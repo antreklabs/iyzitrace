@@ -1,6 +1,6 @@
 import React from 'react';
-import { Layout, Menu, Image } from 'antd';
-import { Outlet } from 'react-router-dom';
+import { Layout, Image } from 'antd';
+//import { Outlet } from 'react-router-dom';
 import logo from '../../../assets/logo.png';
 import LayoutMenu from './menu.component';
 import './layout.component.css';
@@ -14,12 +14,10 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
           <Image src={logo} width={50}></Image>
           <span style={{ marginTop: 20 }}>IYZI TRACE</span>
         </div>
-
         <LayoutMenu />
       </Header>
       <Content className="main-content">
         {children}
-        <Outlet />
       </Content>
     </Layout>
   );

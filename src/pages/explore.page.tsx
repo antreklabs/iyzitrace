@@ -7,7 +7,7 @@ import { prefixRoute } from '../utils/utils.routing';
 import { testIds } from '../components/testIds';
 import { PluginPage } from '@grafana/runtime';
 
-function PageFour() {
+function Explore() {
   const s = useStyles2(getStyles);
 
   return (
@@ -24,7 +24,7 @@ function PageFour() {
   );
 }
 
-export default PageFour;
+export default Explore;
 
 const getStyles = (theme: GrafanaTheme2) => ({
   page: css`

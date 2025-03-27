@@ -8,7 +8,7 @@ import { ROUTES } from '../constants';
 import { testIds } from '../components/testIds';
 import { PluginPage } from '@grafana/runtime';
 
-function PageThree() {
+function Traces() {
   const s = useStyles2(getStyles);
   const { id } = useParams<{ id: string }>();
 
@@ -39,7 +39,7 @@ function PageThree() {
   );
 }
 
-export default PageThree;
+export default Traces;
 
 const getStyles = (theme: GrafanaTheme2) => ({
   link: css`

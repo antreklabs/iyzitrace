@@ -2,3 +2,11 @@
     padding: 20px;
     transition: margin-left 0.5s;
 }
+
+.menuContent{
+   min-width: 50%;
+    background: transparent;
+    justify-content: flex-start;
+    align-items: center;
+    border: none;
+}
