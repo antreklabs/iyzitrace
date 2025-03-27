@@ -1,14 +1,17 @@
 import React from 'react'
 import { AppRoute } from "@/interfaces";
 
-import DashboardPage from '../pages/dashboard.page';
-import Explore from '../pages/explore.page';
-import TracePage from '../pages/traces.page';
+
+
+
+const Dashboard = React.lazy(() => import('../pages/dashboard.page'));
+const Explore = React.lazy(() => import('../pages/explore.page'));
+const TracePage = React.lazy(() => import('../pages/traces.page'));
 
 export const appRoutes: AppRoute[] = [
     {
       path: '/',
-      element: <DashboardPage/>,
+      element: <Dashboard/>,
       name: 'dashboard',
       title: 'Dashboard',
       showInMenu: true,
@@ -30,3 +33,5 @@ export const appRoutes: AppRoute[] = [
       showInMenu: true,
     },
   ];
+
+export default appRoutes;
