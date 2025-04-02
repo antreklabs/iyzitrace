@@ -1,0 +1,7 @@
+body,
+.ant-typography,
+.ant-card,
+.ant-btn,
+.ant-menu {
+  font-family: 'Quicksand', sans-serif !important;
+}
