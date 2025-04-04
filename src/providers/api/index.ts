@@ -1,1 +1,1 @@
-export * from './tempo.api';
+export * from './tempo';
