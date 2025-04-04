@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Layout} from 'antd';
 //import { Outlet } from 'react-router-dom';
 import './layout.component.css';
 import Sidebar from './sidebar.component';
 
-const { Content, Header } = Layout;
+const { Content} = Layout;
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (

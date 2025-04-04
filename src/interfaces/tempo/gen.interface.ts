@@ -10,6 +10,7 @@
 
 import * as common from '@grafana/schema';
 import {TraceqlFilter} from  "."
+import { SearchTableType } from '../enums';
 
 export interface TempoQuery extends common.DataQuery {
   /**
@@ -95,28 +96,6 @@ export enum SearchStreamingState {
   Error = 'error',
   Pending = 'pending',
   Streaming = 'streaming',
-}
-
-/**
- * The type of the table that is used to display the search results
- */
-export enum SearchTableType {
-  Raw = 'raw',
-  Spans = 'spans',
-  Traces = 'traces',
-}
-
-/**
- * static fields are pre-set in the UI, dynamic fields are added by the user
- */
-export enum TraceqlSearchScope {
-  Event = 'event',
-  Instrumentation = 'instrumentation',
-  Intrinsic = 'intrinsic',
-  Link = 'link',
-  Resource = 'resource',
-  Span = 'span',
-  Unscoped = 'unscoped',
 }
 
 

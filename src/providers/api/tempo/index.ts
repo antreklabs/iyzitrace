@@ -71,7 +71,7 @@ import {
 } from './resultTransformer';
 import { doTempoMetricsStreaming, doTempoSearchStreaming } from './streaming';
 
-import { TempoVariableSupport } from './variables';
+
 
 export const DEFAULT_LIMIT = 20;
 export const DEFAULT_SPSS = 3; // spans per span set
@@ -173,7 +173,6 @@ export class TempoDatasource extends DataSourceWithBackend<TempoQuery, TempoJson
       };
     }
 
-    this.variables = new TempoVariableSupport(this);
   }
 
   async executeVariableQuery(query: TempoVariableQuery) {

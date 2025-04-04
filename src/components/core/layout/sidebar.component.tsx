@@ -21,13 +21,13 @@ const { Sider } = Layout;
 
 
 const Sidebar: React.FC = ( ) => {
-    const [collapsed, setCollapsed] = React.useState(false);
+    //const [collapsed, setCollapsed] = React.useState(false);
   return (
     <Sider 
     breakpoint="lg" 
     collapsedWidth="80" 
      style={{ minHeight: '100vh' }} 
-     collapsed={collapsed}>
+     collapsed={false}>
      <Space>
      <Image src={logo} width={50}></Image>
      </Space>
