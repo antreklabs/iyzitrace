@@ -9,6 +9,7 @@ import { PluginPage } from '@grafana/runtime';
 
 function DashboardPage() {
   const s = useStyles2(getStyles);
+  console.log('açıldı')
 
   return (
     <PluginPage>

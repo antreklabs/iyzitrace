@@ -5,7 +5,7 @@ import { AppRoute } from "@/interfaces";
 
 
 const Dashboard = React.lazy(() => import('../pages/dashboard.page'));
-const Explore = React.lazy(() => import('../pages/explore.page'));
+const Services = React.lazy(() => import('../pages/services.page'));
 const TracePage = React.lazy(() => import('../pages/traces.page'));
 
 export const appRoutes: AppRoute[] = [
@@ -17,10 +17,10 @@ export const appRoutes: AppRoute[] = [
       showInMenu: true,
     },
     {
-      path: 'explore',
-      element: <Explore />,
-      name: 'explore',
-      title: 'Explore',
+      path: 'services',
+      element: <Services />,
+      name: 'services',
+      title: 'services',
       icon: 'search',
       showInMenu: true,
     },

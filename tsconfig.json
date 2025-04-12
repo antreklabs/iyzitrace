@@ -5,6 +5,8 @@
     "paths": {
       "@/*": ["*"]
     },
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "strictNullChecks": false,
+    "strict": false
   }
 }

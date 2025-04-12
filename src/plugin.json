@@ -21,7 +21,7 @@
     {
       "type": "page",
       "name": "Page One",
-      "path": "/a/%PLUGIN_ID%/one",
+      "path": "/a/%PLUGIN_ID%/",
       "addToNav": true,
       "defaultNav": true
     },

@@ -5,6 +5,8 @@ import MainLayout from 'components/core/layout/layout.component';
 import { ConfigProvider } from 'antd';
 import AppRoutes from '../../routes/AppRoutes';
 import '../../assets/global.css';
+import { Provider } from 'react-redux';
+import store from '../../store/store';
 
 function App(props: AppRootProps) {
   useEffect(() => {
@@ -14,12 +16,15 @@ function App(props: AppRootProps) {
     document.head.appendChild(link);
   }, []);
   return (
-    <ConfigProvider theme={themetoken}>
-      <MainLayout>
-        <AppRoutes />
-      </MainLayout>
-
-  </ConfigProvider>
+    <React.StrictMode>
+      <Provider store={store}>
+        <ConfigProvider theme={themetoken}>
+          <MainLayout>
+            <AppRoutes />
+          </MainLayout>
+        </ConfigProvider>
+      </Provider>
+    </React.StrictMode>
   );
 }
 
