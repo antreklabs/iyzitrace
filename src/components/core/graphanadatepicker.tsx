@@ -47,7 +47,7 @@ const GrafanaLikeRangePicker = ({
       format="YYYY-MM-DD HH:mm:ss"
       allowClear={false}
       presets={presets}
-      defaultValue={[now.subtract(1, 'hour'), now]}
+      defaultValue={[now.subtract(15, 'minute'), now]}
       style={{ minWidth: 320 }}
       onChange={(dates) => {
         if (!dates || dates.length !== 2) {

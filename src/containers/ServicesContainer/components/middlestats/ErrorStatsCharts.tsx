@@ -100,7 +100,7 @@ const ErrorStatsCharts: React.FC<MiddleStatsProps> = ({ serviceNames, start, end
   };
 
   return (
-    <Card title="Service Error Call Stats (last 60m)" loading={loading}>
+    <Card title="Service Call Stats (last 60m)" loading={loading}>
       <ApexCharts options={options} series={chartData} type="line" height={400} />
     </Card>
   );

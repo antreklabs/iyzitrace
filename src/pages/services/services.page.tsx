@@ -1,7 +1,7 @@
 import React from 'react';
 import { PageLayoutType } from '@grafana/data';
 import { PluginPage } from '@grafana/runtime';
-import ServicesContainer from '../containers/ServicesContainer/ServicesContainer';
+import ServicesContainer from '../../containers/ServicesContainer/ServicesContainer';
 
 
 function ServicesPage() {
