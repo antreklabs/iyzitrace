@@ -7,6 +7,7 @@ import AppRoutes from '../../routes/AppRoutes';
 import '../../assets/global.css';
 import { Provider } from 'react-redux';
 import store from '../../store/store';
+import { AliveScope } from 'react-activation';
 
 function App(props: AppRootProps) {
   useEffect(() => {
@@ -19,9 +20,11 @@ function App(props: AppRootProps) {
     <React.StrictMode>
       <Provider store={store}>
         <ConfigProvider theme={themetoken}>
-          <MainLayout>
-            <AppRoutes />
-          </MainLayout>
+          <AliveScope>
+            <MainLayout>
+              <AppRoutes />
+            </MainLayout>
+          </AliveScope>
         </ConfigProvider>
       </Provider>
     </React.StrictMode>

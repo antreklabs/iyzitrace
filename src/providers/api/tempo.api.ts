@@ -2,6 +2,7 @@
 
 import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
 import store from '../../store/store';
+import qs from 'qs';
 
 type TraceQLSearchParams = {
     query: string;
@@ -34,12 +35,29 @@ export const TempoApi = {
         return res;
     },
 
-    async getOperationNames(serviceName: string): Promise<string[]> {
+    async getOperationNames(serviceNames: string[]): Promise<any[]> {
+        console.log('serviceName', serviceNames);
         const url = await this.getBaseUrl();
+        let payload = serviceNames.map((name) => `resource.service.name=${name}`).join('||');
+        if(serviceNames.length>1){
+            payload = `(${payload})`;
+        }
         const res = await getBackendSrv().get(
-            `${url}/api/v2/search/tag/span.name/values?tag=resource.service.name&value=${encodeURIComponent(serviceName)}`
+            `${url}/api/v2/search/tag/name/values?q=${payload}`,
         );
-        return res.values ?? [];
+        return res;
+    },
+
+    async getStatusByServiceName(serviceNames: string[]): Promise<any> {
+        const url = await this.getBaseUrl();
+        let payload = serviceNames.map((name) => `resource.service.name=${name}`).join('||');
+        if(serviceNames.length>1){
+            payload = `(${payload})`;
+        }
+        const res = await getBackendSrv().get(
+            `${url}/api/v2/search/tag/status/values?q=${payload}`,
+        );
+        return res;
     },
 
     async getTrace(traceId: string): Promise<any> {
@@ -50,12 +68,14 @@ export const TempoApi = {
 
     async searchTraceQL(params: TraceQLSearchParams): Promise<any> {
         const url = await this.getBaseUrl();
-        const res = await getBackendSrv().post(`${url}/api/search`, {
-            query: params.query,
+        const query = params.query;
+        const payload = {
+            q: query,
             start: params.start,
             end: params.end,
-            limit: params.limit ?? 100,
-        });
+            limit: params.limit || 1000,
+        };
+        const res = await getBackendSrv().get(`${url}/api/search?${qs.stringify(payload)}`);
         return res;
     },
 
