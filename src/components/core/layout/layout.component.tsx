@@ -13,19 +13,10 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       <Sidebar></Sidebar>
       <Layout>
         <Layout.Header
-          style={{
-            background: 'transparent',
-            height: '48px',
-            padding: '0 16px',
-            borderBottom: '1px solid rgba(255,255,255,0.05)',
-            display: 'flex',
-            alignItems: 'center',
-            zIndex: 10,
-          }}
+          style={{ height: 40, padding: 3, display: 'flex', alignItems: 'center', background: 'transparent' }}
         >
           <TabManager />
         </Layout.Header>
-
         <Content className="main-content">{children}</Content>
       </Layout>
     </Layout>

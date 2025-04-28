@@ -7,7 +7,8 @@ import AppRoutes from '../../routes/AppRoutes';
 import '../../assets/global.css';
 import { Provider } from 'react-redux';
 import store from '../../store/store';
-import { AliveScope } from 'react-activation';
+import KeepAlive, { AliveScope } from 'react-activation';
+import TempoInitializer from './TempoInıt';
 
 function App(props: AppRootProps) {
   useEffect(() => {
@@ -21,8 +22,11 @@ function App(props: AppRootProps) {
       <Provider store={store}>
         <ConfigProvider theme={themetoken}>
           <AliveScope>
+            <TempoInitializer></TempoInitializer>
             <MainLayout>
-              <AppRoutes />
+              
+                <AppRoutes />
+
             </MainLayout>
           </AliveScope>
         </ConfigProvider>

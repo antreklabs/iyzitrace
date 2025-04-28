@@ -8,6 +8,7 @@ const Dashboard = React.lazy(() => import('../pages/dashboard.page'));
 const Services = React.lazy(() => import('../pages/services/services.page'));
 const ServiveDetail = React.lazy(() => import('../pages/services/servicedetail.page'));
 const TracePage = React.lazy(() => import('../pages/traces/traces.page'));
+const TraceDetail = React.lazy(() => import('../pages/traces/tracedetail.page'));
 
 export const appRoutes: AppRoute[] = [
     {
@@ -37,6 +38,14 @@ export const appRoutes: AppRoute[] = [
       element: <TracePage />,
       name: 'traces',
       title: 'Traces',
+      icon: 'search',
+      showInMenu: true,
+    },
+    {
+      path: '/traces/:traceId',
+      element: <TraceDetail />,
+      name: 'tracedetail',
+      title: 'Trace Detail',
       icon: 'search',
       showInMenu: true,
     },

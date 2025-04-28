@@ -37,7 +37,6 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, header
       }
     };
 
-    // sadece tempoUids boşsa çalıştır
     if (tempoUids.length === 0) {
       loadTempos();
     }
