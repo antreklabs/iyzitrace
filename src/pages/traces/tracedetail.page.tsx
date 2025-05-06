@@ -3,7 +3,7 @@ import React from 'react';
 import { PluginPage } from '@grafana/runtime';
 
 import { PageLayoutType } from '@grafana/data';
-import TraceDetailContainer from '../../containers/TraceDetailContainer/TraceDetailContainer';
+import TraceDetailContainer from '../../containers/TraceDetailContainer';
 import { useParams } from 'react-router-dom';
 
 function TraceDetail() {

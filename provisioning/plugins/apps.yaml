@@ -1,9 +1,9 @@
 apiVersion: 1
 
 apps:
-  - type: 'easytrace-test-app'
+  - type: 'iyzitrace-app'
     org_id: 1
-    org_name: 'easytrace'
+    org_name: 'iyzitrace'
     disabled: false
     jsonData:
       apiUrl: http://default-url.com

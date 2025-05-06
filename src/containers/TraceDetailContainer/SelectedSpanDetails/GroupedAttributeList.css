@@ -1,0 +1,17 @@
+.tag-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 12px;
+    font-size: 13px;
+    color: #ddd;
+  }
+  
+  .tag-key {
+    font-weight: 500;
+  }
+  
+  .tag-value {
+    text-align: right;
+    color: #aaa;
+  }
+  

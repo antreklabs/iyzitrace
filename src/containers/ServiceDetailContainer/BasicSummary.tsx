@@ -160,7 +160,7 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ serviceName, start, end }) 
             <Spin size="small" />
           ) : (
             <Flex vertical>
-              <Text style={{fontSize:30,fontWeight:"bolder"}}>{data.maxLatencySpan} / {data.maxLatency}</Text>
+              <Text style={{fontSize:30,fontWeight:"bolder"}}>{data.maxLatencySpan} / {data.maxLatency.toFixed(2)}</Text>
               
             </Flex>
           )}
@@ -171,7 +171,7 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ serviceName, start, end }) 
           hoverable
           title={
             <Flex gap={8}>
-              <Text strong style={{fontSize:20}}>Min Latencied Span in {data.totalMin}m</Text>
+              <Text strong style={{fontSize:20}}>Min Latencied Span in {data.totalMin.toFixed(2)}m</Text>
             </Flex>
           }
           size="small"
@@ -181,7 +181,7 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ serviceName, start, end }) 
             <Spin size="small" />
           ) : (
             <Flex vertical>
-              <Text style={{fontSize:30,fontWeight:"bolder"}}>{data.minLatencySpan} / {data.minLatency}</Text>
+              <Text style={{fontSize:30,fontWeight:"bolder"}}>{data.minLatencySpan} / {data.minLatency.toFixed(2)}</Text>
               
             </Flex>
           )}

@@ -8,6 +8,8 @@ import dayjs from 'dayjs';
 import { randomBackgroundGradient } from '../../utils';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { PLUGIN_BASE_URL } from '../../constants';
+import { DownOutlined, UpOutlined } from '@ant-design/icons';
+import { IoIosArrowForward,IoIosArrowDown } from "react-icons/io";
 
 const { Sider, Content } = Layout;
 const { Title, Text } = Typography;
@@ -271,7 +273,21 @@ const TraceContainer: React.FC = () => {
             <Table
               columns={columns}
               dataSource={traceData}
-              expandable={{ expandedRowRender }}
+              expandable={{
+                expandedRowRender,
+                expandIcon: ({ expanded, onExpand, record }) =>
+                  expanded ? (
+                    <IoIosArrowDown
+                      onClick={e => onExpand(record, e)}
+                      style={{ fontSize: 14, marginRight: 8 }}
+                    />
+                  ) : (
+                    <IoIosArrowForward
+                      onClick={e => onExpand(record, e)}
+                      style={{ fontSize: 14, marginRight: 8 }}
+                    />
+                  ),
+              }}
               scroll={{ x: 'max-content', y: 'calc(100vh - 300px)' }}
               pagination={{
                 pageSize: 10,

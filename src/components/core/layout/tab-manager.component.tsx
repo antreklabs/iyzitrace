@@ -1,59 +1,66 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Tabs } from 'antd';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { matchPath, useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { appRoutes } from '../../../routes';
+import { RootState } from '../../../store/rootReducer';
+import { addTab, removeTab, setActiveKey } from '../../../store/slices/tab.slice';
 
 const TabManager: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const [tabs, setTabs] = useState<any[]>([
-    {
-      key: '/a/easytrace-test-app/',
-      label: 'Dashboard',
-      closable: false,
-    },
-  ]);
-  const [activeKey, setActiveKey] = useState('/a/easytrace-test-app/');
+  const tabs = useSelector((state: RootState) => state.tabSlice.tabs);
+  const activeKey = useSelector((state: RootState) => state.tabSlice.activeKey);
 
-  // Path normalize fonksiyonu
   const normalizePath = (pathname: string) => {
-    const basePath = '/a/easytrace-test-app';
+    const basePath = '/a/iyzitrace-app';
     return pathname.startsWith(basePath) ? pathname.replace(basePath, '') || '/' : pathname;
   };
 
   useEffect(() => {
-    const currentPath = normalizePath(location.pathname);
     const currentFullPath = location.pathname + location.search;
+    const currentPath = normalizePath(location.pathname);
 
-    // Route bilgilerini bul
-    const matchedRoute = appRoutes.find((route) => {
-      const normalizedRoute = route.path.startsWith('/') ? route.path : `/${route.path}`;
-      return normalizedRoute === currentPath;
-    });
+    let matchedRoute = null;
+    let matchedParams = null;
+
+    for (const route of appRoutes) {
+      const match = matchPath({ path: route.path, end: false }, currentPath);
+      if (match) {
+        matchedRoute = route;
+        matchedParams = match.params;
+        break;
+      }
+    }
 
     if (matchedRoute) {
-      const existingTab = tabs.find((tab) => tab.key === currentFullPath);
-      if (!existingTab) {
-        setTabs((prev) => [
-          ...prev,
-          {
-            key: currentFullPath,
-            label: matchedRoute.title,
-            closable: currentFullPath !== '/a/easytrace-test-app/',
-          },
-        ]);
+      const exists = tabs.find((tab) => tab.key === currentFullPath);
+      if (!exists) {
+        let label = matchedRoute.title;
+        if (matchedParams && Object.keys(matchedParams).length > 0) {
+          const paramString = Object.values(matchedParams).join(' / ');
+          label = `${matchedRoute.title} (${paramString})`;
+        }
+
+        dispatch(addTab({
+          key: currentFullPath,
+          label,
+          closable: currentFullPath !== '/a/iyzitrace-app/',
+        }));
       }
-      setActiveKey(currentFullPath);
+      dispatch(setActiveKey(currentFullPath));
     }
   }, [location]);
 
-  const remove = (targetKey: string) => {
-    const filtered = tabs.filter((tab) => tab.key !== targetKey);
-    setTabs(filtered);
-
-    if (targetKey === activeKey && filtered.length) {
-      navigate(filtered[filtered.length - 1].key);
+  const handleRemove = (targetKey: string) => {
+    dispatch(removeTab(targetKey));
+    if (targetKey === activeKey) {
+      const remaining = tabs.filter(t => t.key !== targetKey);
+      if (remaining.length > 0) {
+        navigate(remaining[remaining.length - 1].key);
+      }
     }
   };
 
@@ -63,12 +70,12 @@ const TabManager: React.FC = () => {
       hideAdd
       activeKey={activeKey}
       onChange={(key) => {
-        setActiveKey(key);
+        dispatch(setActiveKey(key));
         navigate(key);
       }}
       onEdit={(targetKey, action) => {
-        if (action === 'remove' && targetKey !== '/a/easytrace-test-app/') {
-          remove(targetKey as string);
+        if (action === 'remove' && targetKey !== '/a/iyzitrace-app/') {
+          handleRemove(targetKey as string);
         }
       }}
       items={tabs.map((tab) => ({
