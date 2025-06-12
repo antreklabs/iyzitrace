@@ -6,6 +6,7 @@ const Services = React.lazy(() => import('../pages/services/services.page'));
 const ServiveDetail = React.lazy(() => import('../pages/services/servicedetail.page'));
 const TracePage = React.lazy(() => import('../pages/traces/traces.page'));
 const TraceDetail = React.lazy(() => import('../pages/traces/tracedetail.page'));
+const ServiceMap = React.lazy(() => import('../pages/servicemap.page'));
 
 export const appRoutes: AppRoute[] = [
   {
@@ -31,6 +32,13 @@ export const appRoutes: AppRoute[] = [
     title: 'Trace Detail',
     icon: 'search',
     showInMenu: true,
+  },
+  {
+    path:"/service-map",
+    element: <ServiceMap />,
+    name: 'serviceMap',
+    title: 'Service Map',
+    icon: 'search',
   },
   {
     path: '/traces',
