@@ -2,9 +2,8 @@ services:
   grafana:
     image: yahyaozturk/iyzitrace
     volumes:
-      - ../dist:/var/lib/grafana/plugins/iyzitrace-app
-      - ../provisioning:/etc/grafana/provisioning
-      - ..:/root/iyzitrace-app
+      - ./dist:/var/lib/grafana/plugins/iyzitrace-app
+      - ./provisioning:/etc/grafana/provisioning
     environment:
       NODE_ENV: development
       GF_LOG_FILTERS: plugin.iyzitrace-app:debug
