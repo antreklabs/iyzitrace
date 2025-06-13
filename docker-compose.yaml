@@ -1,8 +1,18 @@
 services:
   grafana:
-    extends:
-      file: .config/docker-compose-base.yaml
-      service: grafana
+    image: yahyaozturk/iyzitrace
+    volumes:
+      - ../dist:/var/lib/grafana/plugins/iyzitrace-app
+      - ../provisioning:/etc/grafana/provisioning
+      - ..:/root/iyzitrace-app
+    environment:
+      NODE_ENV: development
+      GF_LOG_FILTERS: plugin.iyzitrace-app:debug
+      GF_LOG_LEVEL: debug
+      GF_DATAPROXY_LOGGING: 1
+      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: iyzitrace-app
+    ports:
+      - "3000:3000"
 
   init:
     image: &tempoImage grafana/tempo:latest
