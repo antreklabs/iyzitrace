@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import './GroupedAttributeList.css';
-import { Button, Collapse, Tag, Tooltip, TooltipProps } from 'antd';
+import { Collapse, Tag, Tooltip, TooltipProps } from 'antd';
 
 interface GroupedAttributeListProps {
   tags: Record<string, string | number | boolean>;
@@ -19,7 +19,7 @@ const groupTagsByNamespace = (tags: Record<string, any>) => {
 
 const GroupedAttributeList: React.FC<GroupedAttributeListProps> = ({ tags }) => {
   const groupedTags = groupTagsByNamespace(tags);
-  const [arrow, setArrow] = useState<'Show' | 'Hide' | 'Center'>('Show');
+  const [arrow] = useState<'Show' | 'Hide' | 'Center'>('Show');
 
   const mergedArrow = useMemo<TooltipProps['arrow']>(() => {
     if (arrow === 'Hide') {

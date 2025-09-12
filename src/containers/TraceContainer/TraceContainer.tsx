@@ -6,9 +6,8 @@ import { TempoApi } from '../../providers';
 import TraceFilters from './TraceFilters';
 import dayjs from 'dayjs';
 import { randomBackgroundGradient } from '../../utils';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { PLUGIN_BASE_URL } from '../../constants';
-import { DownOutlined, UpOutlined } from '@ant-design/icons';
 import { IoIosArrowForward,IoIosArrowDown } from "react-icons/io";
 
 const { Sider, Content } = Layout;
@@ -34,7 +33,6 @@ const TraceContainer: React.FC = () => {
 
       const mapped = res.traces.map((trace: any) => {
         const spans = trace.spanSets?.[0]?.spans ?? [];
-        const stats = trace.serviceStats ?? [];
 
         const serviceStatsChildren = Object.entries(trace.serviceStats || {}).map(
           ([serviceName, s]: any, i: number) => ({
@@ -79,7 +77,7 @@ const TraceContainer: React.FC = () => {
     }
   };
 
-  const makeStats = (data) => {
+  const makeStats = (data: any) => {
     if (!Array.isArray(data) || data.length === 0) {
       setStatsData([]);
       return;
@@ -162,7 +160,7 @@ const TraceContainer: React.FC = () => {
       padding: '16px',
       height: '100%',
       display: 'flex',
-      flexDirection: 'column',
+      flexDirection: 'column' as const,
       justifyContent: 'center',
       alignItems: 'center',
       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
@@ -278,12 +276,12 @@ const TraceContainer: React.FC = () => {
                 expandIcon: ({ expanded, onExpand, record }) =>
                   expanded ? (
                     <IoIosArrowDown
-                      onClick={e => onExpand(record, e)}
+                      onClick={(e: any) => onExpand(record, e)}
                       style={{ fontSize: 14, marginRight: 8 }}
                     />
                   ) : (
                     <IoIosArrowForward
-                      onClick={e => onExpand(record, e)}
+                      onClick={(e: any) => onExpand(record, e)}
                       style={{ fontSize: 14, marginRight: 8 }}
                     />
                   ),

@@ -19,7 +19,7 @@ const MsCharts: React.FC<MsChartsProps> = ({ series, colors }) => {
         shade: 'dark',
         type: 'vertical',
         shadeIntensity: 0.5,
-        gradientToColors: undefined,
+        gradientToColors: undefined as any,
         inverseColors: false,
         opacityFrom: 1,
         opacityTo: 0.7,
@@ -70,7 +70,7 @@ const MsCharts: React.FC<MsChartsProps> = ({ series, colors }) => {
       show: false,
     },
   };
-  return <ApexCharts options={options} series={series} type="line" height={250} width="100%" />;
+  return <ApexCharts options={options as any} series={series} type="line" height={250} width="100%" />;
 };
 
 export default MsCharts;

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Card, Col, Flex, Row, Spin, Typography } from 'antd';
 import { prometheusApi } from '../../providers';
 import {randomBackgroundGradient } from '../../utils';
-import { PiSteps } from "react-icons/pi";
 
 interface BasicSummaryProps {
   serviceName: string;
@@ -21,13 +20,6 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ serviceName, start, end }) 
     minLatency: 0,
     totalMin: 0,
   });
-  const makeServiceName = (name: string) => {
-    const parts = name.split('-');
-    if (parts.length > 1) {
-      return parts.slice(0, -1).join(' -').toUpperCase() + ' ' + parts[parts.length - 1].toUpperCase();
-    }
-    return name.toUpperCase();
-  };
   const cardStyle = () => {
     return {
       background:  randomBackgroundGradient(),
@@ -36,7 +28,7 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ serviceName, start, end }) 
       padding: '16px',
       height: '100%',
       display: 'flex',
-      flexDirection: 'column',
+      flexDirection: 'column' as const,
       justifyContent: 'center',
       alignItems: 'center',
       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',

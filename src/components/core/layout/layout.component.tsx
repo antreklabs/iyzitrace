@@ -17,7 +17,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         >
           <TabManager />
         </Layout.Header>
-        <Content className="main-content">{children}</Content>
+        <Content className="main-content">{children as any}</Content>
       </Layout>
     </Layout>
   );

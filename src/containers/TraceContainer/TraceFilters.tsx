@@ -11,31 +11,6 @@ interface TraceFiltersProps {
   collapsed?: boolean;
 }
 
-interface TraceSummary {
-  maxLatency: {
-    value: number;
-    serviceName: string;
-  },
-  minLatency: {
-    value: number;
-    serviceName: string;
-  },
-  avgLatency: {
-    serviceName: string;
-  },
-  errorRate: {
-    value: number;
-  },
-  successRate: {
-    value: number;
-  },
-  spanCount: {
-    value: number;
-  },
-  traceCount: {
-    value: number;
-  },
-}
 
 
 
@@ -51,8 +26,9 @@ const TraceFilters: React.FC<TraceFiltersProps> = ({ onChange, collapsed }) => {
     console.log('Fetching services...');
     const res = await TempoApi.getServiceNames();
     console.log('Services:', res);
-    const serviceNames = res.tagValues.map((item) => item.value);
-    setServices(serviceNames ?? []);
+    const values = res.values;
+    const serviceNames: string[] = Array.isArray(values) ? values : [];
+    setServices(serviceNames);
   };
 
   const fetchSpanNames = async (services: string[]) => {
@@ -63,10 +39,12 @@ const TraceFilters: React.FC<TraceFiltersProps> = ({ onChange, collapsed }) => {
       TempoApi.getOperationNames(services),
       TempoApi.getStatusByServiceName(services),
     ]);
-    const spanNames = operations.tagValues.map((item) => item.value);
-    const statusValues = status.tagValues.map((item) => item.value);
+    const operationsValues = operations.values;
+    const statusValues = status.values;
+    const spanNames: any[] = Array.isArray(operationsValues) ? operationsValues : [];
+    const statusArray: any[] = Array.isArray(statusValues) ? statusValues : [];
     setSpanNames(Array.from(new Set(spanNames)));
-    setStatus(Array.from(new Set(statusValues)));
+    setStatus(Array.from(new Set(statusArray)));
   };
 
   useEffect(() => {

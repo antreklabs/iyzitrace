@@ -1,7 +1,7 @@
 // src/components/ServiceCard.tsx
 import React, { useEffect, useState } from 'react';
 import { Card, Typography, Spin, Flex } from 'antd';
-import { prometheusApi, TempoApi } from '../../../providers';
+import { prometheusApi } from '../../../providers';
 import { createGradient, randomBackgroundGradient } from '../../../utils';
 import { ServiceIcon } from '../../../components/core/serviceicons';
 import { useNavigate } from 'react-router-dom';
@@ -16,7 +16,7 @@ interface ServiceCardProps {
 }
 
 const ServiceCard: React.FC<ServiceCardProps> = ({ name, start, end,colors }) => {
-  const [latency, setLatency] = useState<Object | null>(null);
+  const [latency, setLatency] = useState<{avg: number, min: number, max: number, count: number} | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
   const cardStyle = {
@@ -26,7 +26,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ name, start, end,colors }) =>
     padding: '16px',
     height: '100%',
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'column' as const,
     justifyContent: 'center',
     alignItems: 'center',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',

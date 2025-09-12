@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Row, Col, Spin, Empty, Tabs } from 'antd';
+import React, { useState } from 'react';
+import { Row, Tabs } from 'antd';
 import BaseContainer from '../../components/core/basecontainer/basecontainer';
-import { TempoApi } from '../../providers';
 
 import GrafanaLikeRangePicker from '../../components/core/graphanadatepicker';
 import CallMetrics from './CallMetrics/CallMetrics';
