@@ -11,10 +11,8 @@ export const prometheusApi = {
         if (promUid) {
             return promUid;
         }
-        const allDS = await getDataSourceSrv().getList();
-
         const ds = await getDataSourceSrv().getInstanceSettings(tempoUid);
-        const uid = ds?.jsonData?.tracesToMetrics.datasourceUid;
+        const uid = (ds?.jsonData as any)?.tracesToMetrics?.datasourceUid;
         if (!uid) {
             throw new Error('Prometheus UID could not be resolved from Tempo datasource.');
         }
