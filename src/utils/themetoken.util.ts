@@ -37,10 +37,10 @@ export const themetoken = {
       "colorTextPlaceholder": "rgba(255, 255, 255, 0.45)"
     },
     "Menu": {
-      "colorItemTextSelected": "#3CBA57",
-      "colorItemBgSelected": "#3CBA57",
+      "itemSelectedColor": "#3CBA57",
+      "itemSelectedBg": "#3CBA57",
       "colorBgElevated": "#ffffff",
-      "colorItemBg": "#ffffff",
+      "itemBg": "#ffffff",
       "colorPrimary": "#3CBA57",
       "colorBgContainer": "#ffffff"
     },

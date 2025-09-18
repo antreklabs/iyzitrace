@@ -13,12 +13,56 @@ import { IoIosArrowForward,IoIosArrowDown } from "react-icons/io";
 const { Sider, Content } = Layout;
 const { Title, Text } = Typography;
 
-const TraceContainer: React.FC = () => {
+interface TraceContainerProps {
+  traceId?: string | null;
+}
+
+const TraceContainer: React.FC<TraceContainerProps> = ({ traceId }) => {
   const [range, setRange] = useState<[number, number]>([Date.now() - 15 * 60 * 1000, Date.now()]);
   const [traceData, setTraceData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [statsData, setStatsData] = useState<any[]>([]);
+
+  // traceId prop'u geldiğinde otomatik arama yap
+  useEffect(() => {
+    if (traceId) {
+      fetchSpecificTrace(traceId);
+    }
+  }, [traceId]);
+
+  const fetchSpecificTrace = async (traceId: string) => {
+    setLoading(true);
+    try {
+      // Belirli bir trace ID'si için arama yap
+      const res = await TempoApi.searchTraceQL({
+        query: `{traceId="${traceId}"}`,
+        start: Math.floor((Date.now() - 24 * 60 * 60 * 1000) / 1000), // Son 24 saat
+        end: Math.floor(Date.now() / 1000),
+        limit: 1,
+      });
+
+      if (res.traces && res.traces.length > 0) {
+        const trace = res.traces[0];
+        const spans = trace.spanSets?.[0]?.spans ?? [];
+        const mappedTrace = {
+          ...trace,
+          spans: spans,
+          duration: trace.durationMs,
+          serviceCount: new Set(spans.map((span: any) => span.serviceName)).size,
+          spanCount: spans.length,
+        };
+        setTraceData([mappedTrace]);
+      } else {
+        setTraceData([]);
+      }
+    } catch (error) {
+      console.error('Error fetching specific trace:', error);
+      setTraceData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchTraces = async () => {
     setLoading(true);

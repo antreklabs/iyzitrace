@@ -62,3 +62,21 @@ services:
       - ./shared/prometheus.yaml:/etc/prometheus.yaml
     ports:
       - "9090:9090"
+
+  loki:
+    image: grafana/loki:latest
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./shared/loki.yaml:/etc/loki/local-config.yaml
+      - ./loki-data:/loki
+    ports:
+      - "3100:3100"
+
+  cors-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.cors-proxy
+    ports:
+      - "3101:3101"
+    depends_on:
+      - loki

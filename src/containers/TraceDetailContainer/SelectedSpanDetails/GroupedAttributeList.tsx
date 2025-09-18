@@ -35,39 +35,45 @@ const GroupedAttributeList: React.FC<GroupedAttributeListProps> = ({ tags }) => 
     };
   }, [arrow]);
 
-  return (
-    <Collapse bordered={false} defaultActiveKey={[]} ghost>
-      {Object.entries(groupedTags).map(([group, items]) => (
-        <Collapse.Panel header={group} key={group}>
-          {Object.entries(items).map(([subKey, value]) => {
-            if (subKey.includes('.')) {
-              const [subGroup, ...rest] = subKey.split('.');
-              const innerKey = rest.join('.');
-              return (
-                <Collapse key={subKey} bordered={false} ghost>
-                  <Collapse.Panel header={subGroup} key={subKey}>
-                    <div className="tag-row">
-                      <Tag className="tag-key">{innerKey}</Tag>
-                      <span className="tag-value">{String(value)}</span>
-                    </div>
-                  </Collapse.Panel>
-                </Collapse>
-              );
-            }
-
+  const collapseItems = Object.entries(groupedTags).map(([group, items]) => ({
+    key: group,
+    label: group,
+    children: (
+      <div>
+        {Object.entries(items).map(([subKey, value]) => {
+          if (subKey.includes('.')) {
+            const [subGroup, ...rest] = subKey.split('.');
+            const innerKey = rest.join('.');
             return (
-              <div key={subKey} className="tag-row">
-                <Tag className="tag-key">{subKey}</Tag>
-                {String(value).length<=20?<span className="tag-value">{String(value)}</span> : 
-                <Tooltip placement="topLeft" title={String(value)} arrow={mergedArrow}>
-                   <span className="tag-value">{String(value).substring(0,20)+'...'}</span>
-                </Tooltip>}
-              </div>
+              <Collapse key={subKey} bordered={false} ghost items={[{
+                key: subKey,
+                label: subGroup,
+                children: (
+                  <div className="tag-row">
+                    <Tag className="tag-key">{innerKey}</Tag>
+                    <span className="tag-value">{String(value)}</span>
+                  </div>
+                )
+              }]} />
             );
-          })}
-        </Collapse.Panel>
-      ))}
-    </Collapse>
+          }
+
+          return (
+            <div key={subKey} className="tag-row">
+              <Tag className="tag-key">{subKey}</Tag>
+              {String(value).length<=20?<span className="tag-value">{String(value)}</span> : 
+              <Tooltip placement="topLeft" title={String(value)} arrow={mergedArrow}>
+                 <span className="tag-value">{String(value).substring(0,20)+'...'}</span>
+              </Tooltip>}
+            </div>
+          );
+        })}
+      </div>
+    )
+  }));
+
+  return (
+    <Collapse bordered={false} defaultActiveKey={[]} ghost items={collapseItems} />
   );
 };
 
