@@ -64,6 +64,13 @@ export const appRoutes: AppRoute[] = [
     title: 'Dashboard',
     showInMenu: true,
   },
+  {
+    path: '/dashboards',
+    element: <Dashboard />,
+    name: 'dashboards',
+    title: 'Dashboards',
+    showInMenu: true,
+  },
 ];
 
 export default appRoutes;

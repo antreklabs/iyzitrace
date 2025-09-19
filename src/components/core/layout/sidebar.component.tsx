@@ -1,8 +1,7 @@
 // src/components/Sidebar.tsx
 
 import React from 'react';
-import { Layout, Menu, Image, Button, Typography } from 'antd';
-import logo from '../../../assets/logo.png';
+import { Layout, Menu, Button } from 'antd';
 import {
   BarChartOutlined,
   FileSearchOutlined,
@@ -20,7 +19,6 @@ import pluginJson from '../../../plugin.json';
 
 export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
 const { Sider } = Layout;
-const { Title } = Typography;
 
 const Sidebar: React.FC = () => {
   const [collapsed, setCollapsed] = React.useState(false);
@@ -52,23 +50,9 @@ const Sidebar: React.FC = () => {
           alignItems: 'center',
           padding: '20px',
           marginBottom: 24,
-          justifyContent: 'center',
+          justifyContent: 'flex-end',
         }}
       >
-        <Image
-          src={logo}
-          width={collapsed ? 50 : 70}
-          preview={false}
-          style={{
-            boxShadow: '2px 0px 20px #d5521e',
-            borderRadius: '100%',
-          }}
-        />
-        {!collapsed && (
-          <Title level={5} style={{ color: 'white', margin: 0, fontSize: 20 }}>
-            IyziTrace
-          </Title>
-        )}
         <Button
           type="text"
           icon={
@@ -81,9 +65,6 @@ const Sidebar: React.FC = () => {
           onClick={() => setCollapsed(!collapsed)}
           style={{
             color: 'rgb(255 255 255)',
-            position: 'absolute',
-            right: -13,
-            top: 45,
           }}
         />
       </div>
