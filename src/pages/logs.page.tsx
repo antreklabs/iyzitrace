@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { PluginPage } from '@grafana/runtime';
-import { Layout, Typography, Button, Modal, Form, Input, Select, Space, Dropdown, message, App } from 'antd';
-import { PlusOutlined, UpOutlined, DownOutlined, LeftOutlined, RightOutlined, SaveOutlined, MoreOutlined, CopyOutlined, DeleteOutlined, ClearOutlined } from '@ant-design/icons';
+import { Layout, Typography, Button, Modal, Form, Input, Select, Space, Dropdown, App, Tabs } from 'antd';
+import { PlusOutlined, UpOutlined, DownOutlined, LeftOutlined, RightOutlined, SaveOutlined, MoreOutlined, CopyOutlined, DeleteOutlined, ClearOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import { useSearchParams } from 'react-router-dom';
 import { LogEntry, LogQuery } from '../interfaces/logs.interface';
+import { LogPipeline } from '../interfaces/pipeline.interface';
 import { lokiApi } from '../providers/api/loki.api';
+import { pipelineApi } from '../providers/api/pipeline.api';
 import LogFilters from '../components/Logs/LogFilters';
 import LogQueryBuilder from '../components/Logs/LogQueryBuilder';
 import LogResults from '../components/Logs/LogResults';
@@ -21,7 +23,7 @@ const getLogSettings = () => {
 };
 
 const { Content, Sider } = Layout;
-const { Text, Title } = Typography;
+const { Text } = Typography;
 const { Option } = Select;
 
 interface SavedView {
@@ -37,7 +39,7 @@ interface SavedView {
 }
 
 function LogsContent() {
-  const { modal } = App.useApp();
+  const { modal, message } = App.useApp();
   const [searchParams] = useSearchParams();
   const [filteredLogs, setFilteredLogs] = useState<LogEntry[]>([]);
   const [allLogs, setAllLogs] = useState<LogEntry[]>([]); // Tüm logları sakla (Quick Filter için)
@@ -48,6 +50,8 @@ function LogsContent() {
   const [saveViewVisible, setSaveViewVisible] = useState(false);
   const [savedViews, setSavedViews] = useState<SavedView[]>([]);
   const [selectedView, setSelectedView] = useState<string>('');
+  const [pipelines, setPipelines] = useState<LogPipeline[]>([]);
+  const [selectedPipeline, setSelectedPipeline] = useState<string>('');
   const [form] = Form.useForm();
   const [saveViewForm] = Form.useForm();
   
@@ -92,7 +96,8 @@ function LogsContent() {
       }
       
       // Filtreleri ekle (label filtreleme)
-      queryToUse.filters.forEach(filter => {
+      if (queryToUse.filters && Array.isArray(queryToUse.filters)) {
+        queryToUse.filters.forEach(filter => {
         switch (filter.operator) {
           case 'equals':
             lokiQuery = lokiQuery.replace('}', `, ${filter.key}="${filter.value}"}`);
@@ -110,7 +115,8 @@ function LogsContent() {
             lokiQuery = lokiQuery.replace('}', `, ${filter.key}=""}`);
             break;
         }
-      });
+        });
+      }
       
       // Debug için sorguyu logla
       console.log('Loki query:', lokiQuery);
@@ -171,6 +177,20 @@ function LogsContent() {
       }
     }
   }, []);
+
+  // Pipeline'ları yükle
+  useEffect(() => {
+    loadPipelines();
+  }, []);
+
+  const loadPipelines = async () => {
+    try {
+      const data = await pipelineApi.getPipelines();
+      setPipelines(data);
+    } catch (error) {
+      console.error('Failed to load pipelines:', error);
+    }
+  };
 
   useEffect(() => {
     // İlk yüklemede tüm logları çek
@@ -383,15 +403,54 @@ function LogsContent() {
     setSaveViewVisible(true);
   };
 
+  const executePipeline = async () => {
+    if (!selectedPipeline) {
+      message.warning('Please select a pipeline');
+      return;
+    }
+    
+    if (filteredLogs.length === 0) {
+      message.warning('No logs to process');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      const execution = await pipelineApi.executePipeline(selectedPipeline, filteredLogs);
+      
+      if (execution.status === 'completed') {
+        message.success(`Pipeline executed successfully. Processed ${execution.processedLogs} logs.`);
+        // Pipeline sonrası veriyi tazele
+        await handleSearch();
+      } else {
+        message.error(`Pipeline execution failed: ${execution.errorMessage}`);
+      }
+    } catch (error) {
+      message.error('Failed to execute pipeline');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <PluginPage>
       <div style={{ padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <div>
-            <Title level={2} style={{ color: 'white', margin: 0 }}>Logs</Title>
-            <Text style={{ color: '#8c8c8c' }}>
-              View and manage your application logs
-            </Text>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <Tabs
+              activeKey="logs"
+              onChange={(key) => window.location.href = key === 'logs' ? '/a/iyzitrace-app/logs' : '/a/iyzitrace-app/logs-pipelines'}
+              items={[
+                { key: 'logs', label: 'Explorer' },
+                { key: 'pipelines', label: 'Pipelines' }
+              ]}
+            />
+            {/* <div>
+              <Title level={2} style={{ color: 'white', margin: 0 }}>Logs</Title>
+              <Text style={{ color: '#8c8c8c' }}>
+                View and manage your application logs
+              </Text>
+            </div> */}
           </div>
            <Space>
              <Select
@@ -444,18 +503,44 @@ function LogsContent() {
                  }}
                  trigger={['click']}
                >
-                 <Button icon={<MoreOutlined />}>
+                 <Button 
+                  type="primary" 
+                  icon={<MoreOutlined />}>
                    Actions
                  </Button>
                </Dropdown>
              ) : (
                <Button
+                 type="primary" 
                  icon={<SaveOutlined />}
                  onClick={handleSaveView}
                >
                  Save View
                </Button>
              )}
+             
+             <Select
+               placeholder="Select Pipeline"
+               value={selectedPipeline}
+               onChange={setSelectedPipeline}
+               style={{ width: 200 }}
+               allowClear
+             >
+               {pipelines.map(pipeline => (
+                 <Option key={pipeline.id} value={pipeline.id}>
+                   {pipeline.name}
+                 </Option>
+               ))}
+             </Select>
+             
+             <Button 
+               type="primary" 
+               icon={<PlayCircleOutlined />}
+               onClick={executePipeline}
+               disabled={!selectedPipeline || loading}
+             >
+               Execute Pipeline
+             </Button>
              
              <Button
                type="primary"
@@ -562,7 +647,7 @@ function LogsContent() {
                 <div style={{ padding: '16px', overflow: 'auto', height: '100%' }}>
                   <LogFilters 
                     filters={query.filters}
-                    logs={allLogs} // Quick Filter için tüm logları kullan
+                    logs={allLogs.length > 0 ? allLogs : filteredLogs}
                     onFiltersChange={(filters) => setQuery({...query, filters})}
                     onSearch={handleSearch}
                   />

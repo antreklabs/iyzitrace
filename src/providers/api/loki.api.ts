@@ -29,7 +29,8 @@ class LokiApi {
 
   constructor() {
     // CORS proxy üzerinden Loki API'sine erişim
-    this.baseUrl = 'http://localhost:3101';
+    // Proxy, /loki/api/v1/* isteklerini Loki'ye yönlendiriyor
+    this.baseUrl = 'http://localhost:3101/loki/api/v1';
   }
 
   /**
@@ -84,24 +85,48 @@ class LokiApi {
           // Service field'ını attributes.service'den al
           const correctService = labelData.service || parsed.service || 'unknown';
           
+          // Raw JSON'dan parse et: logLine'ı JSON olarak parse etmeye çalış
+          let rawJsonData: any = null;
+          try {
+            rawJsonData = JSON.parse(logLine);
+          } catch {
+            // JSON değilse, text log olarak işle
+          }
+
+          // Attributes: Raw JSON'dan attributes alanını al, yoksa stream label'ları kullan
+          let attributes: Record<string, any> = { ...labelData };
+          if (rawJsonData && rawJsonData.attributes) {
+            attributes = { ...attributes, ...rawJsonData.attributes };
+          } else if (parsed && parsed.attributes) {
+            attributes = { ...attributes, ...parsed.attributes };
+          }
+
+          // Metadata: Raw JSON'dan root level alanları al
+          let metadata: Record<string, any> = {};
+          if (rawJsonData) {
+            // Root level alanları metadata olarak al (attributes hariç)
+            Object.keys(rawJsonData).forEach(key => {
+              if (key !== 'attributes' && key !== 'id' && key !== 'timestamp' && key !== 'level' && key !== 'service' && key !== 'message') {
+                metadata[key] = rawJsonData[key];
+              }
+            });
+          }
+
           logs.push({
             id: `loki-${timestamp}-${index}`,
             timestamp: new Date(parseInt(timestamp) / 1000000).toISOString(), // Nanosecond to millisecond
-            level: parsed.level,
-            service: correctService, // attributes.service'den gelen doğru değer
-            message: parsed.message || logLine,
-            attributes: {
-              ...labelData,
-              ...parsed.attributes
-            },
-            traceId: parsed.traceId,
-            spanId: parsed.spanId,
-            hostname: labelData.hostname || labelData.instance,
-            environment: labelData.environment,
-            namespace: labelData.namespace,
-            pod: labelData.pod,
-            deployment: labelData.deployment,
-            cluster: labelData.cluster
+            level: rawJsonData?.level || parsed.level,
+            service: rawJsonData?.service || correctService,
+            message: rawJsonData?.message || parsed.message || logLine,
+            attributes: attributes,
+            traceId: rawJsonData?.traceId || parsed.traceId,
+            spanId: rawJsonData?.spanId || parsed.spanId,
+            hostname: metadata.hostname || labelData.hostname || labelData.instance,
+            environment: metadata.environment || labelData.environment,
+            namespace: metadata.namespace || labelData.namespace,
+            pod: metadata.pod || labelData.pod,
+            deployment: metadata.deployment || labelData.deployment,
+            cluster: metadata.cluster || labelData.cluster
           });
         });
       });
@@ -186,24 +211,45 @@ class LokiApi {
     traceId?: string;
     spanId?: string;
   } {
-    // Yaygın log formatlarını parse et
-    const levelMatch = logLine.match(/\b(DEBUG|INFO|WARN|WARNING|ERROR|FATAL|TRACE)\b/i);
+    // Örnek format:
+    // 2025-09-17 21:11:45 [INFO] cdn: Asset served - File: /path Size: 103424KB Cache hit: 0 Response time: 202ms Client IP: 203.0.113.101 TraceID: trace-cdn-101 SpanID: span-cdn-101
+
+    // Level
+    const levelMatch = logLine.match(/\[(DEBUG|INFO|WARN|WARNING|ERROR|FATAL|TRACE)\]/i);
     const level = levelMatch ? this.extractLevel(levelMatch[1]) : 'INFO';
-    
-    // Service name'i extract et
-    const serviceMatch = logLine.match(/\[([^\]]+)\]/);
-    const service = serviceMatch ? serviceMatch[1] : undefined;
-    
-    // Trace ID'yi extract et
-    const traceMatch = logLine.match(/trace[_-]?id[=:]\s*([a-f0-9-]+)/i);
-    const traceId = traceMatch ? traceMatch[1] : undefined;
-    
+
+    // Service: level kapalı parantezden sonra gelen ilk "<service>:"
+    let service: string | undefined;
+    const serviceMatch = logLine.match(/\]\s*([^:\s]+)\s*:/);
+    if (serviceMatch) {
+      service = serviceMatch[1];
+    }
+
+    // Trace/Span IDs
+    const traceMatch = logLine.match(/TraceID:\s*([\w-]+)/i);
+    const spanMatch = logLine.match(/SpanID:\s*([\w-]+)/i);
+
+    // Ek alanlar
+    const fileMatch = logLine.match(/File:\s*([^\s]+)\b/);
+    const sizeMatch = logLine.match(/Size:\s*(\d+)KB/i);
+    const cacheMatch = logLine.match(/Cache\s+hit:\s*(\d+)/i);
+    const respMatch = logLine.match(/Response\s+time:\s*(\d+)ms/i);
+    const ipMatch = logLine.match(/Client\s+IP:\s*([\d.]+)/i);
+
+    const attributes: Record<string, any> = {};
+    if (fileMatch) attributes.file = fileMatch[1];
+    if (sizeMatch) attributes.size_kb = Number(sizeMatch[1]);
+    if (cacheMatch) attributes.cache_hit = Number(cacheMatch[1]);
+    if (respMatch) attributes.response_ms = Number(respMatch[1]);
+    if (ipMatch) attributes.client_ip = ipMatch[1];
+
     return {
       level,
       service,
       message: logLine,
-      attributes: {},
-      traceId
+      attributes,
+      traceId: traceMatch ? traceMatch[1] : undefined,
+      spanId: spanMatch ? spanMatch[1] : undefined
     };
   }
 

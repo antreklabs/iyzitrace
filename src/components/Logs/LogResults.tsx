@@ -105,7 +105,7 @@ const LogResults: React.FC<LogResultsProps> = ({ logs, loading, getLevelColor })
                 }}
                 onClick={() => handleTraceClick(record.traceId!)}
               >
-                <LinkOutlined /> Trace: {record.traceId.substring(0, 8)}...
+                <LinkOutlined /> Trace: {record.traceId}
               </Tag>
             </div>
           )}
@@ -152,47 +152,53 @@ const LogResults: React.FC<LogResultsProps> = ({ logs, loading, getLevelColor })
     >
       <Collapse ghost size="small">
         <Panel header="Attributes" key="attributes">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', columnGap: '16px', rowGap: '8px', width: '100%' }}>
             {Object.entries(record.attributes).map(([key, value]) => (
-              <div key={key} style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <React.Fragment key={key}>
                 <Text style={{ color: '#8c8c8c', fontSize: '12px' }}>{key}:</Text>
-                <Text style={{ color: 'white', fontSize: '12px' }}>{String(value)}</Text>
-              </div>
+                <Text style={{ color: 'white', fontSize: '12px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{String(value)}</Text>
+              </React.Fragment>
             ))}
           </div>
         </Panel>
         
         <Panel header="Metadata" key="metadata">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', columnGap: '16px', rowGap: '8px', width: '100%' }}>
             {record.hostname && (
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <>
                 <Text style={{ color: '#8c8c8c', fontSize: '12px' }}>Hostname:</Text>
-                <Text style={{ color: 'white', fontSize: '12px' }}>{record.hostname}</Text>
-              </div>
+                <Text style={{ color: 'white', fontSize: '12px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{record.hostname}</Text>
+              </>
             )}
             {record.environment && (
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <>
                 <Text style={{ color: '#8c8c8c', fontSize: '12px' }}>Environment:</Text>
-                <Text style={{ color: 'white', fontSize: '12px' }}>{record.environment}</Text>
-              </div>
+                <Text style={{ color: 'white', fontSize: '12px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{record.environment}</Text>
+              </>
             )}
             {record.namespace && (
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <>
                 <Text style={{ color: '#8c8c8c', fontSize: '12px' }}>Namespace:</Text>
-                <Text style={{ color: 'white', fontSize: '12px' }}>{record.namespace}</Text>
-              </div>
+                <Text style={{ color: 'white', fontSize: '12px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{record.namespace}</Text>
+              </>
             )}
             {record.pod && (
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <>
                 <Text style={{ color: '#8c8c8c', fontSize: '12px' }}>Pod:</Text>
-                <Text style={{ color: 'white', fontSize: '12px' }}>{record.pod}</Text>
-              </div>
+                <Text style={{ color: 'white', fontSize: '12px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{record.pod}</Text>
+              </>
+            )}
+            {record.deployment && (
+              <>
+                <Text style={{ color: '#8c8c8c', fontSize: '12px' }}>Deployment:</Text>
+                <Text style={{ color: 'white', fontSize: '12px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{record.deployment}</Text>
+              </>
             )}
             {record.cluster && (
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <>
                 <Text style={{ color: '#8c8c8c', fontSize: '12px' }}>Cluster:</Text>
-                <Text style={{ color: 'white', fontSize: '12px' }}>{record.cluster}</Text>
-              </div>
+                <Text style={{ color: 'white', fontSize: '12px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{record.cluster}</Text>
+              </>
             )}
           </div>
         </Panel>
@@ -295,7 +301,7 @@ const LogResults: React.FC<LogResultsProps> = ({ logs, loading, getLevelColor })
           color: 'white'
         }}
         size="small"
-        scroll={{ x: 'max-content', y: 400 }}
+        scroll={{ y: 400 }}
       />
     </Card>
   );

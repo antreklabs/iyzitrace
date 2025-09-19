@@ -18,7 +18,8 @@ app.use('/', createProxyMiddleware({
   target: 'http://loki:3100', // Docker network'te loki service name'i kullan
   changeOrigin: true,
   pathRewrite: {
-    '^/': '/loki/api/v1/'
+    '^/loki/api/v1/': '/loki/api/v1/', // /loki/api/v1/ path'ini koru
+    '^/api/v1/': '/loki/api/v1/' // /api/v1/ path'ini /loki/api/v1/ olarak rewrite et
   },
   onError: (err, req, res) => {
     console.error('Proxy error:', err);

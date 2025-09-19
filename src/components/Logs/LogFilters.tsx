@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Card, Input, Select, Button, Space, Typography, Collapse, Tag } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { LogFilter, LogEntry } from '../../interfaces/logs.interface';
@@ -19,11 +19,15 @@ const LogFilters: React.FC<LogFiltersProps> = ({ filters, logs, onFiltersChange,
     value: '',
     operator: 'equals'
   });
-  // Filtreler değiştiğinde arama işlemini tetikle
+  // Filtreler değiştiğinde arama işlemini tetikle (ilk render'ı atla)
+  const didMountRef = useRef(false);
   useEffect(() => {
-    // İlk render'da tetikleme (filters.length > 0)
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
     onSearch();
-  }, [filters]); // onSearch dependency'sini kaldırdık
+  }, [filters]);
 
   const filterKeys = [
     'service',
