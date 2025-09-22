@@ -5,7 +5,7 @@ import { PlusOutlined, UpOutlined, DownOutlined, LeftOutlined, RightOutlined, Sa
 import { useSearchParams } from 'react-router-dom';
 import { LogEntry, LogQuery } from '../interfaces/logs.interface';
 import { LogPipeline } from '../interfaces/pipeline.interface';
-import { lokiApi } from '../providers/api/loki.api';
+import { lokiReadApi } from '../providers/api/loki.api.read';
 import { pipelineApi } from '../providers/api/pipeline.api';
 import LogFilters from '../components/Logs/LogFilters';
 import LogQueryBuilder from '../components/Logs/LogQueryBuilder';
@@ -62,8 +62,9 @@ function LogsContent() {
     query: '', // Boş query string - sadece log content'inde arama için
     filters: [],
     timeRange: {
-      start: new Date('2025-09-17T20:00:00.000Z').getTime(), // Bugün 20:00
-      end: new Date('2025-09-17T23:00:00.000Z').getTime()    // Bugün 23:00
+      // Varsayılan: Son 6 saat
+      start: new Date(Date.now() - 6 * 60 * 60 * 1000).getTime(),
+      end: Date.now()
     },
     limit: savedSettings?.limit || 100,
     orderBy: savedSettings?.orderBy || 'timestamp',
@@ -122,7 +123,7 @@ function LogsContent() {
       console.log('Loki query:', lokiQuery);
       
       // Loki'den veri çek
-      const result = await lokiApi.queryLogs({
+      const result = await lokiReadApi.queryLogs({
         query: lokiQuery,
         start: new Date(queryToUse.timeRange.start).toISOString(),
         end: new Date(queryToUse.timeRange.end).toISOString(),

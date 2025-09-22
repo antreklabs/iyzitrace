@@ -2,4 +2,5 @@ node_modules
 dist
 .DS_Store
 tempo-data
-loki-data
+/loki-data
+/grafana/public/app/plugins
