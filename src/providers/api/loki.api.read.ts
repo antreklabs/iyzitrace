@@ -13,12 +13,8 @@ import {
 } from '@grafana/data';
 import { lastValueFrom } from 'rxjs';
 
-// Grafana Loki plugin'indeki line parser utilities
-import { 
-  isLogLineJSON, 
-  isLogLineLogfmt,
-  parseLogfmtKeyValues
-} from '../../plugins/datasource/loki/lineParser';
+// Kendi log parser wrapper'ımızı kullan (Grafana bağımlılığını azaltır)
+import { logParser } from '../../utils/log-parser.wrapper';
 
 class LokiReadApi {
   private async getLokiDatasourceInstance(): Promise<any> {
@@ -101,8 +97,8 @@ class LokiReadApi {
               const logLine = lineField.values[i];
               const labels = labelsField ? labelsField.values[i] || {} : {};
               
-              // Log line'ından level, service ve message'ı parse et
-              const parsed = this.parseLogLine(logLine);
+              // Log line'ını direkt wrapper ile parse et
+              const parsed = logParser.parseLogLine(logLine);
               
               // Service field'ını labels'dan al (service_name veya app fallback)
               const correctService = labels.service || labels.service_name || 'unknown';
@@ -136,10 +132,10 @@ class LokiReadApi {
               logs.push({
                 id: `grafana-${timestamp}-${i}`,
                 timestamp: new Date(timestamp).toISOString(),
-                // Level: JSON -> parsed -> labels
+                // Level: JSON -> parsed -> labels (wrapper handles standardization)
                 level: (rawJsonData?.level
-                  ? this.extractLevel(rawJsonData.level)
-                  : parsed.level) || this.extractLevel(labels.level),
+                  ? logParser.extractLevel(rawJsonData.level)
+                  : parsed.level) || logParser.extractLevel(labels.level) as LogEntry['level'],
                 service: rawJsonData?.service || rawJsonData?.service_name || correctService,
                 message: rawJsonData?.message || parsed.message || logLine,
                 attributes: attributes,
@@ -195,135 +191,6 @@ class LokiReadApi {
       logs: sortedLogs,
       total: logs.length,
       hasMore: logs.length >= 100
-    };
-  }
-
-  /**
-   * Log line'ından structured data parse eder
-   * Grafana Loki plugin'indeki line parser utilities kullanarak
-   */
-  private parseLogLine(logLine: string): {
-    level: LogEntry['level'];
-    service?: string;
-    message: string;
-    attributes: Record<string, any>;
-    traceId?: string;
-    spanId?: string;
-  } {
-    // Grafana plugin'indeki isLogLineJSON utility'sini kullan
-    if (isLogLineJSON(logLine)) {
-      try {
-        const jsonLog = JSON.parse(logLine);
-        return {
-          level: this.extractLevel(jsonLog.level),
-          service: jsonLog.service || jsonLog.service_name,
-          message: jsonLog.message || jsonLog.msg || logLine,
-          attributes: jsonLog,
-          traceId: jsonLog.trace_id || jsonLog.traceId,
-          spanId: jsonLog.span_id || jsonLog.spanId
-        };
-      } catch {
-        // JSON parse hatası durumunda text parsing'e düş
-        return this.parseTextLog(logLine);
-      }
-    }
-    
-    // Grafana plugin'indeki isLogLineLogfmt utility'sini kullan
-    if (isLogLineLogfmt(logLine)) {
-      return this.parseLogfmtLog(logLine);
-    }
-    
-    // Diğer durumlarda text formatında parse et
-    return this.parseTextLog(logLine);
-  }
-
-  /**
-   * Text formatındaki log'u parse eder
-   */
-  private parseTextLog(logLine: string): {
-    level: LogEntry['level'];
-    service?: string;
-    message: string;
-    attributes: Record<string, any>;
-    traceId?: string;
-    spanId?: string;
-  } {
-    // Örnek format:
-    // 2025-09-17 21:11:45 [INFO] cdn: Asset served - File: /path Size: 103424KB Cache hit: 0 Response time: 202ms Client IP: 203.0.113.101 TraceID: trace-cdn-101 SpanID: span-cdn-101
-
-    // Level
-    const levelMatch = logLine.match(/\[(DEBUG|INFO|WARN|WARNING|ERROR|FATAL|TRACE)\]/i);
-    const level = this.extractLevel(levelMatch[1]);
-
-    // Service: level kapalı parantezden sonra gelen ilk "<service>:"
-    let service: string | undefined;
-    const serviceMatch = logLine.match(/\]\s*([^:\s]+)\s*:/);
-    if (serviceMatch) {
-      service = serviceMatch[1];
-    }
-
-    // Trace/Span IDs
-    const traceMatch = logLine.match(/TraceID:\s*([\w-]+)/i);
-    const spanMatch = logLine.match(/SpanID:\s*([\w-]+)/i);
-
-    // Ek alanlar
-    const fileMatch = logLine.match(/File:\s*([^\s]+)\b/);
-    const sizeMatch = logLine.match(/Size:\s*(\d+)KB/i);
-    const cacheMatch = logLine.match(/Cache\s+hit:\s*(\d+)/i);
-    const respMatch = logLine.match(/Response\s+time:\s*(\d+)ms/i);
-    const ipMatch = logLine.match(/Client\s+IP:\s*([\d.]+)/i);
-
-    const attributes: Record<string, any> = {};
-    if (fileMatch) attributes.file = fileMatch[1];
-    if (sizeMatch) attributes.size_kb = Number(sizeMatch[1]);
-    if (cacheMatch) attributes.cache_hit = Number(cacheMatch[1]);
-    if (respMatch) attributes.response_ms = Number(respMatch[1]);
-    if (ipMatch) attributes.client_ip = ipMatch[1];
-
-    return {
-      level,
-      service,
-      message: logLine,
-      attributes,
-      traceId: traceMatch ? traceMatch[1] : undefined,
-      spanId: spanMatch ? spanMatch[1] : undefined
-    };
-  }
-
-  /**
-   * Log level'ı standardize eder
-   */
-  private extractLevel(level: string): LogEntry['level'] {
-    const upperLevel = level.toUpperCase();
-    if (['DEBUG', 'INFO', 'WARN', 'WARNING', 'ERROR', 'FATAL'].includes(upperLevel)) {
-      return upperLevel === 'WARNING' ? 'WARN' : upperLevel as LogEntry['level'];
-    }
-    return 'INFO';
-  }
-
-
-  /**
-   * Logfmt formatındaki log'u parse eder - Grafana lineParser utility'sini kullanarak
-   * Örnek: level=info service=api message="User logged in" trace_id=abc123
-   */
-  private parseLogfmtLog(logLine: string): {
-    level: LogEntry['level'];
-    service?: string;
-    message: string;
-    attributes: Record<string, any>;
-    traceId?: string;
-    spanId?: string;
-  } {
-    // Grafana lineParser'dan gelen parseLogfmtKeyValues utility'sini kullan
-    const attributes = parseLogfmtKeyValues(logLine);
-
-    return {
-      level: this.extractLevel(attributes.level),
-      service: attributes.service || attributes.service_name,
-      message: attributes.message || attributes.msg || logLine,
-      attributes,
-      traceId: attributes.trace_id || attributes.traceId,
-      spanId: attributes.span_id || attributes.spanId
     };
   }
 }

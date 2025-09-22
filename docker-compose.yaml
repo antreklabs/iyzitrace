@@ -1,6 +1,6 @@
 services:
   grafana:
-    image: yahyaozturk/iyzitrace
+    image: yahyaozturk/iyzitrace:v1.0.0  # Based on Grafana 11.5.2
     volumes:
       - ./dist:/var/lib/grafana/plugins/iyzitrace-app
       - ./provisioning:/etc/grafana/provisioning
@@ -14,7 +14,7 @@ services:
       - "3000:3000"
 
   init:
-    image: &tempoImage grafana/tempo:latest
+    image: &tempoImage grafana/tempo:2.6.1  # Pinned version
     user: root
     entrypoint:
       - "chown"
@@ -52,7 +52,7 @@ services:
       - ./otel-collector.yaml:/etc/otel-collector.yaml
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.54.1  # Pinned version
     command:
       - --config.file=/etc/prometheus.yaml
       - --web.enable-remote-write-receiver
@@ -64,7 +64,7 @@ services:
       - "9090:9090"
 
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:3.3.0  # Pinned version
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - ./shared/loki.yaml:/etc/loki/local-config.yaml

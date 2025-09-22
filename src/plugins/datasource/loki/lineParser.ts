@@ -31,6 +31,12 @@ export function isLogLinePacked(line: string): boolean {
  * Parses logfmt formatted strings into key-value pairs
  * Example: "level=info service=api message=\"User logged in\" trace_id=abc123"
  * Returns: { level: "info", service: "api", message: "User logged in", trace_id: "abc123" }
+ * 
+ * COPIED FROM GRAFANA LOKI PLUGIN v11.5.2
+ * Source: /public/app/plugins/datasource/loki/lineParser.ts
+ * Last synced: 2024-12-15
+ * 
+ * TODO: Check for updates when upgrading Grafana
  */
 export function parseLogfmtKeyValues(line: string): Record<string, string> {
   const attributes: Record<string, string> = {};
