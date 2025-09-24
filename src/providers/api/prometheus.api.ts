@@ -6,18 +6,18 @@ export const prometheusApi = {
     async resolvePrometheusUid(): Promise<string> {
         const state = store.getState();
         const promUid = state.tempo.selectedPrometheusUid;
-        const tempoUid = state.tempo.selectedTempoUid;
 
         if (promUid) {
             return promUid;
         }
-        const ds = await getDataSourceSrv().getInstanceSettings(tempoUid);
-        const uid = (ds?.jsonData as any)?.tracesToMetrics?.datasourceUid;
-        if (!uid) {
-            throw new Error('Prometheus UID could not be resolved from Tempo datasource.');
+        // Resolve by listing datasources and picking the first Prometheus
+        const list = await getDataSourceSrv().getList();
+        const prom = list.find((d) => d.type === 'prometheus');
+        if (!prom?.uid) {
+            throw new Error('No Prometheus datasource found in Grafana.');
         }
-        store.dispatch(setSelectedPrometheusUid(uid));
-        return uid;
+        store.dispatch(setSelectedPrometheusUid(prom.uid));
+        return prom.uid;
     },
 
     async runTraceQLQuery(query: string): Promise<any> {

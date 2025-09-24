@@ -1,6 +1,6 @@
 services:
   grafana:
-    image: yahyaozturk/iyzitrace:v1.0.0  # Based on Grafana 11.5.2
+    image: yahyaozturk/iyzitrace  # Based on Grafana 11.5.2
     volumes:
       - ./dist:/var/lib/grafana/plugins/iyzitrace-app
       - ./provisioning:/etc/grafana/provisioning
@@ -14,7 +14,7 @@ services:
       - "3000:3000"
 
   init:
-    image: &tempoImage grafana/tempo:2.6.1  # Pinned version
+    image: &tempoImage grafana/tempo
     user: root
     entrypoint:
       - "chown"

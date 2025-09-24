@@ -7,6 +7,8 @@ const ServiveDetail = React.lazy(() => import('../pages/services/servicedetail.p
 const TracePage = React.lazy(() => import('../pages/traces/traces.page'));
 const TraceDetail = React.lazy(() => import('../pages/traces/tracedetail.page'));
 const ServiceMap = React.lazy(() => import('../pages/servicemap.page'));
+const ServiceMapPluginAPI = React.lazy(() => import('../pages/servicemap-plugin-api.page'));
+const ServiceMapHttpAPI = React.lazy(() => import('../pages/servicemap-http-api.page'));
 const LogsPage = React.lazy(() => import('../pages/logs.page'));
 const LogsPipelines = React.lazy(() => import('../pages/logs-pipelines/logs-pipelines.page'));
 
@@ -41,6 +43,23 @@ export const appRoutes: AppRoute[] = [
     name: 'serviceMap',
     title: 'Service Map',
     icon: 'search',
+    showInMenu: true,
+  },
+  {
+    path: '/service-map-plugin-api',
+    element: <ServiceMapPluginAPI />,
+    name: 'serviceMapPluginAPI',
+    title: 'Service Map (Plugin API)',
+    icon: 'search',
+    showInMenu: true,
+  },
+  {
+    path: '/service-map-http-api',
+    element: <ServiceMapHttpAPI />,
+    name: 'serviceMapHttpAPI',
+    title: 'Service Map (HTTP API)',
+    icon: 'search',
+    showInMenu: true,
   },
   {
     path: '/traces',

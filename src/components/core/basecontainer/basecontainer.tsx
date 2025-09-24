@@ -12,9 +12,19 @@ interface BaseConatinerProps {
 
 const BaseContainer: React.FC<BaseConatinerProps> = ({ title, headerActions, children }) => {
   return (
-    <Card title={<BaseContainerHeader title={title} headerActions={headerActions} />} style={{
+    <Card 
+      title={<BaseContainerHeader title={title} headerActions={headerActions} />} 
+      style={{
         height: 'calc(100vh - 75px)'
-    }} className="base-container" bodyStyle={{height: 'calc(100vh - 75px)', overflow: 'auto'}}>
+      }} 
+      className="base-container" 
+      styles={{
+        body: {
+          height: 'calc(100vh - 75px)', 
+          overflow: 'auto'
+        }
+      }}
+    >
       {children as any}
     </Card>
   );
