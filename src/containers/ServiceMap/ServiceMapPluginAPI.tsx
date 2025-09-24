@@ -20,8 +20,7 @@ import {
   ClockCircleOutlined,
   ThunderboltOutlined,
   CheckCircleOutlined,
-  CloseCircleOutlined,
-  SafetyCertificateOutlined
+  CloseCircleOutlined
 } from '@ant-design/icons';
 import BaseContainer from '../../components/core/basecontainer/basecontainer';
 import { getDataSourceSrv } from '@grafana/runtime';
