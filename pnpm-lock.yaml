@@ -110,16 +110,16 @@ importers:
     devDependencies:
       '@grafana/eslint-config':
         specifier: ^8.0.0
-        version: 8.0.0(@stylistic/eslint-plugin-ts@2.13.0(eslint@8.57.1)(typescript@5.5.4))(@typescript-eslint/eslint-plugin@8.38.0(@typescript-eslint/parser@8.38.0(eslint@8.57.1)(typescript@5.5.4))(eslint@8.57.1)(typescript@5.5.4))(@typescript-eslint/parser@8.38.0(eslint@8.57.1)(typescript@5.5.4))(eslint-config-prettier@8.10.0(eslint@8.57.1))(eslint-plugin-jsdoc@46.10.1(eslint@8.57.1))(eslint-plugin-react-hooks@4.6.2(eslint@8.57.1))(eslint-plugin-react@7.37.4(eslint@8.57.1))(eslint@8.57.1)(typescript@5.5.4)
+        version: 8.0.0(@stylistic/eslint-plugin-ts@2.13.0(eslint@8.57.1)(typescript@5.5.4))(@typescript-eslint/eslint-plugin@8.41.0(@typescript-eslint/parser@8.41.0(eslint@8.57.1)(typescript@5.5.4))(eslint@8.57.1)(typescript@5.5.4))(@typescript-eslint/parser@8.41.0(eslint@8.57.1)(typescript@5.5.4))(eslint-config-prettier@8.10.0(eslint@8.57.1))(eslint-plugin-jsdoc@46.10.1(eslint@8.57.1))(eslint-plugin-react-hooks@4.6.2(eslint@8.57.1))(eslint-plugin-react@7.37.4(eslint@8.57.1))(eslint@8.57.1)(typescript@5.5.4)
       '@grafana/plugin-e2e':
-        specifier: ^2.1.7
-        version: 2.1.7(@playwright/test@1.54.1)
+        specifier: ^2.1.9
+        version: 2.1.10(@playwright/test@1.55.0)
       '@grafana/tsconfig':
         specifier: ^2.0.0
         version: 2.0.0
       '@playwright/test':
         specifier: ^1.52.0
-        version: 1.54.1
+        version: 1.55.0
       '@stylistic/eslint-plugin-ts':
         specifier: ^2.9.0
         version: 2.13.0(eslint@8.57.1)(typescript@5.5.4)
@@ -155,10 +155,10 @@ importers:
         version: 5.14.8
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.3.0
-        version: 8.38.0(@typescript-eslint/parser@8.38.0(eslint@8.57.1)(typescript@5.5.4))(eslint@8.57.1)(typescript@5.5.4)
+        version: 8.41.0(@typescript-eslint/parser@8.41.0(eslint@8.57.1)(typescript@5.5.4))(eslint@8.57.1)(typescript@5.5.4)
       '@typescript-eslint/parser':
         specifier: ^8.3.0
-        version: 8.38.0(eslint@8.57.1)(typescript@5.5.4)
+        version: 8.41.0(eslint@8.57.1)(typescript@5.5.4)
       copy-webpack-plugin:
         specifier: ^11.0.0
         version: 11.0.0(webpack@5.98.0)
@@ -460,8 +460,8 @@ packages:
     resolution: {integrity: sha512-2WJMeRQPHKSPemqk/awGrAiuFfzBmOIPXKizAsVhWH9YJqLZ0H+HS4c8loHGgW6utJ3E/ejXQUsiGaQy2NZ9Fw==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/runtime@7.28.2':
-    resolution: {integrity: sha512-KHp2IflsnGywDjBWDkR9iEqiWSpc8GIi0lgTT3mOElT0PP1tG26P4tmFI2YvAdzgq9RGyoHZQEIEdZy6Ec5xCA==}
+  '@babel/runtime@7.28.3':
+    resolution: {integrity: sha512-9uIQ10o0WGdpP6GDhXcdOJPJuDgFtIDtN/9+ArJQ2NAfAmiuhTQdzkaTGR33v43GYS2UrSA0eX2pPPHoFVvpxA==}
     engines: {node: '>=6.9.0'}
 
   '@babel/template@7.26.9':
@@ -580,11 +580,11 @@ packages:
   '@floating-ui/dom@1.6.13':
     resolution: {integrity: sha512-umqzocjDgNRGTuO7Q8CU32dkHkECqI8ZdMZ5Swb6QAM0t5rnlrN3lGo1hdpscRd3WS8T6DKYK4ephgIH9iRh3w==}
 
-  '@floating-ui/dom@1.7.3':
-    resolution: {integrity: sha512-uZA413QEpNuhtb3/iIKoYMSK07keHPYeXF02Zhd6e213j+d1NamLix/mCLxBUDW/Gx52sPH2m+chlUsyaBs/Ag==}
+  '@floating-ui/dom@1.7.4':
+    resolution: {integrity: sha512-OOchDgh4F2CchOX94cRVqhvy7b3AFb+/rQXyswmzmGakRfkMgoWVjfnLWkRirfLEfuD4ysVW16eXzwt3jHIzKA==}
 
-  '@floating-ui/react-dom@2.1.5':
-    resolution: {integrity: sha512-HDO/1/1oH9fjj4eLgegrlH3dklZpHtUYYFiVwMUwfGvk9jWDRWqkklA2/NFScknrcNSspbV868WjXORvreDX+Q==}
+  '@floating-ui/react-dom@2.1.6':
+    resolution: {integrity: sha512-4JX6rEatQEvlmgU80wZyq9RT96HZJa88q8hp0pBd+LrczeDI4o6uA2M+uvxngVHo4Ihr8uibXxH6+70zhAFrVw==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
@@ -649,6 +649,9 @@ packages:
   '@grafana/e2e-selectors@12.1.0':
     resolution: {integrity: sha512-RrZI4TnXU0KjKFDBUniuv0mkkLPizWiCFeXmF717TJ4Qq3oCR15nxYemOQqSJXU4aR6QQ1eNhKC6noOOIQFFPA==}
 
+  '@grafana/e2e-selectors@12.2.0-17364276373':
+    resolution: {integrity: sha512-ofe21ATcog+vCaiTLBF5du5SFFAHKE+iv0yjosWxPLftzD/NojOtNhg/DCT+vAeIGvvdkHN2GkFhKNWdPYMdyg==}
+
   '@grafana/eslint-config@8.0.0':
     resolution: {integrity: sha512-2e/Zk7dEB8k4r7mPiTua9vXZIqv/nN6prWvNcr/kfglz4y9kllEagANE1loxJ7whZsIqwB++UR7s0MAOFA0Iog==}
     peerDependencies:
@@ -675,8 +678,8 @@ packages:
     peerDependencies:
       react: '>=18'
 
-  '@grafana/plugin-e2e@2.1.7':
-    resolution: {integrity: sha512-gf2Zu9YnF3QJeFnYkLN/TXUqemBDjwNjjBQ05IZw1LQiHR1Qg/TogZd4KiV9AvI9O2Vorb1kzVLr4eokWEMD2g==}
+  '@grafana/plugin-e2e@2.1.10':
+    resolution: {integrity: sha512-j8iayggOAoFWvfEqy0ZgIcQPqb1FhnfOcBPX7rPXQLNnRGWceLnHLIgKzNu3biULNEq/QbEQffVBzsL30VLuvw==}
     engines: {node: '>=18 <=22'}
     peerDependencies:
       '@playwright/test': ^1.52.0
@@ -718,14 +721,14 @@ packages:
     resolution: {integrity: sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==}
     deprecated: Use @eslint/object-schema instead
 
-  '@internationalized/date@3.8.2':
-    resolution: {integrity: sha512-/wENk7CbvLbkUvX1tu0mwq49CVkkWpkXubGel6birjRPyo6uQ4nQpnq5xZu823zRCwwn82zgHrvgF1vZyvmVgA==}
+  '@internationalized/date@3.9.0':
+    resolution: {integrity: sha512-yaN3brAnHRD+4KyyOsJyk49XUvj2wtbNACSqg0bz3u8t2VuzhC8Q5dfRnrSxjnnbDb+ienBnkn1TzQfE154vyg==}
 
   '@internationalized/message@3.1.8':
     resolution: {integrity: sha512-Rwk3j/TlYZhn3HQ6PyXUV0XP9Uv42jqZGNegt0BXlxjE6G3+LwHjbQZAGHhCnCPdaA6Tvd3ma/7QzLlLkJxAWA==}
 
-  '@internationalized/number@3.6.4':
-    resolution: {integrity: sha512-P+/h+RDaiX8EGt3shB9AYM1+QgkvHmJ5rKi4/59k4sg9g58k9rqsRW0WxRO7jCoHyvVbFRRFKmVTdFYdehrxHg==}
+  '@internationalized/number@3.6.5':
+    resolution: {integrity: sha512-6hY4Kl4HPBvtfS62asS/R22JzNNy8vi/Ssev7x6EobfCp+9QIB2hKvI2EtbdJ0VSQacxVNtqhE/NmF/NZ0gm6g==}
 
   '@internationalized/string@3.2.7':
     resolution: {integrity: sha512-D4OHBjrinH+PFZPvfCXvG28n2LSykWcJ7GIioQL+ok0LON15SdfoUssoHzzOUmVZLbRoREsQXVzA6r8JKsbP6A==}
@@ -973,8 +976,8 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@playwright/test@1.54.1':
-    resolution: {integrity: sha512-FS8hQ12acieG2dYSksmLOF7BNxnVf2afRJdCuM1eMSxj6QTSE6G4InGF7oApGgDb65MX7AwMVlIkpru0yZA4Xw==}
+  '@playwright/test@1.55.0':
+    resolution: {integrity: sha512-04IXzPwHrW69XusN/SIdDdKZBzMfOT9UNT/YiJit/xpy2VuAoB8NHc8Aplb96zsWDddLnbkPL3TsmrS04ZU2xQ==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -1084,14 +1087,14 @@ packages:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
       react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
-  '@react-aria/i18n@3.12.11':
-    resolution: {integrity: sha512-1mxUinHbGJ6nJ/uSl62dl48vdZfWTBZePNF/wWQy98gR0qNFXLeusd7CsEmJT1971CR5i/WNYUo1ezNlIJnu6A==}
+  '@react-aria/i18n@3.12.12':
+    resolution: {integrity: sha512-JN6p+Xc6Pu/qddGRoeYY6ARsrk2Oz7UiQc9nLEPOt3Ch+blJZKWwDjcpo/p6/wVZdD/2BgXS7El6q6+eMg7ibw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
       react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
-  '@react-aria/interactions@3.25.4':
-    resolution: {integrity: sha512-HBQMxgUPHrW8V63u9uGgBymkMfj6vdWbB0GgUJY49K9mBKMsypcHeWkWM6+bF7kxRO728/IK8bWDV6whDbqjHg==}
+  '@react-aria/interactions@3.25.5':
+    resolution: {integrity: sha512-EweYHOEvMwef/wsiEqV73KurX/OqnmbzKQa2fLxdULbec5+yDj6wVGaRHIzM4NiijIDe+bldEl5DG05CAKOAHA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
       react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
@@ -1114,14 +1117,14 @@ packages:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
       react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
-  '@react-aria/utils@3.30.0':
-    resolution: {integrity: sha512-ydA6y5G1+gbem3Va2nczj/0G0W7/jUVo/cbN10WA5IizzWIwMP5qhFr7macgbKfHMkZ+YZC3oXnt2NNre5odKw==}
+  '@react-aria/utils@3.30.1':
+    resolution: {integrity: sha512-zETcbDd6Vf9GbLndO6RiWJadIZsBU2MMm23rBACXLmpRztkrIqPEb2RVdlLaq1+GklDx0Ii6PfveVjx+8S5U6A==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
       react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
-  '@react-aria/visually-hidden@3.8.26':
-    resolution: {integrity: sha512-Lz36lTVaQbv5Kn74sPv0l9SnLQ5XHKCoq2zilP14Eb4QixDIqR7Ovj43m+6wi9pynf29jtOb/8D/9jrTjbmmgw==}
+  '@react-aria/visually-hidden@3.8.27':
+    resolution: {integrity: sha512-hD1DbL3WnjPnCdlQjwe19bQVRAGJyN0Aaup+s7NNtvZUn7AjoEH78jo8TE+L8yM7z/OZUQF26laCfYqeIwWn4g==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
       react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
@@ -1129,8 +1132,8 @@ packages:
   '@react-stately/flags@3.1.2':
     resolution: {integrity: sha512-2HjFcZx1MyQXoPqcBGALwWWmgFVUk2TuKVIQxCbRq7fPyWXIl6VHcakCLurdtYC2Iks7zizvz0Idv48MQ38DWg==}
 
-  '@react-stately/overlays@3.6.18':
-    resolution: {integrity: sha512-g8n2FtDCxIg2wQ09R7lrM2niuxMPCdP17bxsPV9hyYnN6m42aAKGOhzWrFOK+3phQKgk/E1JQZEvKw1cyyGo1A==}
+  '@react-stately/overlays@3.6.19':
+    resolution: {integrity: sha512-swZXfDvxTYd7tKEpijEHBFFaEmbbnCvEhGlmrAz4K72cuRR9O5u+lcla8y1veGBbBSzrIdKNdBoIIJ+qQH+1TQ==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
@@ -1139,23 +1142,23 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
-  '@react-types/button@3.13.0':
-    resolution: {integrity: sha512-hwvcNnBjDeNvWheWfBhmkJSzC48ub5rZq0DnpemB3XKOvv5WcF9p6rrQZsQ3egNGkh0Z+bKfr2QfotgOkccHSw==}
+  '@react-types/button@3.14.0':
+    resolution: {integrity: sha512-pXt1a+ElxiZyWpX0uznyjy5Z6EHhYxPcaXpccZXyn6coUo9jmCbgg14xR7Odo+JcbfaaISzZTDO7oGLVTcHnpA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
-  '@react-types/dialog@3.5.20':
-    resolution: {integrity: sha512-ebn8jW/xW/nmRATaWIPHVBIpIFWSaqjrAxa58f5TXer5FtCD9pUuzAQDmy/o22ucB0yvn6Kl+fjb3SMbMdALZQ==}
+  '@react-types/dialog@3.5.21':
+    resolution: {integrity: sha512-jF1gN4bvwYamsLjefaFDnaSKxTa3Wtvn5f7WLjNVZ8ICVoiMBMdUJXTlPQHAL4YWqtCj4hK/3uimR1E+Pwd7Xw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
-  '@react-types/overlays@3.9.0':
-    resolution: {integrity: sha512-T2DqMcDN5p8vb4vu2igoLrAtuewaNImLS8jsK7th7OjwQZfIWJn5Y45jSxHtXJUddEg1LkUjXYPSXCMerMcULw==}
+  '@react-types/overlays@3.9.1':
+    resolution: {integrity: sha512-UCG3TOu8FLk4j0Pr1nlhv0opcwMoqbGEOUvsSr6ITN6Qs2y0j+KYSYQ7a4+04m3dN//8+9Wjkkid8k+V1dV2CA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
-  '@react-types/shared@3.31.0':
-    resolution: {integrity: sha512-ua5U6V66gDcbLZe4P2QeyNgPp4YWD1ymGA6j3n+s8CGExtrCPe64v+g4mvpT8Bnb985R96e4zFT61+m0YCwqMg==}
+  '@react-types/shared@3.32.0':
+    resolution: {integrity: sha512-t+cligIJsZYFMSPFMvsJMjzlzde06tZMOIOFa1OV5Z0BcMowrb2g4mB57j/9nP28iJIRYn10xCniQts+qadrqQ==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
@@ -1583,6 +1586,9 @@ packages:
   '@types/lodash@4.17.20':
     resolution: {integrity: sha512-H3MHACvFUEiujabxhaI/ImO6gUrd8oOurg7LQtS7mbwIXA/cUqWrvBsaeJ23aZEPk1TAYkurjfMbSELfoCXlGA==}
 
+  '@types/lodash@4.17.20':
+    resolution: {integrity: sha512-H3MHACvFUEiujabxhaI/ImO6gUrd8oOurg7LQtS7mbwIXA/cUqWrvBsaeJ23aZEPk1TAYkurjfMbSELfoCXlGA==}
+
   '@types/node@20.17.24':
     resolution: {integrity: sha512-d7fGCyB96w9BnWQrOsJtpyiSaBcAYYr75bnK6ZRjDbql2cGLj/3GsL5OYmLPNq76l7Gf2q4Rv9J2o6h5CrD9sA==}
 
@@ -1650,26 +1656,26 @@ packages:
   '@types/yargs@17.0.33':
     resolution: {integrity: sha512-WpxBCKWPLr4xSsHgz511rFJAM+wS28w2zEO1QDNY5zM/S8ok70NNfztH0xwhqKyaK0OHCbN98LDAZuy1ctxDkA==}
 
-  '@typescript-eslint/eslint-plugin@8.38.0':
-    resolution: {integrity: sha512-CPoznzpuAnIOl4nhj4tRr4gIPj5AfKgkiJmGQDaq+fQnRJTYlcBjbX3wbciGmpoPf8DREufuPRe1tNMZnGdanA==}
+  '@typescript-eslint/eslint-plugin@8.41.0':
+    resolution: {integrity: sha512-8fz6oa6wEKZrhXWro/S3n2eRJqlRcIa6SlDh59FXJ5Wp5XRZ8B9ixpJDcjadHq47hMx0u+HW6SNa6LjJQ6NLtw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
-      '@typescript-eslint/parser': ^8.38.0
+      '@typescript-eslint/parser': ^8.41.0
       eslint: ^8.57.0 || ^9.0.0
-      typescript: '>=4.8.4 <5.9.0'
+      typescript: '>=4.8.4 <6.0.0'
 
-  '@typescript-eslint/parser@8.38.0':
-    resolution: {integrity: sha512-Zhy8HCvBUEfBECzIl1PKqF4p11+d0aUJS1GeUiuqK9WmOug8YCmC4h4bjyBvMyAMI9sbRczmrYL5lKg/YMbrcQ==}
+  '@typescript-eslint/parser@8.41.0':
+    resolution: {integrity: sha512-gTtSdWX9xiMPA/7MV9STjJOOYtWwIJIYxkQxnSV1U3xcE+mnJSH3f6zI0RYP+ew66WSlZ5ed+h0VCxsvdC1jJg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
-      typescript: '>=4.8.4 <5.9.0'
+      typescript: '>=4.8.4 <6.0.0'
 
-  '@typescript-eslint/project-service@8.38.0':
-    resolution: {integrity: sha512-dbK7Jvqcb8c9QfH01YB6pORpqX1mn5gDZc9n63Ak/+jD67oWXn3Gs0M6vddAN+eDXBCS5EmNWzbSxsn9SzFWWg==}
+  '@typescript-eslint/project-service@8.41.0':
+    resolution: {integrity: sha512-b8V9SdGBQzQdjJ/IO3eDifGpDBJfvrNTp2QD9P2BeqWTGrRibgfgIlBSw6z3b6R7dPzg752tOs4u/7yCLxksSQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
-      typescript: '>=4.8.4 <5.9.0'
+      typescript: '>=4.8.4 <6.0.0'
 
   '@typescript-eslint/scope-manager@6.21.0':
     resolution: {integrity: sha512-OwLUIWZJry80O99zvqXVEioyniJMa+d2GrqpUTqi5/v5D5rOrppJVBPa0yKCblcigC0/aYAzxxqQ1B+DS2RYsg==}
@@ -1679,22 +1685,22 @@ packages:
     resolution: {integrity: sha512-8oI9GwPMQmBryaaxG1tOZdxXVeMDte6NyJA4i7/TWa4fBwgnAXYlIQP+uYOeqAaLJ2JRxlG9CAyL+C+YE9Xknw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@typescript-eslint/scope-manager@8.38.0':
-    resolution: {integrity: sha512-WJw3AVlFFcdT9Ri1xs/lg8LwDqgekWXWhH3iAF+1ZM+QPd7oxQ6jvtW/JPwzAScxitILUIFs0/AnQ/UWHzbATQ==}
+  '@typescript-eslint/scope-manager@8.41.0':
+    resolution: {integrity: sha512-n6m05bXn/Cd6DZDGyrpXrELCPVaTnLdPToyhBoFkLIMznRUQUEQdSp96s/pcWSQdqOhrgR1mzJ+yItK7T+WPMQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@typescript-eslint/tsconfig-utils@8.38.0':
-    resolution: {integrity: sha512-Lum9RtSE3EroKk/bYns+sPOodqb2Fv50XOl/gMviMKNvanETUuUcC9ObRbzrJ4VSd2JalPqgSAavwrPiPvnAiQ==}
+  '@typescript-eslint/tsconfig-utils@8.41.0':
+    resolution: {integrity: sha512-TDhxYFPUYRFxFhuU5hTIJk+auzM/wKvWgoNYOPcOf6i4ReYlOoYN8q1dV5kOTjNQNJgzWN3TUUQMtlLOcUgdUw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
-      typescript: '>=4.8.4 <5.9.0'
+      typescript: '>=4.8.4 <6.0.0'
 
-  '@typescript-eslint/type-utils@8.38.0':
-    resolution: {integrity: sha512-c7jAvGEZVf0ao2z+nnz8BUaHZD09Agbh+DY7qvBQqLiz8uJzRgVPj5YvOh8I8uEiH8oIUGIfHzMwUcGVco/SJg==}
+  '@typescript-eslint/type-utils@8.41.0':
+    resolution: {integrity: sha512-63qt1h91vg3KsjVVonFJWjgSK7pZHSQFKH6uwqxAH9bBrsyRhO6ONoKyXxyVBzG1lJnFAJcKAcxLS54N1ee1OQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
-      typescript: '>=4.8.4 <5.9.0'
+      typescript: '>=4.8.4 <6.0.0'
 
   '@typescript-eslint/types@6.21.0':
     resolution: {integrity: sha512-1kFmZ1rOm5epu9NZEZm1kckCDGj5UJEf7P1kliH4LKu/RkwpsfqqGmY2OOcUs18lSlQBKLDYBOGxRVtrMN5lpg==}
@@ -1704,8 +1710,8 @@ packages:
     resolution: {integrity: sha512-/6cp9yL72yUHAYq9g6DsAU+vVfvQmd1a8KyA81uvfDE21O2DwQ/qxlM4AR8TSdAu+kJLBDrEHKC5/W2/nxsY0A==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@typescript-eslint/types@8.38.0':
-    resolution: {integrity: sha512-wzkUfX3plUqij4YwWaJyqhiPE5UCRVlFpKn1oCRn2O1bJ592XxWJj8ROQ3JD5MYXLORW84063z3tZTb/cs4Tyw==}
+  '@typescript-eslint/types@8.41.0':
+    resolution: {integrity: sha512-9EwxsWdVqh42afLbHP90n2VdHaWU/oWgbH2P0CfcNfdKL7CuKpwMQGjwev56vWu9cSKU7FWSu6r9zck6CVfnag==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@typescript-eslint/typescript-estree@6.21.0':
@@ -1723,11 +1729,11 @@ packages:
     peerDependencies:
       typescript: '>=4.8.4 <5.9.0'
 
-  '@typescript-eslint/typescript-estree@8.38.0':
-    resolution: {integrity: sha512-fooELKcAKzxux6fA6pxOflpNS0jc+nOQEEOipXFNjSlBS6fqrJOVY/whSn70SScHrcJ2LDsxWrneFoWYSVfqhQ==}
+  '@typescript-eslint/typescript-estree@8.41.0':
+    resolution: {integrity: sha512-D43UwUYJmGhuwHfY7MtNKRZMmfd8+p/eNSfFe6tH5mbVDto+VQCayeAt35rOx3Cs6wxD16DQtIKw/YXxt5E0UQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
-      typescript: '>=4.8.4 <5.9.0'
+      typescript: '>=4.8.4 <6.0.0'
 
   '@typescript-eslint/utils@6.21.0':
     resolution: {integrity: sha512-NfWVaC8HP9T8cbKQxHcsJBY5YE1O33+jpMwN45qzWWaPDZgLIbo12toGMWnmhvCpd3sIxkpDw3Wv1B3dYrbDQQ==}
@@ -1742,12 +1748,12 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: '>=4.8.4 <5.9.0'
 
-  '@typescript-eslint/utils@8.38.0':
-    resolution: {integrity: sha512-hHcMA86Hgt+ijJlrD8fX0j1j8w4C92zue/8LOPAFioIno+W0+L7KqE8QZKCcPGc/92Vs9x36w/4MPTJhqXdyvg==}
+  '@typescript-eslint/utils@8.41.0':
+    resolution: {integrity: sha512-udbCVstxZ5jiPIXrdH+BZWnPatjlYwJuJkDA4Tbo3WyYLh8NvB+h/bKeSZHDOFKfphsZYJQqaFtLeXEqurQn1A==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
-      typescript: '>=4.8.4 <5.9.0'
+      typescript: '>=4.8.4 <6.0.0'
 
   '@typescript-eslint/visitor-keys@6.21.0':
     resolution: {integrity: sha512-JJtkDduxLi9bivAB+cYOVMtbkqdPOhZ+ZI5LC47MIRrDV4Yn2o+ZnW10Nkmr28xRpSpdJ6Sm42Hjf2+REYXm0A==}
@@ -1757,8 +1763,8 @@ packages:
     resolution: {integrity: sha512-WsXQwMkILJvffP6z4U3FYJPlbf/j07HIxmDjZpbNvBJkMfvwXj5ACRkkHwBDvLBbDbtX5TdU64/rcvKJ/vuInQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@typescript-eslint/visitor-keys@8.38.0':
-    resolution: {integrity: sha512-pWrTcoFNWuwHlA9CvlfSsGWs14JxfN1TH25zM5L7o0pRLhsoZkDnTsXfQRJBEWJoV5DL0jf+Z+sxiud+K0mq1g==}
+  '@typescript-eslint/visitor-keys@8.41.0':
+    resolution: {integrity: sha512-+GeGMebMCy0elMNg67LRNoVnUFPIm37iu5CmHESVx56/9Jsfdpsvbv605DQ81Pi/x11IdKUsS5nzgTYbCQU9fg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@ungap/structured-clone@1.3.0':
@@ -3188,8 +3194,8 @@ packages:
   i18next@19.9.2:
     resolution: {integrity: sha512-0i6cuo6ER6usEOtKajUUDj92zlG+KArFia0857xxiEHAQcUwh/RtOQocui1LPJwunSYT574Pk64aNva1kwtxZg==}
 
-  i18next@25.3.2:
-    resolution: {integrity: sha512-JSnbZDxRVbphc5jiptxr3o2zocy5dEqpVm9qCGdJwRNO+9saUJS0/u4LnM/13C23fUEWxAylPqKU/NpMV/IjqA==}
+  i18next@25.4.2:
+    resolution: {integrity: sha512-gD4T25a6ovNXsfXY1TwHXXXLnD/K2t99jyYMCSimSCBnBRJVQr5j+VAaU83RJCPzrTGhVQ6dqIga66xO2rtd5g==}
     peerDependencies:
       typescript: ^5
     peerDependenciesMeta:
@@ -4075,13 +4081,13 @@ packages:
     resolution: {integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==}
     engines: {node: '>=8'}
 
-  playwright-core@1.54.1:
-    resolution: {integrity: sha512-Nbjs2zjj0htNhzgiy5wu+3w09YetDx5pkrpI/kZotDlDUaYk0HVA5xrBVPdow4SAUIlhgKcJeJg4GRKW6xHusA==}
+  playwright-core@1.55.0:
+    resolution: {integrity: sha512-GvZs4vU3U5ro2nZpeiwyb0zuFaqb9sUiAJuyrWpcGouD8y9/HLgGbNRjIph7zU9D3hnPaisMl9zG9CgFi/biIg==}
     engines: {node: '>=18'}
     hasBin: true
 
-  playwright@1.54.1:
-    resolution: {integrity: sha512-peWpSwIBmSLi6aW2auvrUtf2DqY16YYcCMO8rTVx486jKmDTJg7UAhyrraP98GB8BoPURZP8+nxO7TSd4cPr5g==}
+  playwright@1.55.0:
+    resolution: {integrity: sha512-sdCWStblvV1YU909Xqx0DhOjPZE4/5lJsIS84IfN9dAZfcl/CIZ5O8l3o0j7hPMjDvqoTF8ZUcc+i/GL5erstA==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -5366,6 +5372,11 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
+  typescript@5.9.2:
+    resolution: {integrity: sha512-CWBzXQrc/qOkhidw1OzBTQuYRbfyxDXJMVJ1XNwUHGROVmuaeiEm3OslpZ1RV96d7SKKjZKrSJu3+t/xlw3R9A==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
   ua-parser-js@1.0.40:
     resolution: {integrity: sha512-z6PJ8Lml+v3ichVojCiB8toQJBuwR42ySM4ezjXIqXK3M0HczmKQ3LF4rhU55PfD99KEEXQG6yb7iOMyvYuHew==}
     hasBin: true
@@ -5932,7 +5943,7 @@ snapshots:
     dependencies:
       regenerator-runtime: 0.14.1
 
-  '@babel/runtime@7.28.2': {}
+  '@babel/runtime@7.28.3': {}
 
   '@babel/template@7.26.9':
     dependencies:
@@ -6102,20 +6113,20 @@ snapshots:
       '@floating-ui/core': 1.6.9
       '@floating-ui/utils': 0.2.9
 
-  '@floating-ui/dom@1.7.3':
+  '@floating-ui/dom@1.7.4':
     dependencies:
       '@floating-ui/core': 1.7.3
       '@floating-ui/utils': 0.2.10
 
-  '@floating-ui/react-dom@2.1.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@floating-ui/react-dom@2.1.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@floating-ui/dom': 1.7.3
+      '@floating-ui/dom': 1.7.4
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
   '@floating-ui/react@0.27.13(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@floating-ui/react-dom': 2.1.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@floating-ui/react-dom': 2.1.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@floating-ui/utils': 0.2.10
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -6236,11 +6247,17 @@ snapshots:
       tslib: 2.8.1
       typescript: 5.8.3
 
-  '@grafana/eslint-config@8.0.0(@stylistic/eslint-plugin-ts@2.13.0(eslint@8.57.1)(typescript@5.5.4))(@typescript-eslint/eslint-plugin@8.38.0(@typescript-eslint/parser@8.38.0(eslint@8.57.1)(typescript@5.5.4))(eslint@8.57.1)(typescript@5.5.4))(@typescript-eslint/parser@8.38.0(eslint@8.57.1)(typescript@5.5.4))(eslint-config-prettier@8.10.0(eslint@8.57.1))(eslint-plugin-jsdoc@46.10.1(eslint@8.57.1))(eslint-plugin-react-hooks@4.6.2(eslint@8.57.1))(eslint-plugin-react@7.37.4(eslint@8.57.1))(eslint@8.57.1)(typescript@5.5.4)':
+  '@grafana/e2e-selectors@12.2.0-17364276373':
+    dependencies:
+      semver: 7.7.1
+      tslib: 2.8.1
+      typescript: 5.9.2
+
+  '@grafana/eslint-config@8.0.0(@stylistic/eslint-plugin-ts@2.13.0(eslint@8.57.1)(typescript@5.5.4))(@typescript-eslint/eslint-plugin@8.41.0(@typescript-eslint/parser@8.41.0(eslint@8.57.1)(typescript@5.5.4))(eslint@8.57.1)(typescript@5.5.4))(@typescript-eslint/parser@8.41.0(eslint@8.57.1)(typescript@5.5.4))(eslint-config-prettier@8.10.0(eslint@8.57.1))(eslint-plugin-jsdoc@46.10.1(eslint@8.57.1))(eslint-plugin-react-hooks@4.6.2(eslint@8.57.1))(eslint-plugin-react@7.37.4(eslint@8.57.1))(eslint@8.57.1)(typescript@5.5.4)':
     dependencies:
       '@stylistic/eslint-plugin-ts': 2.13.0(eslint@8.57.1)(typescript@5.5.4)
-      '@typescript-eslint/eslint-plugin': 8.38.0(@typescript-eslint/parser@8.38.0(eslint@8.57.1)(typescript@5.5.4))(eslint@8.57.1)(typescript@5.5.4)
-      '@typescript-eslint/parser': 8.38.0(eslint@8.57.1)(typescript@5.5.4)
+      '@typescript-eslint/eslint-plugin': 8.41.0(@typescript-eslint/parser@8.41.0(eslint@8.57.1)(typescript@5.5.4))(eslint@8.57.1)(typescript@5.5.4)
+      '@typescript-eslint/parser': 8.41.0(eslint@8.57.1)(typescript@5.5.4)
       eslint: 8.57.1
       eslint-config-prettier: 8.10.0(eslint@8.57.1)
       eslint-plugin-jsdoc: 46.10.1(eslint@8.57.1)
@@ -6262,14 +6279,14 @@ snapshots:
   '@grafana/i18n@12.1.0(eslint@8.57.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.5.4)':
     dependencies:
       '@formatjs/intl-durationformat': 0.7.4
-      '@typescript-eslint/utils': 8.38.0(eslint@8.57.1)(typescript@5.5.4)
+      '@typescript-eslint/utils': 8.41.0(eslint@8.57.1)(typescript@5.5.4)
       fast-deep-equal: 3.1.3
-      i18next: 25.3.2(typescript@5.5.4)
+      i18next: 25.4.2(typescript@5.5.4)
       i18next-browser-languagedetector: 8.0.4
       i18next-pseudo: 2.2.1
       micro-memoize: 4.1.3
       react: 18.2.0
-      react-i18next: 15.4.1(i18next@25.3.2(typescript@5.5.4))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react-i18next: 15.4.1(i18next@25.4.2(typescript@5.5.4))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     transitivePeerDependencies:
       - eslint
       - react-dom
@@ -6277,10 +6294,10 @@ snapshots:
       - supports-color
       - typescript
 
-  '@grafana/plugin-e2e@2.1.7(@playwright/test@1.54.1)':
+  '@grafana/plugin-e2e@2.1.10(@playwright/test@1.55.0)':
     dependencies:
-      '@grafana/e2e-selectors': 12.1.0
-      '@playwright/test': 1.54.1
+      '@grafana/e2e-selectors': 12.2.0-17364276373
+      '@playwright/test': 1.55.0
       semver: 7.7.1
       uuid: 11.1.0
       yaml: 2.7.0
@@ -6344,7 +6361,7 @@ snapshots:
       date-fns: 4.1.0
       downshift: 9.0.9(react@18.2.0)
       hoist-non-react-statics: 3.3.2
-      i18next: 25.3.2(typescript@5.5.4)
+      i18next: 25.4.2(typescript@5.5.4)
       i18next-browser-languagedetector: 8.0.4
       immutable: 5.1.3
       is-hotkey: 0.2.0
@@ -6369,7 +6386,7 @@ snapshots:
       react-dropzone: 14.3.8(react@18.2.0)
       react-highlight-words: 0.21.0(react@18.2.0)
       react-hook-form: 7.54.2(react@18.2.0)
-      react-i18next: 15.4.1(i18next@25.3.2(typescript@5.5.4))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react-i18next: 15.4.1(i18next@25.4.2(typescript@5.5.4))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-inlinesvg: 4.2.0(react@18.2.0)
       react-loading-skeleton: 3.5.0(react@18.2.0)
       react-router-dom: 5.3.4(react@18.2.0)
@@ -6421,7 +6438,7 @@ snapshots:
 
   '@humanwhocodes/object-schema@2.0.3': {}
 
-  '@internationalized/date@3.8.2':
+  '@internationalized/date@3.9.0':
     dependencies:
       '@swc/helpers': 0.5.15
 
@@ -6430,7 +6447,7 @@ snapshots:
       '@swc/helpers': 0.5.15
       intl-messageformat: 10.7.15
 
-  '@internationalized/number@3.6.4':
+  '@internationalized/number@3.6.5':
     dependencies:
       '@swc/helpers': 0.5.15
 
@@ -6790,9 +6807,9 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@playwright/test@1.54.1':
+  '@playwright/test@1.55.0':
     dependencies:
-      playwright: 1.54.1
+      playwright: 1.55.0
 
   '@popperjs/core@2.11.8': {}
 
@@ -6896,44 +6913,44 @@ snapshots:
 
   '@react-aria/dialog@3.5.27(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@react-aria/interactions': 3.25.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@react-aria/interactions': 3.25.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@react-aria/overlays': 3.27.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@react-aria/utils': 3.29.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@react-types/dialog': 3.5.20(react@18.2.0)
-      '@react-types/shared': 3.31.0(react@18.2.0)
+      '@react-types/dialog': 3.5.21(react@18.2.0)
+      '@react-types/shared': 3.32.0(react@18.2.0)
       '@swc/helpers': 0.5.15
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
   '@react-aria/focus@3.20.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@react-aria/interactions': 3.25.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@react-aria/interactions': 3.25.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@react-aria/utils': 3.29.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@react-types/shared': 3.31.0(react@18.2.0)
+      '@react-types/shared': 3.32.0(react@18.2.0)
       '@swc/helpers': 0.5.15
       clsx: 2.1.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@react-aria/i18n@3.12.11(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@react-aria/i18n@3.12.12(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@internationalized/date': 3.8.2
+      '@internationalized/date': 3.9.0
       '@internationalized/message': 3.1.8
-      '@internationalized/number': 3.6.4
+      '@internationalized/number': 3.6.5
       '@internationalized/string': 3.2.7
       '@react-aria/ssr': 3.9.10(react@18.2.0)
-      '@react-aria/utils': 3.30.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@react-types/shared': 3.31.0(react@18.2.0)
+      '@react-aria/utils': 3.30.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@react-types/shared': 3.32.0(react@18.2.0)
       '@swc/helpers': 0.5.15
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@react-aria/interactions@3.25.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@react-aria/interactions@3.25.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@react-aria/ssr': 3.9.10(react@18.2.0)
-      '@react-aria/utils': 3.30.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@react-aria/utils': 3.30.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@react-stately/flags': 3.1.2
-      '@react-types/shared': 3.31.0(react@18.2.0)
+      '@react-types/shared': 3.32.0(react@18.2.0)
       '@swc/helpers': 0.5.15
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -6941,15 +6958,15 @@ snapshots:
   '@react-aria/overlays@3.27.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@react-aria/focus': 3.20.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@react-aria/i18n': 3.12.11(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@react-aria/interactions': 3.25.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@react-aria/i18n': 3.12.12(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@react-aria/interactions': 3.25.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@react-aria/ssr': 3.9.10(react@18.2.0)
       '@react-aria/utils': 3.29.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@react-aria/visually-hidden': 3.8.26(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@react-stately/overlays': 3.6.18(react@18.2.0)
-      '@react-types/button': 3.13.0(react@18.2.0)
-      '@react-types/overlays': 3.9.0(react@18.2.0)
-      '@react-types/shared': 3.31.0(react@18.2.0)
+      '@react-aria/visually-hidden': 3.8.27(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@react-stately/overlays': 3.6.19(react@18.2.0)
+      '@react-types/button': 3.14.0(react@18.2.0)
+      '@react-types/overlays': 3.9.1(react@18.2.0)
+      '@react-types/shared': 3.32.0(react@18.2.0)
       '@swc/helpers': 0.5.15
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -6964,28 +6981,28 @@ snapshots:
       '@react-aria/ssr': 3.9.10(react@18.2.0)
       '@react-stately/flags': 3.1.2
       '@react-stately/utils': 3.10.8(react@18.2.0)
-      '@react-types/shared': 3.31.0(react@18.2.0)
+      '@react-types/shared': 3.32.0(react@18.2.0)
       '@swc/helpers': 0.5.15
       clsx: 2.1.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@react-aria/utils@3.30.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@react-aria/utils@3.30.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@react-aria/ssr': 3.9.10(react@18.2.0)
       '@react-stately/flags': 3.1.2
       '@react-stately/utils': 3.10.8(react@18.2.0)
-      '@react-types/shared': 3.31.0(react@18.2.0)
+      '@react-types/shared': 3.32.0(react@18.2.0)
       '@swc/helpers': 0.5.15
       clsx: 2.1.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@react-aria/visually-hidden@3.8.26(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@react-aria/visually-hidden@3.8.27(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@react-aria/interactions': 3.25.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@react-aria/utils': 3.30.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@react-types/shared': 3.31.0(react@18.2.0)
+      '@react-aria/interactions': 3.25.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@react-aria/utils': 3.30.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@react-types/shared': 3.32.0(react@18.2.0)
       '@swc/helpers': 0.5.15
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -6994,10 +7011,10 @@ snapshots:
     dependencies:
       '@swc/helpers': 0.5.15
 
-  '@react-stately/overlays@3.6.18(react@18.2.0)':
+  '@react-stately/overlays@3.6.19(react@18.2.0)':
     dependencies:
       '@react-stately/utils': 3.10.8(react@18.2.0)
-      '@react-types/overlays': 3.9.0(react@18.2.0)
+      '@react-types/overlays': 3.9.1(react@18.2.0)
       '@swc/helpers': 0.5.15
       react: 18.2.0
 
@@ -7006,23 +7023,23 @@ snapshots:
       '@swc/helpers': 0.5.15
       react: 18.2.0
 
-  '@react-types/button@3.13.0(react@18.2.0)':
+  '@react-types/button@3.14.0(react@18.2.0)':
     dependencies:
-      '@react-types/shared': 3.31.0(react@18.2.0)
+      '@react-types/shared': 3.32.0(react@18.2.0)
       react: 18.2.0
 
-  '@react-types/dialog@3.5.20(react@18.2.0)':
+  '@react-types/dialog@3.5.21(react@18.2.0)':
     dependencies:
-      '@react-types/overlays': 3.9.0(react@18.2.0)
-      '@react-types/shared': 3.31.0(react@18.2.0)
+      '@react-types/overlays': 3.9.1(react@18.2.0)
+      '@react-types/shared': 3.32.0(react@18.2.0)
       react: 18.2.0
 
-  '@react-types/overlays@3.9.0(react@18.2.0)':
+  '@react-types/overlays@3.9.1(react@18.2.0)':
     dependencies:
-      '@react-types/shared': 3.31.0(react@18.2.0)
+      '@react-types/shared': 3.32.0(react@18.2.0)
       react: 18.2.0
 
-  '@react-types/shared@3.31.0(react@18.2.0)':
+  '@react-types/shared@3.32.0(react@18.2.0)':
     dependencies:
       react: 18.2.0
 
@@ -7503,6 +7520,8 @@ snapshots:
 
   '@types/lodash@4.17.20': {}
 
+  '@types/lodash@4.17.20': {}
+
   '@types/node@20.17.24':
     dependencies:
       undici-types: 6.19.8
@@ -7560,14 +7579,14 @@ snapshots:
     dependencies:
       '@types/yargs-parser': 21.0.3
 
-  '@typescript-eslint/eslint-plugin@8.38.0(@typescript-eslint/parser@8.38.0(eslint@8.57.1)(typescript@5.5.4))(eslint@8.57.1)(typescript@5.5.4)':
+  '@typescript-eslint/eslint-plugin@8.41.0(@typescript-eslint/parser@8.41.0(eslint@8.57.1)(typescript@5.5.4))(eslint@8.57.1)(typescript@5.5.4)':
     dependencies:
       '@eslint-community/regexpp': 4.12.1
-      '@typescript-eslint/parser': 8.38.0(eslint@8.57.1)(typescript@5.5.4)
-      '@typescript-eslint/scope-manager': 8.38.0
-      '@typescript-eslint/type-utils': 8.38.0(eslint@8.57.1)(typescript@5.5.4)
-      '@typescript-eslint/utils': 8.38.0(eslint@8.57.1)(typescript@5.5.4)
-      '@typescript-eslint/visitor-keys': 8.38.0
+      '@typescript-eslint/parser': 8.41.0(eslint@8.57.1)(typescript@5.5.4)
+      '@typescript-eslint/scope-manager': 8.41.0
+      '@typescript-eslint/type-utils': 8.41.0(eslint@8.57.1)(typescript@5.5.4)
+      '@typescript-eslint/utils': 8.41.0(eslint@8.57.1)(typescript@5.5.4)
+      '@typescript-eslint/visitor-keys': 8.41.0
       eslint: 8.57.1
       graphemer: 1.4.0
       ignore: 7.0.5
@@ -7577,22 +7596,22 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/parser@8.38.0(eslint@8.57.1)(typescript@5.5.4)':
+  '@typescript-eslint/parser@8.41.0(eslint@8.57.1)(typescript@5.5.4)':
     dependencies:
-      '@typescript-eslint/scope-manager': 8.38.0
-      '@typescript-eslint/types': 8.38.0
-      '@typescript-eslint/typescript-estree': 8.38.0(typescript@5.5.4)
-      '@typescript-eslint/visitor-keys': 8.38.0
+      '@typescript-eslint/scope-manager': 8.41.0
+      '@typescript-eslint/types': 8.41.0
+      '@typescript-eslint/typescript-estree': 8.41.0(typescript@5.5.4)
+      '@typescript-eslint/visitor-keys': 8.41.0
       debug: 4.4.0
       eslint: 8.57.1
       typescript: 5.5.4
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/project-service@8.38.0(typescript@5.5.4)':
+  '@typescript-eslint/project-service@8.41.0(typescript@5.5.4)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.38.0(typescript@5.5.4)
-      '@typescript-eslint/types': 8.38.0
+      '@typescript-eslint/tsconfig-utils': 8.41.0(typescript@5.5.4)
+      '@typescript-eslint/types': 8.41.0
       debug: 4.4.0
       typescript: 5.5.4
     transitivePeerDependencies:
@@ -7608,20 +7627,20 @@ snapshots:
       '@typescript-eslint/types': 8.27.0
       '@typescript-eslint/visitor-keys': 8.27.0
 
-  '@typescript-eslint/scope-manager@8.38.0':
+  '@typescript-eslint/scope-manager@8.41.0':
     dependencies:
-      '@typescript-eslint/types': 8.38.0
-      '@typescript-eslint/visitor-keys': 8.38.0
+      '@typescript-eslint/types': 8.41.0
+      '@typescript-eslint/visitor-keys': 8.41.0
 
-  '@typescript-eslint/tsconfig-utils@8.38.0(typescript@5.5.4)':
+  '@typescript-eslint/tsconfig-utils@8.41.0(typescript@5.5.4)':
     dependencies:
       typescript: 5.5.4
 
-  '@typescript-eslint/type-utils@8.38.0(eslint@8.57.1)(typescript@5.5.4)':
+  '@typescript-eslint/type-utils@8.41.0(eslint@8.57.1)(typescript@5.5.4)':
     dependencies:
-      '@typescript-eslint/types': 8.38.0
-      '@typescript-eslint/typescript-estree': 8.38.0(typescript@5.5.4)
-      '@typescript-eslint/utils': 8.38.0(eslint@8.57.1)(typescript@5.5.4)
+      '@typescript-eslint/types': 8.41.0
+      '@typescript-eslint/typescript-estree': 8.41.0(typescript@5.5.4)
+      '@typescript-eslint/utils': 8.41.0(eslint@8.57.1)(typescript@5.5.4)
       debug: 4.4.0
       eslint: 8.57.1
       ts-api-utils: 2.1.0(typescript@5.5.4)
@@ -7633,7 +7652,7 @@ snapshots:
 
   '@typescript-eslint/types@8.27.0': {}
 
-  '@typescript-eslint/types@8.38.0': {}
+  '@typescript-eslint/types@8.41.0': {}
 
   '@typescript-eslint/typescript-estree@6.21.0(typescript@5.5.4)':
     dependencies:
@@ -7664,12 +7683,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/typescript-estree@8.38.0(typescript@5.5.4)':
+  '@typescript-eslint/typescript-estree@8.41.0(typescript@5.5.4)':
     dependencies:
-      '@typescript-eslint/project-service': 8.38.0(typescript@5.5.4)
-      '@typescript-eslint/tsconfig-utils': 8.38.0(typescript@5.5.4)
-      '@typescript-eslint/types': 8.38.0
-      '@typescript-eslint/visitor-keys': 8.38.0
+      '@typescript-eslint/project-service': 8.41.0(typescript@5.5.4)
+      '@typescript-eslint/tsconfig-utils': 8.41.0(typescript@5.5.4)
+      '@typescript-eslint/types': 8.41.0
+      '@typescript-eslint/visitor-keys': 8.41.0
       debug: 4.4.0
       fast-glob: 3.3.3
       is-glob: 4.0.3
@@ -7705,12 +7724,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/utils@8.38.0(eslint@8.57.1)(typescript@5.5.4)':
+  '@typescript-eslint/utils@8.41.0(eslint@8.57.1)(typescript@5.5.4)':
     dependencies:
       '@eslint-community/eslint-utils': 4.7.0(eslint@8.57.1)
-      '@typescript-eslint/scope-manager': 8.38.0
-      '@typescript-eslint/types': 8.38.0
-      '@typescript-eslint/typescript-estree': 8.38.0(typescript@5.5.4)
+      '@typescript-eslint/scope-manager': 8.41.0
+      '@typescript-eslint/types': 8.41.0
+      '@typescript-eslint/typescript-estree': 8.41.0(typescript@5.5.4)
       eslint: 8.57.1
       typescript: 5.5.4
     transitivePeerDependencies:
@@ -7726,9 +7745,9 @@ snapshots:
       '@typescript-eslint/types': 8.27.0
       eslint-visitor-keys: 4.2.0
 
-  '@typescript-eslint/visitor-keys@8.38.0':
+  '@typescript-eslint/visitor-keys@8.41.0':
     dependencies:
-      '@typescript-eslint/types': 8.38.0
+      '@typescript-eslint/types': 8.41.0
       eslint-visitor-keys: 4.2.1
 
   '@ungap/structured-clone@1.3.0': {}
@@ -9524,9 +9543,9 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.26.10
 
-  i18next@25.3.2(typescript@5.5.4):
+  i18next@25.4.2(typescript@5.5.4):
     dependencies:
-      '@babel/runtime': 7.28.2
+      '@babel/runtime': 7.28.3
     optionalDependencies:
       typescript: 5.5.4
 
@@ -10581,11 +10600,11 @@ snapshots:
     dependencies:
       find-up: 4.1.0
 
-  playwright-core@1.54.1: {}
+  playwright-core@1.55.0: {}
 
-  playwright@1.54.1:
+  playwright@1.55.0:
     dependencies:
-      playwright-core: 1.54.1
+      playwright-core: 1.55.0
     optionalDependencies:
       fsevents: 2.3.2
 
@@ -11156,11 +11175,11 @@ snapshots:
     dependencies:
       react: 18.2.0
 
-  react-i18next@15.4.1(i18next@25.3.2(typescript@5.5.4))(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  react-i18next@15.4.1(i18next@25.4.2(typescript@5.5.4))(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.26.10
       html-parse-stringify: 3.0.1
-      i18next: 25.3.2(typescript@5.5.4)
+      i18next: 25.4.2(typescript@5.5.4)
       react: 18.2.0
     optionalDependencies:
       react-dom: 18.2.0(react@18.2.0)
@@ -12038,6 +12057,8 @@ snapshots:
   typescript@5.5.4: {}
 
   typescript@5.8.3: {}
+
+  typescript@5.9.2: {}
 
   ua-parser-js@1.0.40: {}
 
