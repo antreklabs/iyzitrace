@@ -4,44 +4,107 @@ import 'reactflow/dist/style.css';
 import { Skeleton, Alert, Row } from 'antd';
 import BaseContainer from '../../components/core/basecontainer/basecontainer';
 import GrafanaLikeRangePicker from '../../components/core/graphanadatepicker';
-import { TempoApi } from '../../providers/api/tempo.api';
+import { prometheusApi } from '../../providers/api/prometheus.api';
+
+interface ServiceEdgeData {
+  from: string;
+  to: string;
+  count: number;
+  errorCount: number;
+  latencyMs: number;
+}
 
 interface ServiceNode {
   name: string;
   calls: number;
 }
 
-interface ServiceEdge {
-  from: string;
-  to: string;
-  count: number;
-}
+function mergePrometheusData(
+  calls: any[],
+  errors: any[],
+  latencies: any[]
+): { nodes: ServiceNode[]; edges: ServiceEdgeData[] } {
+  const edgeMap = new Map<string, ServiceEdgeData>();
+  const nodeMap = new Map<string, number>();
 
-function buildServiceMapFromSpans(spans: any[]): { nodes: ServiceNode[]; edges: ServiceEdge[] } {
-  const nodes = new Map<string, ServiceNode>();
-  const edges = new Map<string, ServiceEdge>();
+  for (const item of calls) {
+    const from = item.metric.client;
+    const to = item.metric.server;
+    const rate = parseFloat(item.value[1]);
+    const count = Math.round(rate * 60);
+    const key = `${from}->${to}`;
+    edgeMap.set(key, { from, to, count, errorCount: 0, latencyMs: 0 });
+    nodeMap.set(from, (nodeMap.get(from) || 0) + count);
+    nodeMap.set(to, nodeMap.get(to) || 0);
+  }
 
-  for (const span of spans) {
-    const from = span.attributes?.['service.name'];
-    const to = span.attributes?.['peer.service'];
-
-    if (!from || !to || from === to) {continue;}
-
-    nodes.set(from, { name: from, calls: (nodes.get(from)?.calls || 0) + 1 });
-    nodes.set(to, { name: to, calls: (nodes.get(to)?.calls || 0) });
-
-    const edgeKey = `${from}->${to}`;
-    if (!edges.has(edgeKey)) {
-      edges.set(edgeKey, { from, to, count: 1 });
-    } else {
-      edges.get(edgeKey)!.count += 1;
+  for (const item of errors) {
+    const from = item.metric.client;
+    const to = item.metric.server;
+    const rate = parseFloat(item.value[1]);
+    const count = Math.round(rate * 60);
+    const key = `${from}->${to}`;
+    if (edgeMap.has(key)) {
+      edgeMap.get(key)!.errorCount = count;
     }
   }
 
-  return {
-    nodes: Array.from(nodes.values()),
-    edges: Array.from(edges.values()),
+  for (const item of latencies) {
+    const from = item.metric.client;
+    const to = item.metric.server;
+    const ms = parseFloat(item.value[1]) * 1000;
+    const key = `${from}->${to}`;
+    if (edgeMap.has(key)) {
+      edgeMap.get(key)!.latencyMs = Math.round(ms);
+    }
+  }
+
+  const edges = Array.from(edgeMap.values());
+  const nodes = Array.from(nodeMap.entries()).map(([name, calls]) => ({ name, calls }));
+  return { nodes, edges };
+}
+
+function layoutGraphNodes(edges: ServiceEdgeData[], nodes: ServiceNode[]): Node[] {
+  const levelMap = new Map<string, number>();
+  const visit = (node: string, depth: number) => {
+    if (levelMap.has(node)) {
+      levelMap.set(node, Math.max(levelMap.get(node)!, depth));
+    } else {
+      levelMap.set(node, depth);
+    }
+    edges.filter((e) => e.from === node).forEach((e) => visit(e.to, depth + 1));
   };
+
+  const called = new Set(edges.map((e) => e.to));
+  const roots = nodes.map((n) => n.name).filter((n) => !called.has(n));
+  roots.forEach((r) => visit(r, 0));
+
+  const levelGroups = new Map<number, string[]>();
+  levelMap.forEach((depth, name) => {
+    if (!levelGroups.has(depth)) levelGroups.set(depth, []);
+    levelGroups.get(depth)!.push(name);
+  });
+
+  const graphNodes: Node[] = [];
+  levelGroups.forEach((names, depth) => {
+    names.forEach((name, index) => {
+      const original = nodes.find((n) => n.name === name)!;
+      graphNodes.push({
+        id: name,
+        data: { label: `${name} (${original.calls})` },
+        position: { x: index * 300, y: depth * 200 },
+        style: {
+          padding: 12,
+          borderRadius: 8,
+          border: '1px solid #333',
+          background: 'white',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+        },
+      });
+    });
+  });
+
+  return graphNodes;
 }
 
 const ServiceMapContainer: React.FC = () => {
@@ -55,54 +118,62 @@ const ServiceMapContainer: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchTraces = async () => {
+    const fetchMetrics = async () => {
       setLoading(true);
       setError(null);
+
       try {
-        const [startTime, endTime] = range;
+        const [calls, errors, latency] = await Promise.all([
+          prometheusApi.runTraceQLQuery(
+            'sum by (client, server) (rate(traces_service_graph_request_total[1m]))'
+          ),
+          prometheusApi.runTraceQLQuery(
+            'sum by (client, server) (rate(traces_service_graph_request_failed_total[1m]))'
+          ),
+          prometheusApi.runTraceQLQuery(
+            'histogram_quantile(0.95, sum by (le, client, server) (rate(traces_service_graph_request_duration_seconds_bucket[1m])))'
+          ),
+        ]);
 
-        const result = await TempoApi.searchTraceQL({
-            query: 'service.name!="" and peer.service!=""',
-          start: Math.floor(startTime / 1000),
-          end: Math.floor(endTime / 1000),
-          limit: 1000,
+        const map = mergePrometheusData(calls, errors, latency);
+        const graphNodes = layoutGraphNodes(map.edges, map.nodes);
+
+        const graphEdges: Edge[] = map.edges.map((e) => {
+          const errorRate = e.errorCount / (e.count || 1);
+          const stroke = errorRate > 0.1 ? '#ff4d4f' : errorRate > 0.01 ? '#faad14' : '#52c41a';
+          const label = `${e.count} calls/min\n${e.latencyMs}ms p95\n${e.errorCount} errors`;
+
+          return {
+            id: `${e.from}->${e.to}`,
+            source: e.from,
+            target: e.to,
+            label,
+            animated: true,
+            style: { stroke, strokeWidth: 2.5 },
+            labelStyle: {
+              fill: '#000',
+              fontWeight: 600,
+              fontSize: 11,
+              whiteSpace: 'pre',
+            },
+          };
         });
-
-        const spans: any[] = result?.traces?.flatMap((t: any) => t.spans) || [];
-        const map = buildServiceMapFromSpans(spans);
-
-        const graphNodes: Node[] = map.nodes.map((n, i) => ({
-          id: n.name,
-          data: { label: `${n.name} (${n.calls})` },
-          position: { x: 150 * i, y: 100 },
-          style: { padding: 8, borderRadius: 8, border: '1px solid #aaa' },
-        }));
-
-        const graphEdges: Edge[] = map.edges.map((e) => ({
-          id: `${e.from}->${e.to}`,
-          source: e.from,
-          target: e.to,
-          label: `${e.count} calls`,
-          animated: true,
-          style: { stroke: '#999' },
-          labelStyle: { fill: '#555', fontWeight: 600 },
-        }));
 
         setNodes(graphNodes);
         setEdges(graphEdges);
       } catch (err: any) {
-        setError(err?.message || 'Unknown error');
+        setError(err?.message || 'Metric fetch failed');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTraces();
+    fetchMetrics();
   }, [range]);
 
   return (
     <BaseContainer
-      title={'Service Map'}
+      title="Service Map"
       headerActions={
         <GrafanaLikeRangePicker
           title="Date Range"
@@ -110,7 +181,7 @@ const ServiceMapContainer: React.FC = () => {
         />
       }
     >
-      <Row>
+      <Row style={{ width: '100%' }}>
         {loading ? (
           <Skeleton active paragraph={{ rows: 4 }} />
         ) : error ? (
