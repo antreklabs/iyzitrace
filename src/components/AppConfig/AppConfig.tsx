@@ -1,33 +1,52 @@
 import React, { ChangeEvent, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { css } from '@emotion/css';
-import { AppPluginMeta, GrafanaTheme2, PluginConfigPageProps, PluginMeta } from '@grafana/data';
+import {
+  AppPluginMeta,
+  GrafanaTheme2,
+  PluginConfigPageProps,
+  PluginMeta,
+} from '@grafana/data';
 import { getBackendSrv } from '@grafana/runtime';
-import { Button, Field, FieldSet, Input, SecretInput, useStyles2 } from '@grafana/ui';
+import {
+  Button,
+  Field,
+  FieldSet,
+  Input,
+  SecretInput,
+  useStyles2,
+} from '@grafana/ui';
 import { testIds } from '../testIds';
+
+type DashboardEntry = {
+  name: string;
+  url: string;
+};
 
 type AppPluginSettings = {
   apiUrl?: string;
+  dashboards?: DashboardEntry[];
 };
 
 type State = {
-  // The URL to reach our custom API.
   apiUrl: string;
-  // Tells us if the API key secret is set.
-  isApiKeySet: boolean;
-  // A secret key for our custom API.
   apiKey: string;
+  isApiKeySet: boolean;
+  dashboards: DashboardEntry[];
 };
 
-export interface AppConfigProps extends PluginConfigPageProps<AppPluginMeta<AppPluginSettings>> {}
+export interface AppConfigProps
+  extends PluginConfigPageProps<AppPluginMeta<AppPluginSettings>> {}
 
 const AppConfig = ({ plugin }: AppConfigProps) => {
   const s = useStyles2(getStyles);
   const { enabled, pinned, jsonData, secureJsonFields } = plugin.meta;
+
   const [state, setState] = useState<State>({
     apiUrl: jsonData?.apiUrl || '',
     apiKey: '',
     isApiKeySet: Boolean(secureJsonFields?.apiKey),
+    dashboards: jsonData?.dashboards || [],
   });
 
   const isSubmitDisabled = Boolean(!state.apiUrl || (!state.isApiKeySet && !state.apiKey));
@@ -47,18 +66,15 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
   };
 
   const onSubmit = () => {
-    if (isSubmitDisabled) {
-      return;
-    }
+    if (isSubmitDisabled) return;
 
     updatePluginAndReload(plugin.meta.id, {
       enabled,
       pinned,
       jsonData: {
         apiUrl: state.apiUrl,
+        dashboards: state.dashboards,
       },
-      // This cannot be queried later by the frontend.
-      // We don't want to override it in case it was set previously and left untouched now.
       secureJsonData: state.isApiKeySet
         ? undefined
         : {
@@ -84,7 +100,7 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
           />
         </Field>
 
-        <Field label="API Url" description="" className={s.marginTop}>
+        <Field label="API Url" className={s.marginTop}>
           <Input
             width={60}
             name="apiUrl"
@@ -95,13 +111,61 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
             onChange={onChange}
           />
         </Field>
-
-        <div className={s.marginTop}>
-          <Button type="submit" data-testid={testIds.appConfig.submit} disabled={isSubmitDisabled}>
-            Save API settings
-          </Button>
-        </div>
       </FieldSet>
+
+      <FieldSet label="Embedded Dashboards" className={s.marginTop}>
+        {state.dashboards.map((entry, index) => (
+          <div key={index} className={s.dashboardBlock}>
+            <Field label="Name">
+              <Input
+                value={entry.name}
+                onChange={(e) => {
+                  const dashboards = [...state.dashboards];
+                  dashboards[index].name = e.currentTarget.value;
+                  setState({ ...state, dashboards });
+                }}
+              />
+            </Field>
+            <Field label="URL">
+              <Input
+                value={entry.url}
+                onChange={(e) => {
+                  const dashboards = [...state.dashboards];
+                  dashboards[index].url = e.currentTarget.value;
+                  setState({ ...state, dashboards });
+                }}
+              />
+            </Field>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                const dashboards = state.dashboards.filter((_, i) => i !== index);
+                setState({ ...state, dashboards });
+              }}
+            >
+              Remove
+            </Button>
+          </div>
+        ))}
+
+        <Button
+          className={s.marginTop}
+          onClick={() => {
+            setState({
+              ...state,
+              dashboards: [...state.dashboards, { name: '', url: '' }],
+            });
+          }}
+        >
+          + Add Dashboard
+        </Button>
+      </FieldSet>
+
+      <div className={s.marginTop}>
+        <Button type="submit" data-testid={testIds.appConfig.submit} disabled={isSubmitDisabled}>
+          Save Settings
+        </Button>
+      </div>
     </form>
   );
 };
@@ -115,14 +179,16 @@ const getStyles = (theme: GrafanaTheme2) => ({
   marginTop: css`
     margin-top: ${theme.spacing(3)};
   `,
+  dashboardBlock: css`
+    margin-top: ${theme.spacing(2)};
+    padding-bottom: ${theme.spacing(2)};
+    border-bottom: 1px solid ${theme.colors.border.weak};
+  `,
 });
 
 const updatePluginAndReload = async (pluginId: string, data: Partial<PluginMeta<AppPluginSettings>>) => {
   try {
     await updatePlugin(pluginId, data);
-
-    // Reloading the page as the changes made here wouldn't be propagated to the actual plugin otherwise.
-    // This is not ideal, however unfortunately currently there is no supported way for updating the plugin state.
     window.location.reload();
   } catch (e) {
     console.error('Error while updating the plugin', e);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Col, Row, Select, Space } from 'antd';
+import { Col, Row, Select } from 'antd';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { setSelectedTempoUid, setTempoUids } from '../../../store/slices/tempo.slice';
 import { getDataSourceSrv } from '@grafana/runtime';
@@ -37,7 +37,6 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, header
       }
     };
 
-    // sadece tempoUids boşsa çalıştır
     if (tempoUids.length === 0) {
       loadTempos();
     }
@@ -56,16 +55,12 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, header
       className="filter-header"
     >
       <Row
-        size={0}
-        style={{
-          display: 'flex',
-          flexWrap: 'nowrap',
-          alignItems: 'center',
-          gap: 12,
-          paddingTop: 10,
-        }}
+        align="middle"
+        justify="space-between"
+        wrap={false}
+        style={{width: '100%', height: 50 }}
       >
-        <Col style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Col style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Select
             value={selectedTempoUid ?? undefined}
             style={{ minWidth: 200 }}
@@ -89,12 +84,13 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, header
               ),
             }))}
           />
-
           <h3 style={{ margin: 0, fontSize: 20 }}>{title}</h3>
           {children}
         </Col>
 
-        <Col style={{ alignItems: 'flex-end' }}>{headerActions}</Col>
+        <Col flex="none">
+          <div style={{ display: 'flex', gap: 12 }}>{headerActions}</div>
+        </Col>
       </Row>
     </motion.div>
   );

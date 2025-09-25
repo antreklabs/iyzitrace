@@ -4,9 +4,10 @@ import { Card, Typography, Spin, Flex } from 'antd';
 import { prometheusApi, TempoApi } from '../../../providers';
 import { createGradient, randomBackgroundGradient } from '../../../utils';
 import { ServiceIcon } from '../../../components/core/serviceicons';
-
+import { useNavigate } from 'react-router-dom';
+import pluginJson from '../../../plugin.json';
 const { Text } = Typography;
-
+export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
 interface ServiceCardProps {
   name: string;
   start: number;
@@ -17,7 +18,7 @@ interface ServiceCardProps {
 const ServiceCard: React.FC<ServiceCardProps> = ({ name, start, end,colors }) => {
   const [latency, setLatency] = useState<Object | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-
+  const navigate = useNavigate();
   const cardStyle = {
     background: colors?createGradient(colors[0],colors[1]) :randomBackgroundGradient(),
     color: '#fff',
@@ -79,6 +80,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ name, start, end,colors }) =>
     }
     return name.toUpperCase();
   };
+  const handleServiceClick = (path: string) => {
+    navigate(`${PLUGIN_BASE_URL}${path}`);
+  };
+
 
   return (
     <Card
@@ -91,19 +96,22 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ name, start, end,colors }) =>
       }
       size="small"
       style={cardStyle}
+      onClick={()=>{
+        handleServiceClick(`/services/${name}`);
+      }}
     >
       {loading ? (
         <Spin size="small" />
       ) : (
         <Flex vertical>
-          <Text>Avg. Lat: {latency != null && latency.avg ? `${latency.avg.toFixed(2)} ms` : '—'}</Text>
-          <Text style={{ marginLeft: '8px' }}>
+          <Text style={{color:"#000",fontWeight:"bolder" }}>Avg. Lat: {latency != null && latency.avg ? `${latency.avg.toFixed(2)} ms` : '—'}</Text>
+          <Text style={{ marginLeft: '8px',color:"#000",fontWeight:"bolder" }}>
             Min. Lat: {latency != null && latency.min ? `${latency.min.toFixed(2)} ms` : '—'}
           </Text>
-          <Text style={{ marginLeft: '8px' }}>
+          <Text style={{ marginLeft: '8px',color:"#000",fontWeight:"bolder"}}>
             Max. Lat : {latency != null && latency.max ? `${latency.max.toFixed(2)} ms` : '—'}
           </Text>
-          <Text style={{ marginLeft: '8px' }}>Count: {latency != null && latency.max ? `${latency.count}` : '—'}</Text>
+          <Text style={{ marginLeft: '8px',color:"#000",fontWeight:"bolder" }}>Count: {latency != null && latency.max ? `${latency.count}` : '—'}</Text>
         </Flex>
       )}
     </Card>

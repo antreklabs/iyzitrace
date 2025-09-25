@@ -1,54 +1,67 @@
-import React, { createElement, useEffect, useState, Suspense } from 'react';
+import React, { useEffect } from 'react';
 import { Tabs } from 'antd';
-import { useLocation, useNavigate, matchPath } from 'react-router-dom';
-import { KeepAlive } from 'react-activation';
+import { matchPath, useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { appRoutes } from '../../../routes';
+import { RootState } from '../../../store/rootReducer';
+import { addTab, removeTab, setActiveKey } from '../../../store/slices/tab.slice';
 
 const TabManager: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [tabs, setTabs] = useState<any[]>([]);
-  const [activeKey, setActiveKey] = useState('');
+  const dispatch = useDispatch();
+
+  const tabs = useSelector((state: RootState) => state.tabSlice.tabs);
+  const activeKey = useSelector((state: RootState) => state.tabSlice.activeKey);
+
+  const normalizePath = (pathname: string) => {
+    const basePath = '/a/iyzitrace-app';
+    return pathname.startsWith(basePath) ? pathname.replace(basePath, '') || '/' : pathname;
+  };
 
   useEffect(() => {
-    const key = `${location.pathname}${location.search}`;
+    const currentFullPath = location.pathname + location.search;
+    const currentPath = normalizePath(location.pathname);
 
-    setTabs((prevTabs) => {
-      const exists = prevTabs.find((t) => t.key === key);
-      if (exists) {
-        return prevTabs;
+    let matchedRoute = null;
+    let matchedParams = null;
+
+    for (const route of appRoutes) {
+      const match = matchPath({ path: route.path, end: false }, currentPath);
+      if (match) {
+        matchedRoute = route;
+        matchedParams = match.params;
+        break;
       }
+    }
 
-      const matchedRoute = appRoutes.find((route) => matchPath({ path: route.path, end: false }, location.pathname));
+    if (matchedRoute) {
+      const exists = tabs.find((tab) => tab.key === currentFullPath);
+      if (!exists) {
+        let label = matchedRoute.title;
+        if (matchedParams && Object.keys(matchedParams).length > 0) {
+          const paramString = Object.values(matchedParams).join(' / ');
+          label = `${matchedRoute.title} (${paramString})`;
+        }
 
-      if (!matchedRoute) {
-        return prevTabs;
+        dispatch(addTab({
+          key: currentFullPath,
+          label,
+          closable: currentFullPath !== '/a/iyzitrace-app/',
+        }));
       }
-
-      const label = matchedRoute.title || 'Untitled';
-      const element = matchedRoute.element;
-
-      const newTab = {
-        key,
-        label,
-        closable: key !== '/' && key !== '/home',
-        element,
-      };
-
-      return [...prevTabs, newTab];
-    });
-
-    setActiveKey(key);
+      dispatch(setActiveKey(currentFullPath));
+    }
   }, [location]);
 
-  const remove = (targetKey: string) => {
-    setTabs((prev) => {
-      const filtered = prev.filter((tab) => tab.key !== targetKey);
-      if (targetKey === activeKey && filtered.length > 0) {
-        navigate(filtered[filtered.length - 1].key);
+  const handleRemove = (targetKey: string) => {
+    dispatch(removeTab(targetKey));
+    if (targetKey === activeKey) {
+      const remaining = tabs.filter(t => t.key !== targetKey);
+      if (remaining.length > 0) {
+        navigate(remaining[remaining.length - 1].key);
       }
-      return filtered;
-    });
+    }
   };
 
   return (
@@ -57,26 +70,17 @@ const TabManager: React.FC = () => {
       hideAdd
       activeKey={activeKey}
       onChange={(key) => {
-        setActiveKey(key);
+        dispatch(setActiveKey(key));
         navigate(key);
       }}
       onEdit={(targetKey, action) => {
-        if (action === 'remove') {
-          remove(targetKey as string);
+        if (action === 'remove' && targetKey !== '/a/iyzitrace-app/') {
+          handleRemove(targetKey as string);
         }
       }}
       items={tabs.map((tab) => ({
         label: tab.label,
         key: tab.key,
-        children: tab.element ? (
-          <Suspense fallback={<div>Loading...</div>}>
-            <KeepAlive id={tab.key}>
-              {React.isValidElement(tab.element) ? tab.element : createElement(tab.element)}
-            </KeepAlive>
-          </Suspense>
-        ) : (
-          <div>Invalid route</div>
-        ),
         closable: tab.closable,
       }))}
     />

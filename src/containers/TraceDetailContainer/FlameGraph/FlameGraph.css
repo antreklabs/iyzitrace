@@ -1,0 +1,63 @@
+.flamegraph-container {
+    background-color: #1f1f1f;
+    color: #fff;
+    font-size: 12px;
+    width: 100%;
+  }
+  
+  .flamegraph-row {
+    display: flex;
+    align-items: center;
+    height: 42px;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  
+  .flamegraph-label {
+    flex: 0 0 300px;
+    padding-left: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .collapse-toggle {
+    display: inline-block;
+    width: 16px;
+    text-align: center;
+    cursor: pointer;
+    margin-right: 4px;
+  }
+  .flamegraph-bar {
+    position: absolute;
+    height: 20px;
+    background-color: #1890ff;
+    border-radius: 4px;
+    min-width: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+  }
+  
+  .flamegraph-bar.selected {
+   border: 2px solid #ff4d4f;
+  }
+  
+  .duration-label {
+    white-space: nowrap;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
+  }
+  .flamegraph-bar-start {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .flamegraph-bar-container {
+    flex: 1;
+    position: relative; 
+  }
+  

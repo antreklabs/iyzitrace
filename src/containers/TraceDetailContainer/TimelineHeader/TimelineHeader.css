@@ -1,0 +1,31 @@
+.timeline-header {
+    display: flex;
+    position: relative;
+    height: 24px;
+    margin-left:300px;
+    margin-right: 250px;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  
+  .timeline-header-cell {
+    flex: 1;
+    position: relative;
+  }
+  
+  .timeline-header-label {
+    text-align: center;
+    font-size: 11px;
+    color: #999;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .timeline-header-gridline {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    width: 1px;
+    height: calc(100vh - 24px);
+    background-color: #2a2a2a;
+  }
+  

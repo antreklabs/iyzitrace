@@ -6,6 +6,10 @@ import { TempoApi } from '../../providers';
 import TraceFilters from './TraceFilters';
 import dayjs from 'dayjs';
 import { randomBackgroundGradient } from '../../utils';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { PLUGIN_BASE_URL } from '../../constants';
+import { DownOutlined, UpOutlined } from '@ant-design/icons';
+import { IoIosArrowForward,IoIosArrowDown } from "react-icons/io";
 
 const { Sider, Content } = Layout;
 const { Title, Text } = Typography;
@@ -118,6 +122,7 @@ const TraceContainer: React.FC = () => {
     console.log('Stats Data:', statsData);
   };
 
+ 
   useEffect(() => {
     fetchTraces();
   }, [range]);
@@ -128,7 +133,7 @@ const TraceContainer: React.FC = () => {
       dataIndex: 'traceID',
       key: 'traceID',
       width: 200,
-      render: (text: string) => <span style={{ color: '#1890ff' }}>{text}</span>,
+      render: (text: string) => <Link to={`${PLUGIN_BASE_URL}/traces/${text}`}>{text}</Link>,
     },
     { title: 'Service', dataIndex: 'rootServiceName', key: 'rootServiceName', width: 200 },
     { title: 'Trace Name', dataIndex: 'rootTraceName', key: 'rootTraceName', width: 200 },
@@ -248,7 +253,11 @@ const TraceContainer: React.FC = () => {
                       <Text style={{ fontSize: 30, fontWeight: 'bolder' }}>
                         {stat.value} {stat.unit}
                       </Text>
-                      {stat.meta && <Text type="secondary" style={{color:"#000",fontWeight:900}}>{stat.meta}</Text>}
+                      {stat.meta && (
+                        <Text type="secondary" style={{ color: '#000', fontWeight: 900 }}>
+                          {stat.meta}
+                        </Text>
+                      )}
                     </Flex>
                   )}
                 </Card>
@@ -264,7 +273,21 @@ const TraceContainer: React.FC = () => {
             <Table
               columns={columns}
               dataSource={traceData}
-              expandable={{ expandedRowRender }}
+              expandable={{
+                expandedRowRender,
+                expandIcon: ({ expanded, onExpand, record }) =>
+                  expanded ? (
+                    <IoIosArrowDown
+                      onClick={e => onExpand(record, e)}
+                      style={{ fontSize: 14, marginRight: 8 }}
+                    />
+                  ) : (
+                    <IoIosArrowForward
+                      onClick={e => onExpand(record, e)}
+                      style={{ fontSize: 14, marginRight: 8 }}
+                    />
+                  ),
+              }}
               scroll={{ x: 'max-content', y: 'calc(100vh - 300px)' }}
               pagination={{
                 pageSize: 10,

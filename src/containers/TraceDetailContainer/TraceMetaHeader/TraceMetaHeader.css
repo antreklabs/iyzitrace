@@ -1,0 +1,57 @@
+.trace-meta-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background-color: #121212;
+    border-bottom: 1px solid #2a2a2a;
+    color: #fff;
+    font-size: 14px;
+  }
+  
+  .trace-label {
+    font-weight: 500;
+    color: #999;
+    margin-right: 8px;
+  }
+  
+  .trace-id-box {
+    background-color: #1f1f1f;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-family: monospace;
+    color: #ccc;
+  }
+  
+  .center-section {
+    display: flex;
+    align-items: center;
+  }
+  
+  .service-name {
+    font-weight: 600;
+    color: #fff;
+  }
+  
+  .duration, .timestamp {
+    color: #ccc;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .right-section {
+    text-align: right;
+  }
+  
+  .meta-count {
+    font-weight: 500;
+    margin-right: 12px;
+    color: #aaa;
+  }
+  
+  .meta-error {
+    color: #f5222d;
+    font-weight: 500;
+  }
+  
