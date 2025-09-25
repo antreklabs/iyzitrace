@@ -119,15 +119,26 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId }) 
         )
       );
 
-      const buildTree = (spans: SpanNode[], parentId: string | null = null): SpanNode[] =>
-        spans
-          .filter((s) => s.parentId === parentId)
-          .map((s) => ({
-            ...s,
-            children: buildTree(spans, s.id),
-          }));
+      const normalize = (id?: string | null) => (!id || id === '' ? null : id);
 
-      setTraceData(buildTree(spans));
+      const buildTree = (spans: SpanNode[]): SpanNode[] => {
+        const idSet = new Set(spans.map((s) => s.id));
+        const rootCandidates = spans.filter((s) => !s.parentId || !idSet.has(s.parentId));
+        const build = (parentId: string): SpanNode[] =>
+          spans
+            .filter((s) => s.parentId === parentId)
+            .map((s) => ({
+              ...s,
+              children: build(s.id),
+            }));
+      
+        return rootCandidates.map((s) => ({
+          ...s,
+          children: build(s.id),
+        }));
+      };
+        const result = buildTree(spans);
+      setTraceData(result);
     };
 
     fetchTrace();
