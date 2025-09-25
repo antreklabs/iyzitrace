@@ -4,7 +4,7 @@ datasources:
   - name: Tempo
     type: tempo
     access: proxy
-    url: http://host.docker.internal:3200
+    url: http://tempo:3200
     basicAuth: false
     isDefault: false
     editable: true
