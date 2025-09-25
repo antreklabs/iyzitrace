@@ -9,7 +9,7 @@ import MiddleStats from './components/middlestats/MiddleStats';
 const ServicesContainer: React.FC = () => {
   const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [range, setRange] = useState<any>(null);
+  const [range] = useState<any>(null);
 
   const now = Date.now();
   const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
@@ -20,7 +20,8 @@ const ServicesContainer: React.FC = () => {
       try {
         const data = await TempoApi.getServiceNames();
         
-        setServices(data.tagValues);
+        const values = data.values;
+        setServices(Array.isArray(values) ? values : []);
       } catch (err) {
         console.error('Failed to fetch services:', err);
       } finally {

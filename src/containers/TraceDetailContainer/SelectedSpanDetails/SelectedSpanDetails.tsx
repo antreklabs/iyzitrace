@@ -68,14 +68,22 @@ const SelectedSpanDetails: React.FC<SelectedSpanDetailsProps> = ({ span }) => {
 
       <Divider style={{ margin: '8px 0' }} />
 
-      <Tabs defaultActiveKey="attributes" size="small">
-        <Tabs.TabPane tab="Attributes" key="attributes">
-          {span.tags ? <GroupedAttributeList tags={span.tags} /> : <div style={{ color: '#aaa' }}>No attributes captured.</div>}
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Events" key="events">
-          <div style={{ color: '#aaa' }}>No events captured.</div>
-        </Tabs.TabPane>
-      </Tabs>
+      <Tabs 
+        defaultActiveKey="attributes" 
+        size="small"
+        items={[
+          {
+            key: 'attributes',
+            label: 'Attributes',
+            children: span.tags ? <GroupedAttributeList tags={span.tags} /> : <div style={{ color: '#aaa' }}>No attributes captured.</div>
+          },
+          {
+            key: 'events',
+            label: 'Events',
+            children: <div style={{ color: '#aaa' }}>No events captured.</div>
+          }
+        ]}
+      />
     </div>
   );
 };

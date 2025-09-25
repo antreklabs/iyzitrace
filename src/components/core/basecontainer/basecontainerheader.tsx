@@ -85,7 +85,7 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, header
             }))}
           />
           <h3 style={{ margin: 0, fontSize: 20 }}>{title}</h3>
-          {children}
+          {children as any}
         </Col>
 
         <Col flex="none">

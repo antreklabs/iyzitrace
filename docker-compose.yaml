@@ -1,6 +1,6 @@
 services:
   grafana:
-    image: yahyaozturk/iyzitrace
+    image: yahyaozturk/iyzitrace  # Based on Grafana 11.5.2
     volumes:
       - ./dist:/var/lib/grafana/plugins/iyzitrace-app
       - ./provisioning:/etc/grafana/provisioning
@@ -14,7 +14,7 @@ services:
       - "3000:3000"
 
   init:
-    image: &tempoImage grafana/tempo:latest
+    image: &tempoImage grafana/tempo
     user: root
     entrypoint:
       - "chown"
@@ -52,7 +52,7 @@ services:
       - ./otel-collector.yaml:/etc/otel-collector.yaml
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.54.1  # Pinned version
     command:
       - --config.file=/etc/prometheus.yaml
       - --web.enable-remote-write-receiver
@@ -62,3 +62,21 @@ services:
       - ./shared/prometheus.yaml:/etc/prometheus.yaml
     ports:
       - "9090:9090"
+
+  loki:
+    image: grafana/loki:3.3.0  # Pinned version
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./shared/loki.yaml:/etc/loki/local-config.yaml
+      - ./loki-data:/loki
+    ports:
+      - "3100:3100"
+
+  cors-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.cors-proxy
+    ports:
+      - "3101:3101"
+    depends_on:
+      - loki

@@ -68,7 +68,7 @@ const ErrorStatsCharts: React.FC<MiddleStatsProps> = ({ serviceNames, start, end
           shade: 'dark',
           type: "vertical", 
           shadeIntensity: 0.5,
-          gradientToColors: undefined, // 
+          gradientToColors: undefined as any, // 
           inverseColors: false,
           opacityFrom: 1,
           opacityTo: 0.7,
@@ -101,7 +101,7 @@ const ErrorStatsCharts: React.FC<MiddleStatsProps> = ({ serviceNames, start, end
 
   return (
     <Card title="Service Call Stats (last 60m)" loading={loading}>
-      <ApexCharts options={options} series={chartData} type="line" height={400} />
+      <ApexCharts options={options as any} series={chartData} type="line" height={400} />
     </Card>
   );
 };

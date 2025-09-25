@@ -28,6 +28,14 @@ datasources:
     httpMethod: GET
     serviceMap:
       datasourceUid: prometheus
+    search:
+      hide: false
+    traceQuery:
+      timeShiftEnabled: true
+      spanStartTimeShift: '1h'
+      spanEndTimeShift: '1h'
     streamingEnabled:
       search: true
+    nodeGraph:
+      enabled: true
 

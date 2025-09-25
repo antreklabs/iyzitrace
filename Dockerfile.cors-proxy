@@ -1,0 +1,18 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Package.json ve package-lock.json'ı kopyala
+COPY package.json pnpm-lock.yaml ./
+
+# pnpm yükle ve dependencies'leri kur
+RUN npm install -g pnpm && pnpm install
+
+# CORS proxy dosyasını kopyala
+COPY cors-proxy.js ./
+
+# Port 3101'i expose et
+EXPOSE 3101
+
+# CORS proxy'yi başlat
+CMD ["node", "cors-proxy.js"]

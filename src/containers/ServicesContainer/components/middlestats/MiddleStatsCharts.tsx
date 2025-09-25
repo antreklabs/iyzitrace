@@ -62,7 +62,7 @@ const MiddleStatsCharts: React.FC<MiddleStatsProps> = ({ serviceNames, start, en
         shade: 'dark',
         type: "vertical", 
         shadeIntensity: 0.5,
-        gradientToColors: undefined, // 
+        gradientToColors: undefined as any, // 
         inverseColors: false,
         opacityFrom: 1,
         opacityTo: 0.7,
@@ -139,7 +139,7 @@ const MiddleStatsCharts: React.FC<MiddleStatsProps> = ({ serviceNames, start, en
 
   return(
   <Card title="Latency Percentiles">
-      <ApexCharts options={options} series={series} type="line" height={400} />
+      <ApexCharts options={options as any} series={series} type="line" height={400} />
   </Card> 
 
   )

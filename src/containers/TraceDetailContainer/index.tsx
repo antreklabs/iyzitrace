@@ -8,7 +8,7 @@ import { TempoApi } from '../../providers';
 import BaseContainer from '../../components/core/basecontainer/basecontainer';
 import { Spin } from 'antd';
 import ServiceLegendPanel from './ServiceLegend/ServiceLegend';
-import { FiGlobe, FiDatabase, FiZap, FiBox } from 'react-icons/fi';
+import { FiDatabase, FiZap, FiBox } from 'react-icons/fi';
 import { MdHttp } from 'react-icons/md';
 
 const COLORS = [

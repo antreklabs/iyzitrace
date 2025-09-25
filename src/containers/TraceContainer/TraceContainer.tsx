@@ -6,20 +6,63 @@ import { TempoApi } from '../../providers';
 import TraceFilters from './TraceFilters';
 import dayjs from 'dayjs';
 import { randomBackgroundGradient } from '../../utils';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { PLUGIN_BASE_URL } from '../../constants';
-import { DownOutlined, UpOutlined } from '@ant-design/icons';
 import { IoIosArrowForward,IoIosArrowDown } from "react-icons/io";
 
 const { Sider, Content } = Layout;
 const { Title, Text } = Typography;
 
-const TraceContainer: React.FC = () => {
+interface TraceContainerProps {
+  traceId?: string | null;
+}
+
+const TraceContainer: React.FC<TraceContainerProps> = ({ traceId }) => {
   const [range, setRange] = useState<[number, number]>([Date.now() - 15 * 60 * 1000, Date.now()]);
   const [traceData, setTraceData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [statsData, setStatsData] = useState<any[]>([]);
+
+  // traceId prop'u geldiğinde otomatik arama yap
+  useEffect(() => {
+    if (traceId) {
+      fetchSpecificTrace(traceId);
+    }
+  }, [traceId]);
+
+  const fetchSpecificTrace = async (traceId: string) => {
+    setLoading(true);
+    try {
+      // Belirli bir trace ID'si için arama yap
+      const res = await TempoApi.searchTraceQL({
+        query: `{traceId="${traceId}"}`,
+        start: Math.floor((Date.now() - 24 * 60 * 60 * 1000) / 1000), // Son 24 saat
+        end: Math.floor(Date.now() / 1000),
+        limit: 1,
+      });
+
+      if (res.traces && res.traces.length > 0) {
+        const trace = res.traces[0];
+        const spans = trace.spanSets?.[0]?.spans ?? [];
+        const mappedTrace = {
+          ...trace,
+          spans: spans,
+          duration: trace.durationMs,
+          serviceCount: new Set(spans.map((span: any) => span.serviceName)).size,
+          spanCount: spans.length,
+        };
+        setTraceData([mappedTrace]);
+      } else {
+        setTraceData([]);
+      }
+    } catch (error) {
+      console.error('Error fetching specific trace:', error);
+      setTraceData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchTraces = async () => {
     setLoading(true);
@@ -34,7 +77,6 @@ const TraceContainer: React.FC = () => {
 
       const mapped = res.traces.map((trace: any) => {
         const spans = trace.spanSets?.[0]?.spans ?? [];
-        const stats = trace.serviceStats ?? [];
 
         const serviceStatsChildren = Object.entries(trace.serviceStats || {}).map(
           ([serviceName, s]: any, i: number) => ({
@@ -79,7 +121,7 @@ const TraceContainer: React.FC = () => {
     }
   };
 
-  const makeStats = (data) => {
+  const makeStats = (data: any) => {
     if (!Array.isArray(data) || data.length === 0) {
       setStatsData([]);
       return;
@@ -162,7 +204,7 @@ const TraceContainer: React.FC = () => {
       padding: '16px',
       height: '100%',
       display: 'flex',
-      flexDirection: 'column',
+      flexDirection: 'column' as const,
       justifyContent: 'center',
       alignItems: 'center',
       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
@@ -278,12 +320,12 @@ const TraceContainer: React.FC = () => {
                 expandIcon: ({ expanded, onExpand, record }) =>
                   expanded ? (
                     <IoIosArrowDown
-                      onClick={e => onExpand(record, e)}
+                      onClick={(e: any) => onExpand(record, e)}
                       style={{ fontSize: 14, marginRight: 8 }}
                     />
                   ) : (
                     <IoIosArrowForward
-                      onClick={e => onExpand(record, e)}
+                      onClick={(e: any) => onExpand(record, e)}
                       style={{ fontSize: 14, marginRight: 8 }}
                     />
                   ),

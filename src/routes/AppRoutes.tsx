@@ -10,7 +10,7 @@ const renderRoutes = (routes: AppRoute[]): JSX.Element[] => {
         }
       });
   return routes.flatMap((route) => {
-    const current = <Route key={route.path} path={route.path} element={route.element} />;
+    const current = <Route key={route.path} path={route.path} element={route.element as any} />;
     const children = route.children ? renderRoutes(route.children) : [];
     return [current, ...children];
   });

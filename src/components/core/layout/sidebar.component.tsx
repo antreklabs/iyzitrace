@@ -1,8 +1,7 @@
 // src/components/Sidebar.tsx
 
 import React from 'react';
-import { Layout, Menu, Image, Button, Typography } from 'antd';
-import logo from '../../../assets/logo.png';
+import { Layout, Menu, Button } from 'antd';
 import {
   BarChartOutlined,
   FileSearchOutlined,
@@ -13,6 +12,8 @@ import {
   DeploymentUnitOutlined,
   SettingOutlined,
   TeamOutlined,
+  ApiOutlined,
+  CloudOutlined,
 } from '@ant-design/icons';
 import { FaChevronCircleLeft, FaChevronCircleRight } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -20,7 +21,6 @@ import pluginJson from '../../../plugin.json';
 
 export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
 const { Sider } = Layout;
-const { Title } = Typography;
 
 const Sidebar: React.FC = () => {
   const [collapsed, setCollapsed] = React.useState(false);
@@ -52,23 +52,9 @@ const Sidebar: React.FC = () => {
           alignItems: 'center',
           padding: '20px',
           marginBottom: 24,
-          justifyContent: 'center',
+          justifyContent: 'flex-end',
         }}
       >
-        <Image
-          src={logo}
-          width={collapsed ? 50 : 70}
-          preview={false}
-          style={{
-            boxShadow: '2px 0px 20px #d5521e',
-            borderRadius: '100%',
-          }}
-        />
-        {!collapsed && (
-          <Title level={5} style={{ color: 'white', margin: 0, fontSize: 20 }}>
-            IyziTrace
-          </Title>
-        )}
         <Button
           type="text"
           icon={
@@ -81,9 +67,6 @@ const Sidebar: React.FC = () => {
           onClick={() => setCollapsed(!collapsed)}
           style={{
             color: 'rgb(255 255 255)',
-            position: 'absolute',
-            right: -13,
-            top: 45,
           }}
         />
       </div>
@@ -101,10 +84,25 @@ const Sidebar: React.FC = () => {
           { key: 'services', icon: <BarChartOutlined style={{ fontSize: 16 }} />, label: 'Services' },
           { key: 'traces', icon: <FileSearchOutlined style={{ fontSize: 16 }} />, label: 'Traces' },
           { key: 'logs', icon: <ProfileOutlined style={{ fontSize: 16 }} />, label: 'Logs' },
+          // { key: 'logs-pipelines', icon: <SettingOutlined style={{ fontSize: 16 }} />, label: 'Logs Pipelines' },
           { key: 'dashboards', icon: <ClusterOutlined style={{ fontSize: 16 }} />, label: 'Dashboards' },
           { key: 'alerts', icon: <AlertOutlined style={{ fontSize: 16 }} />, label: 'Alerts' },
           { key: 'exceptions', icon: <RadarChartOutlined style={{ fontSize: 16 }} />, label: 'Exceptions' },
-          { key: 'service-map', icon: <DeploymentUnitOutlined style={{ fontSize: 16 }} />, label: 'Service Map' },
+          { 
+            key: 'service-map', 
+            icon: <DeploymentUnitOutlined style={{ fontSize: 16 }} />, 
+            label: 'Service Map (Original)'
+          },
+          { 
+            key: 'service-map-plugin-api', 
+            icon: <ApiOutlined style={{ fontSize: 16, color: '#e74c3c' }} />, 
+            label: 'Service Map (Plugin API)'
+          },
+          { 
+            key: 'service-map-http-api', 
+            icon: <CloudOutlined style={{ fontSize: 16, color: '#27ae60' }} />, 
+            label: 'Service Map (HTTP API)'
+          },
           { key: 'team', icon: <TeamOutlined style={{ fontSize: 16 }} />, label: 'Team' },
           { key: 'settings', icon: <SettingOutlined style={{ fontSize: 16 }} />, label: 'Settings' },
         ]}

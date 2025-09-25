@@ -1,9 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import ReactFlow, { Background, Controls, MiniMap, Edge, Node } from 'reactflow';
+import React, { useEffect, useState, useCallback } from 'react';
+import ReactFlow, { 
+  Background, 
+  Controls, 
+  MiniMap, 
+  Edge, 
+  Node,
+  ReactFlowProvider,
+  useNodesState,
+  useEdgesState,
+  Position,
+  MarkerType,
+  Handle
+} from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Skeleton, Alert, Row } from 'antd';
+import './ServiceMap.styles.css';
+import { Skeleton, Alert, Space, Button, Tooltip, Badge } from 'antd';
+import { 
+  ReloadOutlined, 
+  InfoCircleOutlined, 
+  CloseOutlined
+} from '@ant-design/icons';
 import BaseContainer from '../../components/core/basecontainer/basecontainer';
 import GrafanaLikeRangePicker from '../../components/core/graphanadatepicker';
+
 import { prometheusApi } from '../../providers/api/prometheus.api';
 
 interface ServiceEdgeData {
@@ -57,6 +76,90 @@ function mergePrometheusData(
     if (edgeMap.has(key)) {
       edgeMap.get(key)!.latencyMs = Math.round(ms);
     }
+  };
+
+  // Determine border color based on success rate (4th image style)
+  const getBorderColor = () => {
+    if (data.successRate >= 95) return '#4CAF50'; // Green
+    if (data.successRate >= 85) return '#FF9800'; // Orange  
+    return '#f44336'; // Red
+  };
+
+  return (
+    <div 
+      onClick={handleNodeClick}
+      style={{
+        backgroundColor: '#1e1e1e', // Dark background like 4th image
+        border: `2px solid ${getBorderColor()}`,
+        borderRadius: '8px',
+        padding: '12px',
+        minWidth: '160px',
+        maxWidth: '200px',
+        color: '#ffffff',
+        cursor: 'pointer',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        position: 'relative',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+      }}
+    >
+      <Handle type="target" position={Position.Top} />
+      <Handle type="source" position={Position.Bottom} />
+      
+      {/* Service Title - Centered like 4th image */}
+      <div style={{
+        fontSize: '12px',
+        fontWeight: '600',
+        color: '#ffffff',
+        textAlign: 'center',
+        marginBottom: '8px',
+        textOverflow: 'ellipsis',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap'
+      }}>
+        {data.title}
+      </div>
+
+      {/* Simple Metrics like 4th image */}
+      <div style={{
+        textAlign: 'center',
+        fontSize: '10px',
+        color: '#cccccc'
+      }}>
+        <div style={{ marginBottom: '2px' }}>
+          {formatNumber(data.mainStat, ' ms/r')}
+        </div>
+        <div>
+          {formatNumber(data.secondaryStat, ' r/sec')}
+        </div>
+      </div>
+
+      {/* Instrumentation Status */}
+      {data.isInstrumented !== undefined && (
+        <div className={`service-node__instrumentation ${
+          data.isInstrumented ? 'service-node__instrumentation--active' : 'service-node__instrumentation--inactive'
+        }`}>
+          {data.isInstrumented ? '✓ Instrumented' : '⚠ Not Instrumented'}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Node types for ReactFlow
+const nodeTypes = {
+  serviceNode: ServiceNode,
+};
+
+// Service Detail Panel Component
+const ServiceDetailPanel: React.FC<{ 
+  selectedService: ServiceMapNode | null;
+  onClose: () => void;
+}> = ({ selectedService, onClose }) => {
+  const [panelWidth, setPanelWidth] = useState(400);
+  const [isResizing, setIsResizing] = useState(false);
+
+  if (!selectedService) {
+    return null;
   }
 
   const edges = Array.from(edgeMap.values());
@@ -108,14 +211,16 @@ function layoutGraphNodes(edges: ServiceEdgeData[], nodes: ServiceNode[]): Node[
 }
 
 const ServiceMapContainer: React.FC = () => {
+  // @ts-ignore - TEMP: range will be used when API calls are restored
   const [range, setRange] = useState<[number, number]>([
     Date.now() - 60 * 60 * 1000,
     Date.now(),
   ]);
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedService, setSelectedService] = useState<ServiceMapNode | null>(null);
 
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -166,8 +271,7 @@ const ServiceMapContainer: React.FC = () => {
       } finally {
         setLoading(false);
       }
-    };
-
+  }, [setNodes, setEdges]);
     fetchMetrics();
   }, [range]);
 

@@ -15,7 +15,7 @@ interface SpanNode {
 
 interface ServiceMeta {
   color: string;
-  icon: JSX.Element;
+  icon: React.ReactElement;
 }
 
 interface FlameGraphRowProps {
@@ -84,8 +84,8 @@ const FlameGraphRow: React.FC<FlameGraphRowProps> = ({
             {widthPx > 80 ? (
               <>
                 <span className="flamegraph-bar-start">
-                  {span.tags?.['http.method'] || ''} {span.tags?.['http.target'] || ''}{' '}
-                  {span.tags?.['http.status_code'] || ''}
+                  {(span as any).tags?.['http.method'] || ''} {(span as any).tags?.['http.target'] || ''}{' '}
+                  {(span as any).tags?.['http.status_code'] || ''}
                 </span>
                 <span className="duration-label">
                   {spanDurationMs > 1000

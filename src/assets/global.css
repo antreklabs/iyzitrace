@@ -5,3 +5,8 @@ body,
 .ant-menu {
   font-family: 'Quicksand', sans-serif !important;
 }
+
+/* Tüm dinamik page-header div'lerini gizle */
+[class*="css-"][class*="page-header"] {
+  display: none !important;
+}

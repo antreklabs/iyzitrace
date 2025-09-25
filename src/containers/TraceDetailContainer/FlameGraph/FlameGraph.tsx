@@ -1,4 +1,4 @@
-import React, { JSX, useEffect, useRef, useState } from 'react';
+import React, { JSX } from 'react';
 import { Spin } from 'antd';
 import FlameGraphRow from './FlameGraphRow';
 import './FlameGraph.css';

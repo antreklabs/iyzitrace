@@ -7,7 +7,7 @@ import AppRoutes from '../../routes/AppRoutes';
 import '../../assets/global.css';
 import { Provider } from 'react-redux';
 import store, { persistor } from '../../store/store';
-import KeepAlive, { AliveScope } from 'react-activation';
+import { AliveScope } from 'react-activation';
 import TempoInitializer from './TempoInıt';
 import { PersistGate } from 'redux-persist/integration/react';
 

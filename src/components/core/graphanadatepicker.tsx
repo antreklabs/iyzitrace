@@ -40,8 +40,10 @@ const parseRelativeInput = (val: string): dayjs.Dayjs | null => {
 
 const GrafanaLikeRangePicker = ({
   onChange,
+  title,
 }: {
   onChange: (start: number, end: number) => void;
+  title?: string;
 }) => {
   const [visible, setVisible] = useState(false);
   const [from, setFrom] = useState('now-1h');

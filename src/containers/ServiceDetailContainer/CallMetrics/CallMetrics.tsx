@@ -92,25 +92,25 @@ const CallMetrics: React.FC<CallMetricsProps> = ({ serviceName, start, end }) =>
     <Row gutter={[16, 16]}>
       <Col span={12}>
         <Card title="Latency (ms)" styles={{body: { padding: 0 }}} loading={loading}>
-          <MsCharts series={latencyData} />
+          <MsCharts series={latencyData as any} />
         </Card>
       </Col>
 
       <Col span={12}>
         <Card title="Operation Rate (ops/s)" loading={loading}>
-         <MsCharts colors={["#d5521e"]} series={rateData} />
+         <MsCharts colors={["#d5521e"]} series={rateData as any} />
         </Card>
       </Col>
 
       <Col span={12}>
         <Card title="Apdex Score" loading={loading}>
-          <MsCharts colors={["#d5521e"]} series={apdexData} />
+          <MsCharts colors={["#d5521e"]} series={apdexData as any} />
         </Card>
       </Col>
 
       <Col span={12}>
         <Card title="Key Operations (ops/sec)" loading={loading}>
-          <MsCharts colors={["#d5521e"]} series={keyOpsData} />
+          <MsCharts colors={["#d5521e"]} series={keyOpsData as any} />
         </Card>
       </Col>
     </Row>
