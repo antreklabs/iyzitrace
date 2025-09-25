@@ -47,7 +47,58 @@ interface ServiceMapNode {
   errorRate: number;       // Error percentage
 }
 
-// Custom Node Component  
+// Circular Operation Node Component
+const OperationNode: React.FC<{ data: ServiceMapNode }> = ({ data }) => {
+  const formatNumber = (num: number, unit?: string) => {
+    if (num === null || num === undefined || Number.isNaN(num)) { return `-`; }
+    return `${Number(num).toFixed(2)}${unit || ''}`;
+  };
+
+  const borderColor = '#8e44ad';
+  const latencySec = data.mainStat ? data.mainStat / 1000 : 0;
+
+  return (
+    <div
+      style={{
+        width: 120,
+        height: 120,
+        borderRadius: '50%',
+        backgroundColor: '#1e1e1e',
+        border: `2px solid ${borderColor}`,
+        color: '#fff',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+      }}
+    >
+      <div style={{ fontSize: 11, fontWeight: 600, marginBottom: 6, textAlign: 'center', padding: '0 6px' }}>
+        {data.title}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontSize: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <ThunderboltOutlined style={{ color: '#ffd166' }} />
+          <span>{formatNumber(data.secondaryStat, ' r/s')}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <ClockCircleOutlined style={{ color: '#a0a0ff' }} />
+          <span>{formatNumber(latencySec, ' s')}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <CheckCircleOutlined style={{ color: '#4CAF50' }} />
+          <span>{formatNumber(data.successRate, ' %')}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <CloseCircleOutlined style={{ color: '#f44336' }} />
+          <span>{formatNumber(data.errorRate, ' %')}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Custom Node Component (Service)
 const ServiceNode: React.FC<{ data: ServiceMapNode & { onNodeClick?: (node: ServiceMapNode) => void } }> = ({ data }) => {
 
   const formatNumber = (num: number, unit?: string) => {
@@ -128,7 +179,7 @@ const ServiceNode: React.FC<{ data: ServiceMapNode & { onNodeClick?: (node: Serv
 };
 
 // **PLUGIN API ONLY** - Pure Plugin API approach (expected to have limitations)
-const queryTempoServiceMapPluginAPI = async (): Promise<{ nodes: Node[]; edges: Edge[] }> => {
+const queryTempoServiceMapPluginAPI = async (): Promise<{ nodes: Node[]; edges: Edge[]; opNodes: Node[]; opEdges: Edge[] }> => {
   try {
     console.log('🔧 [Plugin API] Getting Tempo datasource via Plugin API only...');
     
@@ -203,34 +254,36 @@ const queryTempoServiceMapPluginAPI = async (): Promise<{ nodes: Node[]; edges: 
 };
 
 // Convert DataFrame response to ReactFlow graph
-const convertDataFramesToGraph = (dataFrames: DataFrame[]): { nodes: Node[]; edges: Edge[] } => {
-  const safeStringify = (value: any) => {
-    const seen = new WeakSet();
-    const replacer = (_key: string, val: any) => {
-      if (typeof val === 'bigint') { return Number(val); }
-      if (val && typeof val === 'object') {
-        if (seen.has(val)) { return '[Circular]'; }
-        seen.add(val);
-        if (val instanceof Map) { return Object.fromEntries(val as any); }
-        if (val instanceof Set) { return Array.from(val as any); }
-      }
-      return val;
-    };
-    try { return JSON.stringify(value, replacer, 2); } catch { return '[Unserializable]'; }
-  };
+const convertDataFramesToGraph = (dataFrames: DataFrame[]): { nodes: Node[]; edges: Edge[]; opNodes: Node[]; opEdges: Edge[] } => {
+  // const safeStringify = (value: any) => {
+  //   const seen = new WeakSet();
+  //   const replacer = (_key: string, val: any) => {
+  //     if (typeof val === 'bigint') { return Number(val); }
+  //     if (val && typeof val === 'object') {
+  //       if (seen.has(val)) { return '[Circular]'; }
+  //       seen.add(val);
+  //       if (val instanceof Map) { return Object.fromEntries(val as any); }
+  //       if (val instanceof Set) { return Array.from(val as any); }
+  //     }
+  //     return val;
+  //   };
+  //   try { return JSON.stringify(value, replacer, 2); } catch { return '[Unserializable]'; }
+  // };
 
-  console.log('🔄 Converting DataFrames to graph (raw object):', dataFrames);
-  try {
+  // console.log('🔄 Converting DataFrames to graph (raw object):', dataFrames);
+  // try {
     // Log as string to share easily
     // Note: This avoids circular refs and BigInt issues
     // eslint-disable-next-line no-console
-    console.log('🔄 Converting DataFrames to graph (stringified):\n' + safeStringify(dataFrames));
-  } catch (e) {
-    console.log('Stringify failed:', e);
-  }
+    // console.log('🔄 Converting DataFrames to graph (stringified):\n' + safeStringify(dataFrames));
+  // } catch (e) {
+  //   console.log('Stringify failed:', e);
+  // }
   
   const nodes: Node[] = [];
   const edges: Edge[] = [];
+  const opNodes: Node[] = [];
+  const opEdges: Edge[] = [];
   
   dataFrames.forEach((frame: any) => {
     // Prefer Grafana NodeGraph "Nodes" frame if present
@@ -270,63 +323,62 @@ const convertDataFramesToGraph = (dataFrames: DataFrame[]): { nodes: Node[]; edg
       return; // handled as Nodes frame
     }
 
-    // const nameField = frame.fields.find((f: any) => f.name === 'Name');
-    // const rateField = frame.fields.find((f: any) => f.name === 'Rate');
-    // const errField = frame.fields.find((f: any) => f.name === 'Error Rate');
-    // const durField = frame.fields.find((f: any) => f.name === 'Duration (p90)');
-    // const linksField = frame.fields.find((f: any) => f.name === 'Links');
-    // if (nameField?.values) {
-    //   nameField.values.forEach((service: string, i: number) => {
-    //     const rps = Number(rateField?.values?.[i] ?? 0);
-    //     const err = Number(errField?.values?.[i] ?? 0);
-    //     const latencySec = Number(durField?.values?.[i] ?? 0);
-    //     const latencyMs = latencySec * 1000;
-    //     const successRate = Math.max(0, 100 - err * 100);
-    //     const errorRate = 100 - successRate;
+    const nameField = frame.fields.find((f: any) => f.name === 'Name');
+    const rateField = frame.fields.find((f: any) => f.name === 'Rate');
+    const errField = frame.fields.find((f: any) => f.name === 'Error Rate');
+    const durField = frame.fields.find((f: any) => f.name === 'Duration (p90)');
+    const linksField = frame.fields.find((f: any) => f.name === 'Links');
+    if (nameField?.values) {
+      nameField.values.forEach((service: string, i: number) => {
+        const rps = Number(rateField?.values?.[i] ?? 0);
+        const err = Number(errField?.values?.[i] ?? 0);
+        const latencySec = Number(durField?.values?.[i] ?? 0);
+        const latencyMs = latencySec * 1000;
+        const successRate = Math.max(0, 100 - err * 100);
+        const errorRate = 100 - successRate;
 
-    //     nodes.push({
-    //       id: service,
-    //       type: 'serviceNode',
-    //       position: {
-    //         x: (i % 4) * 220 + 50,
-    //         y: Math.floor(i / 4) * 180 + 50
-    //       },
-    //       data: {
-    //         id: service,
-    //         title: service,
-    //         mainStat: latencyMs,
-    //         secondaryStat: rps,
-    //         successRate,
-    //         errorRate,
-    //         onNodeClick: () => console.log('[Plugin API] Node clicked:', service)
-    //       } as ServiceMapNode
-    //     });
+        opNodes.push({
+          id: service,
+          type: 'operationNode',
+          position: {
+            x: (i % 6) * 120 + 600,
+            y: Math.floor(i / 6) * 200 + 110
+          },
+          data: {
+            id: service,
+            title: service,
+            mainStat: latencyMs,
+            secondaryStat: rps,
+            successRate,
+            errorRate,
+            onNodeClick: () => console.log('[Plugin API] Node clicked:', service)
+          } as ServiceMapNode
+        });
 
-    //     const rawLinks = linksField?.values?.[i];
-    //     if (typeof rawLinks === 'string' && rawLinks.trim().length > 0) {
-    //       const targets = rawLinks.split(/[;,\n]/).map((s: string) => s.trim()).filter(Boolean);
-    //       targets.forEach((target: string) => {
-    //         edges.push({
-    //           id: `${service}-${target}`,
-    //           source: service,
-    //           target,
-    //           type: 'default',
-    //           animated: true,
-    //           style: { stroke: '#3498db', strokeWidth: 2 },
-    //           markerEnd: { type: MarkerType.ArrowClosed, color: '#3498db' },
-    //           label: 'Plugin API',
-    //           labelStyle: {
-    //             fontSize: '10px',
-    //             backgroundColor: '#2c3e50',
-    //             padding: '2px 6px',
-    //             borderRadius: '4px'
-    //           }
-    //         });
-    //       });
-    //     }
-    //   });
-    //   return;
-    // }
+        const rawLinks = linksField?.values?.[i];
+        if (typeof rawLinks === 'string' && rawLinks.trim().length > 0) {
+          const targets = rawLinks.split(/[;,\n]/).map((s: string) => s.trim()).filter(Boolean);
+          targets.forEach((target: string) => {
+            opEdges.push({
+              id: `${service}-${target}`,
+              source: service,
+              target,
+              type: 'default',
+              animated: true,
+              style: { stroke: '#3498db', strokeWidth: 2 },
+              markerEnd: { type: MarkerType.ArrowClosed, color: '#3498db' },
+              labelStyle: {
+                fontSize: '10px',
+                backgroundColor: '#2c3e50',
+                padding: '2px 6px',
+                borderRadius: '4px'
+              }
+            });
+          });
+        }
+      });
+      return;
+    }
 
     // Edges frame mapping (Grafana service graph)
     const sourceField = frame.fields.find((f: any) => f.name === 'source' || f.name === 'sourceName');
@@ -414,7 +466,7 @@ const convertDataFramesToGraph = (dataFrames: DataFrame[]): { nodes: Node[]; edg
     });
   });
 
-  return { nodes, edges };
+  return { nodes, edges, opNodes, opEdges };
 };
 
 // (Test data generator removed permanently)
@@ -424,9 +476,12 @@ const ServiceMapPluginAPI: React.FC = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [opNodes, setOpNodes] = useState<Node[]>([]);
+  const [opEdges, setOpEdges] = useState<Edge[]>([]);
+  const resultRef = React.useRef<{ nodes: Node[]; edges: Edge[]; opNodes: Node[]; opEdges: Edge[] } | null>(null);
   
   // Custom node types
-  const nodeTypes = React.useMemo(() => ({ serviceNode: ServiceNode }), []);
+  const nodeTypes = React.useMemo(() => ({ serviceNode: ServiceNode, operationNode: OperationNode }), []);
 
   const fetchServiceMap = useCallback(async () => {
     setLoading(true);
@@ -448,6 +503,7 @@ const ServiceMapPluginAPI: React.FC = () => {
       
       setNodes(result.nodes);
       setEdges(result.edges);
+      resultRef.current = result; // keep latest for edge click
       
     } catch (err) {
       console.error('❌ [Plugin API] All methods failed:', err);
@@ -457,7 +513,7 @@ const ServiceMapPluginAPI: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [setNodes, setEdges]);
+  }, [setNodes, setEdges, setOpNodes, setOpEdges]);
 
   useEffect(() => {
     fetchServiceMap();
@@ -466,6 +522,28 @@ const ServiceMapPluginAPI: React.FC = () => {
   const handleRefresh = () => {
     fetchServiceMap();
   };
+
+  const clearOperations = () => {
+    setOpNodes([]);
+    setOpEdges([]);
+  };
+
+  const onEdgeClick = useCallback(async (_: any, edge: Edge) => {
+    try {
+      const latest = resultRef.current;
+      if (latest) {
+        console.log('[Plugin API] onEdgeClick -> cached result:', latest);
+      }
+      // Optionally use cached opNodes/opEdges from resultRef if present
+      if (latest?.opNodes?.length || latest?.opEdges?.length) {
+        setOpNodes(latest.opNodes || []);
+        setOpEdges(latest.opEdges || []);
+        return;
+      }
+    } catch (e) {
+      console.warn('Failed to fetch operations for edge', edge, e);
+    }
+  }, [nodes]);
 
   const renderHeaderActions = () => (
     <Space>
@@ -552,10 +630,11 @@ const ServiceMapPluginAPI: React.FC = () => {
       <div className="service-map__flow-container">
         <ReactFlowProvider>
           <ReactFlow
-            nodes={nodes}
-            edges={edges}
+            nodes={[...nodes, ...opNodes]}
+            edges={[...edges, ...opEdges]}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
+            onEdgeClick={onEdgeClick}
             nodeTypes={nodeTypes}
             fitView
             attributionPosition="bottom-left"
@@ -573,6 +652,11 @@ const ServiceMapPluginAPI: React.FC = () => {
             />
           </ReactFlow>
         </ReactFlowProvider>
+        {opNodes.length > 0 && (
+          <div style={{ position: 'absolute', right: 16, bottom: 16, zIndex: 2 }}>
+            <Button size="small" onClick={clearOperations}>Hide operations</Button>
+          </div>
+        )}
       </div>
     </BaseContainer>
   );
