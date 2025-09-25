@@ -12,6 +12,8 @@ import {
   DeploymentUnitOutlined,
   SettingOutlined,
   TeamOutlined,
+  ApiOutlined,
+  CloudOutlined,
 } from '@ant-design/icons';
 import { FaChevronCircleLeft, FaChevronCircleRight } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -86,7 +88,21 @@ const Sidebar: React.FC = () => {
           { key: 'dashboards', icon: <ClusterOutlined style={{ fontSize: 16 }} />, label: 'Dashboards' },
           { key: 'alerts', icon: <AlertOutlined style={{ fontSize: 16 }} />, label: 'Alerts' },
           { key: 'exceptions', icon: <RadarChartOutlined style={{ fontSize: 16 }} />, label: 'Exceptions' },
-          { key: 'service-map', icon: <DeploymentUnitOutlined style={{ fontSize: 16 }} />, label: 'Service Map' },
+          { 
+            key: 'service-map', 
+            icon: <DeploymentUnitOutlined style={{ fontSize: 16 }} />, 
+            label: 'Service Map (Original)'
+          },
+          { 
+            key: 'service-map-plugin-api', 
+            icon: <ApiOutlined style={{ fontSize: 16, color: '#e74c3c' }} />, 
+            label: 'Service Map (Plugin API)'
+          },
+          { 
+            key: 'service-map-http-api', 
+            icon: <CloudOutlined style={{ fontSize: 16, color: '#27ae60' }} />, 
+            label: 'Service Map (HTTP API)'
+          },
           { key: 'team', icon: <TeamOutlined style={{ fontSize: 16 }} />, label: 'Team' },
           { key: 'settings', icon: <SettingOutlined style={{ fontSize: 16 }} />, label: 'Settings' },
         ]}

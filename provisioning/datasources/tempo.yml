@@ -4,8 +4,27 @@ datasources:
   - name: Tempo
     type: tempo
     access: proxy
+    orgId: 1
     url: http://tempo:3200
     basicAuth: false
-    isDefault: false
-    editable: true
+    isDefault: true
+    version: 1
+    editable: false
     uid: tempo
+    apiVersion: 1
+    jsonData:
+      httpMethod: GET
+      tracesToMetrics:
+        datasourceUid: prometheus
+      serviceMap:
+        datasourceUid: prometheus
+      search:
+        hide: false
+      traceQuery:
+        timeShiftEnabled: true
+        spanStartTimeShift: '1h'
+        spanEndTimeShift: '1h'
+      streamingEnabled:
+        search: true
+      nodeGraph:
+        enabled: true
