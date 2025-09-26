@@ -20,7 +20,6 @@ App plugins can let you create a custom out-of-the-box monitoring experience by 
 
    ```bash
    pnpm run dev
-   node cors-proxy.js
    ```
 
 3. Build plugin in production mode

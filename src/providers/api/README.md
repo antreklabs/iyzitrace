@@ -110,7 +110,7 @@ const result = await lokiWriteApi.writeLogs([log1, log2], {
 
 ### Yazma (Write)
 - **Direct HTTP**: Yazma işlemleri doğrudan HTTP push ile yapılır
-- **Fallback**: Grafana proxy başarısız olursa CORS proxy'ye fallback
+- **Fallback**: Grafana proxy başarısız olursa direct Loki connection'a fallback
 - **Batch Processing**: Loglar batch'ler halinde gönderilir
 
 ## Konfigürasyon
@@ -120,9 +120,9 @@ const result = await lokiWriteApi.writeLogs([log1, log2], {
 - URL: `http://localhost:3100` (Loki server)
 - Access: `Server (default)`
 
-### CORS Proxy
-- Yazma için CORS proxy `http://localhost:3101` kullanılır
-- Proxy, `/loki/api/v1/push` isteklerini Loki'ye yönlendirir
+### Direct Connection
+- Yazma için direct Loki connection `http://localhost:3100` kullanılır
+- Fallback olarak direct HTTP push ile Loki'ye bağlanır
 
 ## Grafana'nın Önerdiği LanguageProvider Metodları
 
@@ -168,8 +168,8 @@ Bu implementasyon Grafana'nın resmi LogsPanel kodunda kullanılan pattern'leri 
 - Query hataları: Loki'dan gelen hata mesajları
 
 ### Yazma Hataları
-- Grafana proxy başarısız: CORS proxy'ye fallback
-- CORS proxy başarısız: Detaylı hata mesajı
+- Grafana proxy başarısız: Direct Loki connection'a fallback
+- Direct connection başarısız: Detaylı hata mesajı
 
 ## Migration Notes
 

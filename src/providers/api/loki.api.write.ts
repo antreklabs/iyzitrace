@@ -25,8 +25,8 @@ class LokiWriteApi {
       const uid = await this.getLokiUid().catch((): null => null);
       const grafanaProxyUrl = uid ? `/api/datasources/proxy/uid/${uid}/loki/api/v1/push` : null;
 
-      // 2) Fallback to local CORS proxy
-      const fallbackUrl = 'http://localhost:3101/loki/api/v1/push';
+      // 2) Fallback to direct Loki connection
+      const fallbackUrl = 'http://localhost:3100/loki/api/v1/push';
 
       // Logları etiketlere göre grupla ve her grup için ayrı stream gönder (Loki label semantiği)
       const groups: Record<string, { labels: Record<string, string>; entries: any[] }> = {};
@@ -91,7 +91,7 @@ class LokiWriteApi {
             throw new Error(`HTTP ${res.status}: ${text}`);
           }
         } catch (error) {
-          console.error('Failed to write to Loki via CORS proxy:', error);
+          console.error('Failed to write to Loki via direct connection:', error);
           throw error;
         }
       }
@@ -118,8 +118,8 @@ class LokiWriteApi {
     const uid = await this.getLokiUid().catch((): null => null);
     const grafanaProxyUrl = uid ? `/api/datasources/proxy/uid/${uid}/loki/api/v1/push` : null;
 
-    // 2) Fallback to local CORS proxy
-    const fallbackUrl = 'http://localhost:3101/loki/api/v1/push';
+    // 2) Fallback to direct Loki connection
+    const fallbackUrl = 'http://localhost:3100/loki/api/v1/push';
 
     // Logları etiketlere göre grupla ve her grup için ayrı stream gönder (Loki label semantiği)
     const groups: Record<string, { labels: Record<string, string>; entries: any[] }> = {};
@@ -189,7 +189,7 @@ class LokiWriteApi {
           throw new Error(`HTTP ${res.status}: ${text}`);
         }
       } catch (error) {
-        console.error('Failed to write to Loki via CORS proxy:', error);
+        console.error('Failed to write to Loki via direct connection:', error);
         throw error;
       }
     }

@@ -49,7 +49,7 @@ services:
     image: otel/opentelemetry-collector:0.86.0
     command: [ "--config=/etc/otel-collector.yaml" ]
     volumes:
-      - ./otel-collector.yaml:/etc/otel-collector.yaml
+      - ./shared/otel-collector.yaml:/etc/otel-collector.yaml
 
   prometheus:
     image: prom/prometheus:v2.54.1  # Pinned version
@@ -72,11 +72,3 @@ services:
     ports:
       - "3100:3100"
 
-  cors-proxy:
-    build:
-      context: .
-      dockerfile: Dockerfile.cors-proxy
-    ports:
-      - "3101:3101"
-    depends_on:
-      - loki
