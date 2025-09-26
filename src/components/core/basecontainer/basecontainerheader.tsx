@@ -15,14 +15,14 @@ interface BaseContainerHeaderProps {
 
 const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, headerActions, children }) => {
   const dispatch = useAppDispatch();
-  const { tempoUids, selectedTempoUid } = useAppSelector((state) => state.tempo);
+  const { selectedTempoUid } = useAppSelector((state) => state.tempo);
   const [allList, setAllList] = useState<any[]>([]);
 
   useEffect(() => {
     const loadTempos = async () => {
       const listFromGrafana = getDataSourceSrv()
         .getList()
-        .filter((ds) => ds.type !== 'grafana');
+        .filter((ds) => ds.type === 'tempo');
 
       setAllList(listFromGrafana);
       const uidList = listFromGrafana.map((ds) => ds.uid);
@@ -37,10 +37,10 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, header
       }
     };
 
-    if (tempoUids.length === 0) {
-      loadTempos();
-    }
-  }, [dispatch, tempoUids]);
+    // Her component mount'unda data source'ları yükle
+    // Sayfa geçişlerinde dropdown'ın düzgün doldurulması için
+    loadTempos();
+  }, [dispatch]);
 
   const handleChange = (value: string) => {
     dispatch(setSelectedTempoUid(value));

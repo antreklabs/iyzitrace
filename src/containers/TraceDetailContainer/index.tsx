@@ -119,8 +119,6 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId }) 
         )
       );
 
-      const normalize = (id?: string | null) => (!id || id === '' ? null : id);
-
       const buildTree = (spans: SpanNode[]): SpanNode[] => {
         const idSet = new Set(spans.map((s) => s.id));
         const rootCandidates = spans.filter((s) => !s.parentId || !idSet.has(s.parentId));

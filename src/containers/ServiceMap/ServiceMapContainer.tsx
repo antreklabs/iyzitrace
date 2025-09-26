@@ -1,25 +1,18 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactFlow, { 
   Background, 
   Controls, 
   MiniMap, 
   Edge, 
   Node,
-  ReactFlowProvider,
   useNodesState,
   useEdgesState,
   Position,
-  MarkerType,
   Handle
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import './ServiceMap.styles.css';
-import { Skeleton, Alert, Space, Button, Tooltip, Badge } from 'antd';
-import { 
-  ReloadOutlined, 
-  InfoCircleOutlined, 
-  CloseOutlined
-} from '@ant-design/icons';
+import { Skeleton, Alert, Row } from 'antd';
 import BaseContainer from '../../components/core/basecontainer/basecontainer';
 import GrafanaLikeRangePicker from '../../components/core/graphanadatepicker';
 
@@ -36,6 +29,16 @@ interface ServiceEdgeData {
 interface ServiceNode {
   name: string;
   calls: number;
+}
+
+interface ServiceMapNode {
+  name: string;
+  calls: number;
+  successRate: number;
+  title: string;
+  mainStat: number;
+  secondaryStat: number;
+  isInstrumented?: boolean;
 }
 
 function mergePrometheusData(
@@ -76,9 +79,25 @@ function mergePrometheusData(
     if (edgeMap.has(key)) {
       edgeMap.get(key)!.latencyMs = Math.round(ms);
     }
+  }
+
+  const edges = Array.from(edgeMap.values());
+  const nodes = Array.from(nodeMap.entries()).map(([name, calls]) => ({ name, calls }));
+  return { nodes, edges };
+}
+
+// Service Node Component
+const ServiceNodeComponent: React.FC<{ data: ServiceMapNode }> = ({ data }) => {
+  const handleNodeClick = () => {
+    // Handle node click logic here
+    console.log('Node clicked:', data.name);
   };
 
-  // Determine border color based on success rate (4th image style)
+  const formatNumber = (value: number, suffix: string) => {
+    return `${value.toFixed(1)}${suffix}`;
+  };
+
+  // Determine border color based on success rate
   const getBorderColor = () => {
     if (data.successRate >= 95) return '#4CAF50'; // Green
     if (data.successRate >= 85) return '#FF9800'; // Orange  
@@ -89,7 +108,7 @@ function mergePrometheusData(
     <div 
       onClick={handleNodeClick}
       style={{
-        backgroundColor: '#1e1e1e', // Dark background like 4th image
+        backgroundColor: '#1e1e1e', // Dark background
         border: `2px solid ${getBorderColor()}`,
         borderRadius: '8px',
         padding: '12px',
@@ -105,7 +124,7 @@ function mergePrometheusData(
       <Handle type="target" position={Position.Top} />
       <Handle type="source" position={Position.Bottom} />
       
-      {/* Service Title - Centered like 4th image */}
+      {/* Service Title - Centered */}
       <div style={{
         fontSize: '12px',
         fontWeight: '600',
@@ -119,7 +138,7 @@ function mergePrometheusData(
         {data.title}
       </div>
 
-      {/* Simple Metrics like 4th image */}
+      {/* Simple Metrics */}
       <div style={{
         textAlign: 'center',
         fontSize: '10px',
@@ -147,7 +166,7 @@ function mergePrometheusData(
 
 // Node types for ReactFlow
 const nodeTypes = {
-  serviceNode: ServiceNode,
+  serviceNode: ServiceNodeComponent,
 };
 
 // Service Detail Panel Component
@@ -155,17 +174,30 @@ const ServiceDetailPanel: React.FC<{
   selectedService: ServiceMapNode | null;
   onClose: () => void;
 }> = ({ selectedService, onClose }) => {
-  const [panelWidth, setPanelWidth] = useState(400);
-  const [isResizing, setIsResizing] = useState(false);
-
   if (!selectedService) {
     return null;
   }
 
-  const edges = Array.from(edgeMap.values());
-  const nodes = Array.from(nodeMap.entries()).map(([name, calls]) => ({ name, calls }));
-  return { nodes, edges };
-}
+  return (
+    <div style={{
+      position: 'fixed',
+      right: 0,
+      top: 0,
+      width: '400px',
+      height: '100vh',
+      backgroundColor: '#1e1e1e',
+      color: '#ffffff',
+      padding: '20px',
+      borderLeft: '1px solid #333',
+      zIndex: 1000
+    }}>
+      <h3>{selectedService.name}</h3>
+      <p>Calls: {selectedService.calls}</p>
+      <p>Success Rate: {selectedService.successRate}%</p>
+      <button onClick={onClose}>Close</button>
+    </div>
+  );
+};
 
 function layoutGraphNodes(edges: ServiceEdgeData[], nodes: ServiceNode[]): Node[] {
   const levelMap = new Map<string, number>();
@@ -194,8 +226,18 @@ function layoutGraphNodes(edges: ServiceEdgeData[], nodes: ServiceNode[]): Node[
       const original = nodes.find((n) => n.name === name)!;
       graphNodes.push({
         id: name,
-        data: { label: `${name} (${original.calls})` },
+        data: { 
+          label: `${name} (${original.calls})`,
+          name: name,
+          calls: original.calls,
+          successRate: 95, // Default value
+          title: name,
+          mainStat: 100, // Default value
+          secondaryStat: 10, // Default value
+          isInstrumented: true // Default value
+        },
         position: { x: index * 300, y: depth * 200 },
+        type: 'serviceNode',
         style: {
           padding: 12,
           borderRadius: 8,
@@ -211,7 +253,6 @@ function layoutGraphNodes(edges: ServiceEdgeData[], nodes: ServiceNode[]): Node[
 }
 
 const ServiceMapContainer: React.FC = () => {
-  // @ts-ignore - TEMP: range will be used when API calls are restored
   const [range, setRange] = useState<[number, number]>([
     Date.now() - 60 * 60 * 1000,
     Date.now(),
@@ -271,9 +312,10 @@ const ServiceMapContainer: React.FC = () => {
       } finally {
         setLoading(false);
       }
-  }, [setNodes, setEdges]);
+    };
+
     fetchMetrics();
-  }, [range]);
+  }, [range, setNodes, setEdges]);
 
   return (
     <BaseContainer
@@ -292,7 +334,14 @@ const ServiceMapContainer: React.FC = () => {
           <Alert type="error" message="Service Map Error" description={error} showIcon />
         ) : (
           <div style={{ width: '100%', height: '800px' }}>
-            <ReactFlow nodes={nodes} edges={edges} fitView>
+            <ReactFlow 
+              nodes={nodes} 
+              edges={edges} 
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              nodeTypes={nodeTypes}
+              fitView
+            >
               <MiniMap />
               <Controls />
               <Background />
@@ -300,6 +349,12 @@ const ServiceMapContainer: React.FC = () => {
           </div>
         )}
       </Row>
+      {selectedService && (
+        <ServiceDetailPanel 
+          selectedService={selectedService} 
+          onClose={() => setSelectedService(null)} 
+        />
+      )}
     </BaseContainer>
   );
 };

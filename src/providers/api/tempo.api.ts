@@ -29,7 +29,7 @@ export const TempoApi = {
         return ds.url!;
     },
 
-    async getServiceNames(): Promise<string[]> {
+    async getServiceNames(): Promise<any> {
         const url = await this.getBaseUrl();
         const res = await getBackendSrv().get(`${url}/api/v2/search/tag/resource.service.name/values`);
         return res;
