@@ -13,7 +13,7 @@ import ReactFlow, {
   Handle
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import './ServiceMap.styles.css';
+import '../../assets/styles/pages/service-map.styles.css';
 import { Skeleton, Alert, Space, Button, Tooltip, Badge } from 'antd';
 import { 
   ReloadOutlined,
@@ -179,7 +179,7 @@ const ServiceNode: React.FC<{ data: ServiceMapNode & { onNodeClick?: (node: Serv
 };
 
 // **PLUGIN API ONLY** - Pure Plugin API approach (expected to have limitations)
-const queryTempoServiceMapPluginAPI = async (): Promise<{ nodes: Node[]; edges: Edge[]; opNodes: Node[]; opEdges: Edge[] }> => {
+const queryTempoServiceMap = async (): Promise<{ nodes: Node[]; edges: Edge[]; opNodes: Node[]; opEdges: Edge[] }> => {
   try {
     console.log('🔧 [Plugin API] Getting Tempo datasource via Plugin API only...');
     
@@ -471,7 +471,7 @@ const convertDataFramesToGraph = (dataFrames: DataFrame[]): { nodes: Node[]; edg
 
 // (Test data generator removed permanently)
 
-const ServiceMapPluginAPI: React.FC = () => {
+const ServiceMap: React.FC = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [loading, setLoading] = useState(false);
@@ -493,7 +493,7 @@ const ServiceMapPluginAPI: React.FC = () => {
       // Try Plugin API first (expected to fail due to limitations)
       let result;
       try {
-        result = await queryTempoServiceMapPluginAPI();
+        result = await queryTempoServiceMap();
         console.log('✅ [Plugin API] Plugin API succeeded!', result);
       } catch (pluginError) {
         console.warn('⚠️ [Plugin API] Plugin API failed as expected:', pluginError);
@@ -552,7 +552,7 @@ const ServiceMapPluginAPI: React.FC = () => {
           icon={<ReloadOutlined />} 
           onClick={handleRefresh}
           loading={loading}
-          className="service-map__refresh-btn service-map__refresh-btn--plugin-api"
+          className="service-map__refresh-btn"
         >
           Refresh
         </Button>
@@ -563,7 +563,7 @@ const ServiceMapPluginAPI: React.FC = () => {
 
   if (loading) {
     return (
-      <BaseContainer title="Service Map (Plugin API)" headerActions={renderHeaderActions()}>
+      <BaseContainer title="Service Map" headerActions={renderHeaderActions()}>
         <div className="service-map__loading">
           <Skeleton active paragraph={{ rows: 8 }} />
         </div>
@@ -573,7 +573,7 @@ const ServiceMapPluginAPI: React.FC = () => {
 
   if (error) {
     return (
-      <BaseContainer title="Service Map (Plugin API)" headerActions={renderHeaderActions()}>
+      <BaseContainer title="Service Map" headerActions={renderHeaderActions()}>
         <Alert
           message="Plugin API Limitation Demonstrated"
           description={
@@ -597,7 +597,7 @@ const ServiceMapPluginAPI: React.FC = () => {
 
   if (!nodes.length) {
     return (
-      <BaseContainer title="Service Map (Plugin API)" headerActions={renderHeaderActions()}>
+      <BaseContainer title="Service Map" headerActions={renderHeaderActions()}>
         <Alert
           message="No Services Found"
           description="No service dependencies detected. Check if spans with service.name attributes are being ingested."
@@ -610,9 +610,9 @@ const ServiceMapPluginAPI: React.FC = () => {
   }
 
   return (
-    <BaseContainer title="Service Map (Plugin API)" headerActions={renderHeaderActions()}>
+    <BaseContainer title="Service Map" headerActions={renderHeaderActions()}>
       {/* Status Bar */}
-      <div className="service-map__status-bar service-map__status-bar--plugin-api">
+      <div className="service-map__status-bar">
         <div className="service-map__status-metrics">
           <Badge count={nodes.length} color="#e74c3c">
             <span style={{ color: '#ffffff' }}>Services</span>
@@ -620,9 +620,6 @@ const ServiceMapPluginAPI: React.FC = () => {
           <Badge count={edges.length} color="#e74c3c">
             <span style={{ color: '#ffffff' }}>Connections</span>
           </Badge>
-        </div>
-        <div className="service-map__mode-badge service-map__mode-badge--plugin-api">
-          🔧 Plugin API Mode
         </div>
       </div>
 
@@ -646,9 +643,9 @@ const ServiceMapPluginAPI: React.FC = () => {
               size={1} 
               style={{ opacity: 0.1 }}
             />
-            <Controls className="service-map__controls service-map__controls--plugin-api" />
+            <Controls className="service-map__controls" />
             <MiniMap 
-              className="service-map__minimap service-map__minimap--plugin-api"
+              className="service-map__minimap"
             />
           </ReactFlow>
         </ReactFlowProvider>
@@ -662,4 +659,4 @@ const ServiceMapPluginAPI: React.FC = () => {
   );
 };
 
-export default ServiceMapPluginAPI;
+export default ServiceMap;

@@ -1,5 +1,5 @@
 import React from 'react';
-import ServiceMapPluginAPI from '../containers/ServiceMap/ServiceMapPluginAPI';
+import ServiceMap from '../containers/ServiceMap/ServiceMap';
 
 /**
  * Service Map Plugin API Page
@@ -14,8 +14,8 @@ import ServiceMapPluginAPI from '../containers/ServiceMap/ServiceMapPluginAPI';
  * 
  * Use this page to understand Plugin API limitations compared to HTTP API approach.
  */
-const ServiceMapPluginAPIPage: React.FC = () => {
-  return <ServiceMapPluginAPI />;
+const ServiceMapPage: React.FC = () => {
+  return <ServiceMap />;
 };
 
-export default ServiceMapPluginAPIPage;
+export default ServiceMapPage;

@@ -454,6 +454,26 @@ function LogsContent() {
             </div> */}
           </div>
            <Space>
+             <Button
+               type="default"
+               onClick={() => {
+                 const now = Date.now();
+                 const sampleQuery: LogQuery = {
+                   ...query,
+                   query: 'job="sample"',
+                   filters: [],
+                   timeRange: {
+                     start: now - 10 * 60 * 1000,
+                     end: now,
+                   },
+                 };
+                 setQuery(sampleQuery);
+                 handleSearch(sampleQuery);
+                 message.success('Loaded sample logs (job="sample")');
+               }}
+             >
+               Load sample logs
+             </Button>
              <Select
                placeholder="Select a view"
                value={selectedView}

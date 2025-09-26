@@ -36,22 +36,34 @@ class LokiReadApi {
     try {
       const lokiDs = await this.getLokiDatasourceInstance();
       
+      // Güvenli varsayılan tarih aralığı (son 1 saat)
+      const fallbackTo = dateTime();
+      const fallbackFrom = dateTime().subtract(1, 'hour');
+
+      // Datasource ref (Grafana'nın query motoru için kritik)
+      const dsRef = typeof lokiDs?.getRef === 'function'
+        ? lokiDs.getRef()
+        : { uid: lokiDs?.uid ?? 'loki', type: lokiDs?.type ?? 'loki' };
+
       // Grafana'nın LokiQuery formatında query oluştur
       const lokiQuery: LokiQuery = {
         refId: 'A',
         expr: params.query,
         queryType: LokiQueryType.Range,
-        maxLines: params.limit || 100
+        maxLines: params.limit || 100,
+        // @ts-expect-error: datasource field runtime'da mevcut; tipler her versiyonda olmayabiliyor
+        datasource: dsRef,
       };
 
       // TimeRange oluştur
+      const fromDt = params.start ? dateTime(params.start) : fallbackFrom;
+      const toDt = params.end ? dateTime(params.end) : fallbackTo;
+
       const timeRange: TimeRange = {
-        from: dateTime(params.start),
-        to: dateTime(params.end),
-        raw: {
-          from: params.start,
-          to: params.end
-        }
+        from: fromDt,
+        to: toDt,
+        // raw alanını DateTime objeleri ile ver (Grafana beklenen format)
+        raw: { from: fromDt, to: toDt },
       };
 
       // DataQueryRequest oluştur
@@ -63,7 +75,8 @@ class LokiReadApi {
         intervalMs: 1000,
         scopedVars: {},
         timezone: 'UTC',
-        app: CoreApp.Unknown,
+        app: CoreApp.Explore,
+        maxDataPoints: 1000,
         startTime: Date.now()
       };
 

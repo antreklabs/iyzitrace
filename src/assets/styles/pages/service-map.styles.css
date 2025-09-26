@@ -50,7 +50,7 @@
   background: #3498db;
 }
 
-.service-node__badge--plugin-api {
+.service-node__badge {
   background: #e74c3c;
 }
 
@@ -146,20 +146,6 @@
   align-items: center;
 }
 
-.service-map__status-bar--original {
-  /* background: linear-gradient(90deg, #2c3e50 0%, #34495e 100%); */
-}
-
-.service-map__status-bar--plugin-api {
-  /* background: linear-gradient(90deg, #c0392b 0%, #e74c3c 100%);
-  border-bottom-color: rgba(231, 76, 60, 0.3); */
-}
-
-.service-map__status-bar--http-api {
-  /* background: linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
-  border-bottom-color: rgba(39, 174, 96, 0.3); */
-}
-
 .service-map__status-metrics {
   display: flex;
   gap: 20px;
@@ -176,7 +162,7 @@
   background: #3498db;
 }
 
-.service-map__mode-badge--plugin-api {
+.service-map__mode-badge {
   background: #e74c3c;
 }
 
@@ -201,39 +187,11 @@
   border-radius: 8px;
 }
 
-.service-map__controls--plugin-api {
-  background: rgba(192, 57, 43, 0.9);
-  border-color: rgba(231, 76, 60, 0.3);
-}
-
-.service-map__controls--http-api {
-  background: rgba(39, 174, 96, 0.9);
-  border-color: rgba(46, 204, 113, 0.3);
-}
-
 /* ReactFlow MiniMap */
 .service-map__minimap {
   background: rgba(44, 62, 80, 0.9);
   border: 1px solid rgba(52, 152, 219, 0.3);
   border-radius: 8px;
-}
-
-.service-map__minimap--plugin-api {
-  /* background: rgba(192, 57, 43, 0.9); */
-  /* border-color: rgba(231, 76, 60, 0.3); */
-}
-
-.service-map__minimap--http-api {
-  /* background: rgba(39, 174, 96, 0.9);
-  border-color: rgba(46, 204, 113, 0.3); */
-}
-
-.service-map__minimap-node--original {
-  fill: #3498db;
-}
-
-.service-map__minimap-node--plugin-api {
-  /* fill: #e74c3c; */
 }
 
 .service-map__minimap-node--http-api {
@@ -244,10 +202,6 @@
   fill: rgba(44, 62, 80, 0.8);
 }
 
-.service-map__minimap-mask--plugin-api {
-  fill: rgba(192, 57, 43, 0.8);
-}
-
 .service-map__minimap-mask--http-api {
   fill: rgba(39, 174, 96, 0.8);
 }
@@ -255,11 +209,6 @@
 /* Edge Styles */
 .service-map__edge--original {
   stroke: #3498db;
-  stroke-width: 2;
-}
-
-.service-map__edge--plugin-api {
-  stroke: #e74c3c;
   stroke-width: 2;
 }
 
@@ -276,14 +225,6 @@
 
 .service-map__edge-label--original {
   background: #2c3e50;
-}
-
-.service-map__edge-label--plugin-api {
-  background: #e74c3c;
-}
-
-.service-map__edge-label--http-api {
-  background: #27ae60;
 }
 
 /* Service Detail Panel */
@@ -524,11 +465,6 @@
 .service-map__refresh-btn--original {
   background: #3498db;
   border-color: #3498db;
-}
-
-.service-map__refresh-btn--plugin-api {
-  background: #e74c3c;
-  border-color: #e74c3c;
 }
 
 .service-map__refresh-btn--http-api {
