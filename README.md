@@ -25,13 +25,13 @@ App plugins can let you create a custom out-of-the-box monitoring experience by 
 
 ### Running the Complete Stack
 
-To run IyziTrace with real observability data, you need to start the observability platform first, then IyziTrace:
+To run IyziTrace with real observability data, you have two options for data generation:
 
-#### 1. Start Observability Platform
+#### Option 1: Observability Platform (Recommended)
 
 ```bash
 # Start the observability platform with Tempo, Prometheus, Loki, and telemetry generators
-docker compose -f docker-compose-observability-platform.yml up -d
+docker compose -f configs/observability-platform/docker-compose.yml up -d
 ```
 
 This will start:
@@ -42,24 +42,52 @@ This will start:
 - **NGINX** - Signal router for telemetry data
 - **Telemetry Generators** - Generate sample traces, metrics, and logs
 
+#### Option 2: OpenTelemetry Demo
+
+```bash
+# Start the OpenTelemetry demo with full microservices stack
+docker compose -f configs/opentelemetry-demo/docker-compose.yml up -d
+```
+
+This will start:
+- **Full Microservices Stack** - Frontend, backend services, databases
+- **Tempo** (traces) - Distributed tracing backend
+- **Prometheus** (metrics) - Metrics collection and storage
+- **Loki** (logs) - Log aggregation system
+- **Jaeger** (alternative traces) - Alternative tracing backend
+- **Load Generator** - Simulates real user traffic
+- **Real Application Data** - More realistic and complex traces
+
+#### Option 3: Both Platforms (Advanced)
+
+You can run both platforms simultaneously for maximum data variety:
+
+```bash
+# Start both platforms
+docker compose -f configs/observability-platform/docker-compose.yml up -d
+docker compose -f configs/opentelemetry-demo/docker-compose.yml up -d
+```
+
+**Note**: Both platforms use different ports to avoid conflicts.
+
 #### 2. Start IyziTrace Grafana Plugin
 
 ```bash
-# Start IyziTrace Grafana instance connected to the observability platform
+# Start IyziTrace Grafana instance connected to the data sources
 docker compose up -d
 ```
 
 This will start:
 - Grafana with IyziTrace plugin
-- Connected to observability platform datasources
-- Pre-configured with Prometheus, Tempo, and Loki datasources
+- Connected to both observability platform and OpenTelemetry demo datasources
+- Pre-configured with Prometheus, Tempo, and Loki datasources from both platforms
 
 #### 3. Access the Application
 
 - **Grafana UI**: http://localhost:3000
 - **IyziTrace Plugin**: Navigate to the IyziTrace app in Grafana
 - **Service Map**: View real-time service dependencies
-- **Traces**: Explore distributed traces from telemetry generators
+- **Traces**: Explore distributed traces from telemetry generators or microservices
 - **Logs**: Analyze application logs from Loki
 - **Metrics**: Monitor performance metrics from Prometheus
 
@@ -69,8 +97,11 @@ This will start:
 # Stop IyziTrace
 docker compose down
 
-# Stop observability platform
-docker compose -f docker-compose-observability-platform.yml down
+# Stop observability platform (if running)
+docker compose -f configs/observability-platform/docker-compose.yml down
+
+# Stop OpenTelemetry demo (if running)
+docker compose -f configs/opentelemetry-demo/docker-compose.yml down
 ```
 
 ## Development Setup
@@ -130,28 +161,38 @@ docker compose -f docker-compose-observability-platform.yml down
 
 ### Development with Observability Data
 
-For development with real observability data:
+For development with real observability data, you can choose between:
 
-1. Start the observability platform:
-   ```bash
-   docker compose -f docker-compose-observability-platform.yml up -d
-   ```
+#### Option A: Observability Platform
+```bash
+# Start observability platform
+docker compose -f configs/observability-platform/docker-compose.yml up -d
 
-2. Start IyziTrace in development mode:
-   ```bash
-   pnpm run dev
-   ```
+# Start IyziTrace in development mode
+pnpm run dev
 
-3. In another terminal, start Grafana with the plugin:
-   ```bash
-   pnpm run server
-   ```
+# In another terminal, start Grafana with the plugin
+pnpm run server
+```
+
+#### Option B: OpenTelemetry Demo
+```bash
+# Start OpenTelemetry demo
+docker compose -f configs/opentelemetry-demo/docker-compose.yml up -d
+
+# Start IyziTrace in development mode
+pnpm run dev
+
+# In another terminal, start Grafana with the plugin
+pnpm run server
+```
 
 This setup allows you to:
 - Develop the plugin with hot reloading
 - Test against real telemetry data (traces, metrics, logs)
-- Debug with live telemetry generators
+- Debug with live telemetry generators or microservices
 - Monitor service interactions in real-time
+- Choose between simple telemetry generators or complex microservices
 
 # Distributing your plugin
 

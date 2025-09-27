@@ -3,6 +3,8 @@ networks:
     name: iyzitrace-network
   observability-platform_otel:
     external: true
+  opentelemetry-demo:
+    external: true
 
 services:
   grafana:
@@ -26,3 +28,4 @@ services:
     networks:
       - default
       - observability-platform_otel
+      - opentelemetry-demo

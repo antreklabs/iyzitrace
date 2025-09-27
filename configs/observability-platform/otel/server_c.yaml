@@ -8,7 +8,7 @@ receivers:
 
 exporters:
   otlphttp:
-    endpoint: http://loki:3100/otlp
+    endpoint: http://loki-platform:3100/otlp
 
 processors:
   batch: {}
