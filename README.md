@@ -1,14 +1,81 @@
-# Grafana app plugin template
+# IyziTrace - Grafana App Plugin
 
-This template is a starting point for building an app plugin for Grafana.
+IyziTrace is a comprehensive observability platform built as a Grafana app plugin, providing distributed tracing, service mapping, and log analysis capabilities.
+
+## Features
+
+- **Distributed Tracing**: Explore and analyze distributed traces with flame graphs and timeline views
+- **Service Map**: Visualize service dependencies and interactions in real-time
+- **Service Metrics**: Monitor service performance with detailed metrics and charts
+- **Log Analysis**: Search and analyze application logs with advanced filtering
+- **Log Pipelines**: Process and transform logs with configurable pipelines (SigNoz-like feature)
+- **TraceQL Support**: Advanced trace querying with TraceQL language
+- **Real-time Data**: Live observability data from telemetry generators
 
 ## What are Grafana app plugins?
 
 App plugins can let you create a custom out-of-the-box monitoring experience by custom pages, nested data sources and panel plugins.
 
-## Get started
+## Quick Start
 
-### Frontend
+### Prerequisites
+
+- Docker and Docker Compose
+- Node.js and pnpm
+
+### Running the Complete Stack
+
+To run IyziTrace with real observability data, you need to start the observability platform first, then IyziTrace:
+
+#### 1. Start Observability Platform
+
+```bash
+# Start the observability platform with Tempo, Prometheus, Loki, and telemetry generators
+docker compose -f docker-compose-observability-platform.yml up -d
+```
+
+This will start:
+- **Tempo** (traces) - Distributed tracing backend
+- **Prometheus** (metrics) - Metrics collection and storage
+- **Loki** (logs) - Log aggregation system
+- **OpenTelemetry Collectors** - Data collection and routing
+- **NGINX** - Signal router for telemetry data
+- **Telemetry Generators** - Generate sample traces, metrics, and logs
+
+#### 2. Start IyziTrace Grafana Plugin
+
+```bash
+# Start IyziTrace Grafana instance connected to the observability platform
+docker compose up -d
+```
+
+This will start:
+- Grafana with IyziTrace plugin
+- Connected to observability platform datasources
+- Pre-configured with Prometheus, Tempo, and Loki datasources
+
+#### 3. Access the Application
+
+- **Grafana UI**: http://localhost:3000
+- **IyziTrace Plugin**: Navigate to the IyziTrace app in Grafana
+- **Service Map**: View real-time service dependencies
+- **Traces**: Explore distributed traces from telemetry generators
+- **Logs**: Analyze application logs from Loki
+- **Metrics**: Monitor performance metrics from Prometheus
+
+#### 4. Stop the Stack
+
+```bash
+# Stop IyziTrace
+docker compose down
+
+# Stop observability platform
+docker compose -f docker-compose-observability-platform.yml down
+```
+
+## Development Setup
+
+### Frontend Development
 
 1. Install dependencies
 
@@ -38,13 +105,7 @@ App plugins can let you create a custom out-of-the-box monitoring experience by 
    pnpm run test:ci
    ```
 
-5. Spin up a Grafana instance and run the plugin inside it (using Docker)
-
-   ```bash
-   pnpm run server
-   ```
-
-6. Run the E2E tests (using Playwright)
+5. Run the E2E tests (using Playwright)
 
    ```bash
    # Spins up a Grafana instance first that we tests against
@@ -57,7 +118,7 @@ App plugins can let you create a custom out-of-the-box monitoring experience by 
    pnpm run e2e
    ```
 
-7. Run the linter
+6. Run the linter
 
    ```bash
    pnpm run lint
@@ -66,6 +127,31 @@ App plugins can let you create a custom out-of-the-box monitoring experience by 
 
    pnpm run lint:fix
    ```
+
+### Development with Observability Data
+
+For development with real observability data:
+
+1. Start the observability platform:
+   ```bash
+   docker compose -f docker-compose-observability-platform.yml up -d
+   ```
+
+2. Start IyziTrace in development mode:
+   ```bash
+   pnpm run dev
+   ```
+
+3. In another terminal, start Grafana with the plugin:
+   ```bash
+   pnpm run server
+   ```
+
+This setup allows you to:
+- Develop the plugin with hot reloading
+- Test against real telemetry data (traces, metrics, logs)
+- Debug with live telemetry generators
+- Monitor service interactions in real-time
 
 # Distributing your plugin
 

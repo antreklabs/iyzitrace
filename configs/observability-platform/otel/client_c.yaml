@@ -2,21 +2,20 @@ receivers:
   otlp:
     protocols:
       grpc:
+        endpoint: 0.0.0.0:4317
 
 exporters:
-  otlp:
-    endpoint: tempo:4317
+  otlp/nginx:
+    endpoint: nginx:4317
     tls:
       insecure: true
 
 processors:
-  batch:
-    timeout: 1s
-    send_batch_size: 1024
+  batch: {}
 
 service:
   pipelines:
-    traces:
+    logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp]
+      exporters: [otlp/nginx]
