@@ -6,32 +6,32 @@ services:
   ########################
 
   tempo:
-    container_name: tempo
+    container_name: tempo-platform
     image: grafana/tempo:latest
     command: [ "-config.file=/etc/tempo/tempo.yaml" ]
     volumes:
-      - ./configs/observability-platform/tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
+      - ./tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
       - tempo-data:/tmp/tempo
     ports:
-      - "3200:3200" # Tempo HTTP (optional to expose)
-      - "14268:14268" # Jaeger ingest (not used here)
-      - "4317"   # OTLP gRPC (optional to expose)
-      - "4318"   # OTLP HTTP (optional to expose)
+      - "3201:3200" # Tempo HTTP (changed from 3200 to avoid conflict)
+      - "14269:14268" # Jaeger ingest (changed from 14268 to avoid conflict)
+      - "4319"   # OTLP gRPC (changed from 4317 to avoid conflict)
+      - "4320"   # OTLP HTTP (changed from 4318 to avoid conflict)
     networks: [ otel ]
 
   loki:
-    container_name: loki
+    container_name: loki-platform
     image: grafana/loki:latest
     command: [ "-config.file=/etc/loki/config.yml" ]
     volumes:
-      - ./configs/observability-platform/loki/config.yml:/etc/loki/config.yml:ro
+      - ./loki/config.yml:/etc/loki/config.yml:ro
       - loki-data:/loki
     ports:
-      - "3100:3100"
+      - "3101:3100" # Changed from 3100 to avoid conflict
     networks: [ otel ]
 
   prometheus:
-    container_name: prometheus
+    container_name: prometheus-platform
     image: prom/prometheus:latest
     command:
       - --config.file=/etc/prometheus.yaml
@@ -39,9 +39,9 @@ services:
       - --enable-feature=exemplar-storage
       - --enable-feature=native-histograms
     volumes:
-      - ./configs/observability-platform/prometheus/prometheus.yml:/etc/prometheus.yaml
+      - ./prometheus/prometheus.yml:/etc/prometheus.yaml
     ports:
-      - "9090:9090"
+      - "9091:9090" # Changed from 9090 to avoid conflict
     networks: [ otel ]
 
   ########################
@@ -53,7 +53,7 @@ services:
     image: otel/opentelemetry-collector-contrib:latest
     command: [ "--config=/etc/otelcol/config.yaml" ]
     volumes:
-      - ./configs/observability-platform/otel/server_a.yaml:/etc/otelcol/config.yaml:ro
+      - ./otel/server_a.yaml:/etc/otelcol/config.yaml:ro
     ports:
       - "14317:4317" # optional, for debugging
       - "14318:4318"
@@ -65,7 +65,7 @@ services:
     image: otel/opentelemetry-collector-contrib:latest
     command: [ "--config=/etc/otelcol/config.yaml" ]
     volumes:
-      - ./configs/observability-platform/otel/server_b.yaml:/etc/otelcol/config.yaml:ro
+      - ./otel/server_b.yaml:/etc/otelcol/config.yaml:ro
     ports:
       - "18889:8889" # expose server_b's /metrics for quick manual checks
       - "24317:4317"
@@ -78,7 +78,7 @@ services:
     image: otel/opentelemetry-collector-contrib:latest
     command: [ "--config=/etc/otelcol/config.yaml" ]
     volumes:
-      - ./configs/observability-platform/otel/server_c.yaml:/etc/otelcol/config.yaml:ro
+      - ./otel/server_c.yaml:/etc/otelcol/config.yaml:ro
     ports:
       - "34317:4317"
       - "34318:4318"
@@ -90,13 +90,13 @@ services:
   ########################
 
   nginx:
-    container_name: nginx
+    container_name: nginx-platform
     image: nginx:1.27-alpine
     volumes:
-      - ./configs/observability-platform/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
-      - "4317:4317" # gRPC ingress
-      - "4318:4318" # HTTP ingress
+      - "4319:4317" # gRPC ingress (changed from 4317 to avoid conflict)
+      - "4320:4318" # HTTP ingress (changed from 4318 to avoid conflict)
     networks: [ otel ]
     depends_on: [ server_a, server_b, server_c ]
 
@@ -109,7 +109,7 @@ services:
     image: otel/opentelemetry-collector-contrib:latest
     command: [ "--config=/etc/otelcol/config.yaml" ]
     volumes:
-      - ./configs/observability-platform/otel/client_a.yaml:/etc/otelcol/config.yaml:ro
+      - ./otel/client_a.yaml:/etc/otelcol/config.yaml:ro
     ports:
       - "5317:4317" # to receive from telemetrygen_traces
     networks: [ otel ]
@@ -120,7 +120,7 @@ services:
     image: otel/opentelemetry-collector-contrib:latest
     command: [ "--config=/etc/otelcol/config.yaml" ]
     volumes:
-      - ./configs/observability-platform/otel/client_b.yaml:/etc/otelcol/config.yaml:ro
+      - ./otel/client_b.yaml:/etc/otelcol/config.yaml:ro
     ports:
       - "6317:4317" # to receive from telemetrygen_metrics
     networks: [ otel ]
@@ -131,7 +131,7 @@ services:
     image: otel/opentelemetry-collector-contrib:latest
     command: [ "--config=/etc/otelcol/config.yaml" ]
     volumes:
-      - ./configs/observability-platform/otel/client_c.yaml:/etc/otelcol/config.yaml:ro
+      - ./otel/client_c.yaml:/etc/otelcol/config.yaml:ro
     ports:
       - "7317:4317" # to receive from telemetrygen_logs
     networks: [ otel ]

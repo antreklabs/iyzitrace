@@ -1,0 +1,23 @@
+# Copyright The OpenTelemetry Authors
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: 1
+
+datasources:
+  - name: Tempo
+    uid: webstore-tempo
+    type: tempo
+    url: http://tempo:3200
+    editable: true
+    jsonData:
+      httpMethod: GET
+      serviceMap:
+        datasourceUid: webstore-metrics
+      tracesToLogs:
+        datasourceUid: webstore-loki
+        spanStartTimeShift: "-20m"
+        spanEndTimeShift: "20m"
+        filterByTraceID: true
+        filterBySpanID: true
+        customQuery: true
+        query: traceId:"$${__trace.traceId}" AND spanId:"$${__span.spanId}"
