@@ -3,13 +3,13 @@ apiVersion: 1
 datasources:
   - name: Prometheus
     type: prometheus
-    access: proxy
-    url: http://prometheus:9090
-    isDefault: false
     uid: prometheus
+    access: proxy
     orgId: 1
+    url: http://prometheus.observability-platform_otel:9090
     basicAuth: false
+    isDefault: false
     version: 1
-    editable: false
+    editable: true
     jsonData:
       httpMethod: GET
