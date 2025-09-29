@@ -243,7 +243,11 @@ Below you can find source code for existing app plugins and other related docume
 
 ## Git Workflow Commands
 
-### Creating a new branch from dev and pushing to GitHub
+### Complete Development Workflow
+
+This section covers the complete workflow from creating a feature branch to merging back to dev.
+
+#### 1. Creating a new branch from dev
 
 ```bash
 # Switch to dev branch
@@ -257,4 +261,46 @@ git checkout -b feature/your-feature-name
 
 # Push the new branch to GitHub and set up tracking
 git push -u origin feature/your-feature-name
+```
+
+#### 2. Creating Pull Request with GitHub CLI
+
+Create and manage pull request:
+
+```bash
+# Create pull request from feature branch to dev
+gh pr create --base dev --head feature/your-feature-name \
+  --title "Your PR Title" \
+  --body "## Description
+Your detailed PR description here
+
+## Changes
+- Change 1
+- Change 2
+
+## Testing
+- [x] Test case 1
+- [x] Test case 2"
+
+# Check PR status
+gh pr status
+
+# View PR details
+gh pr view [PR_NUMBER]
+```
+
+#### 3. Merging and cleanup
+
+```bash
+# Merge PR and delete remote branch (can be done by reviewer)
+gh pr merge [PR_NUMBER] --merge --delete-branch
+
+# Switch back to dev branch
+git checkout dev
+
+# Pull latest changes including your merged PR
+git pull origin dev
+
+# Delete local feature branch (if exists)
+git branch -d feature/your-feature-name
 ```
