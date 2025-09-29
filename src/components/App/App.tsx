@@ -4,7 +4,7 @@ import { themetoken } from '../../utils/index';
 import MainLayout from 'components/core/layout/layout.component';
 import { ConfigProvider } from 'antd';
 import AppRoutes from '../../routes/AppRoutes';
-import '../../assets/global.css';
+import '../../assets/styles/global.css';
 import { Provider } from 'react-redux';
 import store, { persistor } from '../../store/store';
 import { AliveScope } from 'react-activation';

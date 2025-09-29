@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, Row, Col, Table, Spin, Button, Typography, Empty, Card, Flex } from 'antd';
+import { Layout, Row, Col, Table, Spin, Typography, Empty, Card, Flex } from 'antd';
 import BaseContainer from '../../components/core/basecontainer/basecontainer';
 import GrafanaLikeRangePicker from '../../components/core/graphanadatepicker';
 import { TempoApi } from '../../providers';
 import TraceFilters from './TraceFilters';
+import FiltersSider from '../../components/core/layout/filters-sider.component';
 import dayjs from 'dayjs';
 import { randomBackgroundGradient } from '../../utils';
 import { Link } from 'react-router-dom';
@@ -11,8 +12,8 @@ import { PLUGIN_BASE_URL } from '../../constants';
 import { IoIosArrowForward,IoIosArrowDown } from "react-icons/io";
 import { useAppSelector } from '../../store/hooks';
 
-const { Sider, Content } = Layout;
-const { Title, Text } = Typography;
+const { Content } = Layout;
+const { Text } = Typography;
 
 interface TraceContainerProps {
   traceId?: string | null;
@@ -263,18 +264,9 @@ const TraceContainer: React.FC<TraceContainerProps> = ({ traceId }) => {
       headerActions={<GrafanaLikeRangePicker title="Date Range" onChange={(start, end) => setRange([start, end])} />}
     >
       <Layout style={{ height: 'calc(100% - 40px)', overflow: 'auto' }}>
-        <Sider width={300} style={{ background: '#1f1f1f', padding: 16 }} collapsedWidth={80} collapsed={collapsed}>
-          <Button
-            type="primary"
-            icon={collapsed ? <i className="fa fa-angle-right" /> : <i className="fa fa-angle-left" />}
-            onClick={() => setCollapsed(!collapsed)}
-            style={{ marginBottom: 16, color: '#fff', position: 'absolute', top: 16, right: collapsed ? -15 : 16 }}
-          />
-          <Title level={5} style={{ color: '#fff' }}>
-            Filters
-          </Title>
+        <FiltersSider title="Filters" collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)}>
           <TraceFilters onChange={fetchTraces} collapsed={collapsed} />
-        </Sider>
+        </FiltersSider>
 
         <Content style={{ padding: 24 }}>
           <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>

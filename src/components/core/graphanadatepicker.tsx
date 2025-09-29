@@ -72,7 +72,7 @@ const GrafanaLikeRangePicker = ({
     <div
       style={{
         display: 'flex',
-        width: 700,
+        width: 400,
         background: '#1e1e1e',
         padding: 16,
         borderRadius: 8,
@@ -121,7 +121,7 @@ const GrafanaLikeRangePicker = ({
         </Space>
       </div>
 
-      <div style={{ width: 250 }}>
+      <div style={{ width: 120 }}>
         <Input
           placeholder="Search quick ranges"
           value={search}

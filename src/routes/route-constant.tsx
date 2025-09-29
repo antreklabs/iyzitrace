@@ -9,6 +9,7 @@ const TraceDetail = React.lazy(() => import('../pages/traces/tracedetail.page'))
 const ServiceMap = React.lazy(() => import('../pages/service-map.page'));
 const LogsPage = React.lazy(() => import('../pages/logs.page'));
 const LogsPipelines = React.lazy(() => import('../pages/logs-pipelines/logs-pipelines.page'));
+const LogsV2Page = React.lazy(() => import('../pages/logs/logs.page'));
 
 export const appRoutes: AppRoute[] = [
   {
@@ -56,6 +57,14 @@ export const appRoutes: AppRoute[] = [
     element: <LogsPage />,
     name: 'logs',
     title: 'Logs',
+    icon: 'search',
+    showInMenu: true,
+  },
+  {
+    path: '/logs-v2',
+    element: <LogsV2Page />,
+    name: 'logsV2',
+    title: 'Logs v2',
     icon: 'search',
     showInMenu: true,
   },

@@ -60,6 +60,7 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, header
         wrap={false}
         style={{width: '100%', height: 50 }}
       >
+        {/* Left: Data source selector (and optional children) */}
         <Col style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Select
             value={selectedTempoUid ?? undefined}
@@ -84,10 +85,15 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, header
               ),
             }))}
           />
-          <h3 style={{ margin: 0, fontSize: 20 }}>{title}</h3>
           {children as any}
         </Col>
 
+        {/* Center: Title */}
+        <Col flex={1} style={{ display: 'flex', justifyContent: 'center' }}>
+          <h3 style={{ margin: 0, fontSize: 20, textAlign: 'center' }}>{title}</h3>
+        </Col>
+
+        {/* Right: Header actions */}
         <Col flex="none">
           <div style={{ display: 'flex', gap: 12 }}>{headerActions}</div>
         </Col>

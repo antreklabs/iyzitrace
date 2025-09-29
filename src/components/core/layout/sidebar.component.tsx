@@ -82,6 +82,7 @@ const Sidebar: React.FC = () => {
           { key: 'services', icon: <BarChartOutlined style={{ fontSize: 16 }} />, label: 'Services' },
           { key: 'traces', icon: <FileSearchOutlined style={{ fontSize: 16 }} />, label: 'Traces' },
           { key: 'logs', icon: <ProfileOutlined style={{ fontSize: 16 }} />, label: 'Logs' },
+          { key: 'logs-v2', icon: <ProfileOutlined style={{ fontSize: 16 }} />, label: 'Logs v2' },
           // { key: 'logs-pipelines', icon: <SettingOutlined style={{ fontSize: 16 }} />, label: 'Logs Pipelines' },
           { key: 'dashboards', icon: <ClusterOutlined style={{ fontSize: 16 }} />, label: 'Dashboards' },
           { key: 'alerts', icon: <AlertOutlined style={{ fontSize: 16 }} />, label: 'Alerts' },
