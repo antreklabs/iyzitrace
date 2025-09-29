@@ -11,16 +11,57 @@ exporters:
     tls:
       insecure: true
   
+  # Loki exporter for logs
   otlphttp/loki:
     endpoint: http://loki:3100/otlp
-
+    
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [resourcedetection, memory_limiter, batch]
-      exporters: [otlp, otlphttp/tempo, debug, spanmetrics]
+      processors: [resourcedetection, memory_limiter, transform, batch]
+      exporters: [otlp, otlphttp/tempo, debug, spanmetrics, servicegraph]
+    metrics:
+      receivers: [docker_stats, httpcheck/frontend-proxy, hostmetrics, nginx, otlp, postgresql, redis, spanmetrics, servicegraph]
+      processors: [resourcedetection, memory_limiter, batch, metricstransform]
+      exporters: [otlphttp/prometheus, debug]
     logs:
       receivers: [otlp]
       processors: [resourcedetection, memory_limiter, batch]
       exporters: [opensearch, otlphttp/loki, debug]
+
+processors:
+  # var olan memory_limiter / batch varsa kalsın; aşağıdaki yeni blokları ekliyoruz/override ediyoruz
+  metricstransform:
+    transforms:
+      - include: ^traces_service_graph(.*)$
+        match_type: regexp
+        action: update
+        new_name: iyzitrace_service_graph$$1
+      - include: ^traces\.span\.metrics\.(.*)$
+        match_type: regexp
+        action: update
+        new_name: iyzitrace.span.metrics.$$1
+
+  transform:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          # Base'teki 2 kuralı koruyoruz ve 1 kural ekliyoruz
+          - replace_pattern(name, "\\?.*", "")
+          - replace_match(name, "GET /api/products/*", "GET /api/products/{productId}")
+          - set(span.attributes["operation.name"], span.name)
+
+connectors:
+  spanmetrics: {}
+  servicegraph:
+    metrics_flush_interval: 30s
+    dimensions:
+      - db.system
+      - db.name
+      - operation.name
+    virtual_node_peer_attributes:
+      - db.system
+      - peer.service
+    virtual_node_extra_label: true

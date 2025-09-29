@@ -9,6 +9,7 @@ import BaseContainer from '../../components/core/basecontainer/basecontainer';
 import { Spin } from 'antd';
 import ServiceLegendPanel from './ServiceLegend/ServiceLegend';
 import { FiDatabase, FiZap, FiBox } from 'react-icons/fi';
+import { useAppSelector } from '../../store/hooks';
 import { MdHttp } from 'react-icons/md';
 
 const COLORS = [
@@ -55,6 +56,7 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId }) 
   const [traceData, setTraceData] = useState<SpanNode[]>([]);
   const [selectedSpanId, setSelectedSpanId] = useState<string | null>(null);
   const [gridWidth, setGridWidth] = useState(0);
+  const { selectedTempoUid } = useAppSelector((state) => state.tempo);
 
   const flattenSpans = (nodes: SpanNode[]): SpanNode[] =>
     nodes.flatMap((n) => [n, ...(n.children ? flattenSpans(n.children) : [])]);
@@ -140,7 +142,7 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId }) 
     };
 
     fetchTrace();
-  }, [traceId]);
+  }, [traceId, selectedTempoUid]);
 
   const spans = useMemo(() => flattenSpans(traceData), [traceData]);
   const minStartTime = Math.min(...spans.map((s) => s.startTime));

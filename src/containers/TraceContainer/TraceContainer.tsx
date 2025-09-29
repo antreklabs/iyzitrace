@@ -9,6 +9,7 @@ import { randomBackgroundGradient } from '../../utils';
 import { Link } from 'react-router-dom';
 import { PLUGIN_BASE_URL } from '../../constants';
 import { IoIosArrowForward,IoIosArrowDown } from "react-icons/io";
+import { useAppSelector } from '../../store/hooks';
 
 const { Sider, Content } = Layout;
 const { Title, Text } = Typography;
@@ -23,13 +24,14 @@ const TraceContainer: React.FC<TraceContainerProps> = ({ traceId }) => {
   const [loading, setLoading] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [statsData, setStatsData] = useState<any[]>([]);
+  const { selectedTempoUid } = useAppSelector((state) => state.tempo);
 
   // traceId prop'u geldiğinde otomatik arama yap
   useEffect(() => {
     if (traceId) {
       fetchSpecificTrace(traceId);
     }
-  }, [traceId]);
+  }, [traceId, selectedTempoUid]);
 
   const fetchSpecificTrace = async (traceId: string) => {
     setLoading(true);
@@ -167,7 +169,7 @@ const TraceContainer: React.FC<TraceContainerProps> = ({ traceId }) => {
  
   useEffect(() => {
     fetchTraces();
-  }, [range]);
+  }, [range, selectedTempoUid]);
 
   const columns = [
     {
