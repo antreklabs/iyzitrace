@@ -240,3 +240,21 @@ Below you can find source code for existing app plugins and other related docume
 - [Basic app plugin example](https://github.com/grafana/grafana-plugin-examples/tree/master/examples/app-basic#readme)
 - [`plugin.json` documentation](https://grafana.com/developers/plugin-tools/reference/plugin-jsonplugin-json)
 - [Sign a plugin](https://grafana.com/developers/plugin-tools/publish-a-plugin/sign-a-plugin)
+
+## Git Workflow Commands
+
+### Creating a new branch from dev and pushing to GitHub
+
+```bash
+# Switch to dev branch
+git checkout dev
+
+# Pull latest changes from dev
+git pull origin dev
+
+# Create and switch to new branch from dev
+git checkout -b feature/your-feature-name
+
+# Push the new branch to GitHub and set up tracking
+git push -u origin feature/your-feature-name
+```

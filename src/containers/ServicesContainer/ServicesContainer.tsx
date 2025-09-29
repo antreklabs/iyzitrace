@@ -5,11 +5,13 @@ import { TempoApi } from '../../providers';
 import ServiceCard from './components/ServiceCard';
 import GrafanaLikeRangePicker from '../../components/core/graphanadatepicker';
 import MiddleStats from './components/middlestats/MiddleStats';
+import { useAppSelector } from '../../store/hooks';
 
 const ServicesContainer: React.FC = () => {
   const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [range] = useState<any>(null);
+  const { selectedTempoUid } = useAppSelector((state) => state.tempo);
 
   const now = Date.now();
   const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
@@ -32,7 +34,7 @@ const ServicesContainer: React.FC = () => {
     };
 
     fetchServices();
-  }, []);
+  }, [selectedTempoUid]);
 
   if (loading) {
     return (

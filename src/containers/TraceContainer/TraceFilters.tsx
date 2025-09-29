@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Select, Input, Button, Divider, Form, Row, Col, InputNumber, Switch, Typography } from 'antd';
 import { TempoApi } from '../../providers';
+import { useAppSelector } from '../../store/hooks';
 
 const { Option } = Select;
 
@@ -21,6 +22,7 @@ const TraceFilters: React.FC<TraceFiltersProps> = ({ onChange, collapsed }) => {
   const [status, setStatus] = useState<string[]>([]);
   const [form] = Form.useForm();
   const [selectedService, setSelectedService] = useState<string[]>([]);
+  const { selectedTempoUid } = useAppSelector((state) => state.tempo);
 
   const fetchServices = async () => {
     console.log('Fetching services...');
@@ -49,7 +51,7 @@ const TraceFilters: React.FC<TraceFiltersProps> = ({ onChange, collapsed }) => {
 
   useEffect(() => {
     fetchServices();
-  }, []);
+  }, [selectedTempoUid]);
 
   const handleServiceChange = (value: string[]) => {
     console.log('Selected service:', value);
