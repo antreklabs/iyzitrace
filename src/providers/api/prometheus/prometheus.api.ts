@@ -1,6 +1,6 @@
-import store from '../../store/store';
+import store from '../../../store/store';
 import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
-import { setSelectedPrometheusUid } from '../../store/slices/tempo.slice'; // varsa burada
+import { setSelectedPrometheusUid } from '../../../store/slices/tempo.slice'; // varsa burada
 
 export const prometheusApi = {
     async resolvePrometheusUid(): Promise<string> {

@@ -2,80 +2,65 @@ import React from 'react';
 import { LogsProps } from '../../interfaces/pages/logs/logs-props.interface';
 import BaseContainerComponent from '../base.container';
 import LogFilter from './log.filter';
+import { lokiReadApi } from '../../providers/api/loki/loki.api.read';
+import { LogsRequestModel } from '../../interfaces/pages/logs/logs.request.interface';
 
 const LogContainer: React.FC<LogsProps> = (props) => {
   const { id, start, end } = props;
 
   // Loki'den veri çek, viewModelData'ya ekle
-  const fetchModelData = async (params?: LogsProps & { filters?: any }) => {
-    // TODO: Implement Loki API call
-    // const data = await lokiApi.getLogs(params);
+  const fetchModelData = async (params?: LogsProps & { filters?: any; range?: [number, number] }) => {
+    // Console log incoming params and filters
+    // Note: params can include runtime filters from the UI
+    // eslint-disable-next-line no-console
+    console.log('[LogContainer] fetchModelData params:', params);
+    // eslint-disable-next-line no-console
+    console.log('[LogContainer] fetchModelData filters:', params?.filters);
+
+    const selectedService = params?.filters?.service;
+    const selectedLevel = params?.filters?.level;
+
+    // Use range from GrafanaLikeRangePicker if available, otherwise fallback to props or defaults
+    const [rangeStart, rangeEnd] = params?.range || [start, end] || [Date.now() - 60 * 60 * 1000, Date.now()];
+
+    // Basic Loki expr: constrain by service and level when available
+    // Fallback to a generic selector if not provided
+    const exprParts: string[] = [];
+    if (selectedService) {
+      exprParts.push(`service="${selectedService}"`);
+    }
+    const selector = `{${exprParts.join(',')}}`;
+
+    const levelFilter = selectedLevel ? ` |= "${selectedLevel}"` : '';
+    const expr = `${selector}${levelFilter}` || '{ }';
+
+    const requestModel: LogsRequestModel = {
+      datasourceUidOrName: 'loki',
+      expr,
+      start: rangeStart,
+      end: rangeEnd,
+      limit: 100,
+      orderBy: 'timestamp',
+      orderDirection: 'desc',
+      interval: '1s',
+      intervalMs: 1000,
+      timezone: 'UTC',
+      maxDataPoints: 1000,
+    };
+
+    try {
+      // Call API with manual input (result is not yet wired to table data)
+      const apiResult = await lokiReadApi.query(requestModel);
+      // eslint-disable-next-line no-console
+      console.log('[LogContainer] lokiReadApi.query result:', apiResult);
+
+      return apiResult.logs;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('[LogContainer] lokiReadApi.query error:', e);
+    }
     
-    // Dummy data - Loki benzeri log verileri
-    const dummyLogs = [
-      {
-        id: 'log_001',
-        timestamp: new Date().toISOString(),
-        level: 'ERROR',
-        service: 'user-service',
-        message: 'Failed to authenticate user: invalid credentials',
-        traceId: 'trace_abc123',
-        spanId: 'span_def456',
-        duration: 45,
-        status: 'error',
-        tags: { userId: '12345', endpoint: '/api/auth/login' }
-      },
-      {
-        id: 'log_002',
-        timestamp: new Date(Date.now() - 30000).toISOString(),
-        level: 'INFO',
-        service: 'payment-service',
-        message: 'Payment processed successfully',
-        traceId: 'trace_xyz789',
-        spanId: 'span_ghi012',
-        duration: 120,
-        status: 'success',
-        tags: { orderId: 'ORD-001', amount: '99.99' }
-      },
-      {
-        id: 'log_003',
-        timestamp: new Date(Date.now() - 60000).toISOString(),
-        level: 'WARN',
-        service: 'inventory-service',
-        message: 'Low stock alert for product SKU-12345',
-        traceId: 'trace_mno345',
-        spanId: 'span_pqr678',
-        duration: 25,
-        status: 'warning',
-        tags: { productId: 'SKU-12345', currentStock: '5' }
-      },
-      {
-        id: 'log_004',
-        timestamp: new Date(Date.now() - 90000).toISOString(),
-        level: 'DEBUG',
-        service: 'notification-service',
-        message: 'Email notification queued for delivery',
-        traceId: 'trace_stu901',
-        spanId: 'span_vwx234',
-        duration: 8,
-        status: 'success',
-        tags: { email: 'user@example.com', template: 'welcome' }
-      },
-      {
-        id: 'log_005',
-        timestamp: new Date(Date.now() - 120000).toISOString(),
-        level: 'ERROR',
-        service: 'database-service',
-        message: 'Connection timeout to primary database',
-        traceId: 'trace_yza567',
-        spanId: 'span_bcd890',
-        duration: 5000,
-        status: 'error',
-        tags: { database: 'primary', retryCount: '3' }
-      }
-    ];
-    
-    return dummyLogs;
+    return [];
   };
 
   const expandedRowRender = (record: any) => {
@@ -259,6 +244,7 @@ const LogContainer: React.FC<LogsProps> = (props) => {
       onExpandedRowRender={expandedRowRender}
       columns={columns}
       filterComponent={<LogFilter onChange={fetchModelData} collapsed={false} />}
+      datasourceType="loki"
     />
   );
 };

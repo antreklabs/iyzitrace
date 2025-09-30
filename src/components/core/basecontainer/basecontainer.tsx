@@ -8,12 +8,13 @@ interface BaseConatinerProps {
   title: string;
   headerActions?: React.ReactNode;
   children?: React.ReactNode;
+  datasourceType?: 'tempo' | 'loki';
 }
 
-const BaseContainer: React.FC<BaseConatinerProps> = ({ title, headerActions, children }) => {
+const BaseContainer: React.FC<BaseConatinerProps> = ({ title, headerActions, children, datasourceType }) => {
   return (
     <Card 
-      title={<BaseContainerHeader title={title} headerActions={headerActions} />} 
+      title={<BaseContainerHeader title={title} headerActions={headerActions} datasourceType={datasourceType} />} 
       style={{
         height: 'calc(100vh - 75px)'
       }} 

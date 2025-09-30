@@ -11,18 +11,19 @@ interface BaseContainerHeaderProps {
   title: string;
   headerActions?: React.ReactNode;
   children?: React.ReactNode;
+  datasourceType?: 'tempo' | 'loki';
 }
 
-const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, headerActions, children }) => {
+const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, headerActions, children, datasourceType = 'tempo' }) => {
   const dispatch = useAppDispatch();
   const { selectedTempoUid } = useAppSelector((state) => state.tempo);
   const [allList, setAllList] = useState<any[]>([]);
 
   useEffect(() => {
-    const loadTempos = async () => {
+    const loadDatasources = async () => {
       const listFromGrafana = getDataSourceSrv()
         .getList()
-        .filter((ds) => ds.type === 'tempo');
+        .filter((ds) => ds.type === datasourceType);
 
       setAllList(listFromGrafana);
       const uidList = listFromGrafana.map((ds) => ds.uid);
@@ -39,8 +40,8 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, header
 
     // Her component mount'unda data source'ları yükle
     // Sayfa geçişlerinde dropdown'ın düzgün doldurulması için
-    loadTempos();
-  }, [dispatch]);
+    loadDatasources();
+  }, [dispatch, datasourceType]);
 
   const handleChange = (value: string) => {
     dispatch(setSelectedTempoUid(value));
@@ -66,12 +67,13 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, header
             value={selectedTempoUid ?? undefined}
             style={{ minWidth: 200 }}
             onChange={handleChange}
-            placeholder="Select Tempo Instance"
+            placeholder={`Select ${datasourceType === 'loki' ? 'Loki' : 'Tempo'} Instance`}
             options={allList.map((ds) => ({
               value: ds.uid,
               label: (
                 <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {ds.type === 'tempo' && <img src={tempoLogoSvg} width={16} height={16} alt="tempo" />}
+                  {ds.type === 'loki' && <img src="public/app/plugins/datasource/loki/img/loki_icon.svg" width={16} height={16} alt="loki" />}
                   {ds.type === 'prometheus' && (
                     <img
                       src="public/plugins/prometheus/img/prometheus_logo.svg"

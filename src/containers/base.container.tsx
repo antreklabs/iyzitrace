@@ -19,6 +19,7 @@ interface BaseContainerProps {
   onExpandedRowRender: (record: any) => React.ReactNode;
   columns: any[];
   filterComponent?: React.ReactNode;
+  datasourceType?: 'tempo' | 'loki';
 }
 
 const BaseContainerComponent: React.FC<BaseContainerProps> = ({
@@ -29,7 +30,8 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   onFetchData,
   onExpandedRowRender,
   columns,
-  filterComponent
+  filterComponent,
+  datasourceType = 'tempo'
 }) => {
   const defaults = createDefaultBaseProps();
   const [range, setRange] = useState<[number, number]>([start ?? defaults.start!, end ?? defaults.end!]);
@@ -71,6 +73,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   return (
     <BaseContainer
       title={title}
+      datasourceType={datasourceType}
       headerActions={<GrafanaLikeRangePicker title="Date Range" onChange={(start, end) => setRange([start, end])} />}
     >
       <Layout style={{ height: 'calc(100% - 40px)', overflow: 'auto' }}>

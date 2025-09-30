@@ -4,7 +4,7 @@ import { Layout, Button, Table, Space, Modal, App, Tabs, Switch } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, ArrowUpOutlined, ArrowDownOutlined, CopyOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { LogPipeline } from '../../interfaces/pipeline.interface';
-import { pipelineApi } from '../../providers/api/pipeline.api';
+import { pipelineApi } from '../../providers/api/loki/pipeline.api';
 import PipelineEditor from '../../components/Pipeline/PipelineEditor';
 
 const { Header, Content } = Layout;

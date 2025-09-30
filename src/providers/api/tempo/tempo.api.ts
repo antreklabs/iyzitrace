@@ -1,7 +1,7 @@
 // src/services/tempoApi.ts
 
 import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
-import store from '../../store/store';
+import store from '../../../store/store';
 import qs from 'qs';
 
 type TraceQLSearchParams = {
