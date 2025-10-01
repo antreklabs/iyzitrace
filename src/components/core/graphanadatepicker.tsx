@@ -40,10 +40,14 @@ const parseRelativeInput = (val: string): dayjs.Dayjs | null => {
 
 const GrafanaLikeRangePicker = ({
   onChange,
+  onApply,
   title,
+  value,
 }: {
   onChange: (start: number, end: number) => void;
+  onApply: (start: number, end: number) => void;
   title?: string;
+  value?: [number, number];
 }) => {
   const [visible, setVisible] = useState(false);
   const [from, setFrom] = useState('now-1h');
@@ -55,7 +59,7 @@ const GrafanaLikeRangePicker = ({
     const fromParsed = parseRelativeInput(from);
     const toParsed = parseRelativeInput(to);
     if (fromParsed && toParsed) {
-      onChange(fromParsed.valueOf(), toParsed.valueOf());
+      onApply(fromParsed.valueOf(), toParsed.valueOf());
       setVisible(false);
     }
   };
@@ -88,6 +92,11 @@ const GrafanaLikeRangePicker = ({
             onChange={(e) => {
               setFrom(e.target.value);
               setSelectedQuickLabel(null);
+              const fromParsed = parseRelativeInput(e.target.value);
+              const toParsed = parseRelativeInput(to);
+              if (fromParsed && toParsed) {
+                onChange(fromParsed.valueOf(), toParsed.valueOf());
+              }
             }}
             style={{ background: '#2c2c2c', color: '#fff' }}
           />
@@ -97,6 +106,11 @@ const GrafanaLikeRangePicker = ({
             onChange={(e) => {
               setTo(e.target.value);
               setSelectedQuickLabel(null);
+              const fromParsed = parseRelativeInput(from);
+              const toParsed = parseRelativeInput(e.target.value);
+              if (fromParsed && toParsed) {
+                onChange(fromParsed.valueOf(), toParsed.valueOf());
+              }
             }}
             style={{ background: '#2c2c2c', color: '#fff' }}
           />
@@ -140,6 +154,11 @@ const GrafanaLikeRangePicker = ({
                 setFrom(relative);
                 setTo('now');
                 setSelectedQuickLabel(item.label);
+                const fromParsed = parseRelativeInput(relative);
+                const toParsed = parseRelativeInput('now');
+                if (fromParsed && toParsed) {
+                  onChange(fromParsed.valueOf(), toParsed.valueOf());
+                }
               }}
             >
               {item.label}

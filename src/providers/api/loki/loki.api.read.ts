@@ -3,25 +3,25 @@ import { LogsRequestModel } from '../../../interfaces/pages/logs/logs.request.in
 import { LokiReadRequestFactory } from './models/loki.read.request.model';
 import { LogItem, LogsResponseModel } from '../../../interfaces/pages/logs/logs.response.interface';
 import { logParser } from '../../../utils/log-parser.wrapper';
+import { BaseApi } from '../core/base.api';
 
-class LokiReadApi {
+class LokiReadApi extends BaseApi {
+
   async query(requestModel: LogsRequestModel): Promise<LogsResponseModel> {
-    try {
+      try {
 
-      const lokiReadRequestModel = await LokiReadRequestFactory.create(requestModel);
-      const response = await lastValueFrom(
-        lokiReadRequestModel.datasource.query(lokiReadRequestModel.request));
+        const datasource = await this.getDatasourceInstance();
+        const lokiReadRequestModel = await LokiReadRequestFactory.create(requestModel, datasource);
+        const response = await lastValueFrom(datasource.query(lokiReadRequestModel.request));
       
-      return this.mapResponseModel(response, 
-        lokiReadRequestModel.orderBy, lokiReadRequestModel.orderDirection);
+      return this.mapResponseModel(response);
     } catch (error) {
       console.error('Loki query error:', error);
       throw error;
     }
   }
 
-  private mapResponseModel(response: any, orderBy?: string, orderDirection?: 'asc' | 'desc'): 
-  LogsResponseModel {
+  private mapResponseModel(response: any): LogsResponseModel {
     const logs: LogItem[] = [];
     
     if (response.data && Array.isArray(response.data)) {
@@ -95,42 +95,9 @@ class LokiReadApi {
       });
     }
     
-    // Sıralama uygula
-    let sortedLogs: LogItem[] = logs;
-    if (orderBy) {
-      sortedLogs = logs.sort((a, b) => {
-        let aValue: any;
-        let bValue: any;
-
-        switch (orderBy) {
-          case 'timestamp':
-            aValue = new Date(a.timestamp).getTime();
-            bValue = new Date(b.timestamp).getTime();
-            break;
-          case 'level':
-            aValue = a.level;
-            bValue = b.level;
-            break;
-          case 'service':
-            aValue = a.service;
-            bValue = b.service;
-            break;
-          default:
-            aValue = new Date(a.timestamp).getTime();
-            bValue = new Date(b.timestamp).getTime();
-        }
-
-        const result = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-        return orderDirection === 'desc' ? -result : result;
-      });
-    } else {
-      // Default: timestamp desc
-      sortedLogs = logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-    }
-
     return {
-      logs: sortedLogs,
-      total: sortedLogs.length,
+      logs: logs,
+      total: logs.length,
       hasMore: false,
     };
   }

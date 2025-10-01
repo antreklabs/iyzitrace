@@ -25,14 +25,14 @@ const TraceContainer: React.FC<TraceContainerProps> = ({ traceId }) => {
   const [loading, setLoading] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [statsData, setStatsData] = useState<any[]>([]);
-  const { selectedTempoUid } = useAppSelector((state) => state.tempo);
+  const { selectedUid } = useAppSelector((state) => state.datasource);
 
   // traceId prop'u geldiğinde otomatik arama yap
   useEffect(() => {
     if (traceId) {
       fetchSpecificTrace(traceId);
     }
-  }, [traceId, selectedTempoUid]);
+  }, [traceId, selectedUid]);
 
   const fetchSpecificTrace = async (traceId: string) => {
     setLoading(true);
@@ -170,7 +170,7 @@ const TraceContainer: React.FC<TraceContainerProps> = ({ traceId }) => {
  
   useEffect(() => {
     fetchTraces();
-  }, [range, selectedTempoUid]);
+  }, [range, selectedUid]);
 
   const columns = [
     {
@@ -261,7 +261,17 @@ const TraceContainer: React.FC<TraceContainerProps> = ({ traceId }) => {
   return (
     <BaseContainer
       title="Traces"
-      headerActions={<GrafanaLikeRangePicker title="Date Range" onChange={(start, end) => setRange([start, end])} />}
+      headerActions={
+        <GrafanaLikeRangePicker 
+          onChange={(start, end) => setRange([start, end])} 
+          onApply={(start, end) => {
+            setRange([start, end]);
+            // TODO: Fetch data with new range
+          }}
+          value={range}
+          title="Date Range" 
+        />
+      }
     >
       <Layout style={{ height: 'calc(100% - 40px)', overflow: 'auto' }}>
         <FiltersSider title="Filters" collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)}>

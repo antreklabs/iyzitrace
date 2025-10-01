@@ -1,5 +1,4 @@
 export interface LogsRequestModel {
-    datasourceUidOrName: string;
     expr: string;
     limit?: number;
     start?: number;

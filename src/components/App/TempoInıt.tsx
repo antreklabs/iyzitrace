@@ -1,31 +1,33 @@
 import React, { useEffect } from 'react';
 import { useAppDispatch } from '../../store/hooks';
-import { setSelectedTempoUid, setTempoUids } from '../../store/slices/tempo.slice';
+import { setDataSourceUids, setSelectedDataSourceUid } from '../../store/slices/datasource.slice';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { getTempoUidFromLocal, saveTempoUidToLocal } from '../../utils';
+import { getPageState, updatePageState } from '../../utils';
 
 const TempoInitializer: React.FC = () => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    const loadTempos = async () => {
+    const loadDatasources = async () => {
+      // Load Tempo datasources by default for backward compatibility
       const listFromGrafana = getDataSourceSrv()
         .getList()
         .filter((ds) => ds.type === 'tempo');
 
       const uidList = listFromGrafana.map((ds) => ds.uid);
-      dispatch(setTempoUids(uidList));
+      dispatch(setDataSourceUids(uidList));
 
-      const saved = getTempoUidFromLocal();
-      if (saved && uidList.includes(saved)) {
-        dispatch(setSelectedTempoUid(saved));
+      const pageState = getPageState('tempo');
+      const savedUid = pageState?.selectedDataSourceUid;
+      if (savedUid && uidList.includes(savedUid)) {
+        dispatch(setSelectedDataSourceUid(savedUid));
       } else if (uidList.length > 0) {
-        dispatch(setSelectedTempoUid(uidList[0]));
-        saveTempoUidToLocal(uidList[0]);
+        dispatch(setSelectedDataSourceUid(uidList[0]));
+        updatePageState('tempo', { selectedDataSourceUid: uidList[0] });
       }
     };
 
-    loadTempos();
+    loadDatasources();
   }, [dispatch]);
 
   return null; // Görünmez component

@@ -13,9 +13,9 @@ type TraceQLSearchParams = {
 
 export const TempoApi = {
     getSelectedUid(): string {
-        const uid = store.getState().tempo.selectedTempoUid;
+        const uid = store.getState().datasource.selectedUid;
         if (!uid) {
-            throw new Error('No Tempo UID selected.');
+            throw new Error('No Datasource UID selected.');
         }
         return uid;
     },
@@ -85,7 +85,7 @@ export const TempoApi = {
         return res.values ?? [];
     },
     async getAvgLatency(serviceName: string, start: number, end: number): Promise<Object | null> {
-        const uid = store.getState().tempo.selectedTempoUid;
+        const uid = store.getState().datasource.selectedUid;
         const url = `/api/datasources/proxy/uid/${uid}/api/search`;
 
         const query = `service.name = "${serviceName}"`;

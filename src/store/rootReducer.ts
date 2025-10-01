@@ -1,11 +1,12 @@
 import { combineReducers } from '@reduxjs/toolkit';
-import tempoReducer from './slices/tempo.slice';
+import prometheusReducer from './slices/prometheus.slice';
 import tabReducer from './slices/tab.slice';
+import datasourceReducer from './slices/datasource.slice';
 
 const rootReducer = combineReducers({
-  tempo: tempoReducer,
+  prometheus: prometheusReducer,
   tabSlice: tabReducer,
-  
+  datasource: datasourceReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

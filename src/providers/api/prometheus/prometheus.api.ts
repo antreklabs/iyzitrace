@@ -1,11 +1,11 @@
 import store from '../../../store/store';
 import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
-import { setSelectedPrometheusUid } from '../../../store/slices/tempo.slice'; // varsa burada
+import { setSelectedPrometheusUid } from '../../../store/slices/prometheus.slice';
 
 export const prometheusApi = {
     async resolvePrometheusUid(): Promise<string> {
         const state = store.getState();
-        const promUid = state.tempo.selectedPrometheusUid;
+        const promUid = state.prometheus.selectedPrometheusUid;
 
         if (promUid) {
             return promUid;

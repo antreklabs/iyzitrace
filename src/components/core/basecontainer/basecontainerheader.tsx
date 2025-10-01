@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Col, Row, Select } from 'antd';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { setSelectedTempoUid, setTempoUids } from '../../../store/slices/tempo.slice';
+import { setDataSourceUids, setSelectedDataSourceUid } from '../../../store/slices/datasource.slice';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { getTempoUidFromLocal, saveTempoUidToLocal } from '../../../utils';
+import { getPageState, updatePageState } from '../../../utils';
 import tempoLogoSvg from '../../../assets/images/tempo_logo.svg';
 
 interface BaseContainerHeaderProps {
@@ -16,7 +16,7 @@ interface BaseContainerHeaderProps {
 
 const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, headerActions, children, datasourceType = 'tempo' }) => {
   const dispatch = useAppDispatch();
-  const { selectedTempoUid } = useAppSelector((state) => state.tempo);
+  const { selectedUid } = useAppSelector((state) => state.datasource);
   const [allList, setAllList] = useState<any[]>([]);
 
   useEffect(() => {
@@ -27,14 +27,18 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, header
 
       setAllList(listFromGrafana);
       const uidList = listFromGrafana.map((ds) => ds.uid);
-      dispatch(setTempoUids(uidList));
+      
+      // Datasource slice'ını set et
+      dispatch(setDataSourceUids(uidList));
 
-      const saved = getTempoUidFromLocal();
-      if (saved && uidList.includes(saved)) {
-        dispatch(setSelectedTempoUid(saved));
+      // Sayfa state'inden datasource uid'i al
+      const pageState = getPageState(datasourceType);
+      const savedUid = pageState?.selectedDataSourceUid;
+      if (savedUid && uidList.includes(savedUid)) {
+        dispatch(setSelectedDataSourceUid(savedUid));
       } else if (uidList.length > 0) {
-        dispatch(setSelectedTempoUid(uidList[0]));
-        saveTempoUidToLocal(uidList[0]);
+        dispatch(setSelectedDataSourceUid(uidList[0]));
+        updatePageState(datasourceType, { selectedDataSourceUid: uidList[0] });
       }
     };
 
@@ -44,8 +48,8 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, header
   }, [dispatch, datasourceType]);
 
   const handleChange = (value: string) => {
-    dispatch(setSelectedTempoUid(value));
-    saveTempoUidToLocal(value);
+    dispatch(setSelectedDataSourceUid(value));
+    updatePageState(datasourceType, { selectedDataSourceUid: value });
   };
 
   return (
@@ -64,7 +68,7 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, header
         {/* Left: Data source selector (and optional children) */}
         <Col style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Select
-            value={selectedTempoUid ?? undefined}
+            value={selectedUid ?? undefined}
             style={{ minWidth: 200 }}
             onChange={handleChange}
             placeholder={`Select ${datasourceType === 'loki' ? 'Loki' : 'Tempo'} Instance`}

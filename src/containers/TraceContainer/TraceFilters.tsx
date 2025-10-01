@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Select, Input, Button, Divider, Form, Row, Col, InputNumber, Switch, Typography } from 'antd';
+import { Select, Input, Button, Divider, Form, Row, Col, InputNumber, Switch, Typography, Space } from 'antd';
 import { TempoApi } from '../../providers';
 import { useAppSelector } from '../../store/hooks';
 
@@ -22,7 +22,7 @@ const TraceFilters: React.FC<TraceFiltersProps> = ({ onChange, collapsed }) => {
   const [status, setStatus] = useState<string[]>([]);
   const [form] = Form.useForm();
   const [selectedService, setSelectedService] = useState<string[]>([]);
-  const { selectedTempoUid } = useAppSelector((state) => state.tempo);
+  const { selectedUid } = useAppSelector((state) => state.datasource);
 
   const fetchServices = async () => {
     console.log('Fetching services...');
@@ -51,7 +51,7 @@ const TraceFilters: React.FC<TraceFiltersProps> = ({ onChange, collapsed }) => {
 
   useEffect(() => {
     fetchServices();
-  }, [selectedTempoUid]);
+  }, [selectedUid]);
 
   const handleServiceChange = (value: string[]) => {
     console.log('Selected service:', value);
@@ -73,7 +73,7 @@ const TraceFilters: React.FC<TraceFiltersProps> = ({ onChange, collapsed }) => {
             {selectedService.length > 0 ? selectedService.length + ' Select' : 'All'}
           </Typography.Text>
         ) : (
-          <Input.Group compact style={{ maxHeight: 32 }}>
+          <Space.Compact style={{ maxHeight: 32, width: '100%' }}>
             <Form.Item name={['filters', 'serviceNameOperator']} noStyle initialValue="=">
               <Select style={{ width: '25%' }}>
                 {OPERATOR_OPTIONS.map((op) => (
@@ -101,7 +101,7 @@ const TraceFilters: React.FC<TraceFiltersProps> = ({ onChange, collapsed }) => {
                 ))}
               </Select>
             </Form.Item>
-          </Input.Group>
+          </Space.Compact>
         )}
       </Form.Item>
 
@@ -111,7 +111,7 @@ const TraceFilters: React.FC<TraceFiltersProps> = ({ onChange, collapsed }) => {
             {form.getFieldValue('spanName')?.length > 0 ? form.getFieldValue('spanName').length + ' Select' : 'All'}
           </Typography.Text>
         ) : (
-          <Input.Group compact>
+          <Space.Compact style={{ width: '100%' }}>
             <Form.Item name={['filters', 'spanNameOperator']} noStyle initialValue="=">
               <Select style={{ width: '25%' }}>
                 {OPERATOR_OPTIONS.map((op) => (
@@ -137,7 +137,7 @@ const TraceFilters: React.FC<TraceFiltersProps> = ({ onChange, collapsed }) => {
                 ))}
               </Select>
             </Form.Item>
-          </Input.Group>
+          </Space.Compact>
         )}
       </Form.Item>
 
@@ -147,7 +147,7 @@ const TraceFilters: React.FC<TraceFiltersProps> = ({ onChange, collapsed }) => {
             {form.getFieldValue('status')?.length > 0 ? form.getFieldValue('status').length + ' Select' : 'All'}
           </Typography.Text>
         ) : (
-          <Input.Group compact>
+          <Space.Compact style={{ width: '100%' }}>
             <Form.Item name={['filters', 'statusOperator']} noStyle initialValue="=">
               <Select style={{ width: '25%' }}>
                 {['=', '!='].map((op) => (
@@ -166,7 +166,7 @@ const TraceFilters: React.FC<TraceFiltersProps> = ({ onChange, collapsed }) => {
                 ))}
               </Select>
             </Form.Item>
-          </Input.Group>
+          </Space.Compact>
         )}
       </Form.Item>
 

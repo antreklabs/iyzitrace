@@ -4,53 +4,82 @@ import BaseContainerComponent from '../base.container';
 import LogFilter from './log.filter';
 import { lokiReadApi } from '../../providers/api/loki/loki.api.read';
 import { LogsRequestModel } from '../../interfaces/pages/logs/logs.request.interface';
+import { getPageState } from '../../utils';
+import { useLocation } from 'react-router-dom';
 
 const LogContainer: React.FC<LogsProps> = (props) => {
-  const { id, start, end } = props;
+  const getIntervalLabel = (intervalMs: number): string => {
+    if (!intervalMs) return '1s';
+    
+    if (intervalMs >= 86400000) { // 24 saat
+      return `${intervalMs / 86400000}d`;
+    }
+    if (intervalMs >= 3600000) { // 1 saat
+      return `${intervalMs / 3600000}h`;
+    }
+    if (intervalMs >= 60000) { // 1 dakika
+      return `${intervalMs / 60000}m`;
+    }
+    if (intervalMs >= 1000) { // 1 saniye
+      return `${intervalMs / 1000}s`;
+    }
+    return `${intervalMs}ms`;
+  };
+  const { id } = props;
+  const location = useLocation();
+  const pageName = location.pathname.split('/').filter(Boolean).join('_') || 'home';
 
   // Loki'den veri çek, viewModelData'ya ekle
-  const fetchModelData = async (params?: LogsProps & { filters?: any; range?: [number, number] }) => {
-    // Console log incoming params and filters
-    // Note: params can include runtime filters from the UI
+  const fetchModelData = async () => {
+    // Get state from localStorage
+    const pageState = getPageState(pageName);
+    console.log('[LogContainer] pageState:', pageState);
+    const selectedDataSourceUid = pageState?.selectedDataSourceUid;
+    if (!selectedDataSourceUid) {
+      console.warn('No datasource selected');
+      return [];
+    }
+
     // eslint-disable-next-line no-console
-    console.log('[LogContainer] fetchModelData params:', params);
-    // eslint-disable-next-line no-console
-    console.log('[LogContainer] fetchModelData filters:', params?.filters);
 
-    const selectedService = params?.filters?.service;
-    const selectedLevel = params?.filters?.level;
+    const selectedFilters = pageState.filters;
+    const selectedService = selectedFilters?.service;
+    const selectedLevel = selectedFilters?.level;
+    const [rangeStart, rangeEnd] = pageState.range;
+    const limit = selectedFilters.limit;
+    const intervalMs = selectedFilters.interval;
+    const interval = getIntervalLabel(intervalMs);
 
-    // Use range from GrafanaLikeRangePicker if available, otherwise fallback to props or defaults
-    const [rangeStart, rangeEnd] = params?.range || [start, end] || [Date.now() - 60 * 60 * 1000, Date.now()];
-
-    // Basic Loki expr: constrain by service and level when available
-    // Fallback to a generic selector if not provided
+    // Use correct labels from Loki logs
     const exprParts: string[] = [];
     if (selectedService) {
-      exprParts.push(`service="${selectedService}"`);
+      exprParts.push(`service_name="${selectedService}"`);
     }
-    const selector = `{${exprParts.join(',')}}`;
-
-    const levelFilter = selectedLevel ? ` |= "${selectedLevel}"` : '';
-    const expr = `${selector}${levelFilter}` || '{ }';
+    
+    // If no filters, use service_namespace="opentelemetry-demo"
+    const selector = exprParts.length > 0 ? `{${exprParts.join(',')}}` : '{service_namespace="opentelemetry-demo"}';
+    let expr = `${selector}`;
+    if (selectedLevel) {
+      const levelFilter = ` |= "${selectedLevel}"`;
+      expr += levelFilter;
+    }
 
     const requestModel: LogsRequestModel = {
-      datasourceUidOrName: 'loki',
       expr,
       start: rangeStart,
       end: rangeEnd,
-      limit: 100,
+      limit: limit,
       orderBy: 'timestamp',
       orderDirection: 'desc',
-      interval: '1s',
-      intervalMs: 1000,
+      interval: interval,
+      intervalMs: intervalMs,
       timezone: 'UTC',
       maxDataPoints: 1000,
     };
 
     try {
       // Call API with manual input (result is not yet wired to table data)
-      const apiResult = await lokiReadApi.query(requestModel);
+      const apiResult = await lokiReadApi.query({...requestModel});
       // eslint-disable-next-line no-console
       console.log('[LogContainer] lokiReadApi.query result:', apiResult);
 
@@ -64,6 +93,42 @@ const LogContainer: React.FC<LogsProps> = (props) => {
   };
 
   const expandedRowRender = (record: any) => {
+    // Extract attributes from record
+    const attributes = record.attributes || {};
+
+    // Basic fields with null checks
+    const basicFields = [
+      { label: 'Log ID', value: record.id },
+      { label: 'Timestamp', value: record.timestamp ? new Date(record.timestamp).toLocaleString() : null },
+      { label: 'Level', value: record.level || attributes.detected_level },
+      { label: 'Service', value: record.service || attributes.service_name },
+      { label: 'Service Instance ID', value: attributes.service_instance_id },
+      { label: 'Service Namespace', value: attributes.service_namespace },
+      { label: 'Service Version', value: attributes.service_version },
+      { label: 'Process ID', value: attributes.process_pid },
+      { label: 'Host Name', value: attributes.host_name },
+      { label: 'Container ID', value: attributes.container_id?.substring(0, 12) }
+    ].filter(field => field.value != null);
+
+    // Runtime fields with null checks
+    const runtimeFields = [
+      { label: 'Runtime Name', value: attributes.process_runtime_name },
+      { label: 'Runtime Version', value: attributes.process_runtime_version },
+      { label: 'Runtime Description', value: attributes.process_runtime_description },
+      { label: 'OS Type', value: attributes.os_type },
+      { label: 'OS Description', value: attributes.os_description },
+      { label: 'Architecture', value: attributes.host_arch }
+    ].filter(field => field.value != null);
+
+    // Telemetry fields with null checks
+    const telemetryFields = [
+      { label: 'Telemetry SDK', value: attributes.telemetry_sdk_name },
+      { label: 'SDK Version', value: attributes.telemetry_sdk_version },
+      { label: 'SDK Language', value: attributes.telemetry_sdk_language },
+      { label: 'Distro Name', value: attributes.telemetry_distro_name },
+      { label: 'Distro Version', value: attributes.telemetry_distro_version }
+    ].filter(field => field.value != null);
+
     return (
       <div style={{ 
         padding: '16px', 
@@ -72,76 +137,120 @@ const LogContainer: React.FC<LogsProps> = (props) => {
         border: '1px solid #434343',
         borderRadius: '6px'
       }}>
-        <h4 style={{ marginBottom: '12px', color: '#1890ff', fontSize: '16px' }}>Log Details</h4>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        {/* Message Section */}
+        {record.message && (
           <div>
-            <h5 style={{ color: '#fff', marginBottom: '8px', fontSize: '14px' }}>Basic Information</h5>
-            <p style={{ color: '#d9d9d9', margin: '4px 0' }}><strong style={{ color: '#fff' }}>Log ID:</strong> {record.id}</p>
-            <p style={{ color: '#d9d9d9', margin: '4px 0' }}><strong style={{ color: '#fff' }}>Timestamp:</strong> {new Date(record.timestamp).toLocaleString()}</p>
-            <p style={{ color: '#d9d9d9', margin: '4px 0' }}><strong style={{ color: '#fff' }}>Level:</strong> 
-              <span style={{ 
-                color: record.level === 'ERROR' ? '#ff4d4f' : 
-                       record.level === 'WARN' ? '#faad14' : 
-                       record.level === 'INFO' ? '#52c41a' : '#1890ff',
-                fontWeight: 'bold',
-                marginLeft: '8px'
-              }}>
-                {record.level}
-              </span>
-            </p>
-            <p style={{ color: '#d9d9d9', margin: '4px 0' }}><strong style={{ color: '#fff' }}>Service:</strong> {record.service}</p>
-            <p style={{ color: '#d9d9d9', margin: '4px 0' }}><strong style={{ color: '#fff' }}>Duration:</strong> {record.duration}ms</p>
+            <h5 style={{ color: '#fff', marginBottom: '8px', fontSize: '14px' }}>Message</h5>
+            <div style={{ 
+              backgroundColor: '#262626', 
+              padding: '12px', 
+              border: '1px solid #434343', 
+              borderRadius: '4px',
+              fontFamily: 'monospace',
+              fontSize: '14px',
+              color: '#d9d9d9',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word'
+            }}>
+              {record.message}
+            </div>
           </div>
-          
-          <div>
-            <h5 style={{ color: '#fff', marginBottom: '8px', fontSize: '14px' }}>Trace Information</h5>
-            <p style={{ color: '#d9d9d9', margin: '4px 0' }}><strong style={{ color: '#fff' }}>Trace ID:</strong> {record.traceId}</p>
-            <p style={{ color: '#d9d9d9', margin: '4px 0' }}><strong style={{ color: '#fff' }}>Span ID:</strong> {record.spanId}</p>
-            <p style={{ color: '#d9d9d9', margin: '4px 0' }}><strong style={{ color: '#fff' }}>Status:</strong> 
-              <span style={{ 
-                color: record.status === 'error' ? '#ff4d4f' : 
-                       record.status === 'warning' ? '#faad14' : '#52c41a',
-                fontWeight: 'bold',
-                marginLeft: '8px'
-              }}>
-                {record.status}
-              </span>
-            </p>
+        )}
+
+        {/* Telemetry Information */}
+        {telemetryFields.length > 0 && (
+          <div style={{ marginTop: '16px' }}>
+            <h5 style={{ color: '#fff', marginBottom: '8px', fontSize: '14px' }}>Telemetry Information</h5>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {telemetryFields.map(field => (
+                <span key={field.label} style={{
+                  backgroundColor: '#111b26',
+                  border: '1px solid #1890ff',
+                  borderRadius: '4px',
+                  padding: '4px 8px',
+                  fontSize: '12px',
+                  color: '#d9d9d9'
+                }}>
+                  <strong style={{ color: '#1890ff' }}>{field.label}:</strong> {field.value}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
-        
-        <div style={{ marginTop: '16px' }}>
-          <h5 style={{ color: '#fff', marginBottom: '8px', fontSize: '14px' }}>Message</h5>
-          <div style={{ 
-            backgroundColor: '#262626', 
-            padding: '12px', 
-            border: '1px solid #434343', 
-            borderRadius: '4px',
-            fontFamily: 'monospace',
-            fontSize: '14px',
-            color: '#d9d9d9'
-          }}>
-            {record.message}
+        )}
+
+        <div style={{ display: 'grid', gridTemplateColumns: '400px minmax(500px, 1fr)', gap: '16px', marginTop: '16px' }}>
+          {/* Left Column: Basic Information and Runtime Information */}
+          <div style={{ minWidth: '400px' }}>
+            {/* Basic Information */}
+            <div>
+              <h5 style={{ color: '#fff', marginBottom: '8px', fontSize: '14px' }}>Basic Information</h5>
+              {basicFields.map(field => (
+                <p key={field.label} style={{ color: '#d9d9d9', margin: '4px 0' }}>
+                  <strong style={{ color: '#fff' }}>{field.label}:</strong>
+                  {field.label === 'Level' ? (
+                    <span style={{ 
+                      color: field.value === 'ERROR' ? '#ff4d4f' : 
+                             field.value === 'WARN' ? '#faad14' : 
+                             field.value === 'INFO' ? '#52c41a' : '#1890ff',
+                      fontWeight: 'bold',
+                      marginLeft: '8px'
+                    }}>
+                      {field.value}
+                    </span>
+                  ) : (
+                    <span style={{ marginLeft: '8px' }}>{field.value}</span>
+                  )}
+                </p>
+              ))}
+            </div>
+
+            {/* Runtime Information */}
+            {runtimeFields.length > 0 && (
+              <div style={{ marginTop: '16px' }}>
+                <h5 style={{ color: '#fff', marginBottom: '8px', fontSize: '14px' }}>Runtime Information</h5>
+                {runtimeFields.map(field => (
+                  <p key={field.label} style={{ color: '#d9d9d9', margin: '4px 0' }}>
+                    <strong style={{ color: '#fff' }}>{field.label}:</strong>
+                    <span style={{ marginLeft: '8px' }}>{field.value}</span>
+                  </p>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-        
-        <div style={{ marginTop: '16px' }}>
-          <h5 style={{ color: '#fff', marginBottom: '8px', fontSize: '14px' }}>Tags</h5>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {Object.entries(record.tags).map(([key, value]) => (
-              <span key={key} style={{
-                backgroundColor: '#111b26',
-                border: '1px solid #1890ff',
+
+          {/* Right Column: Additional Attributes */}
+          {Object.keys(attributes).length > 0 && (
+            <div style={{ minWidth: '400px', maxWidth: '600px' }}>
+              <h5 style={{ color: '#fff', marginBottom: '8px', fontSize: '14px' }}>Additional Attributes</h5>
+              <div style={{ 
+                backgroundColor: '#262626',
+                border: '1px solid #434343',
                 borderRadius: '4px',
-                padding: '4px 8px',
-                fontSize: '12px',
-                color: '#d9d9d9'
+                padding: '12px',
+                maxHeight: '400px',
+                overflowY: 'auto'
               }}>
-                <strong style={{ color: '#1890ff' }}>{key}:</strong> {value as string}
-              </span>
-            ))}
-          </div>
+                {Object.entries(attributes)
+                  .filter(([key]) => !basicFields.some(f => f.value === attributes[key]) && 
+                                   !runtimeFields.some(f => f.value === attributes[key]) && 
+                                   !telemetryFields.some(f => f.value === attributes[key]))
+                  .map(([key, value], index, array) => (
+                    <div key={key} style={{
+                      padding: '8px 0',
+                      borderBottom: index < array.length - 1 ? '1px solid #434343' : 'none',
+                      color: '#d9d9d9',
+                      fontSize: '12px'
+                    }}>
+                      <div style={{ color: '#1890ff', marginBottom: '4px' }}>{key}</div>
+                      <div style={{ 
+                        wordBreak: 'break-all',
+                        fontFamily: 'monospace'
+                      }}>{value as string}</div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -207,43 +316,17 @@ const LogContainer: React.FC<LogsProps> = (props) => {
           {message}
         </span>
       ),
-    },
-    {
-      title: 'Duration',
-      dataIndex: 'duration',
-      key: 'duration',
-      width: 100,
-      render: (duration: number) => `${duration}ms`,
-      sorter: (a: any, b: any) => a.duration - b.duration,
-    },
-    {
-      title: 'Trace ID',
-      dataIndex: 'traceId',
-      key: 'traceId',
-      width: 120,
-      render: (traceId: string) => (
-        <span style={{ 
-          fontFamily: 'monospace', 
-          fontSize: '12px',
-          color: '#1890ff',
-          cursor: 'pointer'
-        }} title="Click to view trace">
-          {traceId.substring(0, 12)}...
-        </span>
-      ),
-    },
+    }
   ];
 
   return (
     <BaseContainerComponent
       title="Logs"
       id={id}
-      start={start}
-      end={end}
       onFetchData={fetchModelData}
       onExpandedRowRender={expandedRowRender}
       columns={columns}
-      filterComponent={<LogFilter onChange={fetchModelData} collapsed={false} />}
+      filterComponent={<LogFilter onChange={fetchModelData} collapsed={false} columns={columns} />}
       datasourceType="loki"
     />
   );

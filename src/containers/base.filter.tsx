@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Select, Input, Button, Divider, Form, Row, Col, InputNumber, Switch, Typography } from 'antd';
+import { Select, Input, Button, Divider, Form, Row, Col, InputNumber, Typography, Space } from 'antd';
 import { TempoApi } from '../providers';
 import { useAppSelector } from '../store/hooks';
 
@@ -17,6 +17,7 @@ interface BaseFilterProps {
   hasDurationFilter?: boolean;
   hasTagsFilter?: boolean;
   hasOptionsFilter?: boolean;
+  columns?: any[];
 }
 
 const BaseFilter: React.FC<BaseFilterProps> = ({ 
@@ -28,14 +29,15 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
   hasStatusFilter = false,
   hasDurationFilter = false,
   hasTagsFilter = false,
-  hasOptionsFilter = false
+  hasOptionsFilter = false,
+  columns = []
 }) => {
   const [services, setServices] = useState<string[]>([]);
   const [spanNames, setSpanNames] = useState<string[]>([]);
   const [status, setStatus] = useState<string[]>([]);
   const [form] = Form.useForm();
   const [selectedService, setSelectedService] = useState<string[]>([]);
-  const { selectedTempoUid } = useAppSelector((state) => state.tempo);
+  const { selectedUid } = useAppSelector((state) => state.datasource);
 
   const fetchServices = async () => {
     console.log('Fetching services...');
@@ -66,7 +68,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     if (hasServiceFilter) {
       fetchServices();
     }
-  }, [selectedTempoUid, hasServiceFilter]);
+  }, [selectedUid, hasServiceFilter]);
 
   const handleServiceChange = (value: string[]) => {
     console.log('Selected service:', value);
@@ -91,7 +93,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
             {selectedService.length > 0 ? selectedService.length + ' Select' : 'All'}
           </Typography.Text>
         ) : (
-          <Input.Group compact style={{ maxHeight: 32 }}>
+          <Space.Compact style={{ maxHeight: 32, width: '100%' }}>
             <Form.Item name={['filters', 'serviceNameOperator']} noStyle initialValue="=">
               <Select style={{ width: '25%' }}>
                 {OPERATOR_OPTIONS.map((op) => (
@@ -119,7 +121,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 ))}
               </Select>
             </Form.Item>
-          </Input.Group>
+          </Space.Compact>
         )}
         </Form.Item>
       )}
@@ -131,7 +133,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
             {form.getFieldValue('spanName')?.length > 0 ? form.getFieldValue('spanName').length + ' Select' : 'All'}
           </Typography.Text>
         ) : (
-          <Input.Group compact>
+          <Space.Compact style={{ width: '100%' }}>
             <Form.Item name={['filters', 'spanNameOperator']} noStyle initialValue="=">
               <Select style={{ width: '25%' }}>
                 {OPERATOR_OPTIONS.map((op) => (
@@ -157,7 +159,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 ))}
               </Select>
             </Form.Item>
-          </Input.Group>
+          </Space.Compact>
         )}
         </Form.Item>
       )}
@@ -169,7 +171,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
             {form.getFieldValue('status')?.length > 0 ? form.getFieldValue('status').length + ' Select' : 'All'}
           </Typography.Text>
         ) : (
-          <Input.Group compact>
+          <Space.Compact style={{ width: '100%' }}>
             <Form.Item name={['filters', 'statusOperator']} noStyle initialValue="=">
               <Select style={{ width: '25%' }}>
                 {['=', '!='].map((op) => (
@@ -188,7 +190,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 ))}
               </Select>
             </Form.Item>
-          </Input.Group>
+          </Space.Compact>
         )}
         </Form.Item>
       )}
@@ -262,50 +264,52 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
 
       <Row gutter={8}>
         {
-            collapsed ? (
-                <Typography.Text type="secondary">
-                {form.getFieldValue('options')?.length > 0
-                    ? form.getFieldValue('options').length + ' Select'
-                    : 'All'}
-                </Typography.Text>
-            ) : (
-                <>
+            <>
                 <Col span={12}>
-                    <Form.Item name={['options', 'start']} label="Start" initialValue={0}>
+                    <Form.Item name={['options', 'limit']} label="Limit" initialValue={100}>
                     <InputNumber min={0} style={{ width: '100%' }} />
                     </Form.Item>
                 </Col>
                 <Col span={12}>
-                    <Form.Item name={['options', 'end']} label="End" initialValue={0}>
+                    <Form.Item name={['options', 'interval']} label="Interval (ms)" initialValue={1000}>
                     <InputNumber min={0} style={{ width: '100%' }} />
                     </Form.Item>
                 </Col>
                 </>
-            )
         }
       </Row>
 
-      <Form.Item name={['options', 'step']} label="Step (sec)" initialValue={60}>
+      <Row gutter={8}>
         {
-            collapsed ? (
-                <Typography.Text type="secondary">
-                {form.getFieldValue('step')?.length > 0 ? form.getFieldValue('step').length + ' Select' : 'All'}
-                </Typography.Text>
-            ) : (
-                <InputNumber min={1} style={{ width: '100%' }} />
-            )
+            <>
+                <Col span={12}>
+                    <Form.Item name={['options', 'orderBy']} label="Order By" initialValue={'timestamp'}>
+                      <Select style={{ width: '100%' }}>
+                        {columns.map((column) => (
+                          <Option key={column.key} value={column.key}>
+                            {column.title}
+                          </Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                </Col>
+                <Col span={12}>
+                    <Form.Item name={['options', 'orderDirection']} label="Direction" initialValue={'desc'}>
+                      <Select style={{ width: '100%' }}>
+                        <Option value="asc">Ascending</Option>
+                        <Option value="desc">Descending</Option>
+                      </Select>
+                    </Form.Item>
+                </Col>
+                </>
         }
-      </Form.Item>
-
-      <Form.Item name={['options', 'streaming']} label="Streaming" valuePropName="checked" initialValue={false}>
-        <Switch />
-      </Form.Item>
+      </Row>
         </>
       )}
 
       {children}
 
-      <Form.Item>
+      <Form.Item style={{ marginTop: '16px' }}>
         <Button type="primary" htmlType="submit" block>
           Apply 
         </Button>

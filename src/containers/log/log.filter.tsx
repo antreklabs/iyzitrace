@@ -4,21 +4,22 @@ import BaseFilter from '../base.filter';
 interface LogFilterProps {
   onChange: (values: any) => void;
   collapsed?: boolean;
+  columns?: any[];
 }
 
-const LogFilter: React.FC<LogFilterProps> = ({ onChange, collapsed }) => {
+const LogFilter: React.FC<LogFilterProps> = ({ onChange, collapsed, columns }) => {
   return (
     <BaseFilter 
       onChange={onChange} 
       collapsed={collapsed}
-      hasServiceFilter={true}
-      hasSpanFilter={true}
-      hasStatusFilter={true}
-      hasDurationFilter={true}
-      hasTagsFilter={true}
+      columns={columns}
+      hasServiceFilter={false}
+      hasSpanFilter={false}
+      hasStatusFilter={false}
+      hasDurationFilter={false}
+      hasTagsFilter={false}
       hasOptionsFilter={true}
     >
-      {/* Log-specific filters can be added here */}
     </BaseFilter>
   );
 };

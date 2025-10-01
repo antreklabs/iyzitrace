@@ -13,7 +13,17 @@ const ServiceDetailContainer: React.FC<ServiceDetailContainerProps> = ({ service
   return (
     <BaseContainer
       title={'Detail of ' + serviceName.toUpperCase()}
-      headerActions={<GrafanaLikeRangePicker onChange={(start, end) => setRange([start, end])} title="Date Range" />}
+      headerActions={
+        <GrafanaLikeRangePicker 
+          onChange={(start, end) => setRange([start, end])} 
+          onApply={(start, end) => {
+            setRange([start, end]);
+            // TODO: Fetch data with new range
+          }}
+          value={range}
+          title="Date Range" 
+        />
+      }
     >
     <BasicSummary serviceName={serviceName} start={range[0]} end={range[1]} />
       <Row gutter={[16, 16]}>
