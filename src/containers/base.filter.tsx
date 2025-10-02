@@ -3,8 +3,9 @@ import { Select, Input, Button, Divider, Form, Row, Col, InputNumber, Typography
 import { lokiReadApi } from '../providers/api/loki/loki.api.read';
 import { useAppSelector } from '../store/hooks';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
-import { getPageState } from '../utils/localstorage.util';
+import { getPageState, updatePageState, getDefaultPageState } from '../utils/localstorage.util';
 import { useLocation } from 'react-router-dom';
+import '../assets/styles/pages/base/base.filter.css';
 
 export const { Option } = Select;
 export const OPERATOR_OPTIONS = ['=', '!=', '>', '<', 'contains', 'regex'];
@@ -21,6 +22,8 @@ interface BaseFilterProps {
   hasLabelsFilter?: boolean;
   hasFieldsFilter?: boolean;
   columns?: any[];
+  data?: any[]; // Grid data to extract fields from
+  onExpressionUpdate?: (labelExpressionParts: string[], expression: string) => { labelExpressionParts: string[], expression: string } | void; // Callback for expression updates
 }
 
 const BaseFilter: React.FC<BaseFilterProps> = ({ 
@@ -33,7 +36,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
   hasLabelsFilter = false,
   hasOptionsFilter = false,
   hasFieldsFilter = false,
-  columns = []
+  columns = [],
+  data = [],
+  onExpressionUpdate
 }) => {
   const [services, setServices] = useState<string[]>([]);
   const [lokiLabels, setLokiLabels] = useState<string[]>([]);
@@ -61,14 +66,78 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     }
   };
 
-  const fetchLokiFields = async () => {
-    try {
-      const fields = await lokiReadApi.getFields();
-      setLokiFields(Array.isArray(fields) ? fields : []);
-    } catch (error) {
-      console.error('Error fetching Loki fields:', error);
-      setLokiFields([]);
+  // Function to extract fields from grid data
+  const extractFieldsFromData = (data: any[]) => {
+    if (!data || data.length === 0) return;
+    
+    const fieldNames = new Set<string>();
+    data.forEach(item => {
+      if (item.attributes) {
+        Object.keys(item.attributes).forEach(key => fieldNames.add(key));
+      }
+    });
+    
+    const extractedFields = Array.from(fieldNames);
+    if (extractedFields.length > 0) {
+      setLokiFields(extractedFields);
     }
+  };
+
+  // Function to extract field values from grid data
+  const extractFieldValuesFromData = (data: any[], fieldName: string) => {
+    if (!data || data.length === 0) return [];
+    
+    const fieldValues = new Set<string>();
+    data.forEach(item => {
+      if (item.attributes && item.attributes[fieldName]) {
+        const value = item.attributes[fieldName];
+        if (typeof value === 'string' || typeof value === 'number') {
+          fieldValues.add(String(value));
+        }
+      }
+    });
+    
+    return Array.from(fieldValues);
+  };
+
+  // Function to build LogQL expression
+  const buildLogQLExpression = (formValues: any) => {
+    const parts: string[] = [];
+    
+    // Add default service namespace
+    parts.push(`service_namespace="opentelemetry-demo"`);
+    
+    // Add service filter
+    const selectedService = formValues?.filters?.serviceName;
+    const selectedServiceNameOperator = formValues?.filters?.serviceNameOperator || '=';
+    if (selectedService) {
+      parts.push(`service_name${selectedServiceNameOperator}"${selectedService}"`);
+    }
+    
+    // Add dynamic label filters
+    const labelFilters = formValues?.labels || {};
+    Object.values(labelFilters).forEach((labelFilter: any) => {
+      if (labelFilter && labelFilter.name && labelFilter.value) {
+        const labelName = labelFilter.name;
+        const labelValues = Array.isArray(labelFilter.value) ? labelFilter.value : [labelFilter.value];
+        
+        if (labelValues.length > 0) {
+          if (labelValues.length === 1) {
+            parts.push(`${labelName}="${labelValues[0]}"`);
+          } else {
+            const regexPattern = labelValues.map((val: string) => val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+            parts.push(`${labelName}=~"${regexPattern}"`);
+          }
+        }
+      }
+    });
+    
+    const baseExpression = `{${parts.join(',')}}`;
+    
+    return {
+      labelExpressionParts: parts,
+      expression: baseExpression
+    };
   };
 
   useEffect(() => {
@@ -78,17 +147,31 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     if (hasLabelsFilter) {
       fetchLokiLabels();
     }
-    if (hasFieldsFilter) {
-      fetchLokiFields();
+  }, [selectedUid, hasServiceFilter, hasLabelsFilter]);
+
+  // Extract fields from grid data when data changes
+  useEffect(() => {
+    if (hasFieldsFilter && data && data.length > 0) {
+      extractFieldsFromData(data);
+      
+      // Also update field values for existing field filters
+      fieldFilters.forEach(filter => {
+        if (filter.field) {
+          const values = extractFieldValuesFromData(data, filter.field);
+          setFieldFilters(prev => prev.map(f => 
+            f.id === filter.id 
+              ? { ...f, values: values }
+              : f
+          ));
+        }
+      });
     }
-  }, [selectedUid, hasServiceFilter, hasLabelsFilter, hasFieldsFilter]);
+  }, [data, hasFieldsFilter, fieldFilters]);
 
   // Set initial form values from localStorage
   useEffect(() => {
     const pageState = getPageState(pageName);
     if (pageState && pageState.filters) {
-      console.log('[BaseFilter] Setting initial form values from pageState:', pageState.filters);
-      
       // Set form values
       form.setFieldsValue(pageState.filters);
       
@@ -132,26 +215,8 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         }));
         setFieldFilters(fieldFiltersArray);
         
-        // Fetch values for each field that has a name
-        const fetchFieldValues = async () => {
-          for (const filter of fieldFiltersArray) {
-            if (filter.field) {
-              try {
-                console.log(`[BaseFilter] Fetching values for initial field: ${filter.field}`);
-                const values = await lokiReadApi.getFieldValue(filter.field);
-                console.log(`[BaseFilter] Field values received for ${filter.field}:`, values);
-                setFieldFilters(prev => prev.map(f => 
-                  f.id === filter.id 
-                    ? { ...f, values: Array.isArray(values) ? values : [] }
-                    : f
-                ));
-              } catch (error) {
-                console.error(`Error fetching field values for ${filter.field}:`, error);
-              }
-            }
-          }
-        };
-        fetchFieldValues();
+        // Field values will be populated from grid data when available
+        // No initial API calls needed
       }
     }
   }, [pageName, form]);
@@ -214,7 +279,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       }
     }
   };
-  const handleFieldFilterChange = async (id: string, fieldName: string) => {
+  const handleFieldFilterChange = (id: string, fieldName: string) => {
     setFieldFilters(fieldFilters.map(filter => 
       filter.id === id 
         ? { ...filter, field: fieldName, values: [] }
@@ -224,24 +289,46 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     currentFields[id] = { ...currentFields[id], value: undefined };
     form.setFieldsValue({ fields: currentFields });
 
-    // Fetch values for the selected label
-    if (fieldName) {
-      try {
-        const values = await lokiReadApi.getFieldValue(fieldName);
-        setFieldFilters(fieldFilters.map(filter => 
-          filter.id === id 
-            ? { ...filter, field: fieldName, values: Array.isArray(values) ? values : [] }
-            : filter
-        ));
-      } catch (error) {
-        console.error(`Error fetching field values for ${fieldName}:`, error);
-      }
-    }
+    // Field values will be populated when grid data is available
+    // No API call needed here
   };
 
   const handleApply = () => {
     const values = form.getFieldsValue();
-    onChange(values);
+    
+    // Build LogQL expression
+    const { labelExpressionParts, expression } = buildLogQLExpression(values);
+    
+    // Call callback if provided and get updated values
+    let finalLabelExpressionParts = labelExpressionParts;
+    let finalExpression = expression;
+    
+    if (onExpressionUpdate) {
+      const updated = onExpressionUpdate(labelExpressionParts, expression);
+      if (updated && typeof updated === 'object') {
+        finalLabelExpressionParts = updated.labelExpressionParts;
+        finalExpression = updated.expression;
+      }
+    }
+    
+    // Add expression data to values
+    const valuesWithExpression = {
+      ...values,
+      labelExpressionParts: finalLabelExpressionParts,
+      expression: finalExpression
+    };
+    
+    // Save to pageState
+    const pageState = getPageState(pageName) || getDefaultPageState();
+    updatePageState(pageName, {
+      ...pageState,
+      filters: {
+        ...pageState.filters,
+        ...valuesWithExpression
+      }
+    });
+    
+    onChange(valuesWithExpression);
   };
 
   return (
@@ -253,9 +340,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
             
           </Typography.Text>
         ) : (
-          <Space.Compact style={{ maxHeight: 32, width: '100%' }}>
+          <Space.Compact className="base-filter-compact-space">
             <Form.Item name={['filters', 'serviceNameOperator']} noStyle initialValue="=">
-              <Select style={{ width: '25%' }}>
+              <Select className="base-filter-operator-select">
                 {EQUAL_OPERATOR_OPTIONS.map((op) => (
                   <Option key={op} value={op}>
                     {op}
@@ -268,7 +355,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 showSearch
                 allowClear
                 placeholder="Select service"
-                style={{ width: '75%', maxHeight: 32 }}
+                className="base-filter-value-select"
               >
                 {services.map((service) => (
                   <Option key={service} value={service}>
@@ -353,7 +440,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
 
     {labelFilters.map((filter, index) => (
       <React.Fragment key={filter.id}>
-        <Row gutter={8} style={{ marginBottom: 16 }}>
+        <Row gutter={8} className="base-filter-label-filter-row">
           {collapsed ? (
             <Typography.Text type="secondary">
               {filter.label ? `${filter.label} = ${form.getFieldValue(['labels', filter.id, 'value']) || 'any'}` : 'All'}
@@ -383,7 +470,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                     showSearch
                     allowClear
                     placeholder="Select value"
-                    style={{ width: '100%', maxHeight: 16 }}
+                    className="base-filter-label-select"
                     disabled={!filter.label}
                     loading={filter.values.length === 0 && filter.label !== ''}
                     mode="multiple"
@@ -414,7 +501,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
             type="dashed" 
             icon={<PlusOutlined />} 
             onClick={addLabelFilter}
-            style={{ width: '100%' }}
+            className="base-filter-add-button"
           >
             Add Label Filter
           </Button>
@@ -423,14 +510,14 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     )}
 
     {!collapsed && labelFilters.length > 0 && (
-      <Row gutter={8} style={{ marginTop: 8 }}>
+      <Row gutter={8} className="base-filter-remove-button-row">
         <Col span={24}>
           <Button 
             type="dashed" 
             icon={<MinusOutlined />} 
             onClick={() => removeLabelFilter(labelFilters[labelFilters.length - 1].id)}
             danger
-            style={{ width: '100%' }}
+            className="base-filter-add-button"
           >
             Remove Last Label Filter
           </Button>
@@ -447,7 +534,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
 
     {fieldFilters.map((filter, index) => (
       <React.Fragment key={filter.id}>
-        <Row gutter={8} style={{ marginBottom: 16 }}>
+        <Row gutter={8} className="base-filter-field-filter-row">
           {collapsed ? (
             <Typography.Text type="secondary">
               {filter.field ? `${filter.field} = ${form.getFieldValue(['fields', filter.id, 'value']) || 'any'}` : 'All'}
@@ -477,7 +564,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                     showSearch
                     allowClear
                     placeholder="Select value"
-                    style={{ width: '100%', maxHeight: 16 }}
+                    className="base-filter-label-select"
                     disabled={!filter.field}
                     loading={filter.values.length === 0 && filter.field !== ''}
                     mode="multiple"
@@ -508,7 +595,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
             type="dashed" 
             icon={<PlusOutlined />} 
             onClick={addFieldFilter}
-            style={{ width: '100%' }}
+            className="base-filter-add-button"
           >
             Add Field Filter
           </Button>
@@ -517,14 +604,14 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     )}
 
     {!collapsed && fieldFilters.length > 0 && (
-      <Row gutter={8} style={{ marginTop: 8 }}>
+      <Row gutter={8} className="base-filter-remove-button-row">
         <Col span={24}>
           <Button 
             type="dashed" 
             icon={<MinusOutlined />} 
             onClick={() => removeFieldFilter(fieldFilters[fieldFilters.length - 1].id)}
             danger
-            style={{ width: '100%' }}
+            className="base-filter-add-button"
           >
             Remove Last Field Filter
           </Button>
@@ -544,12 +631,12 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
             <>
                 <Col span={12}>
                     <Form.Item name={['options', 'limit']} label="Limit" initialValue={100}>
-                    <InputNumber min={0} style={{ width: '100%' }} />
+                    <InputNumber min={0} className="base-filter-input-number" />
                     </Form.Item>
                 </Col>
                 <Col span={12}>
                     <Form.Item name={['options', 'interval']} label="Interval (ms)" initialValue={1000}>
-                    <InputNumber min={0} style={{ width: '100%' }} />
+                    <InputNumber min={0} className="base-filter-input-number" />
                     </Form.Item>
                 </Col>
                 </>
@@ -561,7 +648,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
             <>
                 <Col span={12}>
                     <Form.Item name={['options', 'orderBy']} label="Order By" initialValue={'timestamp'}>
-                      <Select style={{ width: '100%' }}>
+                      <Select className="base-filter-order-select">
                         {columns.map((column) => (
                           <Option key={column.key} value={column.key}>
                             {column.title}
@@ -572,7 +659,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 </Col>
                 <Col span={12}>
                     <Form.Item name={['options', 'orderDirection']} label="Direction" initialValue={'desc'}>
-                      <Select style={{ width: '100%' }}>
+                      <Select className="base-filter-order-select">
                         <Option value="asc">Ascending</Option>
                         <Option value="desc">Descending</Option>
                       </Select>
@@ -584,11 +671,11 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         </>
       )}
 
-      <Form.Item style={{ marginTop: '16px' }}>
+      <Form.Item className="base-filter-apply-form-item">
         <Button type="primary" htmlType="submit" block>
           Apply 
         </Button>
-        <Button block style={{ marginTop: 8 }} onClick={() => form.resetFields()}>
+        <Button block className="base-filter-reset-button" onClick={() => form.resetFields()}>
           Reset
         </Button>
       </Form.Item>

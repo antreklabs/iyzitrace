@@ -1,0 +1,25 @@
+/* Base Container Styles */
+.base-container-layout {
+  height: calc(100% - 40px);
+  overflow: auto;
+}
+
+.base-container-content {
+  padding: 24px;
+}
+
+.base-container-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.base-container-loading-spinner {
+  height: 200px;
+}
+
+.base-container-icon {
+  font-size: 14px;
+  margin-right: 8px;
+}

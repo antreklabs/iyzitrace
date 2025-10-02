@@ -2,15 +2,39 @@ import React from 'react';
 import BaseFilter from '../base.filter';
 import { Form, Select, Space } from 'antd';
 import { EQUAL_OPERATOR_OPTIONS, Option } from '../base.filter';
+import { getPageState } from '../../utils/localstorage.util';
+import { useLocation } from 'react-router-dom';
+import '../../assets/styles/pages/log/log.filter.css';
 
 interface LogFilterProps {
   onChange: (values: any) => void;
   collapsed?: boolean;
   columns?: any[];
-  levels?: string[];
+  data?: any[];
 }
 
-const LogFilter: React.FC<LogFilterProps> = ({ onChange, collapsed, columns, levels }) => {
+const LogFilter: React.FC<LogFilterProps> = ({ onChange, collapsed, columns, data }) => {
+  const location = useLocation();
+  const pageName = location.pathname.split('/').filter(Boolean).join('_') || 'home';
+  const levels = ['ERROR', 'WARN', 'INFO', 'DEBUG'];
+
+  // Simple function to add level filter to expression
+  const handleExpressionUpdate = (labelExpressionParts: string[], expression: string) => {
+    const pageState = getPageState(pageName);
+    const selectedLevel = pageState?.filters?.filters?.level;
+    const levelOperator = pageState?.filters?.filters?.levelOperator || '=';
+    
+    if (selectedLevel) {
+      // Add level filter to parts
+      const updatedParts = [...labelExpressionParts, `level${levelOperator}"${selectedLevel}"`];
+      const updatedExpression = `{${updatedParts.join(',')}}`;
+      
+      // Call the callback with updated values
+      return { labelExpressionParts: updatedParts, expression: updatedExpression };
+    }
+    
+    return { labelExpressionParts, expression };
+  };
 
   return (
     <BaseFilter 
@@ -23,13 +47,15 @@ const LogFilter: React.FC<LogFilterProps> = ({ onChange, collapsed, columns, lev
       hasLabelsFilter={true}
       hasFieldsFilter={true}
       hasOptionsFilter={true}
+      data={data}
+      onExpressionUpdate={handleExpressionUpdate}
     >
       {levels?.length > 0 && (
       <Form.Item label="Levels">
         {(
-          <Space.Compact style={{ maxHeight: 32, width: '100%' }}>
+          <Space.Compact className="log-filter-level-compact-space">
             <Form.Item name={['filters', 'levelOperator']} noStyle initialValue="=">
-              <Select style={{ width: '25%' }}>
+              <Select className="log-filter-level-operator-select">
                 {EQUAL_OPERATOR_OPTIONS.map((op) => (
                   <Option key={op} value={op}>
                     {op}
@@ -42,7 +68,7 @@ const LogFilter: React.FC<LogFilterProps> = ({ onChange, collapsed, columns, lev
                 showSearch
                 allowClear
                 placeholder="Select level"
-                style={{ width: '75%', maxHeight: 32 }}
+                className="log-filter-level-value-select"
               >
                 {levels.map((level) => (
                   <Option key={level} value={level}>

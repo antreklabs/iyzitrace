@@ -7,14 +7,13 @@ import BaseContainer from '../components/core/basecontainer/basecontainer';
 import GrafanaLikeRangePicker from '../components/core/graphanadatepicker';
 import FiltersSider from '../components/core/layout/filters-sider.component';
 import { getPageState, updatePageState, getDefaultPageState, PageState } from '../utils/localstorage.util';
+import '../assets/styles/pages/base/base.container.css';
 
 const { Content } = Layout;
 
 interface BaseContainerProps {
   title: string;
   id?: string | null;
-  start?: number;
-  end?: number;
   onFetchData: () => Promise<any[]>;
   onExpandedRowRender: (record: any) => React.ReactNode;
   columns: any[];
@@ -25,8 +24,6 @@ interface BaseContainerProps {
 const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   title,
   id,
-  start,
-  end,
   onFetchData,
   onExpandedRowRender,
   columns,
@@ -113,16 +110,19 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
         />
       }
     >
-      <Layout style={{ height: 'calc(100% - 40px)', overflow: 'auto' }}>
+      <Layout className="base-container-layout">
         <FiltersSider title="Filters" collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)}>
-          {React.cloneElement(filterComponent as React.ReactElement<any>, { onChange: handleFilterChange })}
+          {React.cloneElement(filterComponent as React.ReactElement<any>, { 
+            onChange: handleFilterChange,
+            data: modelData 
+          })}
         </FiltersSider>
 
-        <Content style={{ padding: 24 }}>
+        <Content className="base-container-content">
           {loading ? (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+            <div className="base-container-loading">
               <Spin tip="Loading data..." size="large">
-                <div style={{ height: 200 }} />
+                <div className="base-container-loading-spinner" />
               </Spin>
             </div>
           ) : modelData.length === 0 ? (
@@ -137,12 +137,12 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
                   expanded ? (
                     <IoIosArrowDown
                       onClick={(e: any) => onExpand(record, e)}
-                      style={{ fontSize: 14, marginRight: 8 }}
+                      className="base-container-icon"
                     />
                   ) : (
                     <IoIosArrowForward
                       onClick={(e: any) => onExpand(record, e)}
-                      style={{ fontSize: 14, marginRight: 8 }}
+                      className="base-container-icon"
                     />
                   ),
               }}

@@ -1,0 +1,14 @@
+/* Log Filter Styles */
+.log-filter-level-operator-select {
+  width: 25%;
+}
+
+.log-filter-level-value-select {
+  width: 75%;
+  max-height: 32px;
+}
+
+.log-filter-level-compact-space {
+  max-height: 32px;
+  width: 100%;
+}
