@@ -39,38 +39,79 @@ const LogContainer: React.FC<LogsProps> = (props) => {
       console.warn('No datasource selected');
       return [];
     }
-
-    // eslint-disable-next-line no-console
-
-    const selectedFilters = pageState.filters;
-    const selectedService = selectedFilters?.service;
-    const selectedLevel = selectedFilters?.level;
-    const [rangeStart, rangeEnd] = pageState.range;
-    const limit = selectedFilters.limit;
-    const intervalMs = selectedFilters.interval;
-    const interval = getIntervalLabel(intervalMs);
-
-    // Use correct labels from Loki logs
+    const selectedFilters = pageState.filters.filters;
     const exprParts: string[] = [];
+    exprParts.push(`service_namespace="opentelemetry-demo"`);
+
+    const selectedService = selectedFilters?.serviceName;
+    const selectedServiceNameOperator = selectedFilters?.serviceNameOperator;
     if (selectedService) {
-      exprParts.push(`service_name="${selectedService}"`);
+      exprParts.push(`service_name${selectedServiceNameOperator}"${selectedService}"`);
+    }
+    // Apply level filter as a label selector instead of body search
+    const selectedLevel = selectedFilters?.level;
+    const levelOperator = selectedFilters?.levelOperator;
+    if (selectedLevel) {
+      exprParts.push(`level${levelOperator}"${selectedLevel}"`);
     }
     
-    // If no filters, use service_namespace="opentelemetry-demo"
-    const selector = exprParts.length > 0 ? `{${exprParts.join(',')}}` : '{service_namespace="opentelemetry-demo"}';
-    let expr = `${selector}`;
-    if (selectedLevel) {
-      const levelFilter = ` |= "${selectedLevel}"`;
-      expr += levelFilter;
-    }
+    // Apply dynamic label filters
+    const labelFilters = pageState.filters.labels || {};
+    Object.values(labelFilters).forEach((labelFilter: any) => {
+      if (labelFilter && labelFilter.name && labelFilter.value) {
+        const labelName = labelFilter.name;
+        const labelValues = Array.isArray(labelFilter.value) ? labelFilter.value : [labelFilter.value];
+        
+        if (labelValues.length > 0) {
+          // For multiple values, use regex pattern
+          if (labelValues.length === 1) {
+            exprParts.push(`${labelName}="${labelValues[0]}"`);
+          } else {
+            const regexPattern = labelValues.map((val: string) => val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+            exprParts.push(`${labelName}=~"${regexPattern}"`);
+          }
+        }
+      }
+    });
+    
+    const fieldExprParts: string[] = [];
+    const selectedFields = pageState.filters.fields || {};
+    Object.values(selectedFields).forEach((fieldFilter: any) => {
+      if (fieldFilter && fieldFilter.name && fieldFilter.value) {
+        const fieldName = fieldFilter.name;
+        const fieldValues = Array.isArray(fieldFilter.value) ? fieldFilter.value : [fieldFilter.value];
+        
+        if (fieldValues.length > 0) {
+          if (fieldValues.length === 1) {
+            fieldExprParts.push(`${fieldName}="${fieldValues[0]}"`);
+          } else {
+            const regexPattern = fieldValues.map((val: string) => val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+            fieldExprParts.push(`${fieldName}=~"${regexPattern}"`);
+          }
+        }
+      }
+    });
+
+    const expr = `{${exprParts.join(',')}}${fieldExprParts.length > 0 ? ' | ' : ''}${fieldExprParts.join(' |')}`;
+    console.log('[LogContainer] Final LogQL expression:', expr);
+    
+    // Build the final LogQL expression
+    
+    const selectedOptions = pageState.filters.options;
+    const limit = selectedOptions.limit;
+    const intervalMs = selectedOptions.interval;
+    const interval = getIntervalLabel(intervalMs);
+    const orderBy = selectedOptions.orderBy;
+    const orderDirection = selectedOptions.orderDirection;
+    const [rangeStart, rangeEnd] = pageState.range;
 
     const requestModel: LogsRequestModel = {
       expr,
       start: rangeStart,
       end: rangeEnd,
       limit: limit,
-      orderBy: 'timestamp',
-      orderDirection: 'desc',
+      orderBy: orderBy,
+      orderDirection: orderDirection,
       interval: interval,
       intervalMs: intervalMs,
       timezone: 'UTC',
@@ -319,6 +360,8 @@ const LogContainer: React.FC<LogsProps> = (props) => {
     }
   ];
 
+  const levels = ['ERROR', 'WARN', 'INFO', 'DEBUG'];
+
   return (
     <BaseContainerComponent
       title="Logs"
@@ -326,7 +369,7 @@ const LogContainer: React.FC<LogsProps> = (props) => {
       onFetchData={fetchModelData}
       onExpandedRowRender={expandedRowRender}
       columns={columns}
-      filterComponent={<LogFilter onChange={fetchModelData} collapsed={false} columns={columns} />}
+      filterComponent={<LogFilter onChange={fetchModelData} collapsed={false} columns={columns} levels={levels} />}
       datasourceType="loki"
     />
   );

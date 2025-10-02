@@ -58,7 +58,6 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   // Filter handler
   const handleFilterChange = (filterValues: any) => {
     // eslint-disable-next-line no-console
-    console.log('[BaseContainer] Filter values received:', filterValues);
     setFilters(filterValues);
     saveState({ filters: filterValues });
     fetchModelData();
@@ -67,7 +66,6 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   // Tekleştirilmiş fetch fonksiyonu
   const fetchModelData = async () => {
     // eslint-disable-next-line no-console
-    console.log('[BaseContainer] fetchModelData called');
     setLoading(true);
     try {
       const data = await onFetchData();

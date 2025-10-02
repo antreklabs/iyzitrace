@@ -13,11 +13,128 @@ class LokiReadApi extends BaseApi {
         const datasource = await this.getDatasourceInstance();
         const lokiReadRequestModel = await LokiReadRequestFactory.create(requestModel, datasource);
         const response = await lastValueFrom(datasource.query(lokiReadRequestModel.request));
-      
+
       return this.mapResponseModel(response);
     } catch (error) {
       console.error('Loki query error:', error);
       throw error;
+    }
+  }
+
+  async getLabels(): Promise<string[]> {
+    try {
+      const datasource = await this.getDatasourceInstance();
+      
+      // Simple approach: just try languageProvider
+      if (datasource.languageProvider && typeof datasource.languageProvider.fetchLabels === 'function') {
+        const labels = await datasource.languageProvider.fetchLabels();
+        return Array.isArray(labels) ? labels : [];
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('Loki getLabels error:', error);
+      return [];
+    }
+  }
+
+  async getLabelValues(labelName: string): Promise<string[]> {
+    try {
+      const datasource = await this.getDatasourceInstance();
+      
+      // Try using languageProvider to get label values
+      if (datasource.languageProvider && typeof datasource.languageProvider.fetchLabelValues === 'function') {
+        const values = await datasource.languageProvider.fetchLabelValues(labelName);
+        if (Array.isArray(values)) {
+          return values;
+        }
+      }
+      
+      console.warn(`Could not get values for label: ${labelName}`);
+      return [];
+    } catch (error) {
+      console.error(`Error getting label values for ${labelName}:`, error);
+      return [];
+    }
+  }
+
+  async getFields(): Promise<string[]> {
+    try {
+      try {
+        const sampleRequest = {
+          expr: '{service_namespace="opentelemetry-demo"}',
+          start: Date.now() - 15 * 60 * 1000,
+          end: Date.now(),
+          limit: 10,
+          orderBy: 'timestamp' as const,
+          orderDirection: 'desc' as const,
+          interval: '1s',
+          intervalMs: 1000,
+          timezone: 'UTC',
+          maxDataPoints: 1000,
+        };
+        
+        const response = await this.query(sampleRequest);
+        if (response.logs && response.logs.length > 0) {
+          // Extract field names from log attributes
+          const fieldNames = new Set<string>();
+          response.logs.forEach(log => {
+            if (log.attributes) {
+              Object.keys(log.attributes).forEach(key => fieldNames.add(key));
+            }
+          });
+          return Array.from(fieldNames);
+        }
+      } catch (sampleError) {
+        console.warn('Sample query failed:', sampleError);
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('Loki getFields error:', error);
+      return [];
+    }
+  }
+
+  async getFieldValue(fieldName: string): Promise<string[]> {
+    try {
+      try {
+        const sampleRequest = {
+          expr: '{service_namespace="opentelemetry-demo"}',
+          start: Date.now() - 15 * 60 * 1000,
+          end: Date.now(),
+          limit: 1000,
+          orderBy: 'timestamp' as const,
+          orderDirection: 'desc' as const,
+          interval: '1s',
+          intervalMs: 1000,
+          timezone: 'UTC',
+          maxDataPoints: 1000,
+        };
+        
+        const response = await this.query(sampleRequest);
+        if (response.logs && response.logs.length > 0) {
+          // Extract unique values for the specified field
+          const fieldValues = new Set<string>();
+          response.logs.forEach(log => {
+            if (log.attributes && log.attributes[fieldName]) {
+              const value = log.attributes[fieldName];
+              if (typeof value === 'string' || typeof value === 'number') {
+                fieldValues.add(String(value));
+              }
+            }
+          });
+          console.log(`Field values for ${fieldName} from sample query:`, Array.from(fieldValues));
+          return Array.from(fieldValues);
+        }
+      } catch (sampleError) {
+        console.warn(`Sample query failed for field ${fieldName}:`, sampleError);
+      }
+      
+      return [];
+    } catch (error) {
+      console.error(`Error getting field values for ${fieldName}:`, error);
+      return [];
     }
   }
 
