@@ -11,9 +11,11 @@ exporters:
     tls:
       insecure: true
   
-  # Loki exporter for logs
+  # Loki exporter for logs via OTLP
   otlphttp/loki:
     endpoint: http://loki:3100/otlp
+    # tls:
+    #   insecure: true
     
 service:
   pipelines:
@@ -27,7 +29,7 @@ service:
       exporters: [otlphttp/prometheus, debug]
     logs:
       receivers: [otlp]
-      processors: [resourcedetection, memory_limiter, batch]
+      processors: [resourcedetection, memory_limiter, transform, batch]
       exporters: [opensearch, otlphttp/loki, debug]
 
 processors:
@@ -52,6 +54,17 @@ processors:
           - replace_pattern(name, "\\?.*", "")
           - replace_match(name, "GET /api/products/*", "GET /api/products/{productId}")
           - set(span.attributes["operation.name"], span.name)
+    log_statements:
+      - context: log
+        statements:
+          # Level'ı resource attributes'a ekle
+          - set(resource.attributes["level"], "INFO")
+          # Test için basit bir attribute ekle
+          - set(attributes["test_attr"], "working")
+          # Service name'i resource'dan al
+          - set(resource.attributes["service_name"], resource.attributes["service.name"])
+          # Service namespace'i resource'dan al
+          - set(resource.attributes["service_namespace"], resource.attributes["service.namespace"])
 
 connectors:
   spanmetrics: {}
