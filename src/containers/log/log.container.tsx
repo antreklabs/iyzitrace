@@ -1,37 +1,25 @@
 import React from 'react';
-import { LogsProps } from '../../interfaces/pages/logs/logs-props.interface';
-import BaseContainerComponent from '../base.container';
+import BaseContainerComponent, { PageState } from '../base.container';
 import LogFilter from './log.filter';
 import LogExpandedRowComponent from '../../components/log/log.container.expanded-row.component';
 import { lokiReadApi } from '../../providers/api/loki/loki.api.read';
 import { LogsRequestModel } from '../../interfaces/pages/logs/logs.request.interface';
-import { getPageState } from '../../utils';
 import { getIntervalLabel } from '../../utils/extensions.utils';
-import { useLocation } from 'react-router-dom';
 import '../../assets/styles/pages/log/log.container.css';
 
-const LogContainer: React.FC<LogsProps> = (props) => {
-  const { id } = props;
-  const location = useLocation();
-  const pageName = location.pathname.split('/').filter(Boolean).join('_') || 'home';
-
-  // Loki'den veri çek, viewModelData'ya ekle
-  const fetchModelData = async () => {
-    // Get state from localStorage
-    const pageState = getPageState(pageName);
-    
-    // Get expression from pageState (built in base.filter.tsx)
-    let expr = pageState.filters?.expression || '{service_namespace="opentelemetry-demo"}';
+const LogContainer: React.FC = () => {
+  const fetchModelData = async (pageState?: PageState | null) => {
+    let expr = pageState?.filters?.expression || '{service_namespace="opentelemetry-demo"}';
     
     console.log('[LogContainer] Using LogQL expression from pageState:', expr);
     
-    const selectedOptions = pageState.filters.options;
-    const limit = selectedOptions.limit;
-    const intervalMs = selectedOptions.interval;
+    const selectedOptions = pageState?.filters?.options;
+    const limit = selectedOptions?.limit || 100;
+    const intervalMs = selectedOptions?.interval || 1000;
     const interval = getIntervalLabel(intervalMs);
-    const orderBy = selectedOptions.orderBy;
-    const orderDirection = selectedOptions.orderDirection;
-    const [rangeStart, rangeEnd] = pageState.range;
+    const orderBy = selectedOptions?.orderBy || 'timestamp';
+    const orderDirection = selectedOptions?.orderDirection || 'desc';
+    const [rangeStart, rangeEnd] = pageState?.range || [Date.now() - 15 * 60 * 1000, Date.now()];
 
     const requestModel: LogsRequestModel = {
       expr,
@@ -120,7 +108,6 @@ const LogContainer: React.FC<LogsProps> = (props) => {
   return (
     <BaseContainerComponent
       title="Logs"
-      id={id}
       onFetchData={fetchModelData}
       onExpandedRowRender={expandedRowRender}
       columns={columns}

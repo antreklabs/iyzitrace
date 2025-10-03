@@ -6,15 +6,15 @@ import { useParams, useLocation } from 'react-router-dom';
 import BaseContainer from '../components/core/basecontainer/basecontainer';
 import GrafanaLikeRangePicker from '../components/core/graphanadatepicker';
 import FiltersSider from '../components/core/layout/filters-sider.component';
-import { getPageState, updatePageState, getDefaultPageState, PageState } from '../utils/localstorage.util';
-import '../assets/styles/pages/base/base.container.css';
+import { getPageState, updatePageState, getDefaultPageState, savePageState, PageState } from '../utils/localstorage.util';
+import '../assets/styles/base/base.container.css';
 
 const { Content } = Layout;
 
 interface BaseContainerProps {
   title: string;
   id?: string | null;
-  onFetchData: () => Promise<any[]>;
+  onFetchData: (pageState?: PageState | null) => Promise<any[]>;
   onExpandedRowRender: (record: any) => React.ReactNode;
   columns: any[];
   filterComponent?: React.ReactElement;
@@ -65,7 +65,8 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
     // eslint-disable-next-line no-console
     setLoading(true);
     try {
-      const data = await onFetchData();
+      const currentPageState = getPageState(pageName);
+      const data = await onFetchData(currentPageState);
       setModelData(data);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -168,3 +169,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
 };
 
 export default BaseContainerComponent;
+
+// Export the 4 page state management functions for use in child containers
+export { getPageState, updatePageState, getDefaultPageState, savePageState };
+export type { PageState };

@@ -5,19 +5,19 @@ import { setSelectedPrometheusUid } from '../../../store/slices/prometheus.slice
 export const prometheusApi = {
     async resolvePrometheusUid(): Promise<string> {
         const state = store.getState();
+        const tempoUid = state.datasource.selectedUid;
         const promUid = state.prometheus.selectedPrometheusUid;
 
         if (promUid) {
             return promUid;
         }
-        // Resolve by listing datasources and picking the first Prometheus
-        const list = await getDataSourceSrv().getList();
-        const prom = list.find((d) => d.type === 'prometheus');
-        if (!prom?.uid) {
-            throw new Error('No Prometheus datasource found in Grafana.');
+        const ds = await getDataSourceSrv().getInstanceSettings(tempoUid);
+        const uid = (ds?.jsonData as any)?.serviceMap?.datasourceUid;
+        if (!uid) {
+            throw new Error('Prometheus UID could not be resolved from Tempo datasource.');
         }
-        store.dispatch(setSelectedPrometheusUid(prom.uid));
-        return prom.uid;
+        store.dispatch(setSelectedPrometheusUid(uid));
+        return uid;
     },
 
     async runTraceQLQuery(query: string): Promise<any> {

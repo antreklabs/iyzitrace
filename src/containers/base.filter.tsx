@@ -3,9 +3,9 @@ import { Select, Input, Button, Divider, Form, Row, Col, InputNumber, Typography
 import { lokiReadApi } from '../providers/api/loki/loki.api.read';
 import { useAppSelector } from '../store/hooks';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
-import { getPageState, updatePageState, getDefaultPageState } from '../utils/localstorage.util';
+import { getPageState, updatePageState, getDefaultPageState } from './base.container';
 import { useLocation } from 'react-router-dom';
-import '../assets/styles/pages/base/base.filter.css';
+import '../assets/styles/base/base.filter.css';
 
 export const { Option } = Select;
 export const OPERATOR_OPTIONS = ['=', '!=', '>', '<', 'contains', 'regex'];

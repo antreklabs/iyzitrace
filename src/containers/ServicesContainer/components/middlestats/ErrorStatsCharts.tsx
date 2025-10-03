@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card } from "antd";
 import ApexCharts from "react-apexcharts";
 import { prometheusApi } from "../../../../providers";
+import { buildQuery, QueryKeys } from "../../../../providers/api/prometheus/prometheus.registry";
 import { MiddleStatsProps } from "../../../../interfaces";
 
 const ErrorStatsCharts: React.FC<MiddleStatsProps> = ({ serviceNames, start, end }) => {
@@ -16,7 +17,8 @@ const ErrorStatsCharts: React.FC<MiddleStatsProps> = ({ serviceNames, start, end
     const startUnix = endUnix - 60 * 60; // Son 1 saat
     const step = "60s";
 
-    const query = `floor(sum by(service) (increase(traces_spanmetrics_calls_total[1m])))`;
+    const ctx = { serviceName: '', windowSeconds: 3600, rateInterval: '1m' };
+    const query = buildQuery(QueryKeys.serviceCallCountGlobal, ctx);
 
     try {
       const result = await prometheusApi.runTraceQlQueryRange(query, startUnix, endUnix, step);

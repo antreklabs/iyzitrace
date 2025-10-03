@@ -25,9 +25,7 @@ const TraceFilters: React.FC<TraceFiltersProps> = ({ onChange, collapsed }) => {
   const { selectedUid } = useAppSelector((state) => state.datasource);
 
   const fetchServices = async () => {
-    console.log('Fetching services...');
     const res = await TempoApi.getServiceNames();
-    console.log('Services:', res);
     const values = res.values;
     const serviceNames: string[] = Array.isArray(values) ? values : [];
     setServices(serviceNames);
@@ -54,7 +52,6 @@ const TraceFilters: React.FC<TraceFiltersProps> = ({ onChange, collapsed }) => {
   }, [selectedUid]);
 
   const handleServiceChange = (value: string[]) => {
-    console.log('Selected service:', value);
     setSelectedService(value);
     fetchSpanNames(value);
     form.setFieldsValue({ spanName: undefined });

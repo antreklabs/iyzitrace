@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Col, Flex, Row, Spin, Typography } from 'antd';
 import { prometheusApi } from '../../providers';
+import { buildQuery } from '../../providers/api/prometheus/prometheus.registry';
 import {randomBackgroundGradient } from '../../utils';
 
 interface BasicSummaryProps {
@@ -37,27 +38,18 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ serviceName, start, end }) 
   const getMetrics = async () => {
     setLoading(true);
 
-    const queries = {
-      operationCount: `count(count by (span_name) (rate(traces_spanmetrics_calls_total{service="${serviceName}"}[${
-        end - start
-      }s])))`,
-      totalCalls: `sum(increase(traces_spanmetrics_calls_total{service="${serviceName}"}[${end - start}s]))`,
-      maxLatencySpan: `topk(1, sum_over_time(traces_spanmetrics_latency_sum{service="${serviceName}"}[${end - start}s]) 
-  / sum_over_time(traces_spanmetrics_latency_count{service="${serviceName}"}[${end - start}s]) 
-) by (span_name)
-`,
-      minLatencySpan: `bottomk(1, sum_over_time(traces_spanmetrics_latency_sum{service="${serviceName}"}[${end - start}s]) 
-  / sum_over_time(traces_spanmetrics_latency_count{service="${serviceName}"}[${end - start}s]) 
-) by (span_name)
-`,
-    };
+    const ctx = { serviceName, windowSeconds: end - start };
+    const operationCountQuery = buildQuery('operationCount', ctx);
+    const totalCallsQuery = buildQuery('totalCalls', ctx);
+    const maxLatencySpanQuery = buildQuery('maxLatencySpan', ctx);
+    const minLatencySpanQuery = buildQuery('minLatencySpan', ctx);
 
     try {
       const [operationCountRes, totalCallsRes, maxSpanRes, minSpanRes] = await Promise.all([
-        prometheusApi.runTraceQLQuery(queries.operationCount),
-        prometheusApi.runTraceQLQuery(queries.totalCalls),
-        prometheusApi.runTraceQLQuery(queries.maxLatencySpan),
-        prometheusApi.runTraceQLQuery(queries.minLatencySpan),
+        prometheusApi.runTraceQLQuery(operationCountQuery),
+        prometheusApi.runTraceQLQuery(totalCallsQuery),
+        prometheusApi.runTraceQLQuery(maxLatencySpanQuery),
+        prometheusApi.runTraceQLQuery(minLatencySpanQuery),
       ]);
 
       console.log('Operation Count:', operationCountRes);
@@ -90,7 +82,12 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ serviceName, start, end }) 
   }, [serviceName, start, end]);
 
   if (loading) {
-    return <Spin tip="Loading metrics..." />;
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+        <Spin size="large" />
+        <span style={{ marginLeft: '8px' }}>Loading metrics...</span>
+      </div>
+    );
   }
 
   return (

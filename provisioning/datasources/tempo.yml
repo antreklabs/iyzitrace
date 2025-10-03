@@ -28,3 +28,10 @@ datasources:
     isDefault: true
     version: 1
     editable: true
+    apiVersion: 1
+    jsonData:
+      httpMethod: GET
+      serviceMap:
+        datasourceUid: prometheus-demo
+      streamingEnabled:
+        search: true

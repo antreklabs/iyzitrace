@@ -21,9 +21,6 @@ const ServicesContainer: React.FC = () => {
       setLoading(true);
       try {
         const data = await TempoApi.getServiceNames();
-        console.log('API Response:', data); // Debug için
-        
-        // API'den gelen yapı: { tagValues: [{ type: 'string', value: 'service-name' }] }
         const tagValues = data?.tagValues || [];
         setServices(tagValues);
       } catch (err) {

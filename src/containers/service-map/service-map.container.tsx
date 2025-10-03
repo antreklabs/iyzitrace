@@ -13,7 +13,7 @@ import ReactFlow, {
   Handle
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import '../../assets/styles/pages/service-map.styles.css';
+import '../../assets/styles/pages/service-map/service-map.styles.css';
 import { Skeleton, Alert, Space, Button, Tooltip, Badge } from 'antd';
 import { 
   ReloadOutlined,

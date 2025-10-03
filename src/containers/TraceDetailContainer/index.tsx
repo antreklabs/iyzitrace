@@ -186,7 +186,10 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId }) 
               serviceMetaMap={serviceMetaMap}
             />
           ) : (
-            <Spin tip="Loading flamegraph..." />
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+              <Spin size="large" />
+              <span style={{ marginLeft: '8px' }}>Loading flamegraph...</span>
+            </div>
           )}
         </div>
         <div className="trace-sidebar">

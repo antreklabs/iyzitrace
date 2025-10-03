@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Col, Row, Spin } from 'antd';
 import { prometheusApi } from '../../../providers';
+import { buildQuery, QueryKeys } from '../../../providers/api/prometheus/prometheus.registry';
 import MsCharts from './MsCharts';
 interface CallMetricsProps {
   serviceName: string;
@@ -27,25 +28,15 @@ const CallMetrics: React.FC<CallMetricsProps> = ({ serviceName, start, end }) =>
   const fetchData = async () => {
     setLoading(true);
     try {
-     
+      const ctx = { serviceName, windowSeconds: Math.floor((end - start) / 1000) };
+      
       const [p50, p90, p99, rate, apdex, keyops] = await Promise.all([
-        getQueryRange(
-          `histogram_quantile(0.50, sum(rate(traces_spanmetrics_latency_bucket{service="${serviceName}"}[1m])) by (le))`
-        ),
-        getQueryRange(
-          `histogram_quantile(0.90, sum(rate(traces_spanmetrics_latency_bucket{service="${serviceName}"}[1m])) by (le))`
-        ),
-        getQueryRange(
-          `histogram_quantile(0.99, sum(rate(traces_spanmetrics_latency_bucket{service="${serviceName}"}[1m])) by (le))`
-        ),
-        getQueryRange(`sum(rate(traces_spanmetrics_calls_total{service="${serviceName}"}[1m]))`),
-        getQueryRange(`(
-          sum(rate(traces_spanmetrics_latency_bucket{le="0.5",service="${serviceName}"}[1m]))
-          + sum(rate(traces_spanmetrics_latency_bucket{le="2",service="${serviceName}"}[1m])) / 2
-        ) / sum(rate(traces_spanmetrics_latency_count{service="${serviceName}"}[1m]))`),
-        getQueryRange(
-          `topk(5, sum(rate(traces_spanmetrics_calls_total{service="${serviceName}"}[1m])) by (span_name))`
-        ),
+        getQueryRange(buildQuery(QueryKeys.p50Latency, ctx)),
+        getQueryRange(buildQuery(QueryKeys.p90Latency, ctx)),
+        getQueryRange(buildQuery(QueryKeys.p99Latency, ctx)),
+        getQueryRange(buildQuery(QueryKeys.callsPerSecond, ctx)),
+        getQueryRange(buildQuery(QueryKeys.apdex, ctx)),
+        getQueryRange(buildQuery(QueryKeys.topKeyOperations, ctx)),
       ]);
 
       const mapMetric = (res: any[], label: string) =>
@@ -85,7 +76,12 @@ const CallMetrics: React.FC<CallMetricsProps> = ({ serviceName, start, end }) =>
   }, [serviceName, start, end]);
 
   if (loading) {
-    return <Spin tip="Loading Metrics..." />;
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+        <Spin size="large" />
+        <span style={{ marginLeft: '8px' }}>Loading Metrics...</span>
+      </div>
+    );
   }
 
   return (

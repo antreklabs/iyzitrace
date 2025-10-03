@@ -16,6 +16,17 @@ exporters:
     endpoint: http://loki:3100/otlp
     # tls:
     #   insecure: true
+
+  otlp:
+    endpoint: "https://ingest.us.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: 5d333cea-ea9b-49bb-901f-484b076ce949
+  debug:
+    verbosity: detailed
+
+
     
 service:
   pipelines:
@@ -26,11 +37,11 @@ service:
     metrics:
       receivers: [docker_stats, httpcheck/frontend-proxy, hostmetrics, nginx, otlp, postgresql, redis, spanmetrics, servicegraph]
       processors: [resourcedetection, memory_limiter, batch, metricstransform]
-      exporters: [otlphttp/prometheus, debug]
+      exporters: [otlp, otlphttp/prometheus, debug]
     logs:
       receivers: [otlp]
       processors: [resourcedetection, memory_limiter, transform, batch]
-      exporters: [opensearch, otlphttp/loki, debug]
+      exporters: [otlp,opensearch, otlphttp/loki, debug]
 
 processors:
   # var olan memory_limiter / batch varsa kalsın; aşağıdaki yeni blokları ekliyoruz/override ediyoruz

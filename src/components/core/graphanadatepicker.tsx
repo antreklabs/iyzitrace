@@ -11,7 +11,7 @@ import {
   TimePicker,
 } from 'antd';
 import dayjs from 'dayjs';
-import '../../assets/styles/pages/core/date-picker.css';
+import '../../assets/styles/components/date-picker.css';
 
 const { Text, Link } = Typography;
 

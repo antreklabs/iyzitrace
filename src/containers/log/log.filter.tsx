@@ -2,7 +2,7 @@ import React from 'react';
 import BaseFilter from '../base.filter';
 import { Form, Select, Space } from 'antd';
 import { EQUAL_OPERATOR_OPTIONS, Option } from '../base.filter';
-import { getPageState } from '../../utils/localstorage.util';
+import { getPageState } from '../base.container';
 import { useLocation } from 'react-router-dom';
 import '../../assets/styles/pages/log/log.filter.css';
 

@@ -33,7 +33,10 @@ console.log(gridWidth, "gridWidth")
   if (!spans.length) {
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
-        <Spin tip="Loading flamegraph..." />
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+          <Spin size="large" />
+          <span style={{ marginLeft: '8px' }}>Loading flamegraph...</span>
+        </div>
       </div>
     );
   }

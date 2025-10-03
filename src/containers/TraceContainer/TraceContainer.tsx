@@ -130,30 +130,36 @@ const TraceContainer: React.FC<TraceContainerProps> = ({ traceId }) => {
       return;
     }
 
-    const maxLatencyRow = data.reduce((prev, curr) => (prev.durationMs > curr.durationMs ? prev : curr));
+    // Filter out items with invalid durationMs
+    const validData = data.filter(item => item && typeof item.durationMs === 'number' && !isNaN(item.durationMs));
+    
+    if (validData.length === 0) {
+      setStatsData([]);
+      return;
+    }
 
-    const minLatencyRow = data.reduce((prev, curr) => (prev.durationMs < curr.durationMs ? prev : curr));
-
-    const totalLatency = data.reduce((sum, curr) => sum + curr.durationMs, 0);
-    const totalSpanCount = data.reduce((sum, curr) => sum + curr.spanCount, 0);
-    const avgLatency = totalLatency / data.length;
+    const maxLatencyRow = validData.reduce((prev, curr) => (prev.durationMs > curr.durationMs ? prev : curr));
+    const minLatencyRow = validData.reduce((prev, curr) => (prev.durationMs < curr.durationMs ? prev : curr));
+    const totalLatency = validData.reduce((sum, curr) => sum + (curr.durationMs || 0), 0);
+    const totalSpanCount = validData.reduce((sum, curr) => sum + (curr.spanCount || 0), 0);
+    const avgLatency = totalLatency / validData.length;
 
     const statsData = [
       {
         title: 'Max Latency',
-        value: maxLatencyRow.durationMs.toFixed(2),
+        value: (maxLatencyRow?.durationMs || 0).toFixed(2),
         unit: 'ms',
-        meta: `${maxLatencyRow.rootServiceName} → ${maxLatencyRow.rootTraceName}`,
+        meta: `${maxLatencyRow?.rootServiceName || 'Unknown'} → ${maxLatencyRow?.rootTraceName || 'Unknown'}`,
       },
       {
         title: 'Min Latency',
-        value: minLatencyRow.durationMs.toFixed(2),
+        value: (minLatencyRow?.durationMs || 0).toFixed(2),
         unit: 'ms',
-        meta: `${minLatencyRow.rootServiceName} → ${minLatencyRow.rootTraceName}`,
+        meta: `${minLatencyRow?.rootServiceName || 'Unknown'} → ${minLatencyRow?.rootTraceName || 'Unknown'}`,
       },
       {
         title: 'Avg Latency',
-        value: avgLatency.toFixed(2),
+        value: (avgLatency || 0).toFixed(2),
         unit: 'ms',
       },
       {
@@ -164,7 +170,6 @@ const TraceContainer: React.FC<TraceContainerProps> = ({ traceId }) => {
     ];
 
     setStatsData(statsData);
-    console.log('Stats Data:', statsData);
   };
 
  
@@ -198,6 +203,23 @@ const TraceContainer: React.FC<TraceContainerProps> = ({ traceId }) => {
       width: 200,
       render: (text: string) => <span>{dayjs(text).format('YYYY-MM-DD HH:mm:ss')}</span>,
     },
+    {
+      title: 'Details',
+      key: 'expand',
+      width: 80,
+      render: (_: any, record: any) => {
+        const isExpanded = expandedRowKeys.includes(record.key);
+        return (
+          <div onClick={() => handleExpand(!isExpanded, record)} style={{ cursor: 'pointer' }}>
+            {isExpanded ? (
+              <IoIosArrowDown style={{ fontSize: 14 }} />
+            ) : (
+              <IoIosArrowForward style={{ fontSize: 14 }} />
+            )}
+          </div>
+        );
+      },
+    },
   ];
   const cardStyle = () => {
     return {
@@ -216,43 +238,61 @@ const TraceContainer: React.FC<TraceContainerProps> = ({ traceId }) => {
     };
   };
 
-  const expandedRowRender = (record: any) => {
+  const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([]);
+
+  const handleExpand = (expanded: boolean, record: any) => {
+    if (expanded) {
+      setExpandedRowKeys([...expandedRowKeys, record.key]);
+    } else {
+      setExpandedRowKeys(expandedRowKeys.filter(key => key !== record.key));
+    }
+  };
+
+  const renderExpandedContent = (record: any) => {
     const stats = record.children?.filter((c: any) => c.type === 'serviceStats') || [];
     const spans = record.children?.filter((c: any) => c.type === 'span') || [];
 
     return (
-      <div>
+      <div style={{ padding: '16px', backgroundColor: '#f5f5f5' }}>
         {stats.length > 0 && (
-          <Card style={{ marginBottom: 16 }} title="Service Stats">
-            <Table
-              columns={[
-                { title: 'Service Name', dataIndex: 'serviceName', key: 'serviceName' },
-                { title: 'Span Count', dataIndex: 'spanCount', key: 'spanCount' },
-                { title: 'Duration (ms)', dataIndex: 'durationMs', key: 'durationMs' },
-              ]}
-              dataSource={stats}
-              pagination={false}
-              size="small"
-              rowKey="key"
-            />
-          </Card>
+          <div style={{ marginBottom: 16 }}>
+            <h4 style={{ marginBottom: 8, color: '#1890ff' }}>Service Stats</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
+              {stats.map((stat: any, index: number) => (
+                <div key={index} style={{ 
+                  padding: '8px', 
+                  backgroundColor: '#fff', 
+                  borderRadius: '4px',
+                  border: '1px solid #d9d9d9'
+                }}>
+                  <div><strong>Service:</strong> {stat.serviceName}</div>
+                  <div><strong>Spans:</strong> {stat.spanCount}</div>
+                  <div><strong>Duration:</strong> {stat.durationMs?.toFixed(2) || '0.00'} ms</div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
         {spans.length > 0 && (
-          <Card title="Spans">
-            <Table
-              columns={[
-                { title: 'Span ID', dataIndex: 'spanID', key: 'spanID' },
-                { title: 'Span Name', dataIndex: 'name', key: 'name' },
-                { title: 'Service Name', dataIndex: 'serviceName', key: 'serviceName' },
-                { title: 'Start Time', dataIndex: 'startTime', key: 'startTime' },
-                { title: 'Duration (ms)', dataIndex: 'durationMs', key: 'durationMs' },
-              ]}
-              dataSource={spans}
-              pagination={false}
-              size="small"
-              rowKey="key"
-            />
-          </Card>
+          <div>
+            <h4 style={{ marginBottom: 8, color: '#1890ff' }}>Spans</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '8px' }}>
+              {spans.map((span: any, index: number) => (
+                <div key={index} style={{ 
+                  padding: '12px', 
+                  backgroundColor: '#fff', 
+                  borderRadius: '4px',
+                  border: '1px solid #d9d9d9'
+                }}>
+                  <div><strong>ID:</strong> {span.spanID}</div>
+                  <div><strong>Name:</strong> {span.name}</div>
+                  <div><strong>Service:</strong> {span.serviceName}</div>
+                  <div><strong>Start:</strong> {span.startTime}</div>
+                  <div><strong>Duration:</strong> {span.durationMs?.toFixed(2) || '0.00'} ms</div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     );
@@ -312,37 +352,40 @@ const TraceContainer: React.FC<TraceContainerProps> = ({ traceId }) => {
           </Row>
 
           {loading ? (
-            <Spin tip="Loading traces..." />
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+              <Spin size="large" />
+              <span style={{ marginLeft: '8px' }}>Loading traces...</span>
+            </div>
           ) : traceData.length === 0 ? (
             <Empty description="No traces found for selected range." />
           ) : (
-            <Table
-              columns={columns}
-              dataSource={traceData}
-              expandable={{
-                expandedRowRender,
-                expandIcon: ({ expanded, onExpand, record }) =>
-                  expanded ? (
-                    <IoIosArrowDown
-                      onClick={(e: any) => onExpand(record, e)}
-                      style={{ fontSize: 14, marginRight: 8 }}
-                    />
-                  ) : (
-                    <IoIosArrowForward
-                      onClick={(e: any) => onExpand(record, e)}
-                      style={{ fontSize: 14, marginRight: 8 }}
-                    />
-                  ),
-              }}
-              scroll={{ x: 'max-content', y: 'calc(100vh - 300px)' }}
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                pageSizeOptions: ['10', '20', '50', '100'],
-              }}
-              size="middle"
-              bordered
-            />
+            <div>
+              <Table
+                columns={columns}
+                dataSource={traceData}
+                scroll={{ x: 'max-content', y: 'calc(100vh - 300px)' }}
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  pageSizeOptions: ['10', '20', '50', '100'],
+                }}
+                size="middle"
+                bordered
+                rowKey="key"
+              />
+              
+              {/* Render expanded content for each expanded row */}
+              {expandedRowKeys.map(key => {
+                const record = traceData.find(item => item.key === key);
+                if (!record) return null;
+                
+                return (
+                  <div key={`expanded-${key}`} style={{ marginTop: '8px' }}>
+                    {renderExpandedContent(record)}
+                  </div>
+                );
+              })}
+            </div>
           )}
         </Content>
       </Layout>
