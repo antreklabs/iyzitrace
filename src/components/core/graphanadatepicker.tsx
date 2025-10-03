@@ -7,8 +7,11 @@ import {
   Space,
   Typography,
   Divider,
+  DatePicker,
+  TimePicker,
 } from 'antd';
 import dayjs from 'dayjs';
+import '../../assets/styles/components/date-picker.css';
 
 const { Text, Link } = Typography;
 
@@ -40,22 +43,44 @@ const parseRelativeInput = (val: string): dayjs.Dayjs | null => {
 
 const GrafanaLikeRangePicker = ({
   onChange,
+  onApply,
   title,
+  value,
 }: {
   onChange: (start: number, end: number) => void;
+  onApply: (start: number, end: number) => void;
   title?: string;
+  value?: [number, number];
 }) => {
   const [visible, setVisible] = useState(false);
   const [from, setFrom] = useState('now-1h');
   const [to, setTo] = useState('now');
   const [search, setSearch] = useState('');
   const [selectedQuickLabel, setSelectedQuickLabel] = useState<string | null>('Last 1 hour');
+  const [fromDate, setFromDate] = useState<dayjs.Dayjs | null>(dayjs().subtract(1, 'hour'));
+  const [toDate, setToDate] = useState<dayjs.Dayjs | null>(dayjs());
+  const [fromTime, setFromTime] = useState<dayjs.Dayjs | null>(dayjs().subtract(1, 'hour'));
+  const [toTime, setToTime] = useState<dayjs.Dayjs | null>(dayjs());
 
   const handleApply = () => {
-    const fromParsed = parseRelativeInput(from);
-    const toParsed = parseRelativeInput(to);
+    // Use absolute date/time if available, otherwise fall back to relative input
+    let fromParsed: dayjs.Dayjs | null = null;
+    let toParsed: dayjs.Dayjs | null = null;
+
+    if (fromDate && fromTime) {
+      fromParsed = fromDate.hour(fromTime.hour()).minute(fromTime.minute()).second(fromTime.second());
+    } else {
+      fromParsed = parseRelativeInput(from);
+    }
+
+    if (toDate && toTime) {
+      toParsed = toDate.hour(toTime.hour()).minute(toTime.minute()).second(toTime.second());
+    } else {
+      toParsed = parseRelativeInput(to);
+    }
+
     if (fromParsed && toParsed) {
-      onChange(fromParsed.valueOf(), toParsed.valueOf());
+      onApply(fromParsed.valueOf(), toParsed.valueOf());
       setVisible(false);
     }
   };
@@ -69,42 +94,67 @@ const GrafanaLikeRangePicker = ({
     : `${parseRelativeInput(from)?.format('YYYY-MM-DD HH:mm:ss')} → ${parseRelativeInput(to)?.format('YYYY-MM-DD HH:mm:ss')}`;
 
   const content = (
-    <div
-      style={{
-        display: 'flex',
-        width: 700,
-        background: '#1e1e1e',
-        padding: 16,
-        borderRadius: 8,
-        color: '#fff',
-      }}
-    >
-      <div style={{ flex: 1, marginRight: 16 }}>
+    <div className="date-picker-container">
+      <div className="date-picker-absolute-section">
         <Space direction="vertical" size="small" style={{ width: '100%' }}>
-          <Text style={{ color: '#ccc' }}>Absolute time range</Text>
-          <Text style={{ color: '#aaa' }}>From</Text>
-          <Input
-            value={from}
-            onChange={(e) => {
-              setFrom(e.target.value);
-              setSelectedQuickLabel(null);
-            }}
-            style={{ background: '#2c2c2c', color: '#fff' }}
-          />
-          <Text style={{ color: '#aaa' }}>To</Text>
-          <Input
-            value={to}
-            onChange={(e) => {
-              setTo(e.target.value);
-              setSelectedQuickLabel(null);
-            }}
-            style={{ background: '#2c2c2c', color: '#fff' }}
-          />
-          <Button type="primary" block onClick={handleApply}>
+          <Text className="date-picker-section-title">Absolute time range</Text>
+          
+          <div>
+            <Text className="date-picker-field-label">From</Text>
+            <div className="date-picker-date-time-row">
+              <DatePicker
+                className="date-picker-date-picker"
+                value={fromDate}
+                onChange={(date) => {
+                  setFromDate(date);
+                  setSelectedQuickLabel(null);
+                }}
+                style={{ background: '#2c2c2c', color: '#fff' }}
+                popupStyle={{ background: '#1e1e1e' }}
+              />
+              <TimePicker
+                className="date-picker-time-picker"
+                value={fromTime}
+                onChange={(time) => {
+                  setFromTime(time);
+                  setSelectedQuickLabel(null);
+                }}
+                style={{ background: '#2c2c2c', color: '#fff' }}
+                popupStyle={{ background: '#1e1e1e' }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <Text className="date-picker-field-label">To</Text>
+            <div className="date-picker-date-time-row">
+              <DatePicker
+                className="date-picker-date-picker"
+                value={toDate}
+                onChange={(date) => {
+                  setToDate(date);
+                  setSelectedQuickLabel(null);
+                }}
+                style={{ background: '#2c2c2c', color: '#fff' }}
+                popupStyle={{ background: '#1e1e1e' }}
+              />
+              <TimePicker
+                className="date-picker-time-picker"
+                value={toTime}
+                onChange={(time) => {
+                  setToTime(time);
+                  setSelectedQuickLabel(null);
+                }}
+                style={{ background: '#2c2c2c', color: '#fff' }}
+                popupStyle={{ background: '#1e1e1e' }}
+              />
+            </div>
+          </div>
+          <Button type="primary" className="date-picker-apply-button" onClick={handleApply}>
             Apply time range
           </Button>
-          <Divider style={{ background: '#333' }} />
-          <Text style={{ fontSize: 12, color: '#999' }}>
+          <Divider className="date-picker-divider" />
+          <Text className="date-picker-help-text">
             It looks like you haven't used this time picker before...
           </Text>
           <Link
@@ -113,20 +163,20 @@ const GrafanaLikeRangePicker = ({
           >
             Read the documentation
           </Link>
-          <div style={{ fontSize: 12, color: '#999', marginTop: 8 }}>
+          {/* <div style={{ fontSize: 12, color: '#999', marginTop: 8 }}>
             Browser Time <strong style={{ color: '#fff' }}>Turkey</strong>
             <br />
             UTC+03:00 <Button size="small" style={{ marginLeft: 8 }}>Change time settings</Button>
-          </div>
+          </div> */}
         </Space>
       </div>
 
-      <div style={{ width: 250 }}>
+      <div className="date-picker-quick-section">
         <Input
           placeholder="Search quick ranges"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          style={{ background: '#2c2c2c', color: '#fff', marginBottom: 8 }}
+          className="date-picker-search-input"
         />
         <List
           size="small"
@@ -134,18 +184,30 @@ const GrafanaLikeRangePicker = ({
           dataSource={filtered}
           renderItem={(item) => (
             <List.Item
-              style={{ color: '#ddd', cursor: 'pointer' }}
+              className={`date-picker-quick-item ${selectedQuickLabel === item.label ? 'selected' : ''}`}
               onClick={() => {
                 const relative = `now-${item.subtract.value}${item.subtract.unit[0]}`;
                 setFrom(relative);
                 setTo('now');
                 setSelectedQuickLabel(item.label);
+                
+                // Update date/time pickers as well
+                const fromParsed = parseRelativeInput(relative);
+                const toParsed = parseRelativeInput('now');
+                
+                if (fromParsed && toParsed) {
+                  setFromDate(fromParsed);
+                  setFromTime(fromParsed);
+                  setToDate(toParsed);
+                  setToTime(toParsed);
+                  onChange(fromParsed.valueOf(), toParsed.valueOf());
+                }
               }}
             >
               {item.label}
             </List.Item>
           )}
-          style={{ background: '#1e1e1e', borderColor: '#333' }}
+          className="date-picker-quick-list"
         />
       </div>
     </div>

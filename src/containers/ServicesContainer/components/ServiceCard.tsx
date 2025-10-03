@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Typography, Spin, Flex } from 'antd';
 import { prometheusApi } from '../../../providers';
+import { buildQuery, QueryKeys } from '../../../providers/api/prometheus/prometheus.registry';
 import { createGradient, randomBackgroundGradient } from '../../../utils';
 import { ServiceIcon } from '../../../components/core/serviceicons';
 import { useNavigate } from 'react-router-dom';
@@ -36,17 +37,13 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ name, start, end,colors }) =>
     const fetchLatency = async () => {
       try {
         setLoading(true);
-        const totalTraceQuery = `sum(rate(traces_spanmetrics_calls_total{service="${name}"}[5m])) * 300`;
-
-        const avgLatencyQuery = `sum(rate(traces_spanmetrics_latency_sum{service="${name}"}[5m])) / sum(rate(traces_spanmetrics_latency_count{service="${name}"}[5m]))`;
-        const minLatencyQuery = `min(rate(traces_spanmetrics_latency_bucket{service="${name}"}[5m]))`;
-        const maxLatencyQuery = `histogram_quantile(0.99, sum(rate(traces_spanmetrics_latency_bucket{service="${name}"}[5m])) by (le))`;
-
+        const ctx = { serviceName: name, windowSeconds: Math.floor((end - start) / 1000) };
+        
         const [totalTraceResponse, avgLatencyResponse, minLatencyResponse, maxLatencyResponse] = await Promise.all([
-          prometheusApi.runTraceQLQuery(totalTraceQuery),
-          prometheusApi.runTraceQLQuery(avgLatencyQuery),
-          prometheusApi.runTraceQLQuery(minLatencyQuery),
-          prometheusApi.runTraceQLQuery(maxLatencyQuery),
+          prometheusApi.runTraceQLQuery(buildQuery(QueryKeys.totalTraceCount, ctx)),
+          prometheusApi.runTraceQLQuery(buildQuery(QueryKeys.avgLatency, ctx)),
+          prometheusApi.runTraceQLQuery(buildQuery(QueryKeys.minLatency, ctx)),
+          prometheusApi.runTraceQLQuery(buildQuery(QueryKeys.maxLatency, ctx)),
         ]);
         const totalTraceValue = totalTraceResponse[0]?.value[1] || 0;
         const avgLatencyValue = avgLatencyResponse[0]?.value[1] || 0;
@@ -59,8 +56,6 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ name, start, end,colors }) =>
           max: parseFloat(maxLatencyValue),
           count: parseInt(totalTraceValue, 10),
         };
-
-        console.log('Latency values:', value);
 
         setLatency(value);
       } catch (err) {

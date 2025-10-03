@@ -5,9 +5,9 @@ import { PlusOutlined, UpOutlined, DownOutlined, LeftOutlined, RightOutlined, Sa
 import { useSearchParams } from 'react-router-dom';
 import { LogEntry, LogQuery } from '../interfaces/logs.interface';
 import { LogPipeline } from '../interfaces/pipeline.interface';
-import { lokiReadApi } from '../providers/api/loki.api.read';
-import { pipelineApi } from '../providers/api/pipeline.api';
-import LogFilters from '../components/Logs/LogFilters';
+// import { lokiReadApi } from '../providers/api/loki/loki.api.read';
+import { pipelineApi } from '../providers/api/loki/pipeline.api';
+// import LogFilters from '../components/Logs/LogFilters';
 import LogQueryBuilder from '../components/Logs/LogQueryBuilder';
 import LogResults from '../components/Logs/LogResults';
 
@@ -42,7 +42,7 @@ function LogsContent() {
   const { modal, message } = App.useApp();
   const [searchParams] = useSearchParams();
   const [filteredLogs, setFilteredLogs] = useState<LogEntry[]>([]);
-  const [allLogs, setAllLogs] = useState<LogEntry[]>([]); // Tüm logları sakla (Quick Filter için)
+  // const [allLogs, setAllLogs] = useState<LogEntry[]>([]); // Tüm logları sakla (Quick Filter için)
   const [loading, setLoading] = useState(false);
   const [queryCollapsed, setQueryCollapsed] = useState(false);
   const [filtersCollapsed, setFiltersCollapsed] = useState(false);
@@ -123,20 +123,20 @@ function LogsContent() {
       console.log('Loki query:', lokiQuery);
       
       // Loki'den veri çek
-      const result = await lokiReadApi.queryLogs({
-        query: lokiQuery,
-        start: new Date(queryToUse.timeRange.start).toISOString(),
-        end: new Date(queryToUse.timeRange.end).toISOString(),
-        limit: queryToUse.limit,
-        direction: queryToUse.orderDirection === 'desc' ? 'backward' : 'forward',
-        orderBy: queryToUse.orderBy,
-        orderDirection: queryToUse.orderDirection
-      });
+      // const result = await lokiReadApi.queryLogs({
+      //   query: lokiQuery,
+      //   start: new Date(queryToUse.timeRange.start).toISOString(),
+      //   end: new Date(queryToUse.timeRange.end).toISOString(),
+      //   limit: queryToUse.limit,
+      //   direction: queryToUse.orderDirection === 'desc' ? 'backward' : 'forward',
+      //   orderBy: queryToUse.orderBy,
+      //   orderDirection: queryToUse.orderDirection
+      // });
       
-      setFilteredLogs(result.logs);
+      // setFilteredLogs(result.logs);
       
       // Her aramada tüm logları sakla (Quick Filter için)
-      setAllLogs(result.logs);
+      // setAllLogs(result.logs);
     } catch (error) {
       console.error('Loki query error:', error);
       // Hata durumunda boş array set et
@@ -666,12 +666,12 @@ function LogsContent() {
                 </Button>
                 
                 <div style={{ padding: '16px', overflow: 'auto', height: '100%' }}>
-                  <LogFilters 
+                  {/* <LogFilters 
                     filters={query.filters}
                     logs={allLogs.length > 0 ? allLogs : filteredLogs}
                     onFiltersChange={(filters) => setQuery({...query, filters})}
                     onSearch={handleSearch}
-                  />
+                  /> */}
                 </div>
               </Sider>
             )}

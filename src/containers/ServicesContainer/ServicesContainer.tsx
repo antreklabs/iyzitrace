@@ -8,10 +8,10 @@ import MiddleStats from './components/middlestats/MiddleStats';
 import { useAppSelector } from '../../store/hooks';
 
 const ServicesContainer: React.FC = () => {
+  const [range, setRange] = useState<[number, number]>([Date.now() - 60 * 15 * 1000, Date.now()]);
   const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [range] = useState<any>(null);
-  const { selectedTempoUid } = useAppSelector((state) => state.tempo);
+  const { selectedUid } = useAppSelector((state) => state.datasource);
 
   const now = Date.now();
   const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
@@ -21,9 +21,6 @@ const ServicesContainer: React.FC = () => {
       setLoading(true);
       try {
         const data = await TempoApi.getServiceNames();
-        console.log('API Response:', data); // Debug için
-        
-        // API'den gelen yapı: { tagValues: [{ type: 'string', value: 'service-name' }] }
         const tagValues = data?.tagValues || [];
         setServices(tagValues);
       } catch (err) {
@@ -34,7 +31,7 @@ const ServicesContainer: React.FC = () => {
     };
 
     fetchServices();
-  }, [selectedTempoUid]);
+  }, [selectedUid]);
 
   if (loading) {
     return (
@@ -55,7 +52,17 @@ const ServicesContainer: React.FC = () => {
   return (
     <BaseContainer
       title="Services"
-      headerActions={<GrafanaLikeRangePicker onChange={(value) => console.log(value)} title="Date Range" />}
+      headerActions={
+        <GrafanaLikeRangePicker 
+          onChange={(start, end) => setRange([start, end])} 
+          onApply={(start, end) => {
+            setRange([start, end]);
+            // TODO: Fetch data with new range
+          }}
+          value={range}
+          title="Date Range" 
+        />
+      }
     >
       <Row gutter={[16, 16]}>
         {services.map((service) => (

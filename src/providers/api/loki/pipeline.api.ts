@@ -1,5 +1,5 @@
 import { getDataSourceSrv } from '@grafana/runtime';
-import { LogPipeline, PipelineExecution, PipelineFilter, PipelineProcessor } from '../../interfaces/pipeline.interface';
+import { LogPipeline, PipelineExecution, PipelineFilter, PipelineProcessor } from '../../../interfaces/pipeline.interface';
 import { lokiWriteApi } from './loki.api.write';
 
 export const pipelineApi = {

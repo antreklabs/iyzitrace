@@ -1,6 +1,6 @@
 import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
-import { LogPipeline } from '../../interfaces/pipeline.interface';
-import { LokiWriteOptions, LokiWriteResult } from '../../interfaces/loki';
+import { LogPipeline } from '../../../interfaces/pipeline.interface';
+import { LokiWriteOptions, LokiWriteResult } from '../../../interfaces/loki';
 
 class LokiWriteApi {
   private async getLokiUid(): Promise<string> {

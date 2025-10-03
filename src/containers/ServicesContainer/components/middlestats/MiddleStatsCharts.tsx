@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ApexCharts from 'react-apexcharts';
 import { prometheusApi } from '../../../../providers';
+import { buildQuery, QueryKeys } from '../../../../providers/api/prometheus/prometheus.registry';
 import { MiddleStatsProps } from '../../../../interfaces';
 import { Card } from 'antd';
 
@@ -9,14 +10,12 @@ const MiddleStatsCharts: React.FC<MiddleStatsProps> = ({ serviceNames, start, en
   const [loading, setLoading] = useState(true);
 
   const getMetrics = async () => {
-    const p50Query = `histogram_quantile(0.50, sum(rate(traces_spanmetrics_latency_bucket[5m])) by (le, service))`;
-    const p90Query = `histogram_quantile(0.90, sum(rate(traces_spanmetrics_latency_bucket[5m])) by (le, service))`;
-    const p95Query = `histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket[5m])) by (le, service))`;
+    const ctx = { serviceName: '', windowSeconds: Math.floor((end - start) / 1000), rateInterval: '5m' };
 
     const [p50, p90, p95] = await Promise.all([
-      prometheusApi.runTraceQLQuery(p50Query),
-      prometheusApi.runTraceQLQuery(p90Query),
-      prometheusApi.runTraceQLQuery(p95Query),
+      prometheusApi.runTraceQLQuery(buildQuery(QueryKeys.p50LatencyGlobal, ctx)),
+      prometheusApi.runTraceQLQuery(buildQuery(QueryKeys.p90LatencyGlobal, ctx)),
+      prometheusApi.runTraceQLQuery(buildQuery(QueryKeys.p95LatencyGlobal, ctx)),
     ]);
 
     const data: Record<string, any> = {};

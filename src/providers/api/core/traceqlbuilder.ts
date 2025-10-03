@@ -1,3 +1,5 @@
+import { buildQuery, QueryKeys } from '../prometheus/prometheus.registry';
+
 type Operator = '=' | '!=' | '=~' | '!~' | '>' | '<' | '>=' | '<=';
 
 interface Condition {
@@ -37,34 +39,42 @@ export class TraceQLBuilder {
         serviceName: string,
         rateInterval = '5m'
     ): string {
-        return `histogram_quantile(${quantile}, sum(rate(traces_spanmetrics_latency_bucket{span_name="${serviceName}"}[${rateInterval}])) by (le))`;
+        const ctx = { serviceName: '', spanName: serviceName, rateInterval, quantile, windowSeconds: 300 };
+        return buildQuery(QueryKeys.p50Latency, ctx); // This will be overridden by quantile parameter
     }
 
     static sumRate(spanName: string, rateInterval = '5m'): string {
-        return `sum(rate(traces_spanmetrics_latency_bucket{span_name="${spanName}"}[${rateInterval}])) by (le)`;
+        const ctx = { serviceName: '', spanName, rateInterval, windowSeconds: 300 };
+        return buildQuery(QueryKeys.opsPerSec, ctx); // Using opsPerSec as closest match
     }
 
     static errorRate(spanName: string, rateInterval = '5m'): string {
-        return `sum(rate(traces_spanmetrics_calls_total{span_name="${spanName}", status_code!="STATUS_CODE_UNSET"}[${rateInterval}])) / sum(rate(traces_spanmetrics_calls_total{span_name="${spanName}"}[${rateInterval}]))`;
+        const ctx = { serviceName: '', spanName, rateInterval, windowSeconds: 300 };
+        return buildQuery(QueryKeys.errorRate, ctx);
     }
 
     static opsPerSec(spanName: string, rateInterval = '5m'): string {
-        return `sum(rate(traces_spanmetrics_calls_total{span_name="${spanName}"}[${rateInterval}]))`;
+        const ctx = { serviceName: '', spanName, rateInterval, windowSeconds: 300 };
+        return buildQuery(QueryKeys.opsPerSec, ctx);
     }
 
     static totalCalls(spanName: string, rateInterval = '5m'): string {
-        return `sum(increase(traces_spanmetrics_calls_total{span_name="${spanName}"}[${rateInterval}]))`;
+        const ctx = { serviceName: '', spanName, rateInterval, windowSeconds: 300 };
+        return buildQuery(QueryKeys.totalCalls, ctx);
     }
 
     static errorCount(spanName: string, rateInterval = '5m'): string {
-        return `sum(increase(traces_spanmetrics_calls_total{span_name="${spanName}", status_code!="STATUS_CODE_UNSET"}[${rateInterval}]))`;
+        const ctx = { serviceName: '', spanName, rateInterval, windowSeconds: 300 };
+        return buildQuery(QueryKeys.errorCount, ctx);
     }
 
     static latencyBucket(spanName: string, le: string, rateInterval = '5m'): string {
-        return `rate(traces_spanmetrics_latency_bucket{span_name="${spanName}", le="${le}"}[${rateInterval}])`;
+        const ctx = { serviceName: '', spanName, le, rateInterval, windowSeconds: 300 };
+        return buildQuery(QueryKeys.latencyBucket, ctx);
     }
 
     static approxAvgLatency(spanName: string, rateInterval = '5m'): string {
-        return `sum(rate(traces_spanmetrics_latency_sum{span_name="${spanName}"}[${rateInterval}])) / sum(rate(traces_spanmetrics_latency_count{span_name="${spanName}"}[${rateInterval}]))`;
+        const ctx = { serviceName: '', spanName, rateInterval, windowSeconds: 300 };
+        return buildQuery(QueryKeys.approxAvgLatency, ctx);
     }
 }

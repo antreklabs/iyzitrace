@@ -1,1 +1,1 @@
-export * from './tempo.store.interface';
+export * from './store.interface';
