@@ -34,47 +34,47 @@ export class TraceQLBuilder {
             .join(' and ');
     }
 
-    static fromPromQLHistogramQuantile(
+    static async fromPromQLHistogramQuantile(
         quantile: number,
         serviceName: string,
         rateInterval = '5m'
-    ): string {
+    ): Promise<string> {
         const ctx = { serviceName: '', spanName: serviceName, rateInterval, quantile, windowSeconds: 300 };
-        return buildQuery(QueryKeys.p50Latency, ctx); // This will be overridden by quantile parameter
+        return await buildQuery(QueryKeys.p50Latency, ctx); // This will be overridden by quantile parameter
     }
 
-    static sumRate(spanName: string, rateInterval = '5m'): string {
+    static async sumRate(spanName: string, rateInterval = '5m'): Promise<string> {
         const ctx = { serviceName: '', spanName, rateInterval, windowSeconds: 300 };
-        return buildQuery(QueryKeys.opsPerSec, ctx); // Using opsPerSec as closest match
+        return await buildQuery(QueryKeys.opsPerSec, ctx); // Using opsPerSec as closest match
     }
 
-    static errorRate(spanName: string, rateInterval = '5m'): string {
+    static async errorRate(spanName: string, rateInterval = '5m'): Promise<string> {
         const ctx = { serviceName: '', spanName, rateInterval, windowSeconds: 300 };
-        return buildQuery(QueryKeys.errorRate, ctx);
+        return await buildQuery(QueryKeys.errorRate, ctx);
     }
 
-    static opsPerSec(spanName: string, rateInterval = '5m'): string {
+    static async opsPerSec(spanName: string, rateInterval = '5m'): Promise<string> {
         const ctx = { serviceName: '', spanName, rateInterval, windowSeconds: 300 };
-        return buildQuery(QueryKeys.opsPerSec, ctx);
+        return await buildQuery(QueryKeys.opsPerSec, ctx);
     }
 
-    static totalCalls(spanName: string, rateInterval = '5m'): string {
+    static async totalCalls(spanName: string, rateInterval = '5m'): Promise<string> {
         const ctx = { serviceName: '', spanName, rateInterval, windowSeconds: 300 };
-        return buildQuery(QueryKeys.totalCalls, ctx);
+        return await buildQuery(QueryKeys.totalCalls, ctx);
     }
 
-    static errorCount(spanName: string, rateInterval = '5m'): string {
+    static async errorCount(spanName: string, rateInterval = '5m'): Promise<string> {
         const ctx = { serviceName: '', spanName, rateInterval, windowSeconds: 300 };
-        return buildQuery(QueryKeys.errorCount, ctx);
+        return await buildQuery(QueryKeys.errorCount, ctx);
     }
 
-    static latencyBucket(spanName: string, le: string, rateInterval = '5m'): string {
+    static async latencyBucket(spanName: string, le: string, rateInterval = '5m'): Promise<string> {
         const ctx = { serviceName: '', spanName, le, rateInterval, windowSeconds: 300 };
-        return buildQuery(QueryKeys.latencyBucket, ctx);
+        return await buildQuery(QueryKeys.latencyBucket, ctx);
     }
 
-    static approxAvgLatency(spanName: string, rateInterval = '5m'): string {
+    static async approxAvgLatency(spanName: string, rateInterval = '5m'): Promise<string> {
         const ctx = { serviceName: '', spanName, rateInterval, windowSeconds: 300 };
-        return buildQuery(QueryKeys.approxAvgLatency, ctx);
+        return await buildQuery(QueryKeys.approxAvgLatency, ctx);
     }
 }

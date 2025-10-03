@@ -1,6 +1,8 @@
 import store from '../../../store/store';
 import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
 import { setSelectedPrometheusUid } from '../../../store/slices/prometheus.slice';
+import { applyPrometheusRegistryOverrides } from './prometheus.registry';
+
 
 export const prometheusApi = {
     async resolvePrometheusUid(): Promise<string> {
@@ -9,6 +11,8 @@ export const prometheusApi = {
         const promUid = state.prometheus.selectedPrometheusUid;
 
         if (promUid) {
+            // Ensure overrides are applied if present on the datasource jsonData
+            await applyPrometheusRegistryOverrides(promUid);
             return promUid;
         }
         const ds = await getDataSourceSrv().getInstanceSettings(tempoUid);
@@ -16,6 +20,8 @@ export const prometheusApi = {
         if (!uid) {
             throw new Error('Prometheus UID could not be resolved from Tempo datasource.');
         }
+        // Apply overrides from the resolved Prometheus datasource if any
+        await applyPrometheusRegistryOverrides(uid);
         store.dispatch(setSelectedPrometheusUid(uid));
         return uid;
     },
@@ -26,6 +32,7 @@ export const prometheusApi = {
             if (!uid) { throw new Error('No Prometheus UID selected'); }
 
             const url = `/api/datasources/proxy/uid/${uid}/api/v1/query`;
+            console.log('runTraceQLQuery', query);
             const res = await getBackendSrv().get(url, {
                 query
             });
@@ -41,6 +48,7 @@ export const prometheusApi = {
             if (!uid) { throw new Error('No Prometheus UID selected'); }
 
             const url = `/api/datasources/proxy/uid/${uid}/api/v1/query_range`;
+            console.log('runTraceQlQueryRange', query);
             const res = await getBackendSrv().get(url, {
                 query,
                 start,

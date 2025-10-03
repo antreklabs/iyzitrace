@@ -39,10 +39,10 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ serviceName, start, end }) 
     setLoading(true);
 
     const ctx = { serviceName, windowSeconds: end - start };
-    const operationCountQuery = buildQuery('operationCount', ctx);
-    const totalCallsQuery = buildQuery('totalCalls', ctx);
-    const maxLatencySpanQuery = buildQuery('maxLatencySpan', ctx);
-    const minLatencySpanQuery = buildQuery('minLatencySpan', ctx);
+    const operationCountQuery = await buildQuery('operationCount', ctx);
+    const totalCallsQuery = await buildQuery('totalCalls', ctx);
+    const maxLatencySpanQuery = await buildQuery('maxLatencySpan', ctx);
+    const minLatencySpanQuery = await buildQuery('minLatencySpan', ctx);
 
     try {
       const [operationCountRes, totalCallsRes, maxSpanRes, minSpanRes] = await Promise.all([

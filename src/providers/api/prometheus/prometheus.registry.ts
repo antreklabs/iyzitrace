@@ -1,3 +1,5 @@
+import { getDataSourceSrv } from '@grafana/runtime';
+import { prometheusApi } from './prometheus.api';
 /*
   Prometheus configuration registry
   - Centralizes metric names, label keys, and query builders
@@ -6,10 +8,10 @@
 */
 
 export const MetricKeys = {
-  traces_spanmetrics_calls_total: 'iyzitrace_span_metrics_calls_total	',
-  traces_spanmetrics_latency_sum: 'iyzitrace_span_metrics_duration_milliseconds_sum',
-  traces_spanmetrics_latency_count: 'iyzitrace_span_metrics_duration_milliseconds_count',
-  traces_spanmetrics_latency_bucket: 'iyzitrace_span_metrics_duration_milliseconds_bucket',
+  traces_spanmetrics_calls_total: 'span_metrics_calls_total	',
+  traces_spanmetrics_latency_sum: 'span_metrics_duration_milliseconds_sum',
+  traces_spanmetrics_latency_count: 'span_metrics_duration_milliseconds_count',
+  traces_spanmetrics_latency_bucket: 'span_metrics_duration_milliseconds_bucket',
 } as const;
 
 export type MetricKey = keyof typeof MetricKeys;
@@ -256,10 +258,29 @@ export function buildAllQueries(ctx: PrometheusQueriesContext, uid?: string): Re
 }
 
 /** Build a single query string by key */
-export function buildQuery(key: QueryKey, ctx: PrometheusQueriesContext, uid?: string): string {
+export async function buildQuery(key: QueryKey, ctx: PrometheusQueriesContext, uid?: string): Promise<string> {
+  if (!uid) {
+    uid = await prometheusApi.resolvePrometheusUid();
+  }
   const cfg = resolvePrometheusConfig(uid);
   const builder = cfg.queries[key];
   return builder(ctx, cfg);
 }
 
+
+/**
+ * Reads promRegistryOverrides from datasource instance settings and applies them for the given UID.
+ * Safe to call multiple times; the last call wins.
+ */
+export async function applyPrometheusRegistryOverrides(uid: string): Promise<void> {
+  try {
+    const inst = await getDataSourceSrv().getInstanceSettings(uid);
+    const overrides = (inst?.jsonData as any)?.promRegistryOverrides;
+    if (overrides) {
+      setPrometheusOverrides(uid, overrides as any);
+    }
+  } catch {
+    // ignore: missing instance or overrides
+  }
+}
 

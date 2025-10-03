@@ -40,10 +40,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ name, start, end,colors }) =>
         const ctx = { serviceName: name, windowSeconds: Math.floor((end - start) / 1000) };
         
         const [totalTraceResponse, avgLatencyResponse, minLatencyResponse, maxLatencyResponse] = await Promise.all([
-          prometheusApi.runTraceQLQuery(buildQuery(QueryKeys.totalTraceCount, ctx)),
-          prometheusApi.runTraceQLQuery(buildQuery(QueryKeys.avgLatency, ctx)),
-          prometheusApi.runTraceQLQuery(buildQuery(QueryKeys.minLatency, ctx)),
-          prometheusApi.runTraceQLQuery(buildQuery(QueryKeys.maxLatency, ctx)),
+          prometheusApi.runTraceQLQuery(await buildQuery(QueryKeys.totalTraceCount, ctx)),
+          prometheusApi.runTraceQLQuery(await buildQuery(QueryKeys.avgLatency, ctx)),
+          prometheusApi.runTraceQLQuery(await buildQuery(QueryKeys.minLatency, ctx)),
+          prometheusApi.runTraceQLQuery(await buildQuery(QueryKeys.maxLatency, ctx)),
         ]);
         const totalTraceValue = totalTraceResponse[0]?.value[1] || 0;
         const avgLatencyValue = avgLatencyResponse[0]?.value[1] || 0;
