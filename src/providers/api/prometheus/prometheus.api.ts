@@ -32,7 +32,7 @@ export const prometheusApi = {
             if (!uid) { throw new Error('No Prometheus UID selected'); }
 
             const url = `/api/datasources/proxy/uid/${uid}/api/v1/query`;
-            console.log('runTraceQLQuery', query);
+            // console.log('runTraceQLQuery', query);
             const res = await getBackendSrv().get(url, {
                 query
             });
@@ -48,7 +48,7 @@ export const prometheusApi = {
             if (!uid) { throw new Error('No Prometheus UID selected'); }
 
             const url = `/api/datasources/proxy/uid/${uid}/api/v1/query_range`;
-            console.log('runTraceQlQueryRange', query);
+            // console.log('runTraceQlQueryRange', query);
             const res = await getBackendSrv().get(url, {
                 query,
                 start,

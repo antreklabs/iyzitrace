@@ -16,7 +16,7 @@ interface ServiceCardProps {
   colors?: string[]
 }
 
-const ServiceCard: React.FC<ServiceCardProps> = ({ name, start, end,colors }) => {
+const ServiceCard: React.FC<ServiceCardProps> = ({ name, start, end, colors }) => {
   const [latency, setLatency] = useState<{avg: number, min: number, max: number, count: number} | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();

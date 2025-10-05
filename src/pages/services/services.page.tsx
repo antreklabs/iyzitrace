@@ -1,17 +1,15 @@
 import React from 'react';
-import { PageLayoutType } from '@grafana/data';
-import { PluginPage } from '@grafana/runtime';
-import ServicesContainer from '../../containers/ServicesContainer/ServicesContainer';
 
+import BasePage from '../base.page';
+import ServiceContainer from '../../containers/service/service.container';
 
-function ServicesPage() {
+function ServiceV2() {
 
   return (
-    <PluginPage layout={PageLayoutType.Canvas}>
-      <ServicesContainer></ServicesContainer>
-    </PluginPage>
+    <BasePage>
+      <ServiceContainer />
+    </BasePage>
   );
 }
 
-export default ServicesPage;
-
+export default ServiceV2;

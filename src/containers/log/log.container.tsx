@@ -108,6 +108,7 @@ const LogContainer: React.FC = () => {
   return (
     <BaseContainerComponent
       title="Logs"
+      initialFilterCollapsed={false}
       onFetchData={fetchModelData}
       onExpandedRowRender={expandedRowRender}
       columns={columns}

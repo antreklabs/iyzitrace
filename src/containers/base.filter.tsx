@@ -445,193 +445,193 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
 
       {children}
 
-{hasLabelsFilter && (
-  <>
-    <Divider orientation={collapsed ? 'left':'center'}>Labels</Divider>
+      {hasLabelsFilter && (
+        <>
+          <Divider orientation={collapsed ? 'left':'center'}>Labels</Divider>
 
-    {labelFilters.map((filter, index) => (
-      <React.Fragment key={filter.id}>
-        <Row gutter={8} className="base-filter-label-filter-row">
-          {collapsed ? (
-            <Typography.Text type="secondary">
-              {filter.label ? `${filter.label} = ${form.getFieldValue(['labels', filter.id, 'value']) || 'any'}` : 'All'}
-            </Typography.Text>
-          ) : (
-            <>
+          {labelFilters.map((filter, index) => (
+            <React.Fragment key={filter.id}>
+              <Row gutter={8} className="base-filter-label-filter-row">
+                {collapsed ? (
+                  <Typography.Text type="secondary">
+                    {filter.label ? `${filter.label} = ${form.getFieldValue(['labels', filter.id, 'value']) || 'any'}` : 'All'}
+                  </Typography.Text>
+                ) : (
+                  <>
+                    <Col span={24}>
+                      <Form.Item name={['labels', filter.id, 'name']} label="" initialValue={''}>
+                        <Select
+                          showSearch
+                          allowClear
+                          placeholder="Select label"
+                          onChange={(value) => handleLabelFilterChange(filter.id, value)}
+                          loading={labels.length === 0}
+                        >
+                          {labels.map((label) => (
+                            <Option key={label} value={label}>
+                              {label}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={24}>
+                      <Form.Item name={['labels', filter.id, 'value']} noStyle>
+                        <Select
+                          showSearch
+                          allowClear
+                          placeholder="Select value"
+                          className="base-filter-label-select"
+                          disabled={!filter.label}
+                          loading={filter.values.length === 0 && filter.label !== ''}
+                          mode="multiple"
+                          maxTagCount={2}
+                          maxTagTextLength={500}
+                        >
+                          {filter.values.map((value) => (
+                            <Option key={value} value={value}>
+                              {value}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                  </>
+                )}
+              </Row>
+              {index < labelFilters.length - 1 && (
+                <Divider orientation={collapsed ? 'left':'center'} />
+              )}
+            </React.Fragment>
+          ))}
+
+          {!collapsed && (
+            <Row gutter={8}>
               <Col span={24}>
-                <Form.Item name={['labels', filter.id, 'name']} label="" initialValue={''}>
-                  <Select
-                    showSearch
-                    allowClear
-                    placeholder="Select label"
-                    onChange={(value) => handleLabelFilterChange(filter.id, value)}
-                    loading={labels.length === 0}
-                  >
-                    {labels.map((label) => (
-                      <Option key={label} value={label}>
-                        {label}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
+                <Button 
+                  type="dashed" 
+                  icon={<PlusOutlined />} 
+                  onClick={addLabelFilter}
+                  className="base-filter-add-button"
+                >
+                  Add Label Filter
+                </Button>
               </Col>
-              <Col span={24}>
-                <Form.Item name={['labels', filter.id, 'value']} noStyle>
-                  <Select
-                    showSearch
-                    allowClear
-                    placeholder="Select value"
-                    className="base-filter-label-select"
-                    disabled={!filter.label}
-                    loading={filter.values.length === 0 && filter.label !== ''}
-                    mode="multiple"
-                    maxTagCount={2}
-                    maxTagTextLength={500}
-                  >
-                    {filter.values.map((value) => (
-                      <Option key={value} value={value}>
-                        {value}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </>
+            </Row>
           )}
-        </Row>
-        {index < labelFilters.length - 1 && (
-          <Divider orientation={collapsed ? 'left':'center'} />
-        )}
-      </React.Fragment>
-    ))}
 
-    {!collapsed && (
-      <Row gutter={8}>
-        <Col span={24}>
-          <Button 
-            type="dashed" 
-            icon={<PlusOutlined />} 
-            onClick={addLabelFilter}
-            className="base-filter-add-button"
-          >
-            Add Label Filter
-          </Button>
-        </Col>
-      </Row>
-    )}
-
-    {!collapsed && labelFilters.length > 0 && (
-      <Row gutter={8} className="base-filter-remove-button-row">
-        <Col span={24}>
-          <Button 
-            type="dashed" 
-            icon={<MinusOutlined />} 
-            onClick={() => removeLabelFilter(labelFilters[labelFilters.length - 1].id)}
-            danger
-            className="base-filter-add-button"
-          >
-            Remove Last Label Filter
-          </Button>
-        </Col>
-      </Row>
-    )}
-
-  </>
-)}
-
-{hasFieldsFilter && (
-  <>
-    <Divider orientation={collapsed ? 'left':'center'}>Fields</Divider>
-
-    {fieldFilters.map((filter, index) => (
-      <React.Fragment key={filter.id}>
-        <Row gutter={8} className="base-filter-field-filter-row">
-          {collapsed ? (
-            <Typography.Text type="secondary">
-              {filter.field ? `${filter.field} = ${form.getFieldValue(['fields', filter.id, 'value']) || 'any'}` : 'All'}
-            </Typography.Text>
-          ) : (
-            <>
+          {!collapsed && labelFilters.length > 0 && (
+            <Row gutter={8} className="base-filter-remove-button-row">
               <Col span={24}>
-                <Form.Item name={['fields', filter.id, 'name']} label="" initialValue={''}>
-                  <Select
-                    showSearch
-                    allowClear
-                    placeholder="Select field"
-                    onChange={(value) => handleFieldFilterChange(filter.id, value)}
-                    loading={fields.length === 0}
-                  >
-                    {fields.map((field) => (
-                      <Option key={field} value={field}>
-                        {field}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
+                <Button 
+                  type="dashed" 
+                  icon={<MinusOutlined />} 
+                  onClick={() => removeLabelFilter(labelFilters[labelFilters.length - 1].id)}
+                  danger
+                  className="base-filter-add-button"
+                >
+                  Remove Last Label Filter
+                </Button>
               </Col>
-              <Col span={24}>
-                <Form.Item name={['fields', filter.id, 'value']} noStyle>
-                  <Select
-                    showSearch
-                    allowClear
-                    placeholder="Select value"
-                    className="base-filter-label-select"
-                    disabled={!filter.field}
-                    loading={filter.values.length === 0 && filter.field !== ''}
-                    mode="multiple"
-                    maxTagCount={2}
-                    maxTagTextLength={500}
-                  >
-                    {filter.values.map((value) => (
-                      <Option key={value} value={value}>
-                        {value}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </>
+            </Row>
           )}
-        </Row>
-        {index < fieldFilters.length - 1 && (
-          <Divider orientation={collapsed ? 'left':'center'} />
-        )}
-      </React.Fragment>
-    ))}
 
-    {!collapsed && (
-      <Row gutter={8}>
-        <Col span={24}>
-          <Button 
-            type="dashed" 
-            icon={<PlusOutlined />} 
-            onClick={addFieldFilter}
-            className="base-filter-add-button"
-          >
-            Add Field Filter
-          </Button>
-        </Col>
-      </Row>
-    )}
+        </>
+      )}
 
-    {!collapsed && fieldFilters.length > 0 && (
-      <Row gutter={8} className="base-filter-remove-button-row">
-        <Col span={24}>
-          <Button 
-            type="dashed" 
-            icon={<MinusOutlined />} 
-            onClick={() => removeFieldFilter(fieldFilters[fieldFilters.length - 1].id)}
-            danger
-            className="base-filter-add-button"
-          >
-            Remove Last Field Filter
-          </Button>
-        </Col>
-      </Row>
-    )}
+      {hasFieldsFilter && (
+        <>
+          <Divider orientation={collapsed ? 'left':'center'}>Fields</Divider>
 
-  </>
-)}
+          {fieldFilters.map((filter, index) => (
+            <React.Fragment key={filter.id}>
+              <Row gutter={8} className="base-filter-field-filter-row">
+                {collapsed ? (
+                  <Typography.Text type="secondary">
+                    {filter.field ? `${filter.field} = ${form.getFieldValue(['fields', filter.id, 'value']) || 'any'}` : 'All'}
+                  </Typography.Text>
+                ) : (
+                  <>
+                    <Col span={24}>
+                      <Form.Item name={['fields', filter.id, 'name']} label="" initialValue={''}>
+                        <Select
+                          showSearch
+                          allowClear
+                          placeholder="Select field"
+                          onChange={(value) => handleFieldFilterChange(filter.id, value)}
+                          loading={fields.length === 0}
+                        >
+                          {fields.map((field) => (
+                            <Option key={field} value={field}>
+                              {field}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={24}>
+                      <Form.Item name={['fields', filter.id, 'value']} noStyle>
+                        <Select
+                          showSearch
+                          allowClear
+                          placeholder="Select value"
+                          className="base-filter-label-select"
+                          disabled={!filter.field}
+                          loading={filter.values.length === 0 && filter.field !== ''}
+                          mode="multiple"
+                          maxTagCount={2}
+                          maxTagTextLength={500}
+                        >
+                          {filter.values.map((value) => (
+                            <Option key={value} value={value}>
+                              {value}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                  </>
+                )}
+              </Row>
+              {index < fieldFilters.length - 1 && (
+                <Divider orientation={collapsed ? 'left':'center'} />
+              )}
+            </React.Fragment>
+          ))}
+
+          {!collapsed && (
+            <Row gutter={8}>
+              <Col span={24}>
+                <Button 
+                  type="dashed" 
+                  icon={<PlusOutlined />} 
+                  onClick={addFieldFilter}
+                  className="base-filter-add-button"
+                >
+                  Add Field Filter
+                </Button>
+              </Col>
+            </Row>
+          )}
+
+          {!collapsed && fieldFilters.length > 0 && (
+            <Row gutter={8} className="base-filter-remove-button-row">
+              <Col span={24}>
+                <Button 
+                  type="dashed" 
+                  icon={<MinusOutlined />} 
+                  onClick={() => removeFieldFilter(fieldFilters[fieldFilters.length - 1].id)}
+                  danger
+                  className="base-filter-add-button"
+                >
+                  Remove Last Field Filter
+                </Button>
+              </Col>
+            </Row>
+          )}
+
+        </>
+      )}
 
       {hasOptionsFilter && (
         <>

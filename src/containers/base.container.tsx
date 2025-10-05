@@ -19,6 +19,8 @@ interface BaseContainerProps {
   columns: any[];
   filterComponent?: React.ReactElement;
   datasourceType?: 'tempo' | 'loki';
+  initialFilterCollapsed?: boolean;
+  children?: React.ReactNode;
 }
 
 const BaseContainerComponent: React.FC<BaseContainerProps> = ({
@@ -28,7 +30,9 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   onExpandedRowRender,
   columns,
   filterComponent,
-  datasourceType = 'tempo'
+  datasourceType = 'tempo',
+  initialFilterCollapsed = true,
+  children
 }) => {
   const location = useLocation();
   const pageName = location.pathname.split('/').filter(Boolean).join('_') || 'home';
@@ -40,7 +44,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   const [filters, setFilters] = useState<any>(savedState?.filters || defaultState.filters);
   const [modelData, setModelData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(initialFilterCollapsed);
   const [pageSize, setPageSize] = useState(savedState?.pageSize || defaultState.pageSize);
   
   const { selectedUid } = useAppSelector((state) => state.datasource);
@@ -67,6 +71,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
     try {
       const currentPageState = getPageState(pageName);
       const data = await onFetchData(currentPageState);
+      console.log('data', data);
       setModelData(data);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -129,38 +134,43 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
           ) : modelData.length === 0 ? (
             <Empty description="No data found for selected range." />
           ) : (
-            <Table
-              dataSource={modelData}
-              columns={columns}
-              expandable={{
-                expandedRowRender: onExpandedRowRender,
-                expandIcon: ({ expanded, onExpand, record }) =>
-                  expanded ? (
-                    <IoIosArrowDown
-                      onClick={(e: any) => onExpand(record, e)}
-                      className="base-container-icon"
-                    />
-                  ) : (
-                    <IoIosArrowForward
-                      onClick={(e: any) => onExpand(record, e)}
-                      className="base-container-icon"
-                    />
-                  ),
-              }}
-              scroll={{ x: 'max-content', y: 'calc(100vh - 300px)' }}
-              pagination={{
-                pageSize: pageSize,
-                showSizeChanger: true,
-                pageSizeOptions: ['10', '20', '50', '100'],
-                onShowSizeChange: (current, size) => {
-                  setPageSize(size);
-                  saveState({ pageSize: size });
-                  fetchModelData();
-                }
-              }}
-              size="middle"
-              bordered
-            />
+            <>
+              {children}
+              
+              <Table
+                rowKey={(record: any) => record.id ?? record.key ?? record.text ?? record.name ?? JSON.stringify(record)}
+                dataSource={modelData}
+                columns={columns}
+                expandable={{
+                  expandedRowRender: onExpandedRowRender,
+                  expandIcon: ({ expanded, onExpand, record }) =>
+                    expanded ? (
+                      <IoIosArrowDown
+                        onClick={(e: any) => onExpand(record, e)}
+                        className="base-container-icon"
+                      />
+                    ) : (
+                      <IoIosArrowForward
+                        onClick={(e: any) => onExpand(record, e)}
+                        className="base-container-icon"
+                      />
+                    ),
+                }}
+                scroll={{ x: 'max-content', y: 'calc(100vh - 300px)' }}
+                pagination={{
+                  pageSize: pageSize,
+                  showSizeChanger: true,
+                  pageSizeOptions: ['10', '20', '50', '100'],
+                  onShowSizeChange: (current, size) => {
+                    setPageSize(size);
+                    saveState({ pageSize: size });
+                    fetchModelData();
+                  }
+                }}
+                size="middle"
+                bordered
+              />
+            </>
           )}
         </Content>
       </Layout>

@@ -41,7 +41,7 @@ service:
     logs:
       receivers: [otlp]
       processors: [resourcedetection, memory_limiter, transform, batch]
-      exporters: [otlp,opensearch, otlphttp/loki, debug]
+      exporters: [otlp, opensearch, otlphttp/loki, debug]
 
 processors:
   # var olan memory_limiter / batch varsa kalsın; aşağıdaki yeni blokları ekliyoruz/override ediyoruz
