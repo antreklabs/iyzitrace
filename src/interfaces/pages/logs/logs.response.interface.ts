@@ -16,7 +16,7 @@ export interface LogItem {
 }
 
 export interface LogsResponseModel {
-    logs: LogItem[];
+    list: LogItem[];
     total: number;
     hasMore: boolean;
 }

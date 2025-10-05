@@ -133,7 +133,7 @@ class LokiReadApi extends BaseApi {
     }
     
     return {
-      logs: logs,
+      list: logs,
       total: logs.length,
       hasMore: false,
     };

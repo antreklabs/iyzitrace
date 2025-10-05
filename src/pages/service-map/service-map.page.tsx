@@ -1,8 +1,8 @@
 import React from 'react';
-import ServiceMap from '../../containers/service-map/service-map.container';
+import ServiceMapContainer from '../../containers/service-map/service-map.container';
 
 const ServiceMapPage: React.FC = () => {
-  return <ServiceMap />;
+  return <ServiceMapContainer />;
 };
 
 export default ServiceMapPage;

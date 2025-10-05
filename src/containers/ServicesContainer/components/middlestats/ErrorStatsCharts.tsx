@@ -18,7 +18,7 @@ const ErrorStatsCharts: React.FC<MiddleStatsProps> = ({ serviceNames, start, end
     const step = "60s";
 
     const ctx = { serviceName: '', windowSeconds: 3600, rateInterval: '1m' };
-    const query = buildQuery(QueryKeys.serviceCallCountGlobal, ctx);
+    const query = await buildQuery(QueryKeys.serviceCallCountGlobal, ctx);
 
     try {
       const result = await prometheusApi.runTraceQlQueryRange(query, startUnix, endUnix, step);

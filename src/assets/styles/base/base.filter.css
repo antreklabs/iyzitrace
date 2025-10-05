@@ -7,16 +7,16 @@
   width: 100%;
 }
 
-.base-filter-operator-select {
-  width: 25%;
+.filter-operator-select {
+  width: 25% !important;
 }
 
-.base-filter-value-select {
+.filter-value-select {
   width: 75%;
   max-height: 32px;
 }
 
-.base-filter-compact-space {
+.filter-compact-space {
   max-height: 32px;
   width: 100%;
 }

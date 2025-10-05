@@ -31,12 +31,12 @@ const CallMetrics: React.FC<CallMetricsProps> = ({ serviceName, start, end }) =>
       const ctx = { serviceName, windowSeconds: Math.floor((end - start) / 1000) };
       
       const [p50, p90, p99, rate, apdex, keyops] = await Promise.all([
-        getQueryRange(buildQuery(QueryKeys.p50Latency, ctx)),
-        getQueryRange(buildQuery(QueryKeys.p90Latency, ctx)),
-        getQueryRange(buildQuery(QueryKeys.p99Latency, ctx)),
-        getQueryRange(buildQuery(QueryKeys.callsPerSecond, ctx)),
-        getQueryRange(buildQuery(QueryKeys.apdex, ctx)),
-        getQueryRange(buildQuery(QueryKeys.topKeyOperations, ctx)),
+        getQueryRange(await buildQuery(QueryKeys.p50Latency, ctx)),
+        getQueryRange(await buildQuery(QueryKeys.p90Latency, ctx)),
+        getQueryRange(await buildQuery(QueryKeys.p99Latency, ctx)),
+        getQueryRange(await buildQuery(QueryKeys.callsPerSecond, ctx)),
+        getQueryRange(await buildQuery(QueryKeys.apdex, ctx)),
+        getQueryRange(await buildQuery(QueryKeys.topKeyOperations, ctx)),
       ]);
 
       const mapMetric = (res: any[], label: string) =>

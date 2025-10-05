@@ -13,9 +13,9 @@ const MiddleStatsCharts: React.FC<MiddleStatsProps> = ({ serviceNames, start, en
     const ctx = { serviceName: '', windowSeconds: Math.floor((end - start) / 1000), rateInterval: '5m' };
 
     const [p50, p90, p95] = await Promise.all([
-      prometheusApi.runTraceQLQuery(buildQuery(QueryKeys.p50LatencyGlobal, ctx)),
-      prometheusApi.runTraceQLQuery(buildQuery(QueryKeys.p90LatencyGlobal, ctx)),
-      prometheusApi.runTraceQLQuery(buildQuery(QueryKeys.p95LatencyGlobal, ctx)),
+      prometheusApi.runTraceQLQuery(await buildQuery(QueryKeys.p50LatencyGlobal, ctx)),
+      prometheusApi.runTraceQLQuery(await buildQuery(QueryKeys.p90LatencyGlobal, ctx)),
+      prometheusApi.runTraceQLQuery(await buildQuery(QueryKeys.p95LatencyGlobal, ctx)),
     ]);
 
     const data: Record<string, any> = {};
