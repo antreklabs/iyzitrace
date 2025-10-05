@@ -38,7 +38,7 @@ const LogContainer: React.FC = () => {
       const apiResult = await lokiReadApi.query({...requestModel});
       console.log('[LogContainer] lokiReadApi.query result:', apiResult);
 
-      return apiResult.logs;
+      return apiResult.list;
     } catch (e) {
       console.error('[LogContainer] lokiReadApi.query error:', e);
     }

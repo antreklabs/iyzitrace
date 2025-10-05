@@ -48,14 +48,15 @@ const LogFilter: React.FC<LogFilterProps> = ({ onChange, collapsed, columns, dat
       hasFieldsFilter={true}
       hasOptionsFilter={true}
       data={data}
+      datasourceType="loki"
       onExpressionUpdate={handleExpressionUpdate}
     >
       {levels?.length > 0 && (
       <Form.Item label="Levels">
         {(
-          <Space.Compact className="log-filter-level-compact-space">
+          <Space.Compact className="filter-compact-space">
             <Form.Item name={['filters', 'levelOperator']} noStyle initialValue="=">
-              <Select className="log-filter-level-operator-select">
+              <Select className="filter-operator-select">
                 {EQUAL_OPERATOR_OPTIONS.map((op) => (
                   <Option key={op} value={op}>
                     {op}
@@ -68,7 +69,7 @@ const LogFilter: React.FC<LogFilterProps> = ({ onChange, collapsed, columns, dat
                 showSearch
                 allowClear
                 placeholder="Select level"
-                className="log-filter-level-value-select"
+                className="filter-value-select"
               >
                 {levels.map((level) => (
                   <Option key={level} value={level}>

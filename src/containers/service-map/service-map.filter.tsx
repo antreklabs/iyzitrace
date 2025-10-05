@@ -16,12 +16,13 @@ const ServiceMapFilter: React.FC<ServiceMapFilterProps> = ({ onChange, collapsed
       onChange={onChange} 
       collapsed={collapsed}
       columns={columns}
-      hasServiceFilter={false}
+      hasServiceFilter={true}
       hasDurationFilter={false}
       hasTagsFilter={false}
       hasLabelsFilter={false}
       hasFieldsFilter={false}
       hasOptionsFilter={false}
+      datasourceType="tempo"
       data={data}
     >
       

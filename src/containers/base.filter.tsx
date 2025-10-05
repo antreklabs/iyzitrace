@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Select, Input, Button, Divider, Form, Row, Col, InputNumber, Typography, Space } from 'antd';
 import { lokiReadApi } from '../providers/api/loki/loki.api.read';
+import { tempoReadApi } from '../providers/api/tempo/tempo.api.read';
 import { useAppSelector } from '../store/hooks';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { getPageState, updatePageState, getDefaultPageState } from './base.container';
@@ -23,6 +24,7 @@ interface BaseFilterProps {
   hasFieldsFilter?: boolean;
   columns?: any[];
   data?: any[]; // Grid data to extract fields from
+  datasourceType?: 'tempo' | 'loki';
   onExpressionUpdate?: (labelExpressionParts: string[], expression: string) => { labelExpressionParts: string[], expression: string } | void; // Callback for expression updates
 }
 
@@ -38,11 +40,12 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
   hasFieldsFilter = false,
   columns = [],
   data = [],
+  datasourceType = 'tempo',
   onExpressionUpdate
 }) => {
   const [services, setServices] = useState<string[]>([]);
-  const [lokiLabels, setLokiLabels] = useState<string[]>([]);
-  const [lokiFields, setLokiFields] = useState<string[]>([]);
+  const [labels, setLabels] = useState<string[]>([]);
+  const [fields, setFields] = useState<string[]>([]);
   const [labelFilters, setLabelFilters] = useState<Array<{id: string, label: string, values: string[]}>>([]);
   const [fieldFilters, setFieldFilters] = useState<Array<{id: string, field: string, values: string[]}>>([]);
   const [form] = Form.useForm();
@@ -51,18 +54,20 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
   const pageName = location.pathname.split('/').filter(Boolean).join('_') || 'home';
 
   const fetchServices = async () => {
-    const values = await lokiReadApi.getLabelValues('service_name');
+    const values = datasourceType === 'loki' ? await lokiReadApi.getLabelValues('service_name') 
+      : await tempoReadApi.getLabelValues('service.name');
     const serviceNames: string[] = Array.isArray(values) ? values : [];
     setServices(serviceNames);
   };
 
-  const fetchLokiLabels = async () => {
+  const fetchLabels = async () => {
     try {
-      const labels = await lokiReadApi.getLabels();
-      setLokiLabels(Array.isArray(labels) ? labels : []);
+      const labels = datasourceType === 'loki' ? await lokiReadApi.getLabels() 
+        : await tempoReadApi.getLabels();
+      setLabels(Array.isArray(labels) ? labels : []);
     } catch (error) {
-      console.error('Error fetching Loki labels:', error);
-      setLokiLabels([]);
+      console.error('Error fetching labels:', error);
+      setLabels([]);
     }
   };
 
@@ -79,7 +84,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     
     const extractedFields = Array.from(fieldNames);
     if (extractedFields.length > 0) {
-      setLokiFields(extractedFields);
+      setFields(extractedFields);
     }
   };
 
@@ -145,7 +150,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       fetchServices();
     }
     if (hasLabelsFilter) {
-      fetchLokiLabels();
+      fetchLabels();
     }
   }, [selectedUid, hasServiceFilter, hasLabelsFilter]);
 
@@ -190,7 +195,8 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
             if (filter.label) {
               try {
                 console.log(`[BaseFilter] Fetching values for initial label: ${filter.label}`);
-                const values = await lokiReadApi.getLabelValues(filter.label);
+                const values = datasourceType === 'loki' ? await lokiReadApi.getLabelValues(filter.label) 
+                  : await tempoReadApi.getLabelValues(filter.label);
                 console.log(`[BaseFilter] Label values received for ${filter.label}:`, values);
                 setLabelFilters(prev => prev.map(f => 
                   f.id === filter.id 
@@ -268,7 +274,8 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     // Fetch values for the selected label
     if (labelName) {
       try {
-        const values = await lokiReadApi.getLabelValues(labelName);
+        const values = datasourceType === 'loki' ? await lokiReadApi.getLabelValues(labelName) 
+          : await tempoReadApi.getLabelValues(labelName);
         setLabelFilters(labelFilters.map(filter => 
           filter.id === id 
             ? { ...filter, label: labelName, values: Array.isArray(values) ? values : [] }
@@ -340,9 +347,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
             
           </Typography.Text>
         ) : (
-          <Space.Compact className="base-filter-compact-space">
+          <Space.Compact className="filter-compact-space">
             <Form.Item name={['filters', 'serviceNameOperator']} noStyle initialValue="=">
-              <Select className="base-filter-operator-select">
+              <Select className="filter-operator-select">
                 {EQUAL_OPERATOR_OPTIONS.map((op) => (
                   <Option key={op} value={op}>
                     {op}
@@ -355,13 +362,17 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 showSearch
                 allowClear
                 placeholder="Select service"
-                className="base-filter-value-select"
+                className="filter-value-select"
               >
-                {services.map((service) => (
-                  <Option key={service} value={service}>
-                    {service}
-                  </Option>
-                ))}
+                {services.map((service) => {
+                  const serviceValue = typeof service === 'string' ? service : (service as any)?.text || (service as any)?.value || String(service);
+                  const serviceKey = typeof service === 'string' ? service : (service as any)?.text || (service as any)?.value || String(service);
+                  return (
+                    <Option key={serviceKey} value={serviceValue}>
+                      {serviceValue}
+                    </Option>
+                  );
+                })}
               </Select>
             </Form.Item>
           </Space.Compact>
@@ -454,9 +465,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                     allowClear
                     placeholder="Select label"
                     onChange={(value) => handleLabelFilterChange(filter.id, value)}
-                    loading={lokiLabels.length === 0}
+                    loading={labels.length === 0}
                   >
-                    {lokiLabels.map((label) => (
+                    {labels.map((label) => (
                       <Option key={label} value={label}>
                         {label}
                       </Option>
@@ -548,9 +559,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                     allowClear
                     placeholder="Select field"
                     onChange={(value) => handleFieldFilterChange(filter.id, value)}
-                    loading={lokiFields.length === 0}
+                    loading={fields.length === 0}
                   >
-                    {lokiFields.map((field) => (
+                    {fields.map((field) => (
                       <Option key={field} value={field}>
                         {field}
                       </Option>
@@ -649,11 +660,11 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 <Col span={12}>
                     <Form.Item name={['options', 'orderBy']} label="Order By" initialValue={'timestamp'}>
                       <Select className="base-filter-order-select">
-                        {columns.map((column) => (
-                          <Option key={column.key} value={column.key}>
-                            {column.title}
+                        {columns && Array.isArray(columns) ? columns.map((column) => (
+                          <Option key={column.key || column.dataIndex} value={column.key || column.dataIndex}>
+                            {column.title || column.key || column.dataIndex}
                           </Option>
-                        ))}
+                        )) : null}
                       </Select>
                     </Form.Item>
                 </Col>
