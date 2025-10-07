@@ -2,7 +2,8 @@ import React from 'react';
 import { AppRoute } from '@/interfaces';
 
 const Dashboard = React.lazy(() => import('../pages/dashboard.page'));
-const Services = React.lazy(() => import('../pages/services/services.page'));
+const Services = React.lazy(() => import('../pages/services/services.old.page'));
+const ServicesV2 = React.lazy(() => import('../pages/services/services.page'));
 const ServiveDetail = React.lazy(() => import('../pages/services/servicedetail.page'));
 const TracePage = React.lazy(() => import('../pages/traces/traces.page'));
 const TraceDetail = React.lazy(() => import('../pages/traces/tracedetail.page'));
@@ -23,6 +24,14 @@ export const appRoutes: AppRoute[] = [
     path: '/services',
     element: <Services />,
     name: 'services',
+    title: 'Services',
+    icon: 'search',
+    showInMenu: true,
+  },
+  {
+    path: '/services-v2',
+    element: <ServicesV2 />,
+    name: 'servicesV2',
     title: 'Services',
     icon: 'search',
     showInMenu: true,

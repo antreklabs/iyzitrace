@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from 'antd';
 
-import './Basecontainer.css';
+import './basecontainer.css';
 import BaseContainerHeader from './basecontainerheader';
 
 interface BaseConatinerProps {

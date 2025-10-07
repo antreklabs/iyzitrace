@@ -72,7 +72,7 @@ const Sidebar: React.FC = () => {
       <Menu
         theme="dark"
         mode="inline"
-        selectedKeys={[currentKey || 'services']}
+        selectedKeys={[currentKey || 'services-v2']}
         onClick={handleMenuClick}
         style={{
           borderRight: 0,
@@ -80,6 +80,7 @@ const Sidebar: React.FC = () => {
         }}
         items={[
           { key: 'services', icon: <BarChartOutlined style={{ fontSize: 16 }} />, label: 'Services' },
+          { key: 'services-v2', icon: <BarChartOutlined style={{ fontSize: 16 }} />, label: 'Services v2' },  
           { key: 'traces', icon: <FileSearchOutlined style={{ fontSize: 16 }} />, label: 'Traces' },
           { key: 'logs', icon: <ProfileOutlined style={{ fontSize: 16 }} />, label: 'Logs' },
           { key: 'logs-v2', icon: <ProfileOutlined style={{ fontSize: 16 }} />, label: 'Logs v2' },

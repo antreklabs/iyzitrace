@@ -27,13 +27,20 @@ const ServiceDetailContainer: React.FC<ServiceDetailContainerProps> = ({ service
     >
     <BasicSummary serviceName={serviceName} start={range[0]} end={range[1]} />
       <Row gutter={[16, 16]}>
-        <Tabs>
-          <Tabs.TabPane tab="Call Metrics" key="callmetric">
-            <CallMetrics serviceName={serviceName} start={range[0]} end={range[1]} />
-          </Tabs.TabPane>
-          <Tabs.TabPane tab="Operations" key="operations">
-            </Tabs.TabPane>
-        </Tabs>
+        <Tabs
+          items={[
+            {
+              key: 'callmetric',
+              label: 'Call Metrics',
+              children: <CallMetrics serviceName={serviceName} start={range[0]} end={range[1]} />
+            },
+            {
+              key: 'operations',
+              label: 'Operations',
+              children: <div>Operations content will be added here</div>
+            }
+          ]}
+        />
       </Row>
     </BaseContainer>
   );
