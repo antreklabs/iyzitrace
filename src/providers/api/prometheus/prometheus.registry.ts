@@ -97,7 +97,7 @@ const defaultQueryBuilders: ResolvedPrometheusConfig['queries'] = {
     `count(count by (${cfg.labels.span_name}) (rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])))`,
 
   totalCalls: ({ serviceName, windowSeconds }, cfg) =>
-    `sum(increase(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s]))`,
+    `sum(increase(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (span_name)`,
 
   maxLatencySpan: ({ serviceName, windowSeconds }, cfg) =>
     `topk(1, sum_over_time(${cfg.metrics.traces_spanmetrics_latency_sum}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s]) / sum_over_time(${cfg.metrics.traces_spanmetrics_latency_count}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name})`,
@@ -107,13 +107,13 @@ const defaultQueryBuilders: ResolvedPrometheusConfig['queries'] = {
 
   // CallMetrics queries (use fixed 1m rate window as in UI today)
   p50Latency: ({ serviceName }, cfg) =>
-    `histogram_quantile(0.50, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[1m])) by (le))`,
+    `histogram_quantile(0.50, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[1m])) by (span_name, le))`,
   
   p90Latency: ({ serviceName }, cfg) =>
-    `histogram_quantile(0.90, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[1m])) by (le))`,
+    `histogram_quantile(0.90, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[1m])) by (span_name, le))`,
   
   p99Latency: ({ serviceName }, cfg) =>
-    `histogram_quantile(0.99, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[1m])) by (le))`,
+    `histogram_quantile(0.99, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[1m])) by (span_name, le))`,
   
   callsPerSecond: ({ serviceName }, cfg) =>
     `sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[1m]))`,
@@ -149,7 +149,7 @@ const defaultQueryBuilders: ResolvedPrometheusConfig['queries'] = {
 
   // TraceQLBuilder queries (span-specific)
   errorRate: ({ spanName, rateInterval = '5m' }, cfg) =>
-    `sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}", status_code!="STATUS_CODE_UNSET"}[${rateInterval}])) / sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}"}[${rateInterval}]))`,
+    `sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}", status_code!="STATUS_CODE_UNSET"}[${rateInterval}])) / sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}"}[${rateInterval}])) by (span_name)`,
   
   opsPerSec: ({ spanName, rateInterval = '5m' }, cfg) =>
     `sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}"}[${rateInterval}]))`,

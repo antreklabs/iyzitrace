@@ -8,14 +8,14 @@ interface ServiceFilterProps {
   data?: any[];
 }
 
-const ServiceFilter: React.FC<ServiceFilterProps> = ({ onChange, collapsed = true, columns, data }) => {
+const ServiceFilter: React.FC<ServiceFilterProps> = ({ onChange, collapsed, columns, data }) => {
   
   return (
     <BaseFilter 
       onChange={onChange} 
       collapsed={collapsed}
       columns={columns}
-      hasServiceFilter={false}
+      hasServiceFilter={true}
       hasDurationFilter={false}
       hasTagsFilter={false}
       hasLabelsFilter={false}

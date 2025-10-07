@@ -135,6 +135,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
             <Empty description="No data found for selected range." />
           ) : (
             <>
+              
               {children}
               
               <Table

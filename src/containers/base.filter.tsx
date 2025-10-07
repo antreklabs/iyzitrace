@@ -342,11 +342,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     <Form form={form} layout="vertical" onFinish={handleApply}>
       {hasServiceFilter && (
         <Form.Item label="Services">
-        {collapsed ? (
-          <Typography.Text type="secondary">
-            
-          </Typography.Text>
-        ) : (
           <Space.Compact className="filter-compact-space">
             <Form.Item name={['filters', 'serviceNameOperator']} noStyle initialValue="=">
               <Select className="filter-operator-select">
@@ -376,7 +371,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
               </Select>
             </Form.Item>
           </Space.Compact>
-        )}
+        
         </Form.Item>
       )}
 
