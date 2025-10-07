@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
-    "dev": "webpack serve -c ./.config/webpack/webpack.config.ts --env development --port 3000 --host 0.0.0.0 --allowed-hosts all",
+    "dev": "webpack -w -c ./.config/webpack/webpack.config.ts --env development",
     "test": "jest --config configs/test/jest.config.js --watch --onlyChanged",
     "test:ci": "jest --config configs/test/jest.config.js --passWithNoTests --maxWorkers 4",
     "typecheck": "tsc --noEmit",
@@ -59,11 +59,9 @@
     "swc-loader": "^0.2.3",
     "terser-webpack-plugin": "^5.3.10",
     "ts-node": "^10.9.2",
-    "tslib": "^2.8.1",
     "typescript": "5.5.4",
     "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.2.2",
     "webpack-livereload-plugin": "^3.0.2",
     "webpack-subresource-integrity": "^5.1.0",
     "webpack-virtual-modules": "^0.6.2"

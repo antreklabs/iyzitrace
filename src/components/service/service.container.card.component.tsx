@@ -33,7 +33,7 @@ const ServiceMetricsCard: React.FC<ServiceMetricsCardProps> = ({ name, start, en
           const maxPoints = 1;
           const step = Math.max(Math.ceil((fixedEnd - fixedStart) / maxPoints), 60);
           
-          const ctx: any = { serviceName: name };
+          const ctx: any = { serviceName: name, windowSeconds: step };
           const [countRes, avgRes, minRes, maxRes] = await Promise.all([
             prometheusApi.runTraceQlQueryRange(await buildQuery(QueryKeys.totalTraceCount, ctx), fixedStart, fixedEnd, step + 's'),
             prometheusApi.runTraceQlQueryRange(await buildQuery(QueryKeys.avgLatency, ctx), fixedStart, fixedEnd, step + 's'),

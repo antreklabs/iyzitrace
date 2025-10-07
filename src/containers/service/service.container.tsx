@@ -52,11 +52,8 @@ const ServiceContainer: React.FC = () => {
     }
     setServices(serviceNames);
 
-    // Also fetch metrics for the main table
     const startMs = pageState?.range?.[0];
-    // console.log('startMs', dateTime(startMs));
     const endMs = pageState?.range?.[1];
-    // console.log('endMs', dateTime(endMs));
     const fixedStart = Math.floor(startMs / 1000);
     const fixedEnd = Math.floor(endMs / 1000);
     const maxPoints = 1;
@@ -65,7 +62,7 @@ const ServiceContainer: React.FC = () => {
     const response: ServiceItem[] = [];
     
     for (const name of serviceNames) {
-      const ctx: any = { serviceName: name };
+      const ctx: any = { serviceName: name, windowSeconds: step };
         const [countRes, avgRes, minRes, maxRes] = await Promise.all([
           prometheusApi.runTraceQlQueryRange(await buildQuery(QueryKeys.totalTraceCount, ctx), fixedStart, fixedEnd, step + 's'),
           prometheusApi.runTraceQlQueryRange(await buildQuery(QueryKeys.avgLatency, ctx), fixedStart, fixedEnd, step + 's'),

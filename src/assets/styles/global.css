@@ -10,3 +10,29 @@ body,
 [class*="css-"][class*="page-header"] {
   display: none !important;
 }
+
+/* Touch event performance improvements */
+* {
+  touch-action: manipulation;
+}
+
+/* ApexCharts specific touch improvements */
+.apexcharts-canvas,
+.apexcharts-svg,
+.apexcharts-zoomable,
+.apexcharts-toolbar,
+.apexcharts-legend {
+  touch-action: pan-x pan-y !important;
+  pointer-events: auto !important;
+}
+
+/* Override ApexCharts touch events globally */
+.apexcharts-canvas *,
+.apexcharts-svg * {
+  touch-action: pan-x pan-y !important;
+}
+
+/* Prevent scroll blocking on chart interactions */
+.apexcharts-canvas {
+  overscroll-behavior: contain;
+}
