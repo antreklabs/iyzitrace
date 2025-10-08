@@ -1,30 +1,63 @@
 import { BaseApi } from '../core/base.api';
-import { ServiceMapRequestModel } from '../../../interfaces/pages/service-map/service-map.request.interface';
 import { ServiceMapItem, ServiceMapResponseModel, ServiceMapNode, ServiceMapEdge } from '../../../interfaces/pages/service-map/service-map.response.interface';
 import { lastValueFrom } from 'rxjs';
-import { ServiceMapTempoReadFactory } from './factory/service-map.tempo.read.factory';
+import { TempoReadFactory } from './factory/tempo.read.factory';
+import { TempoRequestModel } from '../../../interfaces/tempo/tempo.request.interface';
+import { getBackendSrv } from '@grafana/runtime';
+import qs from 'qs';
 
 class TempoReadApi extends BaseApi {
   
-  async query(requestModel: ServiceMapRequestModel): Promise<ServiceMapResponseModel> {
+  async query(requestModel: TempoRequestModel): Promise<any> {
     try {
-      console.log('[TempoReadApi] query - requestModel:', requestModel);
       const datasource = await this.getDatasourceInstance();
-      console.log('[TempoReadApi] datasource methods:', Object.getOwnPropertyNames(datasource));
-      console.log('[TempoReadApi] datasource prototype methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(datasource)));
-      
-      const request = await ServiceMapTempoReadFactory.create(requestModel, datasource);
-      console.log('[TempoReadApi] query - request:', request);
+      const request = await TempoReadFactory.create(requestModel, datasource);
       const response = await lastValueFrom(datasource.query(request));
 
-      return this.mapResponseModel(response);
+      if (requestModel.queryType === 'serviceMap') {
+        return this.mapServiceMapResponseModel(response);
+      }
+      else {
+        throw new Error('Invalid query type');
+      }
     } catch (error) {
       console.error('Tempo query error:', error);
       throw error;
     }
   }
 
-  private mapResponseModel(response: any): ServiceMapResponseModel {
+  async search(query: string, start: number, end: number, limit: number = 1000): Promise<any> {
+    const datasource = await this.getDatasourceInstance();
+    const searchParams = {
+      q: query,
+      start: start,
+      end: end,
+      limit: limit
+    };
+  
+    try {
+      // const res = await datasource.metadataRequest('search', searchParams);
+      // const res = await lastValueFrom(datasource._request('search', searchParams));
+      const res = await getBackendSrv().get(`${datasource.instanceSettings.url}/api/search?${qs.stringify(searchParams)}`);
+      return res;
+    } catch (error) {
+      console.error('Tempo search error:', error);
+      throw error;
+    }
+  }
+
+  // private mapSearchResponseModel(response: any): TraceResponseModel {
+  //   return response.map((item: any) => ({
+  //     id: item.id,
+  //     service: item.service,
+  //     avgLatency: item.avgLatency,
+  //     minLatency: item.minLatency,
+  //     maxLatency: item.maxLatency,
+  //     count: item.count,
+  //   }));
+  // }
+
+  private mapServiceMapResponseModel(response: any): ServiceMapResponseModel {
     const list: ServiceMapItem[] = [];
     const nodes: ServiceMapNode[] = [];
     const edges: ServiceMapEdge[] = [];
@@ -395,9 +428,16 @@ class TempoReadApi extends BaseApi {
   async getLabels(): Promise<string[]> {
     try {
       const datasource = await this.getDatasourceInstance();
-      const labels = await datasource.labelNamesQuery();
+      const raw = await datasource.labelNamesQuery();
 
-      return Array.isArray(labels) ? labels : [];
+      // Normalize to plain string[] regardless of backend shape ({ text }, { value }, or string)
+      const normalized: string[] = (Array.isArray(raw) ? raw : [])
+        .map((item: any) =>
+          typeof item === 'string' ? item : (item?.text ?? item?.value ?? String(item))
+        )
+        .filter((s: any) => typeof s === 'string' && s.length > 0);
+
+      return normalized;
     } catch (error) {
       console.error('Loki getLabels error:', error);
       return [];
@@ -407,9 +447,16 @@ class TempoReadApi extends BaseApi {
   async getLabelValues(labelName: string): Promise<string[]> {
     try {
       const datasource = await this.getDatasourceInstance();
-      const services = await datasource.labelValuesQuery(labelName);
+      const raw = await datasource.labelValuesQuery(labelName);
 
-      return Array.isArray(services) ? services : [];
+      // Normalize to plain string[] regardless of backend shape ({ text }, { value }, or string)
+      const normalized: string[] = (Array.isArray(raw) ? raw : [])
+        .map((item: any) =>
+          typeof item === 'string' ? item : (item?.text ?? item?.value ?? String(item))
+        )
+        .filter((s: any) => typeof s === 'string' && s.length > 0);
+
+      return normalized;
     } catch (error) {
       console.error(`Error getting label values for ${labelName}:`, error);
       return [];
