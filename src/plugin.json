@@ -20,15 +20,45 @@
   "includes": [
     {
       "type": "page",
-      "name": "Dashboard",
-      "path": "/a/iyzitrace-app/",
+      "name": "Infra Overview",
+      "path": "/a/iyzitrace-app/landing",
       "addToNav": true,
       "defaultNav": true
     },
     {
       "type": "page",
       "name": "Services",
-      "path": "/a/iyzitrace-app/services",
+      "path": "/a/iyzitrace-app/services-v2",
+      "addToNav": true
+    },
+    {
+      "type": "page",
+      "name": "Traces",
+      "path": "/a/iyzitrace-app/traces-v2",
+      "addToNav": true
+    },
+    {
+      "type": "page",
+      "name": "Logs",
+      "path": "/a/iyzitrace-app/logs-v2",
+      "addToNav": true
+    },
+    {
+      "type": "page",
+      "name": "Dashboards",
+      "path": "/a/iyzitrace-app/dashboards",
+      "addToNav": true
+    },
+    {
+      "type": "page",
+      "name": "Alerts",
+      "path": "/a/iyzitrace-app/alerts",
+      "addToNav": true
+    },
+    {
+      "type": "page",
+      "name": "Exceptions",
+      "path": "/a/iyzitrace-app/exceptions",
       "addToNav": true
     },
     {
@@ -39,14 +69,14 @@
     },
     {
       "type": "page",
-      "name": "Traces",
-      "path": "/a/iyzitrace-app/traces",
+      "name": "Team",
+      "path": "/a/iyzitrace-app/team",
       "addToNav": true
     },
     {
       "type": "page",
-      "name": "Logs",
-      "path": "/a/iyzitrace-app/logs",
+      "name": "Settings",
+      "path": "/a/iyzitrace-app/settings",
       "addToNav": true
     },
     {

@@ -2,6 +2,7 @@ import React from 'react';
 import { AppRoute } from '@/interfaces';
 
 const Dashboard = React.lazy(() => import('../pages/dashboard.page'));
+const Landing = React.lazy(() => import('../pages/landing.page'));
 const Services = React.lazy(() => import('../pages/services/services.old.page'));
 const ServicesV2 = React.lazy(() => import('../pages/services/services.page'));
 const ServiveDetail = React.lazy(() => import('../pages/services/servicedetail.page'));
@@ -92,6 +93,14 @@ export const appRoutes: AppRoute[] = [
     name: 'logsPipelines',
     title: 'Logs Pipelines',
     icon: 'search',
+    showInMenu: true,
+  },
+  {
+    path: '/landing',
+    element: <Landing />,
+    name: 'landing',
+    title: 'Infra Overview',
+    icon: 'home',
     showInMenu: true,
   },
   {
