@@ -26,6 +26,7 @@ import BaseContainer from '../../components/core/basecontainer/basecontainer';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { DataFrame, TimeRange, DataQueryRequest, dateTime, CoreApp } from '@grafana/data';
 import { lastValueFrom } from 'rxjs';
+import store from '../../store/store';
 
 // Tempo Service Map Query interface
 interface TempoServiceMapQuery {
@@ -184,7 +185,15 @@ const queryTempoServiceMap = async (): Promise<{ nodes: Node[]; edges: Edge[]; o
     console.log('🔧 [Plugin API] Getting Tempo datasource via Plugin API only...');
     
     // Pure Plugin API approach - NO HTTP API bypass
-    const tempoDS = await getDataSourceSrv().get('tempo');
+    // Get selected datasource from store
+    const state = store.getState();
+    const selectedUid = state.datasource.selectedUid;
+    
+    if (!selectedUid) {
+      throw new Error('[Plugin API] No datasource selected');
+    }
+    
+    const tempoDS = await getDataSourceSrv().get(selectedUid);
     
     if (!tempoDS) {
       throw new Error('[Plugin API] Tempo datasource not found');
@@ -198,10 +207,10 @@ const queryTempoServiceMap = async (): Promise<{ nodes: Node[]; edges: Edge[]; o
     });
 
     const timeRange: TimeRange = {
-      from: dateTime(Date.now() - 60 * 60 * 1000),
+      from: dateTime(Date.now() - 24 * 60 * 60 * 1000),
       to: dateTime(Date.now()),
       raw: {
-        from: 'now-1h',
+        from: 'now-24h',
         to: 'now'
       }
     };
