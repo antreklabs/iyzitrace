@@ -74,7 +74,7 @@ docker compose -f configs/opentelemetry-demo/docker-compose.yml up -d
 
 ```bash
 # Start IyziTrace Grafana instance connected to the data sources
-docker compose up -d
+docker compose up -d 
 ```
 
 This will start:
