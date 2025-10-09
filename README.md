@@ -301,6 +301,6 @@ git checkout dev
 # Pull latest changes including your merged PR
 git pull origin dev
 
-# Delete local feature branch (if exists)
-git branch -d feature/your-feature-name
+# Rename local feature branch to indicate it's merged
+git branch -m feature/your-feature-name merged-feature/your-feature-name
 ```
