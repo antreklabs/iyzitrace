@@ -1,5 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Row, Col, Card, Select } from 'antd';
+import ApexCharts from 'react-apexcharts';
 import BaseContainerComponent, { PageState, getPageState } from '../base.container';
 import ServiceFilter from './service.filter';
 import ServiceExpandedRowComponent from '../../components/service/service.container.expanded-row.component';
@@ -12,6 +14,7 @@ import { buildQuery, QueryKeys } from '../../providers/api/prometheus/prometheus
 
 const ServiceContainer: React.FC = () => {
   const [services, setServices] = useState<string[]>([]);
+  const [durationMetric, setDurationMetric] = useState<string>('Avg');
   const navigate = useNavigate();
   const location = useLocation();
   const pageName = location.pathname.split('/').filter(Boolean).join('_') || 'home';
@@ -177,8 +180,262 @@ const ServiceContainer: React.FC = () => {
             ▶
           </button>
         </div>
+        <div style={{ position: 'relative', marginBottom: '24px' }}>
+          <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
+            {/* Requests Chart */}
+            <Col xs={24} lg={8}>
+              <Card
+                title={
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Requests</span>
+                  </div>
+                }
+                style={{ height: '300px' }}
+                styles={{ body: { height: '250px', padding: '16px' } }}
+              >
+                <RequestsChart services={services} />
+              </Card>
+            </Col>
+
+            {/* Errors Chart */}
+            <Col xs={24} lg={8}>
+              <Card
+                title={
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Errors</span>
+                  </div>
+                }
+                style={{ height: '300px' }}
+                styles={{ body: { height: '250px', padding: '16px' } }}
+              >
+                <ErrorsChart services={services} />
+              </Card>
+            </Col>
+
+            {/* Duration Chart */}
+            <Col xs={24} lg={8}>
+              <Card
+                title={
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>Duration</span>
+                      <Select
+                        value={durationMetric}
+                        onChange={setDurationMetric}
+                        style={{ width: '80px' }}
+                        dropdownStyle={{ backgroundColor: '#1f1f1f', border: '1px solid #303030' }}
+                        options={[
+                          { value: 'p99', label: 'p99' },
+                          { value: 'p95', label: 'p95' },
+                          { value: 'p90', label: 'p90' },
+                          { value: 'p75', label: 'p75' },
+                          { value: 'p50', label: 'p50' },
+                          { value: 'Avg', label: 'Avg' },
+                        ]}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      
+                    </div>
+                  </div>
+                }
+                style={{ height: '300px' }}
+                styles={{ body: { height: '250px', padding: '16px' } }}
+              >
+                <DurationChart services={services} metric={durationMetric} />
+              </Card>
+            </Col>
+          </Row>
+        </div>
     </BaseContainerComponent>
   );
+};
+
+// Chart Components
+const RequestsChart: React.FC<{ services: string[] }> = ({ services }) => {
+  const chartData = useMemo(() => {
+    const colors = ['#8B5CF6', '#3B82F6', '#F59E0B', '#6B7280', '#EC4899', '#10B981', '#F97316', '#6366F1', '#84CC16', '#EF4444'];
+    
+    return services.slice(0, 10).map((service, index) => ({
+      name: service,
+      data: Array.from({ length: 20 }, (_, i) => ({
+        x: new Date(Date.now() - (19 - i) * 60000), // Last 20 minutes
+        y: Math.floor(Math.random() * 2000) + 100, // Random requests between 100-2100
+      })),
+      color: colors[index % colors.length],
+    }));
+  }, [services]);
+
+  const options = {
+    chart: {
+      type: 'bar' as const,
+      height: 200,
+      background: 'transparent',
+      toolbar: { show: false },
+      animations: { enabled: false },
+      stacked: true,
+    },
+    colors: chartData.map(d => d.color),
+    fill: {
+      type: 'solid',
+      opacity: 1,
+    },
+    stroke: { width: 2, curve: 'smooth' as const },
+    xaxis: { 
+      type: 'datetime' as const,
+      labels: { style: { colors: '#8c8c8c' } },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    yaxis: {
+      labels: { 
+        style: { colors: '#8c8c8c' },
+        formatter: (val: number) => val >= 1000 ? `${(val/1000).toFixed(1)}K` : val.toString(),
+      },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    grid: { borderColor: '#303030', strokeDashArray: 4 },
+    dataLabels: {
+      enabled: false,
+    },
+    legend: {
+      position: 'bottom' as const,
+      labels: { colors: '#8c8c8c' },
+      markers: { size: 8 },
+      itemMargin: { horizontal: 8, vertical: 4 },
+    },
+    tooltip: {
+      theme: 'dark' as const,
+      y: { formatter: (val: number) => `${val} requests` },
+    },
+  };
+
+  return <ApexCharts options={options} series={chartData} type="bar" height={200} />;
+};
+
+const ErrorsChart: React.FC<{ services: string[] }> = ({ services }) => {
+  const chartData = useMemo(() => {
+    const colors = ['#8B5CF6', '#3B82F6', '#F59E0B', '#6B7280', '#EC4899', '#10B981'];
+    
+    return services.slice(0, 6).map((service, index) => ({
+      name: service,
+      data: Array.from({ length: 20 }, (_, i) => ({
+        x: new Date(Date.now() - (19 - i) * 60000),
+        y: Math.random() * Math.random() * 100, // Random error percentage 0-100%
+      })),
+      color: colors[index % colors.length],
+    }));
+  }, [services]);
+
+  const options = {
+    chart: {
+      type: 'line' as const,
+      height: 200,
+      background: 'transparent',
+      toolbar: { show: false },
+      animations: { enabled: false },
+    },
+    colors: chartData.map(d => d.color),
+    stroke: { width: 1, curve: 'smooth' as const },
+    markers: { size: 0, strokeWidth: 2, hover: { size: 6 } },
+    xaxis: { 
+      type: 'datetime' as const,
+      labels: { style: { colors: '#8c8c8c' } },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    yaxis: {
+      labels: { 
+        style: { colors: '#8c8c8c' },
+        formatter: (val: number) => `${val.toFixed(0)}%`,
+      },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    grid: { borderColor: '#303030', strokeDashArray: 4 },
+    dataLabels: {
+      enabled: false,
+    },
+    legend: {
+      position: 'bottom' as const,
+      labels: { colors: '#8c8c8c' },
+      markers: { size: 8 },
+      itemMargin: { horizontal: 8, vertical: 4 },
+    },
+    tooltip: {
+      theme: 'dark' as const,
+      y: { formatter: (val: number) => `${val.toFixed(2)}%` },
+    },
+  };
+
+  return <ApexCharts options={options} series={chartData} type="line" height={200} />;
+};
+
+const DurationChart: React.FC<{ services: string[]; metric: string }> = ({ services, metric }) => {
+  const chartData = useMemo(() => {
+    const colors = ['#8B5CF6', '#3B82F6', '#F59E0B', '#6B7280', '#EC4899', '#10B981'];
+    
+    return services.slice(0, 6).map((service, index) => ({
+      name: service,
+      data: Array.from({ length: 20 }, (_, i) => {
+        if(i % 3 === 0){
+          return {
+            x: new Date(Date.now() - (19 - i) * 60000),
+            y: Math.random() * Math.random() * Math.random(),
+          };
+        }
+        return {
+          x: new Date(Date.now() - (19 - i) * 60000),
+          y: Math.random() * Math.random(),
+        };
+      }),
+      color: colors[index % colors.length],
+    }));
+  }, [services, metric]);
+
+  const options = {
+    chart: {
+      type: 'line' as const,
+      height: 200,
+      background: 'transparent',
+      toolbar: { show: false },
+      animations: { enabled: false },
+    },
+    colors: chartData.map(d => d.color),
+    stroke: { width: 1, curve: 'smooth' as const },
+    markers: { size: 0, strokeWidth: 0, hover: { size: 6 } },
+    xaxis: { 
+      type: 'datetime' as const,
+      labels: { style: { colors: '#8c8c8c' } },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    yaxis: {
+      labels: { 
+        style: { colors: '#8c8c8c' },
+        formatter: (val: number) => `${val.toFixed(0)} ms`,
+      },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    grid: { borderColor: '#303030', strokeDashArray: 4 },
+    dataLabels: {
+      enabled: false,
+    },
+    legend: {
+      position: 'bottom' as const,
+      labels: { colors: '#8c8c8c' },
+      markers: { size: 8 },
+      itemMargin: { horizontal: 8, vertical: 4 },
+    },
+    tooltip: {
+      theme: 'dark' as const,
+      y: { formatter: (val: number) => `${val.toFixed(2)} ms` },
+    },
+  };
+
+  return <ApexCharts options={options} series={chartData} type="line" height={200} />;
 };
 
 export default ServiceContainer;
