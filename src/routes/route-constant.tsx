@@ -10,6 +10,8 @@ const TracePage = React.lazy(() => import('../pages/traces/traces.old.page'));
 const TracesV2 = React.lazy(() => import('../pages/traces/traces.page'));
 const TraceDetail = React.lazy(() => import('../pages/traces/tracedetail.page'));
 const ServiceMap = React.lazy(() => import( '../pages/service-map/service-map.page'));
+const ServiceMapV2 = React.lazy(() => import( '../pages/service-map/service-map-v2.page'));
+const ServiceMap3D = React.lazy(() => import('../pages/service-map-3d.page'));
 const LogsPage = React.lazy(() => import('../pages/logs.page'));
 const LogsPipelines = React.lazy(() => import('../pages/logs-pipelines/logs-pipelines.page'));
 const LogsV2Page = React.lazy(() => import('../pages/logs/logs.page'));
@@ -52,6 +54,22 @@ export const appRoutes: AppRoute[] = [
     element: <ServiceMap />,
     name: 'serviceMap',
     title: 'Service Map',
+    icon: 'search',
+    showInMenu: true,
+  },
+  {
+    path: '/service-map-v2',
+    element: <ServiceMapV2 />,
+    name: 'serviceMapV2',
+    title: 'Service Map v2',
+    icon: 'search',
+    showInMenu: true,
+  },
+  {
+    path: '/service-map-3d',
+    element: <ServiceMap3D />,
+    name: 'serviceMap3D',
+    title: '3D Service Map',
     icon: 'search',
     showInMenu: true,
   },
