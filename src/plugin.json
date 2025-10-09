@@ -63,8 +63,8 @@
     },
     {
       "type": "page",
-      "name": "Service Map",
-      "path": "/a/iyzitrace-app/service-map",
+      "name": "Traces",
+      "path": "/a/iyzitrace-app/traces-v2",
       "addToNav": true
     },
     {
