@@ -301,6 +301,8 @@ git checkout dev
 # Pull latest changes including your merged PR
 git pull origin dev
 
-# Delete local feature branch (if exists)
-git branch -d feature/your-feature-name
+git branch -m feature/tracev2 merged-feature/tracev2
+git push origin merged-feature/tracev2
+git push origin --delete feature/tracev2
+
 ```
