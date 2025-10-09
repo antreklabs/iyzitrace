@@ -34,6 +34,7 @@ export const QueryKeys = {
   p99Latency: 'p99Latency',
   callsPerSecond: 'callsPerSecond',
   apdex: 'apdex',
+  apdexBySpan: 'apdexBySpan',
   topKeyOperations: 'topKeyOperations',
   // ServiceCard queries
   totalTraceCount: 'totalTraceCount',
@@ -97,7 +98,7 @@ const defaultQueryBuilders: ResolvedPrometheusConfig['queries'] = {
     `count(count by (${cfg.labels.span_name}) (rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])))`,
 
   totalCalls: ({ serviceName, windowSeconds }, cfg) =>
-    `sum(increase(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (span_name)`,
+    `sum(increase(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name})`,
 
   maxLatencySpan: ({ serviceName, windowSeconds }, cfg) =>
     `topk(1, sum_over_time(${cfg.metrics.traces_spanmetrics_latency_sum}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s]) / sum_over_time(${cfg.metrics.traces_spanmetrics_latency_count}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name})`,
@@ -107,19 +108,22 @@ const defaultQueryBuilders: ResolvedPrometheusConfig['queries'] = {
 
   // CallMetrics queries (use fixed 1m rate window as in UI today)
   p50Latency: ({ serviceName, windowSeconds }, cfg) =>
-    `histogram_quantile(0.50, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (span_name, le))`,
+    `histogram_quantile(0.50, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}, le))`,
   
   p90Latency: ({ serviceName, windowSeconds }, cfg) =>
-    `histogram_quantile(0.90, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (span_name, le))`,
+    `histogram_quantile(0.90, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}, le))`,
   
   p99Latency: ({ serviceName, windowSeconds }, cfg) =>
-    `histogram_quantile(0.99, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (span_name, le))`,
+    `histogram_quantile(0.99, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}, le))`,
   
   callsPerSecond: ({ serviceName, windowSeconds }, cfg) =>
-    `sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s]))`,
+    `sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name})`,
   
   apdex: ({ serviceName, windowSeconds }, cfg) =>
     `(sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{le="100",${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) + sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{le="400",${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) / 2) / sum(rate(${cfg.metrics.traces_spanmetrics_latency_count}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s]))`,
+  
+  apdexBySpan: ({ serviceName, windowSeconds }, cfg) =>
+    `(sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{le="100",${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}) + sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{le="400",${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}) / 2) / sum(rate(${cfg.metrics.traces_spanmetrics_latency_count}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name})`,
   
   topKeyOperations: ({ serviceName, windowSeconds }, cfg) =>
     `topk(5, sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}))`,
@@ -149,7 +153,7 @@ const defaultQueryBuilders: ResolvedPrometheusConfig['queries'] = {
 
   // TraceQLBuilder queries (span-specific)
   errorRate: ({ spanName, rateInterval = '5m' }, cfg) =>
-    `sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}", status_code!="STATUS_CODE_UNSET"}[${rateInterval}])) / sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}"}[${rateInterval}])) by (span_name)`,
+    `sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}", status_code!="STATUS_CODE_UNSET"}[${rateInterval}])) / sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}"}[${rateInterval}])) by (${cfg.labels.span_name})`,
   
   opsPerSec: ({ spanName, rateInterval = '5m' }, cfg) =>
     `sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}"}[${rateInterval}]))`,
@@ -240,6 +244,7 @@ export function buildAllQueries(ctx: PrometheusQueriesContext, uid?: string): Re
     p99Latency: cfg.queries.p99Latency(ctx, cfg),
     callsPerSecond: cfg.queries.callsPerSecond(ctx, cfg),
     apdex: cfg.queries.apdex(ctx, cfg),
+    apdexBySpan: cfg.queries.apdexBySpan(ctx, cfg),
     topKeyOperations: cfg.queries.topKeyOperations(ctx, cfg),
     totalTraceCount: cfg.queries.totalTraceCount(ctx, cfg),
     avgLatency: cfg.queries.avgLatency(ctx, cfg),

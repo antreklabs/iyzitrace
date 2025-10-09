@@ -34,4 +34,4 @@ datasources:
       serviceMap:
         datasourceUid: prometheus-demo
       streamingEnabled:
-        search: true
+        search: false

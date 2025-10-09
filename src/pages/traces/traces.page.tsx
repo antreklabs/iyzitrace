@@ -1,25 +1,15 @@
-import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React from 'react';
 
-import { PluginPage } from '@grafana/runtime';
-import TraceContainer from '../../containers/TraceContainer/TraceContainer';
-import { PageLayoutType } from '@grafana/data';
+import BasePage from '../base.page';
+import TraceContainer from '../../containers/trace/trace.container';
 
-function Traces() {
-  const { traceId } = useParams<{ traceId?: string }>();
-
-  useEffect(() => {
-    if (traceId) {
-      // Trace ID'yi TraceContainer'a geç
-      console.log('Trace ID from URL path:', traceId);
-    }
-  }, [traceId]);
+function TraceV2() {
 
   return (
-    <PluginPage layout={PageLayoutType.Canvas}>
-      <TraceContainer traceId={traceId}></TraceContainer>
-    </PluginPage>
+    <BasePage>
+      <TraceContainer />
+    </BasePage>
   );
 }
 
-export default Traces;
+export default TraceV2;

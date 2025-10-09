@@ -3,7 +3,7 @@
 This document describes how to deploy and run the project on a remote server over SSH and how to start the supporting observability stack with Docker Compose. It also shows how to make `pnpm run dev` run remotely on the server.
 
 Assumptions:
-- You can SSH into the server as: `ssh gsipahi@217.154.215.186`
+- You can SSH into the server as: `ssh root@217.154.215.186`
 - Remote working directory: `/opt/iyzitrace`
 - Local project root: `/Users/gokhansipahi/projects/iyzitrace/iyzitrace`
 
@@ -12,7 +12,7 @@ You can copy/paste the command blocks below in order.
 ### 0) One-time prerequisites on the server
 
 ```bash
-ssh gsipahi@217.154.215.186 \
+ssh root@217.154.215.186 \
   'sudo mkdir -p /opt/iyzitrace && sudo chown -R $USER:$USER /opt/iyzitrace && \
    # Install Docker + Compose v2 (Ubuntu example)
    if ! command -v docker >/dev/null 2>&1; then \
@@ -30,7 +30,7 @@ ssh gsipahi@217.154.215.186 \
    fi'
 
 # IMPORTANT: If Docker was just installed, re-login so group changes apply
-ssh gsipahi@217.154.215.186 'exit'
+ssh root@217.154.215.186 'exit'
 ```
 
 ### 1) Sync project files to the server
@@ -39,7 +39,7 @@ Use rsync to mirror your local working copy to the server (deletes removed files
 
 ```bash
 export SERVER_HOST=217.154.215.186
-export SERVER_USER=gsipahi
+export SERVER_USER=root
 export REMOTE_DIR=/opt/iyzitrace
 export LOCAL_DIR=/Users/gokhansipahi/projects/iyzitrace/iyzitrace
 
@@ -49,6 +49,20 @@ rsync -avz --delete \
   --exclude 'dist' \
   --exclude 'docker-compose.yaml' \
   --exclude 'package.json' \
+  "$LOCAL_DIR/" "$SERVER_USER@$SERVER_HOST:$REMOTE_DIR/"
+```
+
+
+```bash
+export SERVER_HOST=217.154.215.186
+export SERVER_USER=root
+export REMOTE_DIR=/opt/iyzitrace
+export LOCAL_DIR=/Users/gokhansipahi/projects/iyzitrace/iyzitrace
+
+rsync -avz --delete \
+  --exclude 'node_modules' \
+  --exclude '.git' \
+  --exclude 'dist' \
   "$LOCAL_DIR/" "$SERVER_USER@$SERVER_HOST:$REMOTE_DIR/"
 ```
 
@@ -78,13 +92,13 @@ Run them on the server like this:
 ssh $SERVER_USER@$SERVER_HOST \
   'cd /opt/iyzitrace && \
    # Option A: start root compose (Grafana plugin dev env)
-   sudo docker compose -f docker-compose.yaml up -d && \
+   docker compose -f docker-compose.yaml up -d && \
    \
    # Option B: start observability-platform stack
-   sudo docker compose -f configs/observability-platform/docker-compose.yml up -d && \
+   docker compose -f configs/observability-platform/docker-compose.yml up -d && \
    \
    # Option C: start OpenTelemetry demo stack
-   sudo docker compose -f configs/opentelemetry-demo/docker-compose.yml up -d'
+   docker compose -f configs/opentelemetry-demo/docker-compose.yml up -d'
 ```
 
 Use whichever option(s) apply to your setup. You can run multiple stacks as needed.

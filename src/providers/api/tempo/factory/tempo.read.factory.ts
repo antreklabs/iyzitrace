@@ -1,9 +1,9 @@
 import { CoreApp, DataQueryRequest, dateTime, TimeRange } from '@grafana/data';
-import { TempoServiceMapQuery } from '../../../../interfaces/tempo/tempo-query.interface';
-import { ServiceMapRequestModel } from '@/interfaces/pages/service-map/service-map.request.interface';
+import { TempoRequestModel } from '../../../../interfaces/tempo/tempo.request.interface';
 
-export class ServiceMapTempoReadFactory {
-  static async create(params: ServiceMapRequestModel, ds: any): Promise<DataQueryRequest> {
+
+export class TempoReadFactory {
+  static async create(params: TempoRequestModel, ds: any): Promise<DataQueryRequest> {
 
     const timezone = params.timezone || 'UTC';
     const interval = params.interval || '1s';
@@ -20,21 +20,21 @@ export class ServiceMapTempoReadFactory {
       raw: { from: timeFrom, to: timeTo },
     };
 
-    const query: TempoServiceMapQuery = {
-      refId: 'A',
-      queryType: 'serviceMap',
-      serviceMapQuery: '{service_namespace="opentelemetry-demo"}', // Empty selector to get all services
-      serviceMapIncludeNamespace: true,
-      serviceMapUseNativeHistograms: false,
-      // Add additional service map specific properties
-      datasource: {
-        type: 'tempo',
-        uid: ds.uid
-      }
-    };
-
-    console.log('[ServiceMapTempoReadFactory] Created query:', query);
-    console.log('[ServiceMapTempoReadFactory] Time range:', { from: timeFrom.format(), to: timeTo.format() });
+    let query: any = {};
+    if (params.queryType === 'serviceMap') {
+      query = {
+        refId: 'A',
+        queryType: 'serviceMap',
+        serviceMapQuery: '{service_namespace="opentelemetry-demo"}', // Empty selector to get all services
+        serviceMapIncludeNamespace: true,
+        serviceMapUseNativeHistograms: false,
+        // Add additional service map specific properties
+        datasource: {
+          type: 'tempo',
+          uid: ds.uid
+        }
+      };
+    }
 
     const request: DataQueryRequest = {
       app: CoreApp.Explore,

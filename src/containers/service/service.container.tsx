@@ -52,7 +52,6 @@ const ServiceContainer: React.FC = () => {
     }
     setServices(serviceNames);
 
-    // Use pageState range if available, otherwise use default range (last 1 hour like date picker)
     const startMs = pageState?.range?.[0] || (Date.now() - 60 * 60 * 1000); // Default: 1 hour ago
     const endMs = pageState?.range?.[1] || Date.now(); // Default: now
     const fixedStart = Math.floor(startMs / 1000);
@@ -160,7 +159,7 @@ const ServiceContainer: React.FC = () => {
             style={{ overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap', padding: '0 36px' }}
           >
             <div style={{ display: 'inline-flex', gap: 16 }}>
-              {services.map((service) => {
+            {services.map((service) => {
                 const start = currentPageState?.range?.[0] || (Date.now() - 60 * 60 * 1000); // Default: 1 hour ago
                 const end = currentPageState?.range?.[1] || Date.now(); // Default: now
                 return (

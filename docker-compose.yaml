@@ -9,7 +9,8 @@ networks:
 services:
   grafana:
     # platform: linux/amd64
-    image: grafana/grafana:latest
+    # image: grafana/grafana:latest
+    image: yahyaozturk/iyzitrace
     container_name: iyzitrace-grafana
     volumes:
       - ./dist:/var/lib/grafana/plugins/iyzitrace-app

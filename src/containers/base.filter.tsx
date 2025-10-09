@@ -17,6 +17,8 @@ interface BaseFilterProps {
   collapsed?: boolean;
   children?: React.ReactNode;
   hasServiceFilter?: boolean;
+  hasOperationsFilter?: boolean;
+  hasStatusesFilter?: boolean;
   hasDurationFilter?: boolean;
   hasTagsFilter?: boolean;
   hasOptionsFilter?: boolean;
@@ -33,6 +35,8 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
   collapsed, 
   children,
   hasServiceFilter = false,
+  hasOperationsFilter = false,
+  hasStatusesFilter = false,
   hasDurationFilter = false,
   hasTagsFilter = false,
   hasLabelsFilter = false,
@@ -45,6 +49,8 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
 }) => {
   const [services, setServices] = useState<string[]>([]);
   const [labels, setLabels] = useState<string[]>([]);
+  const [operations, setOperations] = useState<string[]>([]);
+  const [statuses, setStatuses] = useState<string[]>([]);
   const [fields, setFields] = useState<string[]>([]);
   const [labelFilters, setLabelFilters] = useState<Array<{id: string, label: string, values: string[]}>>([]);
   const [fieldFilters, setFieldFilters] = useState<Array<{id: string, field: string, values: string[]}>>([]);
@@ -58,6 +64,18 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       : await tempoReadApi.getLabelValues('service.name');
     const serviceNames: string[] = Array.isArray(values) ? values : [];
     setServices(serviceNames);
+  };
+  
+  const fetchOperations = async () => {
+    const values = await tempoReadApi.getLabelValues('operation.name');
+    const operations: string[] = Array.isArray(values) ? values : [];
+    setOperations(operations);
+  };
+  
+  const fetchStatuses = async () => {
+    const values = await tempoReadApi.getLabelValues('status');
+    const statuses: string[] = Array.isArray(values) ? values : [];
+    setStatuses(statuses);
   };
 
   const fetchLabels = async () => {
@@ -145,14 +163,35 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     };
   };
 
+  // useEffect(() => {
+  //   if (hasServiceFilter) {
+  //     fetchServices();
+  //   }
+  //   if (hasLabelsFilter) {
+  //     fetchLabels();
+  //   }
+  //   if (hasOperationsFilter) {
+  //     fetchOperations();
+  //   }
+  //   if (hasStatusesFilter) {
+  //     fetchStatuses();
+  //   }
+  // }, [selectedUid, hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter]);
+
   useEffect(() => {
-    if (hasServiceFilter) {
-      fetchServices();
-    }
-    if (hasLabelsFilter) {
-      fetchLabels();
-    }
-  }, [selectedUid, hasServiceFilter, hasLabelsFilter]);
+    let alive = true;
+    (async () => {
+      if (hasServiceFilter) await fetchServices();
+      if (hasLabelsFilter)  await fetchLabels();
+      if (hasOperationsFilter) await fetchOperations();
+  
+      // timeSrv/DS sync için 1 frame beklet
+      await new Promise(r => requestAnimationFrame(() => r(null)));
+  
+      if (alive && hasStatusesFilter) await fetchStatuses();
+    })();
+    return () => { alive = false; };
+  }, [selectedUid, hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter]);
 
   // Extract fields from grid data when data changes
   useEffect(() => {
@@ -341,7 +380,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
   return (
     <Form form={form} layout="vertical" onFinish={handleApply}>
       {hasServiceFilter && (
-        <Form.Item label="Services">
+        <Form.Item label="Service">
           <Space.Compact className="filter-compact-space">
             <Form.Item name={['filters', 'serviceNameOperator']} noStyle initialValue="=">
               <Select className="filter-operator-select">
@@ -365,6 +404,74 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                   return (
                     <Option key={serviceKey} value={serviceValue}>
                       {serviceValue}
+                    </Option>
+                  );
+                })}
+              </Select>
+            </Form.Item>
+          </Space.Compact>
+        
+        </Form.Item>
+      )}
+      {hasOperationsFilter && (
+        <Form.Item label="Operation">
+          <Space.Compact className="filter-compact-space">
+            <Form.Item name={['filters', 'operationNameOperator']} noStyle initialValue="=">
+              <Select className="filter-operator-select">
+                {EQUAL_OPERATOR_OPTIONS.map((op) => (
+                  <Option key={op} value={op}>
+                    {op}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item name={['filters', 'operationName']} noStyle>
+              <Select
+                showSearch
+                allowClear
+                placeholder="Select operation"
+                className="filter-value-select"
+              >
+                {operations.map((operation) => {
+                  const operationValue = typeof operation === 'string' ? operation : (operation as any)?.text || (operation as any)?.value || String(operation);
+                  const operationKey = typeof operation === 'string' ? operation : (operation as any)?.text || (operation as any)?.value || String(operation);
+                  return (
+                    <Option key={operationKey} value={operationValue}>
+                      {operationValue}
+                    </Option>
+                  );
+                })}
+              </Select>
+            </Form.Item>
+          </Space.Compact>
+        
+        </Form.Item>
+      )}
+      {hasStatusesFilter && (
+        <Form.Item label="Status">
+          <Space.Compact className="filter-compact-space">
+            <Form.Item name={['filters', 'statusOperator']} noStyle initialValue="=">
+              <Select className="filter-operator-select">
+                {EQUAL_OPERATOR_OPTIONS.map((op) => (
+                  <Option key={op} value={op}>
+                    {op}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item name={['filters', 'status']} noStyle>
+              <Select
+                showSearch
+                allowClear
+                placeholder="Select status"
+                className="filter-value-select"
+              >
+                {statuses.map((status) => {
+                  const statusValue = typeof status === 'string' ? status : (status as any)?.text || (status as any)?.value || String(status);
+                  const statusKey = typeof status === 'string' ? status : (status as any)?.text || (status as any)?.value || String(status);
+                  return (
+                    <Option key={statusKey} value={statusValue}>
+                      {statusValue}
                     </Option>
                   );
                 })}

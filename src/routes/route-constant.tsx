@@ -2,13 +2,16 @@ import React from 'react';
 import { AppRoute } from '@/interfaces';
 
 const Dashboard = React.lazy(() => import('../pages/dashboard.page'));
+const Landing = React.lazy(() => import('../pages/landing.page'));
 const Services = React.lazy(() => import('../pages/services/services.old.page'));
 const ServicesV2 = React.lazy(() => import('../pages/services/services.page'));
 const ServiveDetail = React.lazy(() => import('../pages/services/servicedetail.page'));
-const TracePage = React.lazy(() => import('../pages/traces/traces.page'));
-const TraceV2 = React.lazy(() => import('../pages/traces/trace.page'));
+const TracePage = React.lazy(() => import('../pages/traces/traces.old.page'));
+const TracesV2 = React.lazy(() => import('../pages/traces/traces.page'));
 const TraceDetail = React.lazy(() => import('../pages/traces/tracedetail.page'));
 const ServiceMap = React.lazy(() => import( '../pages/service-map/service-map.page'));
+const ServiceMapV2 = React.lazy(() => import( '../pages/service-map/service-map-v2.page'));
+const ServiceMap3D = React.lazy(() => import('../pages/service-map-3d.page'));
 const LogsPage = React.lazy(() => import('../pages/logs.page'));
 const LogsPipelines = React.lazy(() => import('../pages/logs-pipelines/logs-pipelines.page'));
 const LogsV2Page = React.lazy(() => import('../pages/logs/logs.page'));
@@ -55,6 +58,22 @@ export const appRoutes: AppRoute[] = [
     showInMenu: true,
   },
   {
+    path: '/service-map-v2',
+    element: <ServiceMapV2 />,
+    name: 'serviceMapV2',
+    title: 'Service Map v2',
+    icon: 'search',
+    showInMenu: true,
+  },
+  {
+    path: '/service-map-3d',
+    element: <ServiceMap3D />,
+    name: 'serviceMap3D',
+    title: '3D Service Map',
+    icon: 'search',
+    showInMenu: true,
+  },
+  {
     path: '/traces',
     element: <TracePage />,
     name: 'traces',
@@ -64,7 +83,7 @@ export const appRoutes: AppRoute[] = [
   },
   {
     path: '/traces-v2',
-    element: <TraceV2 />,
+    element: <TracesV2 />,
     name: 'tracesV2',
     title: 'Traces v2',
     icon: 'search',
@@ -92,6 +111,14 @@ export const appRoutes: AppRoute[] = [
     name: 'logsPipelines',
     title: 'Logs Pipelines',
     icon: 'search',
+    showInMenu: true,
+  },
+  {
+    path: '/landing',
+    element: <Landing />,
+    name: 'landing',
+    title: 'Infra Overview',
+    icon: 'home',
     showInMenu: true,
   },
   {
