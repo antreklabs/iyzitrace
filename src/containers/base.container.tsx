@@ -71,7 +71,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
     try {
       const currentPageState = getPageState(pageName);
       const data = await onFetchData(currentPageState);
-      console.log('data', data);
+      // console.log('data', data);
       setModelData(data);
     } catch (error) {
       console.error('Error fetching data:', error);

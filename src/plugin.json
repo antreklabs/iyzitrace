@@ -28,25 +28,25 @@
     {
       "type": "page",
       "name": "Services",
-      "path": "/a/iyzitrace-app/services",
+      "path": "/a/iyzitrace-app/services-v2",
+      "addToNav": true
+    },
+    {
+      "type": "page",
+      "name": "Traces",
+      "path": "/a/iyzitrace-app/traces-v2",
+      "addToNav": true
+    },
+    {
+      "type": "page",
+      "name": "Logs",
+      "path": "/a/iyzitrace-app/logs-v2",
       "addToNav": true
     },
     {
       "type": "page",
       "name": "Service Map",
       "path": "/a/iyzitrace-app/service-map",
-      "addToNav": true
-    },
-    {
-      "type": "page",
-      "name": "Traces",
-      "path": "/a/iyzitrace-app/traces",
-      "addToNav": true
-    },
-    {
-      "type": "page",
-      "name": "Logs",
-      "path": "/a/iyzitrace-app/logs",
       "addToNav": true
     },
     {

@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Typography, Spin, Flex, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { prometheusApi } from '../../providers';
+import { prometheusApi } from '../../providers/api/prometheus/prometheus.api';
 import { buildQuery, QueryKeys } from '../../providers/api/prometheus/prometheus.registry';
 import pluginJson from '../../plugin.json';
 
 const { Text } = Typography;
 export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
 
-interface ServiceMetricsCardProps {
+interface TraceMetricsCardProps {
   name: string;
   start?: number | undefined;
   end?: number | undefined;
@@ -16,7 +16,7 @@ interface ServiceMetricsCardProps {
 
 interface LatencyData { avg: number; min: number; max: number; count: number }
 
-const ServiceMetricsCard: React.FC<ServiceMetricsCardProps> = ({ name, start, end }) => {
+const TraceMetricsCard: React.FC<TraceMetricsCardProps> = ({ name, start, end }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [metrics, setMetrics] = useState<LatencyData | null>(null);
   const navigate = useNavigate();
@@ -45,7 +45,7 @@ const ServiceMetricsCard: React.FC<ServiceMetricsCardProps> = ({ name, start, en
             && countRes[0].values.length > 0 && avgRes[0].values.length > 0 && minRes[0].values.length > 0 && maxRes[0].values.length > 0
           ){
             let countValue = countRes[0].values[0][1];
-            // console.log('countValue', countValue);
+            console.log('countValue', countValue);
             let avgLatencyValue = avgRes[0].values[0][1];
             let minLatencyValue = minRes[0].values[0][1];
             let maxLatencyValue = maxRes[0].values[0][1];
@@ -135,6 +135,6 @@ const ServiceMetricsCard: React.FC<ServiceMetricsCardProps> = ({ name, start, en
   );
 };
 
-export default ServiceMetricsCard;
+export default TraceMetricsCard;
 
 

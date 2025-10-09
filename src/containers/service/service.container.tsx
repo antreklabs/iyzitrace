@@ -52,8 +52,9 @@ const ServiceContainer: React.FC = () => {
     }
     setServices(serviceNames);
 
-    const startMs = pageState?.range?.[0];
-    const endMs = pageState?.range?.[1];
+    // Use pageState range if available, otherwise use default range (last 1 hour like date picker)
+    const startMs = pageState?.range?.[0] || (Date.now() - 60 * 60 * 1000); // Default: 1 hour ago
+    const endMs = pageState?.range?.[1] || Date.now(); // Default: now
     const fixedStart = Math.floor(startMs / 1000);
     const fixedEnd = Math.floor(endMs / 1000);
     const maxPoints = 1;
@@ -74,7 +75,7 @@ const ServiceContainer: React.FC = () => {
           && countRes[0].values.length > 0 && avgRes[0].values.length > 0 && minRes[0].values.length > 0 && maxRes[0].values.length > 0
         ){
           let countValue = countRes[0].values[0][1];
-          console.log('countValue', countValue);
+          // console.log('countValue', countValue);
           let avgLatencyValue = avgRes[0].values[0][1];
           let minLatencyValue = minRes[0].values[0][1];
           let maxLatencyValue = maxRes[0].values[0][1];
@@ -106,7 +107,9 @@ const ServiceContainer: React.FC = () => {
   };
 
   const expandedRowRender = (record: any) => {
-    return <ServiceExpandedRowComponent record={record} start={currentPageState?.range?.[0]} end={currentPageState?.range?.[1]} />;
+    const start = currentPageState?.range?.[0] || (Date.now() - 60 * 60 * 1000); // Default: 1 hour ago
+    const end = currentPageState?.range?.[1] || Date.now(); // Default: now
+    return <ServiceExpandedRowComponent record={record} start={start} end={end} />;
   };
 
   const columns = [
@@ -157,11 +160,15 @@ const ServiceContainer: React.FC = () => {
             style={{ overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap', padding: '0 36px' }}
           >
             <div style={{ display: 'inline-flex', gap: 16 }}>
-              {services.map((service) => (
-                <div key={service}>
-                  <ServiceMetricsCard name={service} start={currentPageState?.range?.[0]} end={currentPageState?.range?.[1]} />
-                </div>
-              ))}
+              {services.map((service) => {
+                const start = currentPageState?.range?.[0] || (Date.now() - 60 * 60 * 1000); // Default: 1 hour ago
+                const end = currentPageState?.range?.[1] || Date.now(); // Default: now
+                return (
+                  <div key={service}>
+                    <ServiceMetricsCard name={service} start={start} end={end} />
+                  </div>
+                );
+              })}
             </div>
           </div>
           <button
