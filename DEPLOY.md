@@ -52,6 +52,20 @@ rsync -avz --delete \
   "$LOCAL_DIR/" "$SERVER_USER@$SERVER_HOST:$REMOTE_DIR/"
 ```
 
+
+```bash
+export SERVER_HOST=217.154.215.186
+export SERVER_USER=root
+export REMOTE_DIR=/opt/iyzitrace
+export LOCAL_DIR=/Users/gokhansipahi/projects/iyzitrace/iyzitrace
+
+rsync -avz --delete \
+  --exclude 'node_modules' \
+  --exclude '.git' \
+  --exclude 'dist' \
+  "$LOCAL_DIR/" "$SERVER_USER@$SERVER_HOST:$REMOTE_DIR/"
+```
+
 You can re-run this command whenever you make changes locally.
 
 ### 2) Install dependencies on the server
@@ -78,13 +92,13 @@ Run them on the server like this:
 ssh $SERVER_USER@$SERVER_HOST \
   'cd /opt/iyzitrace && \
    # Option A: start root compose (Grafana plugin dev env)
-   sudo docker compose -f docker-compose.yaml up -d && \
+   docker compose -f docker-compose.yaml up -d && \
    \
    # Option B: start observability-platform stack
-   sudo docker compose -f configs/observability-platform/docker-compose.yml up -d && \
+   docker compose -f configs/observability-platform/docker-compose.yml up -d && \
    \
    # Option C: start OpenTelemetry demo stack
-   sudo docker compose -f configs/opentelemetry-demo/docker-compose.yml up -d'
+   docker compose -f configs/opentelemetry-demo/docker-compose.yml up -d'
 ```
 
 Use whichever option(s) apply to your setup. You can run multiple stacks as needed.

@@ -45,7 +45,7 @@ const ServiceMetricsCard: React.FC<ServiceMetricsCardProps> = ({ name, start, en
             && countRes[0].values.length > 0 && avgRes[0].values.length > 0 && minRes[0].values.length > 0 && maxRes[0].values.length > 0
           ){
             let countValue = countRes[0].values[0][1];
-            console.log('countValue', countValue);
+            // console.log('countValue', countValue);
             let avgLatencyValue = avgRes[0].values[0][1];
             let minLatencyValue = minRes[0].values[0][1];
             let maxLatencyValue = maxRes[0].values[0][1];

@@ -5,6 +5,7 @@ import BaseContainer from '../../components/core/basecontainer/basecontainer';
 import GrafanaLikeRangePicker from '../../components/core/graphanadatepicker';
 import CallMetrics from './CallMetrics/CallMetrics';
 import BasicSummary from './BasicSummary';
+import Operations from './Operations/Operations';
 interface ServiceDetailContainerProps {
   serviceName: string;
 }
@@ -37,7 +38,7 @@ const ServiceDetailContainer: React.FC<ServiceDetailContainerProps> = ({ service
             {
               key: 'operations',
               label: 'Operations',
-              children: <div>Operations content will be added here</div>
+              children: <Operations serviceName={serviceName} start={range[0]} end={range[1]} />
             }
           ]}
         />

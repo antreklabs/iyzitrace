@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table } from 'antd';
+import { Table, Tag } from 'antd';
 import { prometheusApi } from '../../providers';
 import { buildQuery, QueryKeys } from '../../providers/api/prometheus/prometheus.registry';
 
@@ -49,7 +49,17 @@ const ServiceExpandedRowComponent: React.FC<ServiceExpandedRowProps> = ({ record
         attach(callsRes, 'calls');
         attach(errRes, 'errorRate', 100); // to percent
 
-        setRows(Object.values(byOp));
+        const sortedByOp = Object
+          .values(byOp)
+          .sort((a: any, b: any) => (b.calls ?? 0) - (a.calls ?? 0))
+          .slice(0, 5);
+
+        // code here to add operation type by choosing from the list [HTTP, DATABASE, GENERAL] by random
+        sortedByOp.forEach((op: any) => {
+          op.operationType = ['HTTP', 'DATABASE', 'GENERAL'][Math.floor(Math.random() * 3)];
+        });
+
+        setRows(sortedByOp);
       } finally {
         setLoading(false);
       }
@@ -57,8 +67,31 @@ const ServiceExpandedRowComponent: React.FC<ServiceExpandedRowProps> = ({ record
     run();
   }, [record?.service, start, end]);
 
+  const getOperationTypeColor = (type: string) => {
+    switch (type) {
+      case 'HTTP':
+        return 'blue';
+      case 'DATABASE':
+        return 'green';
+      case 'GENERAL':
+        return 'orange';
+      default:
+        return 'default';
+    }
+  };
+
   const columns = [
-    { title: 'Span Name', dataIndex: 'name', key: 'name' },
+    { title: 'Operation', dataIndex: 'name', key: 'name' },
+    { 
+      title: 'Operation Type', 
+      dataIndex: 'operationType', 
+      key: 'operationType',
+      render: (type: string) => (
+        <Tag color={getOperationTypeColor(type)}>
+          {type}
+        </Tag>
+      )
+    },
     { title: 'P50 (ms)', dataIndex: 'p50', key: 'p50', render: (v: number) => (v ?? 0).toFixed(2) },
     { title: 'P90 (ms)', dataIndex: 'p90', key: 'p90', render: (v: number) => (v ?? 0).toFixed(2) },
     { title: 'P99 (ms)', dataIndex: 'p99', key: 'p99', render: (v: number) => (v ?? 0).toFixed(2) },
