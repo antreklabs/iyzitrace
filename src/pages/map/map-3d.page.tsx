@@ -1,37 +1,534 @@
-import React, { useMemo, useState, useCallback, useRef } from 'react';
+import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { Card, Dropdown, Input, Tree, Button } from 'antd';
-import { AppstoreOutlined, SearchOutlined, CloseOutlined } from '@ant-design/icons';
-import InfraLayer from './components/infra-layer';
-import ApplicationLayer from './components/application-layer';
-import ServiceLayer from './components/service-layer';
-import OperationLayer from './components/operation-layer';
+import { AppstoreOutlined, SearchOutlined, CloseOutlined, ContainerOutlined, ApiOutlined, DatabaseOutlined, CloudServerOutlined } from '@ant-design/icons';
+import MapLayer from './components/infra-layer';
+import { LayerKey, TreeNode } from './interfaces';
+import infraJson from './data/map.json';
+import { Handle, Position } from 'reactflow';
 
-type LayerKey = 'infra' | 'application' | 'service' | 'operation';
+// ---------- Renk ve durum yardımcıları ----------
+const cardBg = (hex: string) =>
+  `linear-gradient(180deg, ${hex} 0%, rgba(6,10,19,0.9) 100%)`;
 
-interface TreeNode {
-  title: string;
-  key: string;
-  type: LayerKey;
-  children?: TreeNode[];
+// ---------- Ortak Detail Panel ----------
+export const DetailPanel: React.FC<{ 
+  content?: React.ReactNode;
+}> = ({ content }) => {
+  if (!content) return null;
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        width: '350px',
+        background: 'rgba(30, 41, 59, 0.95)',
+        border: '1px solid #334155',
+        borderRadius: '12px',
+        padding: '20px',
+        color: '#ffffff',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        backdropFilter: 'blur(10px)',
+        zIndex: 1000
+      }}
+    >
+      {content}
+    </div>
+  );
+};
+
+
+// ---------- Renk ve durum yardımcıları ----------
+export const statusColor = (s?: string) =>
+  s === 'ok' || s === 'healthy'
+    ? '#22c55e'
+    : s === 'warning' || s === 'degraded'
+    ? '#f59e0b'
+    : s === 'error'
+    ? '#ef4444'
+    : '#6b7280';
+
+
+// ---------- İzometrik blok node ----------
+export const InfraIsoBlockNode: React.FC<any> = ({ data }) => {
+  const accent = data?.accent || '#22c55e';
+  const label = data?.label || 'node';
+  const sub = data?.sub || '';
+  const baseW = data?.w ?? 120;
+  const baseH = data?.h ?? 160; // blok yüksekliği (yan yüzler)
+  const W = Math.max(8, Math.round(baseW * 0.5));
+  const H = Math.max(8, Math.round(baseH * 0.5));
+  const k = W / baseW; // ölçek
+
+  const wrap: React.CSSProperties = {
+    position: 'relative',
+    top: 80,
+    left: 40,
+    width: Math.round(W + 40 * k),
+    height: Math.round(H + 80 * k),
+    filter: 'drop-shadow(0 14px 28px rgba(0,0,0,0.6))'
+  };
+
+  // Sağ ve sol yan yüzler: paralelkenar (skew)
+  const sideCommon: React.CSSProperties = {
+    position: 'absolute',
+    top: Math.round(50 * k),
+    width: W,
+    height: H,
+    background: 'linear-gradient(180deg, #e5e7eb 0%, #cbd5e1 100%)',
+    border: '1px solid rgba(148,163,184,0.7)'
+  };
+  const right: React.CSSProperties = {
+    ...sideCommon,
+    left: Math.round(40 * k) + 20,
+    top: Math.round(50 * k)+ 20,
+    transform: 'skewY(-28deg)',
+    background: 'linear-gradient(180deg, #dbeafe 0%, #c7d2fe 100%)'
+  };
+  const left: React.CSSProperties = {
+    ...sideCommon,
+    left: -40 + 20,
+    top: Math.round(50 * k)+ 20,
+    transform: 'skewY(28deg)',
+    background: 'linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%)'
+  };
+  const rightBack: React.CSSProperties = {
+    ...sideCommon,
+    left: Math.round(-80 * k) + 20,
+    top: Math.round(50 * k) - 15,
+    transform: 'skewY(-28deg)',
+    background: 'linear-gradient(180deg, #dbeafe 0%, #c7d2fe 100%)'
+  };
+  const leftBack: React.CSSProperties = {
+    ...sideCommon,
+    left: 20 + 20,
+    top: Math.round(50 * k) - 15,
+    transform: 'skewY(28deg)',
+    background: 'linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%)'
+  };
+
+  const badge: React.CSSProperties = {
+    position: 'absolute',
+    top: -50,
+    left: -6,
+    background: accent,
+    color: '#0b1220',
+    fontWeight: 700,
+    fontSize: 11,
+    padding: '4px 8px',
+    borderRadius: 6
+  };
+
+  const title: React.CSSProperties = {
+    position: 'absolute',
+    bottom: -50,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    color: '#e2e8f0',
+    fontWeight: 600,
+    fontSize: 14,
+    whiteSpace: 'nowrap',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    padding: '2px 4px',
+    borderRadius: '4px'
+  };
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.currentTarget.style.textDecoration = 'underline';
+    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+  };
+
+  const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.currentTarget.style.textDecoration = 'none';
+    e.currentTarget.style.backgroundColor = 'transparent';
+  };
+
+  return (
+    // <div>test</div>
+    <div style={wrap}>
+      {sub && <div style={badge}>{sub}</div>}
+      <div style={rightBack} />
+      <div style={left} />
+      <div style={leftBack} />
+      <div style={right} />
+      {/* <div style={top} /> */}
+      <div 
+        style={title}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {label}
+      </div>
+      <Handle type="source" position={Position.Right} id="r" style={{ opacity: 0 }} />
+      <Handle type="target" position={Position.Left} id="l" style={{ opacity: 0 }} />
+    </div>
+  );
+};
+
+// Application block - cooler blue/purple theme
+export const ApplicationIsoBlockNode: React.FC<any> = ({ data }) => {
+  const accent = data?.accent || '#3b82f6';
+  const label = data?.label || 'application';
+  const sub = data?.sub || '';
+  const imageUrl = data?.imageUrl;
+  const baseW = data?.w ?? 120;
+  const baseH = data?.h ?? 160;
+  const W = Math.max(8, Math.round(baseW * 0.5));
+  const H = Math.max(8, Math.round(baseH * 0.5));
+  const k = W / baseW;
+
+  const wrap: React.CSSProperties = {
+    position: 'relative',
+    top: 80,
+    left: 40,
+    width: Math.round(W + 40 * k),
+    height: Math.round(H + 80 * k),
+    filter: 'drop-shadow(0 14px 28px rgba(0,0,0,0.6))'
+  };
+
+  const badge: React.CSSProperties = { position: 'absolute', top: -50, left: -6, background: accent, color: '#0b1220', fontWeight: 700, fontSize: 11, padding: '4px 8px', borderRadius: 6 };
+  const title: React.CSSProperties = { position: 'absolute', bottom: -50, left: '50%', transform: 'translateX(-50%)', color: '#e2e8f0', fontWeight: 600, fontSize: 14, whiteSpace: 'nowrap', cursor: 'pointer', transition: 'all 0.2s ease', padding: '2px 4px', borderRadius: '4px' };
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => { e.currentTarget.style.textDecoration = 'underline'; e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'; };
+  const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => { e.currentTarget.style.textDecoration = 'none'; e.currentTarget.style.backgroundColor = 'transparent'; };
+
+  return (
+    <div style={wrap}>
+      {sub && <div style={badge}>{sub}</div>}
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt={label}
+          style={{
+            position: 'absolute',
+            top: 1,
+            width: 100,
+            height: 120,
+            objectFit: 'contain',
+            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))',
+            background: '#ffffff',
+            borderRadius: 40,
+            padding: 2,
+            border: '1px solid rgba(148,163,184,0.25)'
+          }}
+        />
+      )}
+      <div 
+        style={title}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {label}
+      </div>
+      <Handle type="source" position={Position.Right} id="r" style={{ opacity: 0 }} />
+      <Handle type="target" position={Position.Left} id="l" style={{ opacity: 0 }} />
+    </div>
+  );
+};
+
+// Service block - green/health theme
+export const ServiceIsoBlockNode: React.FC<any> = ({ data, selected }) => {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'healthy': return '#10b981';
+      case 'warning': return '#f59e0b';
+      case 'critical': return '#ef4444';
+      default: return '#6b7280';
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'platform': return <CloudServerOutlined />;
+      case 'database': return <DatabaseOutlined />;
+      case 'api': return <ApiOutlined />;
+      case 'container': return <ContainerOutlined />;
+      default: return <CloudServerOutlined />;
+    }
+  };
+
+  // Safeguards for optional props
+  const safeStatus = (data && data.status) ? String(data.status) : 'healthy';
+  const rawType = (data && typeof data.type === 'string') ? String(data.type) : 'api';
+  const safeType = rawType.toLowerCase() === 'service3d' ? 'api' : rawType;
+  const safeZone = (data && typeof data.zone !== 'undefined') ? data.zone : '-';
+
+  return (
+    <div
+      style={{
+        background: 'linear-gradient(145deg, #1e293b, #334155)',
+        border: `2px solid ${getStatusColor(safeStatus)}`,
+        borderRadius: '12px',
+        padding: '16px',
+        minWidth: '180px',
+        boxShadow: selected 
+          ? `0 0 20px ${getStatusColor(safeStatus)}40` 
+          : '0 4px 12px rgba(0,0,0,0.3)',
+        transform: selected ? 'scale(1.05)' : 'scale(1)',
+        transition: 'all 0.2s ease',
+        position: 'relative',
+        overflow: 'hidden'
+      }}
+    >
+      {/* 3D Effect Background */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '30%',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.1), transparent)',
+          borderRadius: '12px 12px 0 0'
+        }}
+      />
+      
+      {/* Status Indicator */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '8px',
+          right: '8px',
+          width: '8px',
+          height: '8px',
+          borderRadius: '50%',
+          backgroundColor: getStatusColor(safeStatus),
+          boxShadow: `0 0 8px ${getStatusColor(safeStatus)}`
+        }}
+      />
+      
+      {/* Node Content */}
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+          <div style={{ color: getStatusColor(safeStatus), fontSize: '16px' }}>
+            {getTypeIcon(safeType)}
+          </div>
+          <div style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '14px' }}>
+            {data?.name}
+          </div>
+        </div>
+        
+        <div style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '4px' }}>
+          {safeType.toUpperCase()}
+        </div>
+        
+        <div style={{ color: '#64748b', fontSize: '11px' }}>
+          Zone: {safeZone}
+        </div>
+        
+        {/* Details */}
+        <div style={{ marginTop: '8px', fontSize: '10px', color: '#94a3b8' }}>
+          {data?.details?.containers && (
+            <div>{data.details.containers} Containers</div>
+          )}
+          {data?.details?.processes && (
+            <div>{data.details.processes} Processes</div>
+          )}
+          {data?.details?.jvms && (
+            <div>{data.details.jvms} JVMs</div>
+          )}
+        </div>
+
+      {/* Metrics */}
+      {data?.metrics && (
+        <div
+          style={{
+            marginTop: '10px',
+            paddingTop: '8px',
+            borderTop: '1px solid rgba(255,255,255,0.06)'
+          }}
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+            <div>
+              <div style={{ color: '#94a3b8', fontSize: '10px' }}>Avg. Lat</div>
+              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.avg}</div>
+            </div>
+            <div>
+              <div style={{ color: '#94a3b8', fontSize: '10px' }}>Min. Lat</div>
+              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.min}</div>
+            </div>
+            <div>
+              <div style={{ color: '#94a3b8', fontSize: '10px' }}>Max. Lat</div>
+              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.max}</div>
+            </div>
+            <div>
+              <div style={{ color: '#94a3b8', fontSize: '10px' }}>Count</div>
+              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.count}</div>
+            </div>
+          </div>
+        </div>
+      )}
+      </div>
+      
+      {/* Handles */}
+      <Handle
+        type="target"
+        position={Position.Top}
+        style={{ background: getStatusColor(safeStatus), border: 'none' }}
+      />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        style={{ background: getStatusColor(safeStatus), border: 'none' }}
+      />
+      <Handle
+        type="target"
+        position={Position.Left}
+        style={{ background: getStatusColor(safeStatus), border: 'none' }}
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        style={{ background: getStatusColor(safeStatus), border: 'none' }}
+      />
+    </div>
+  );
+};
+
+// Operation block - orange/red theme
+export const OperationIsoBlockNode: React.FC<any> = ({ data }) => {
+  const accent = data?.accent || '#f59e0b';
+  const label = data?.label || 'operation';
+  const sub = data?.sub || '';
+  const baseW = data?.w ?? 120;
+  const baseH = data?.h ?? 160;
+  const W = Math.max(8, Math.round(baseW * 0.5));
+  const H = Math.max(8, Math.round(baseH * 0.5));
+  const k = W / baseW;
+  const wrap: React.CSSProperties = { position: 'relative', top: 80, left: 40, width: Math.round(W + 40 * k), height: Math.round(H + 80 * k), filter: 'drop-shadow(0 14px 28px rgba(0,0,0,0.6))' };
+  const sideCommon: React.CSSProperties = { position: 'absolute', top: Math.round(50 * k), width: W, height: H, background: 'linear-gradient(180deg, #fed7aa 0%, #fca5a5 100%)', border: '1px solid rgba(148,163,184,0.7)' };
+  const right = { ...sideCommon, left: Math.round(40 * k) + 20, top: Math.round(50 * k)+ 20, transform: 'skewY(-28deg)' } as React.CSSProperties;
+  const left = { ...sideCommon, left: -40 + 20, top: Math.round(50 * k)+ 20, transform: 'skewY(28deg)' } as React.CSSProperties;
+  const rightBack = { ...sideCommon, left: Math.round(-80 * k) + 20, top: Math.round(50 * k) - 15, transform: 'skewY(-28deg)' } as React.CSSProperties;
+  const leftBack = { ...sideCommon, left: 40, top: Math.round(50 * k) - 15, transform: 'skewY(28deg)' } as React.CSSProperties;
+  const badge: React.CSSProperties = { position: 'absolute', top: -50, left: -6, background: accent, color: '#0b1220', fontWeight: 700, fontSize: 11, padding: '4px 8px', borderRadius: 6 };
+  const title: React.CSSProperties = { position: 'absolute', bottom: -50, left: '50%', transform: 'translateX(-50%)', color: '#e2e8f0', fontWeight: 600, fontSize: 14, whiteSpace: 'nowrap', cursor: 'pointer', transition: 'all 0.2s ease', padding: '2px 4px', borderRadius: '4px' };
+  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => { e.currentTarget.style.textDecoration = 'underline'; e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'; };
+  const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => { e.currentTarget.style.textDecoration = 'none'; e.currentTarget.style.backgroundColor = 'transparent'; };
+  return (
+    <div style={wrap}>
+      {sub && <div style={badge}>{sub}</div>}
+      <div style={rightBack} />
+      <div style={left} />
+      <div style={leftBack} />
+      <div style={right} />
+      <div style={title} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>{label}</div>
+      <Handle type="source" position={Position.Right} id="r" style={{ opacity: 0 }} />
+      <Handle type="target" position={Position.Left} id="l" style={{ opacity: 0 }} />
+    </div>
+  );
+};
+
+// ---------- Grup node (zone/cluster çerçevesi) ----------
+export const GroupNode: React.FC<any> = ({ data }) => {
+  const { label, groupSize, accent = '#6b7fa4' } = data || {};
+  const w = groupSize?.width || 560;
+  const h = groupSize?.height || 300;
+  
+  return (
+    <div
+      style={{
+        width: w,
+        height: h,
+        borderRadius: 14,
+        border: `1px dashed ${accent}60`,
+        background:
+          'repeating-linear-gradient(45deg, rgba(34,48,71,0.2), rgba(34,48,71,0.2) 10px, rgba(34,48,71,0.25) 10px, rgba(34,48,71,0.25) 20px)',
+        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)'
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          bottom: -18,
+          left: 12,
+          color: '#a3b2cc',
+          fontSize: 12,
+          background: '#0b1220',
+          padding: '4px 8px',
+          borderRadius: 8,
+          border: '1px solid rgba(163,178,204,0.18)'
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  );
+};
+
+// ========== Layout yardımcıları ==========
+// Basit grid yerleşim: parent içinde satır/sütun
+export function gridLayout(
+  count: number,
+  startX: number,
+  startY: number,
+  cols: number,
+  gapX = 140,
+  gapY = 140
+) {
+  const pos: { x: number; y: number }[] = [];
+  for (let i = 0; i < count; i++) {
+    const r = Math.floor(i / cols);
+    const c = i % cols;
+    pos.push({ x: startX + c * gapX, y: startY + r * gapY });
+  }
+  return pos;
 }
+
 
 const Map3DPage: React.FC = () => {
   const [layer, setLayer] = useState<LayerKey>('infra');
   const [searchValue, setSearchValue] = useState('');
   const [selectedKey, setSelectedKey] = useState<string>('');
   const [selectedNodeId, setSelectedNodeId] = useState<string>('');
+  const [detailPanelContent, setDetailPanelContent] = useState<React.ReactNode>(null);
   const infraLayerRef = useRef<any>(null);
   const applicationLayerRef = useRef<any>(null);
   const serviceLayerRef = useRef<any>(null);
   const operationLayerRef = useRef<any>(null);
 
+  // Sayfa yüklendiğinde console log
+  useEffect(() => {
+    // console.log('Map 3D sayfa yüklendi');
+  }, []);
+
+  // İlk açılışta Service layer'a geç ve OpenTelemetry grubuna zoom yap
+  useEffect(() => {
+    setLayer('service');
+    setSelectedKey('');
+    setSelectedNodeId('');
+    const t = setTimeout(() => {
+      const ref = serviceLayerRef.current;
+      if (ref && ref.zoomToNode) {
+        ref.zoomToNode('group::OpenTelemetry');
+      }
+    }, 200);
+    return () => clearTimeout(t);
+  }, []);
+
+  // İlk açılışta localStorage'dan veri al, yoksa JSON'dan al ve localStorage'a kaydet
+  const getInitialData = () => {
+    const stored = localStorage.getItem('map-data');
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        console.warn('localStorage data corrupted, using JSON fallback');
+        // JSON'u localStorage'a kaydet
+        localStorage.setItem('map-data', JSON.stringify(infraJson));
+        return infraJson;
+      }
+    }
+    // localStorage'da data yoksa JSON'u yükle ve kaydet
+    console.log('No data in localStorage, loading from JSON and saving to localStorage');
+    localStorage.setItem('map-data', JSON.stringify(infraJson));
+    return infraJson;
+  };
+
   // localStorage'dan veri al ve tree yapısına çevir
   const treeData = useMemo(() => {
     try {
-      const stored = localStorage.getItem('infra-map-data');
-      if (!stored) return [];
-      
-      const data = JSON.parse(stored);
+      const data = getInitialData();
       const regions = data.regions || [];
       
       const nodes: TreeNode[] = [];
@@ -47,7 +544,7 @@ const Map3DPage: React.FC = () => {
         (region.infrastructures || []).forEach((infra: any) => {
           const infraNode: TreeNode = {
             title: infra.name,
-            key: `infra-${infra.id}`,
+            key: `infra-${infra.name}`,
             type: 'infra',
             children: []
           };
@@ -55,7 +552,7 @@ const Map3DPage: React.FC = () => {
           (infra.applications || []).forEach((app: any) => {
             const appNode: TreeNode = {
               title: app.name,
-              key: `app-${app.id || app.name}`,
+              key: `app-${app.name}`,
               type: 'application',
               children: []
             };
@@ -63,7 +560,7 @@ const Map3DPage: React.FC = () => {
             (app.services || []).forEach((service: any) => {
               const serviceNode: TreeNode = {
                 title: service.name,
-                key: `service-${service.id || service.name}`,
+                key: `service-${service.name}`,
                 type: 'service',
                 children: []
               };
@@ -71,7 +568,7 @@ const Map3DPage: React.FC = () => {
               (service.operations || []).forEach((op: any) => {
                 const opNode: TreeNode = {
                   title: op.name,
-                  key: `op-${op.id || op.name}`,
+                  key: `op-${op.name}`,
                   type: 'operation',
                   children: []
                 };
@@ -123,6 +620,7 @@ const Map3DPage: React.FC = () => {
   const filteredTreeData = useMemo(() => {
     return filterTreeData(treeData, searchValue);
   }, [treeData, searchValue, filterTreeData]);
+
 
   const handleSelect = useCallback((selectedKeys: React.Key[]) => {
     if (selectedKeys.length > 0) {
@@ -180,28 +678,153 @@ const Map3DPage: React.FC = () => {
     }, 100);
   }, []);
 
-  const handleInfraNodeClick = useCallback((nodeId: string, nodeType: string) => {
-    console.log('handleInfraNodeClick called with:', nodeId, nodeType);
+  const handleNodeClick = useCallback((nodeId: string, nodeType: string, newLayer?: string) => {
+    // console.log('handleInfraNodeClick called with:', nodeId, nodeType, newLayer);
     
-    if (nodeType === 'clear') {
-      // Clear selection - zoom out yap
-      clearSelection();
-    } else {
-      // Normal node selection
-      setSelectedKey(nodeId);
-      setSelectedNodeId(nodeId);
-      setLayer('infra');
+    if (nodeType === 'layer-change' && newLayer) {
+      // Handle layer change from detail panel
+      setLayer(newLayer as LayerKey);
+      setSelectedKey('');
+      setSelectedNodeId('');
       
-      // Zoom to node
+      // Zoom out to show full map for the new layer
       setTimeout(() => {
-        const currentRef = infraLayerRef.current;
+        const currentRef = newLayer === 'infra' ? infraLayerRef.current :
+                          newLayer === 'application' ? applicationLayerRef.current :
+                          newLayer === 'service' ? serviceLayerRef.current :
+                          operationLayerRef.current;
+        
         if (currentRef && currentRef.zoomToNode) {
-          console.log('Zooming to node:', nodeId);
-          currentRef.zoomToNode(nodeId);
+          currentRef.zoomToNode('');
         }
       }, 100);
+      return;
     }
-  }, [clearSelection]);
+    
+    if (nodeType === 'clear') {
+      // Clear selection - sadece zoom out yap, layer değiştirme
+      setSelectedKey('');
+      setSelectedNodeId('');
+      
+      // Mevcut layer'da zoom out yap
+      setTimeout(() => {
+        if (layer === 'infra') {
+          const currentRef = infraLayerRef.current;
+          if (currentRef && currentRef.zoomToNode) {
+            currentRef.zoomToNode('');
+          }
+        } else if (layer === 'application') {
+          const currentRef = applicationLayerRef.current;
+          if (currentRef && currentRef.zoomToNode) {
+            currentRef.zoomToNode('');
+          }
+        } else if (layer === 'service') {
+          const currentRef = serviceLayerRef.current;
+          if (currentRef && currentRef.zoomToNode) {
+            currentRef.zoomToNode('');
+          }
+        } else if (layer === 'operation') {
+          const currentRef = operationLayerRef.current;
+          if (currentRef && currentRef.zoomToNode) {
+            currentRef.zoomToNode('');
+          }
+        }
+      }, 100);
+    } else {
+      // Normal node selection - sadece infra layer'da
+      if (nodeType === 'infra') {
+        setSelectedKey(nodeId);
+        setSelectedNodeId(nodeId);
+        setLayer('infra');
+        
+        // Zoom to node
+        setTimeout(() => {
+          const currentRef = infraLayerRef.current;
+          if (currentRef && currentRef.zoomToNode) {
+            // console.log('Zooming to node:', nodeId);
+            currentRef.zoomToNode(nodeId);
+          }
+        }, 100);
+      } else if (nodeType === 'application') {
+        // Application node selection - sadece application layer'da
+        setSelectedKey(nodeId);
+        setSelectedNodeId(nodeId);
+        setLayer('application');
+        
+        // Zoom to node
+        setTimeout(() => {
+          const currentRef = applicationLayerRef.current;
+          if (currentRef && currentRef.zoomToNode) {
+            // console.log('Zooming to application:', nodeId);
+            currentRef.zoomToNode(nodeId);
+          }
+        }, 100);
+      } else if (nodeType === 'service') {
+        // Service node selection - sadece service layer'da
+        setSelectedKey(nodeId);
+        setSelectedNodeId(nodeId);
+        setLayer('service');
+        
+        // Zoom to node
+        setTimeout(() => {
+          const currentRef = serviceLayerRef.current;
+          if (currentRef && currentRef.zoomToNode) {
+            console.log('Zooming to service:', nodeId);
+            currentRef.zoomToNode(nodeId);
+          }
+        }, 100);
+      } else if (nodeType === 'operation') {
+        // Operation node selection - sadece operation layer'da
+        setSelectedKey(nodeId);
+        setSelectedNodeId(nodeId);
+        setLayer('operation');
+        
+        // Zoom to node
+        setTimeout(() => {
+          const currentRef = operationLayerRef.current;
+          if (currentRef && currentRef.zoomToNode) {
+            console.log('Zooming to operation:', nodeId);
+            currentRef.zoomToNode(nodeId);
+          }
+        }, 100);
+      }
+    }
+  }, [clearSelection, layer]);
+
+  const handleApplicationClick = useCallback((appName: string, targetLayer?: string) => {
+
+    setLayer(targetLayer as LayerKey);
+    if (targetLayer === 'operationItem') {
+      setSelectedKey(appName);
+      setSelectedNodeId(appName);
+    }
+    else {
+      setSelectedKey('');
+      setSelectedNodeId('');
+    }
+
+    setTimeout(() => {
+      let currentRef: any;
+
+      if (targetLayer === 'application') {
+        currentRef = applicationLayerRef.current;
+      } else if (targetLayer === 'service') {
+        currentRef = serviceLayerRef.current;
+      } else if (targetLayer === 'operation') {
+        currentRef = operationLayerRef.current;
+      } else if (targetLayer === 'operationItem') {
+        currentRef = operationLayerRef.current;
+      } else {
+        currentRef = infraLayerRef.current;
+      }
+
+      if (currentRef && currentRef.zoomToNode) {
+        const nodeId = `${targetLayer !== 'operationItem' ? 'group::' : ''}${appName}`;
+        console.log('click to node:', nodeId);
+        currentRef.zoomToNode(nodeId);
+      }
+    }, 100);
+  }, []);
 
   const dropdownContent = useMemo(() => (
     <div style={{ 
@@ -272,8 +895,184 @@ const Map3DPage: React.FC = () => {
 
   return (
     <div style={{ padding: 0, height: '100vh', overflow: 'hidden' }}>
+      {/* Override React Flow default width for group nodes */}
+      <style>{`
+        .react-flow__node-group { width: auto !important; }
+      `}</style>
       <Card style={{ background: '#0f172a', borderColor: '#1f2937', height: '100vh' }} styles={{ body: { padding: 0, height: '100%' } }}>
         <div style={{ position: 'relative', height: '92%' }}>
+          {/* Legend - Sol Üst */}
+          <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 10, width: '180px' }}>
+            <div
+              style={{
+                padding: 10,
+                borderRadius: 10,
+                border: '1px solid rgba(148,163,184,0.18)',
+                background: cardBg('#1b2a44'),
+                color: '#cbd5e1',
+                fontSize: 12
+              }}
+            >
+              <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                {layer === 'infra' ? 'Infrastructure Layer' : 
+                 layer === 'application' ? 'Application Layer' :
+                 layer === 'service' ? 'Service Layer' : 'Operation Layer'}
+              </div>
+              <div style={{ opacity: 0.7, fontSize: 11 }}>
+                {layer === 'infra' ? (
+                  <>
+                    <span 
+                      style={{ cursor: 'pointer', textDecoration: 'underline', color: '#60a5fa' }}
+                      onClick={() => {
+                        setLayer('infra');
+                        setTimeout(() => {
+                          const currentRef = infraLayerRef.current;
+                          if (currentRef && currentRef.zoomToNode) {
+                            currentRef.zoomToNode('');
+                          }
+                        }, 100);
+                      }}
+                    >
+                      Regions
+                    </span>
+                    {' → '}
+                    <span 
+                      style={{ cursor: 'pointer', textDecoration: 'underline', color: '#60a5fa' }}
+                      onClick={() => {
+                        setLayer('infra');
+                        setTimeout(() => {
+                          const currentRef = infraLayerRef.current;
+                          if (currentRef && currentRef.zoomToNode) {
+                            currentRef.zoomToNode('');
+                          }
+                        }, 100);
+                      }}
+                    >
+                      Infrastructures
+                    </span>
+                  </>
+                ) : layer === 'application' ? (
+                  <>
+                    <span 
+                      style={{ cursor: 'pointer', textDecoration: 'underline', color: '#60a5fa' }}
+                      onClick={() => {
+                        setLayer('infra');
+                        setTimeout(() => {
+                          const currentRef = infraLayerRef.current;
+                          if (currentRef && currentRef.zoomToNode) {
+                            currentRef.zoomToNode('');
+                          }
+                        }, 100);
+                      }}
+                    >
+                      Infrastructures
+                    </span>
+                    {' → '}
+                    <span 
+                      style={{ cursor: 'pointer', textDecoration: 'underline', color: '#60a5fa' }}
+                      onClick={() => {
+                        setLayer('application');
+                        setTimeout(() => {
+                          const currentRef = applicationLayerRef.current;
+                          if (currentRef && currentRef.zoomToNode) {
+                            currentRef.zoomToNode('');
+                          }
+                        }, 100);
+                      }}
+                    >
+                      Applications
+                    </span>
+                  </>
+                ) : layer === 'service' ? (
+                  <>
+                    <span 
+                      style={{ cursor: 'pointer', textDecoration: 'underline', color: '#60a5fa' }}
+                      onClick={() => {
+                        setLayer('application');
+                        setTimeout(() => {
+                          const currentRef = applicationLayerRef.current;
+                          if (currentRef && currentRef.zoomToNode) {
+                            currentRef.zoomToNode('');
+                          }
+                        }, 100);
+                      }}
+                    >
+                      Applications
+                    </span>
+                    {' → '}
+                    <span 
+                      style={{ cursor: 'pointer', textDecoration: 'underline', color: '#60a5fa' }}
+                      onClick={() => {
+                        setLayer('service');
+                        setTimeout(() => {
+                          const currentRef = serviceLayerRef.current;
+                          if (currentRef && currentRef.zoomToNode) {
+                            currentRef.zoomToNode('');
+                          }
+                        }, 100);
+                      }}
+                    >
+                      Services
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span 
+                      style={{ cursor: 'pointer', textDecoration: 'underline', color: '#60a5fa' }}
+                      onClick={() => {
+                        setLayer('service');
+                        setTimeout(() => {
+                          const currentRef = serviceLayerRef.current;
+                          if (currentRef && currentRef.zoomToNode) {
+                            currentRef.zoomToNode('');
+                          }
+                        }, 100);
+                      }}
+                    >
+                      Services
+                    </span>
+                    {' → '}
+                    <span 
+                      style={{ cursor: 'pointer', textDecoration: 'underline', color: '#60a5fa' }}
+                      onClick={() => {
+                        setLayer('operation');
+                        setTimeout(() => {
+                          const currentRef = operationLayerRef.current;
+                          if (currentRef && currentRef.zoomToNode) {
+                            currentRef.zoomToNode('');
+                          }
+                        }, 100);
+                      }}
+                    >
+                      Operations
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Legend - Üst Orta */}
+          <div style={{ position: 'fixed', top: 100, left: '50%', transform: 'translateX(-50%)', zIndex: 10, width: '250px' }}>
+            <div
+              style={{
+                padding: 5,
+                borderRadius: 10,
+                border: '1px solid rgba(148,163,184,0.18)',
+                background: cardBg('#1b2a44'),
+                color: '#cbd5e1',
+                fontSize: 12
+              }}
+            >
+              <div style={{ marginTop: 0, display: 'flex', flexDirection: 'row', gap: 8 }}>
+                <span style={{ color: '#22c55e' }}>● healthy</span>
+                <span style={{ color: '#f59e0b' }}>● warning / degraded</span>
+                <span style={{ color: '#ef4444' }}>● error</span>
+              </div>
+            </div>
+          </div>
+
+          {/* TreeView Search - Sağ Üst */}
           <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 10 }}>
             <Dropdown 
               popupRender={() => dropdownContent}
@@ -303,11 +1102,58 @@ const Map3DPage: React.FC = () => {
             </Dropdown>
           </div>
 
+          {/* Detail Panel - Sol Orta */}
+          {detailPanelContent && (
+            <div style={{ position: 'absolute', left: 12, top: 80, maxHeight: '100px' }}>
+              {detailPanelContent}
+            </div>
+          )}
+
           <div style={{ position: 'absolute', inset: 0 }}>
-            {layer === 'infra' && <InfraLayer ref={infraLayerRef} selectedNodeId={selectedNodeId} onNodeClick={handleInfraNodeClick} />}
-            {layer === 'application' && <ApplicationLayer ref={applicationLayerRef} selectedNodeId={selectedNodeId} />}
-            {layer === 'service' && <ServiceLayer ref={serviceLayerRef} selectedNodeId={selectedNodeId} />}
-            {layer === 'operation' && <OperationLayer ref={operationLayerRef} selectedNodeId={selectedNodeId} />}
+            {layer === 'infra' && (
+            <MapLayer 
+              ref={infraLayerRef}
+              selectedNodeId={selectedNodeId} 
+              onNodeClick={handleNodeClick} 
+              onApplicationClick={handleApplicationClick} 
+              setDetailPanelContent={setDetailPanelContent} 
+              data={getInitialData()}
+              layer={layer}
+            />
+            )}
+            {layer === 'application' && (
+            <MapLayer 
+              ref={applicationLayerRef}
+              selectedNodeId={selectedNodeId} 
+              onNodeClick={handleNodeClick} 
+              onApplicationClick={handleApplicationClick} 
+              setDetailPanelContent={setDetailPanelContent} 
+              data={getInitialData()}
+              layer={layer}
+            />
+            )}
+            {layer === 'service' && (
+            <MapLayer 
+              ref={serviceLayerRef}
+              selectedNodeId={selectedNodeId} 
+              onNodeClick={handleNodeClick} 
+              onApplicationClick={handleApplicationClick} 
+              setDetailPanelContent={setDetailPanelContent} 
+              data={getInitialData()}
+              layer={layer}
+            />
+            )}
+            {layer === 'operation' && (
+            <MapLayer 
+              ref={operationLayerRef}
+              selectedNodeId={selectedNodeId} 
+              onNodeClick={handleNodeClick} 
+              onApplicationClick={handleApplicationClick} 
+              setDetailPanelContent={setDetailPanelContent} 
+              data={getInitialData()}
+              layer={layer}
+            />
+            )}
           </div>
         </div>
       </Card>

@@ -4,9 +4,13 @@ import 'reactflow/dist/style.css';
 
 interface OperationLayerProps {
   selectedNodeId?: string;
+  setDetailPanelContent?: (content: React.ReactNode) => void;
+  data?: any;
+  groupKeyName?: string;
+  hostKeyName?: string;
 }
 
-const OperationInner = forwardRef<any, OperationLayerProps>(({ selectedNodeId }, ref) => {
+const OperationInner = forwardRef<any, OperationLayerProps>(({ selectedNodeId, setDetailPanelContent, data, groupKeyName, hostKeyName  }, ref) => {
   const reactFlowInstance = useRef<any>(null);
 
   const zoomToNode = (nodeId: string) => {

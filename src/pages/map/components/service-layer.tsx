@@ -4,9 +4,13 @@ import 'reactflow/dist/style.css';
 
 interface ServiceLayerProps {
   selectedNodeId?: string;
+  setDetailPanelContent?: (content: React.ReactNode) => void;
+  data?: any;
+  groupKeyName?: string;
+  hostKeyName?: string;
 }
 
-const ServiceInner = forwardRef<any, ServiceLayerProps>(({ selectedNodeId }, ref) => {
+const ServiceInner = forwardRef<any, ServiceLayerProps>(({ selectedNodeId, setDetailPanelContent, data, groupKeyName, hostKeyName }, ref) => {
   const reactFlowInstance = useRef<any>(null);
 
   const zoomToNode = (nodeId: string) => {

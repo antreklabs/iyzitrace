@@ -54,7 +54,11 @@
                       "path": "/orders",
                       "avg_latency_ms": 128,
                       "p95_ms": 260,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     },
                     {
                       "name": "Get Order",
@@ -62,11 +66,40 @@
                       "path": "/orders/{id}",
                       "avg_latency_ms": 64,
                       "p95_ms": 140,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 224,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 400,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 0,
+                "y": 0
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/go.svg"
             },
             {
               "name": "Nginx Server",
@@ -95,11 +128,40 @@
                       "path": "/api/*",
                       "avg_latency_ms": 12,
                       "p95_ms": 35,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 450,
+                    "y": 0
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 224,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 250,
+                "y": 0
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/nginx.svg"
             },
             {
               "name": "Node.js Runtime",
@@ -128,7 +190,11 @@
                       "path": "/users",
                       "avg_latency_ms": 142,
                       "p95_ms": 265,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     },
                     {
                       "name": "Validate User",
@@ -136,7 +202,11 @@
                       "path": "/users/validate",
                       "avg_latency_ms": 89,
                       "p95_ms": 180,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 224,
+                        "y": 24
+                      }
                     },
                     {
                       "name": "Update Profile",
@@ -144,54 +214,897 @@
                       "path": "/users/{id}",
                       "avg_latency_ms": 234,
                       "p95_ms": 420,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 424,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 600,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 700,
+                    "y": 0
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 424,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 500,
+                "y": 0
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/nodedotjs.svg"
             },
             {
               "name": "OpenTelemetry",
-              "platform": "OTel Collector",
+              "platform": "OTel",
               "version": "0.95",
               "status": "running",
               "services": [
                 {
-                  "name": "telemetry-pipeline",
-                  "kind": "otel",
-                  "port": 4317,
-                  "health": "healthy",
-                  "replicas": 1,
-                  "dependencies": [
-                    "tempo",
-                    "loki",
-                    "prometheus"
-                  ],
-                  "metrics": {
-                    "spans_per_s": 3200,
-                    "logs_per_s": 1500,
-                    "dropped_pct": 0.1
+                  "id": "internet",
+                  "name": "Internet",
+                  "type": "service3d",
+                  "position": {
+                    "x": 83,
+                    "y": 379
+                  },
+                  "data": {
+                    "name": "Internet",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "external",
+                    "metrics": {
+                      "avg": "12.10 ms",
+                      "min": "1.20 ms",
+                      "max": "44.00 ms"
+                    }
                   },
                   "operations": [
                     {
-                      "name": "Export Traces",
-                      "method": "OTLP",
-                      "path": "grpc:4317",
-                      "avg_latency_ms": 8,
-                      "p95_ms": 20,
-                      "status": "ok"
+                      "name": "Create User",
+                      "method": "POST",
+                      "path": "/users",
+                      "avg_latency_ms": 142,
+                      "p95_ms": 265,
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     },
                     {
-                      "name": "Export Logs",
-                      "method": "OTLP",
-                      "path": "http:4318",
-                      "avg_latency_ms": 12,
-                      "p95_ms": 25,
-                      "status": "ok"
+                      "name": "Validate User",
+                      "method": "GET",
+                      "path": "/users/validate",
+                      "avg_latency_ms": 89,
+                      "p95_ms": 180,
+                      "status": "ok",
+                      "position": {
+                        "x": 224,
+                        "y": 24
+                      }
+                    },
+                    {
+                      "name": "Update Profile",
+                      "method": "PUT",
+                      "path": "/users/{id}",
+                      "avg_latency_ms": 234,
+                      "p95_ms": 420,
+                      "status": "ok",
+                      "position": {
+                        "x": 424,
+                        "y": 24
+                      }
+                    }
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": [
+                    {
+                      "id": "frontend-proxy",
+                      "label": "HTTP"
                     }
                   ]
+                },
+                {
+                  "id": "loadgen",
+                  "name": "Load Generator",
+                  "type": "service3d",
+                  "position": {
+                    "x": 74,
+                    "y": 701
+                  },
+                  "data": {
+                    "name": "Load Generator",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "tools",
+                    "metrics": {
+                      "avg": "6.80 ms",
+                      "min": "0.90 ms",
+                      "max": "25.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": [
+                    {
+                      "id": "frontend-proxy",
+                      "label": "HTTP"
+                    }
+                  ]
+                },
+                {
+                  "id": "reactnative",
+                  "name": "React Native App",
+                  "type": "service3d",
+                  "position": {
+                    "x": 64,
+                    "y": 1069
+                  },
+                  "data": {
+                    "name": "React Native App",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "mobile",
+                    "metrics": {
+                      "avg": "28.50 ms",
+                      "min": "2.10 ms",
+                      "max": "120.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": [
+                    {
+                      "id": "frontend-proxy",
+                      "label": "HTTP"
+                    }
+                  ]
+                },
+                {
+                  "id": "frontend-proxy",
+                  "name": "Frontend Proxy\\n(Envoy)",
+                  "type": "service3d",
+                  "position": {
+                    "x": 548,
+                    "y": 637
+                  },
+                  "data": {
+                    "name": "Frontend Proxy\\n(Envoy)",
+                    "type": "api",
+                    "status": "warning",
+                    "zone": "edge",
+                    "metrics": {
+                      "avg": "15.65 s",
+                      "min": "0.00 ms",
+                      "max": "15.00 s"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": [
+                    {
+                      "id": "frontend",
+                      "label": "HTTP"
+                    },
+                    {
+                      "id": "flagd-ui",
+                      "label": "HTTP"
+                    },
+                    {
+                      "id": "image-provider",
+                      "label": "HTTP"
+                    }
+                  ]
+                },
+                {
+                  "id": "flagd-ui",
+                  "name": "Flagd-ui",
+                  "type": "service3d",
+                  "position": {
+                    "x": 323,
+                    "y": 791
+                  },
+                  "data": {
+                    "name": "Flagd-ui",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "ui",
+                    "metrics": {
+                      "avg": "9.40 ms",
+                      "min": "1.00 ms",
+                      "max": "60.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": []
+                },
+                {
+                  "id": "image-provider",
+                  "name": "Image Provider\\n(nginx)",
+                  "type": "service3d",
+                  "position": {
+                    "x": 315,
+                    "y": 1269
+                  },
+                  "data": {
+                    "name": "Image Provider\\n(nginx)",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "media",
+                    "metrics": {
+                      "avg": "4.10 ms",
+                      "min": "0.50 ms",
+                      "max": "30.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": []
+                },
+                {
+                  "id": "frontend",
+                  "name": "Frontend",
+                  "type": "service3d",
+                  "position": {
+                    "x": 314,
+                    "y": 295
+                  },
+                  "data": {
+                    "name": "Frontend",
+                    "type": "api",
+                    "status": "warning",
+                    "zone": "web",
+                    "metrics": {
+                      "avg": "45.30 ms",
+                      "min": "5.20 ms",
+                      "max": "340.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": [
+                    {
+                      "id": "checkout",
+                      "label": "HTTP"
+                    },
+                    {
+                      "id": "recommendation",
+                      "label": "gRPC"
+                    },
+                    {
+                      "id": "ad",
+                      "label": "gRPC"
+                    }
+                  ]
+                },
+                {
+                  "id": "checkout",
+                  "name": "Checkout",
+                  "type": "service3d",
+                  "position": {
+                    "x": 316,
+                    "y": 464
+                  },
+                  "data": {
+                    "name": "Checkout",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "backend",
+                    "metrics": {
+                      "avg": "22.40 ms",
+                      "min": "3.10 ms",
+                      "max": "110.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": [
+                    {
+                      "id": "currency",
+                      "label": "gRPC"
+                    },
+                    {
+                      "id": "cart",
+                      "label": "gRPC"
+                    },
+                    {
+                      "id": "queue",
+                      "label": "TCP"
+                    },
+                    {
+                      "id": "shipping",
+                      "label": "HTTP"
+                    },
+                    {
+                      "id": "email",
+                      "label": "HTTP"
+                    },
+                    {
+                      "id": "quote",
+                      "label": "gRPC"
+                    }
+                  ]
+                },
+                {
+                  "id": "queue",
+                  "name": "queue\\n(Kafka)",
+                  "type": "service3d",
+                  "position": {
+                    "x": 1392,
+                    "y": 707
+                  },
+                  "data": {
+                    "name": "queue\\n(Kafka)",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "messaging",
+                    "metrics": {
+                      "avg": "8.10 ms",
+                      "min": "1.10 ms",
+                      "max": "90.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": []
+                },
+                {
+                  "id": "currency",
+                  "name": "Currency",
+                  "type": "service3d",
+                  "position": {
+                    "x": 558,
+                    "y": 251
+                  },
+                  "data": {
+                    "name": "Currency",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "svc",
+                    "metrics": {
+                      "avg": "5.70 ms",
+                      "min": "0.80 ms",
+                      "max": "40.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": [
+                    {
+                      "id": "cache",
+                      "label": "gRPC"
+                    }
+                  ]
+                },
+                {
+                  "id": "cart",
+                  "name": "Cart",
+                  "type": "service3d",
+                  "position": {
+                    "x": 554,
+                    "y": 406
+                  },
+                  "data": {
+                    "name": "Cart",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "svc",
+                    "metrics": {
+                      "avg": "18.20 ms",
+                      "min": "2.00 ms",
+                      "max": "150.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": [
+                    {
+                      "id": "accounting",
+                      "label": "gRPC"
+                    }
+                  ]
+                },
+                {
+                  "id": "cache",
+                  "name": "Cache\\n(Valkey)",
+                  "type": "service3d",
+                  "position": {
+                    "x": 830,
+                    "y": 88
+                  },
+                  "data": {
+                    "name": "Cache\\n(Valkey)",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "infra",
+                    "metrics": {
+                      "avg": "1.90 ms",
+                      "min": "0.30 ms",
+                      "max": "10.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": []
+                },
+                {
+                  "id": "accounting",
+                  "name": "Accounting",
+                  "type": "service3d",
+                  "position": {
+                    "x": 1092,
+                    "y": 96
+                  },
+                  "data": {
+                    "name": "Accounting",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "svc",
+                    "metrics": {
+                      "avg": "11.60 ms",
+                      "min": "1.20 ms",
+                      "max": "85.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": [
+                    {
+                      "id": "flagd",
+                      "label": "gRPC"
+                    }
+                  ]
+                },
+                {
+                  "id": "fraud",
+                  "name": "Fraud Detection",
+                  "type": "service3d",
+                  "position": {
+                    "x": 1098,
+                    "y": 428
+                  },
+                  "data": {
+                    "name": "Fraud Detection",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "svc",
+                    "metrics": {
+                      "avg": "19.40 ms",
+                      "min": "2.10 ms",
+                      "max": "130.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": [
+                    {
+                      "id": "queue",
+                      "label": "TCP"
+                    },
+                    {
+                      "id": "flagd",
+                      "label": "gRPC"
+                    }
+                  ]
+                },
+                {
+                  "id": "payment",
+                  "name": "Payment",
+                  "type": "service3d",
+                  "position": {
+                    "x": 1102,
+                    "y": 601
+                  },
+                  "data": {
+                    "name": "Payment",
+                    "type": "api",
+                    "status": "warning",
+                    "zone": "svc",
+                    "metrics": {
+                      "avg": "27.80 ms",
+                      "min": "3.20 ms",
+                      "max": "210.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": [
+                    {
+                      "id": "queue",
+                      "label": "TCP"
+                    },
+                    {
+                      "id": "flagd",
+                      "label": "gRPC"
+                    }
+                  ]
+                },
+                {
+                  "id": "email",
+                  "name": "Email",
+                  "type": "service3d",
+                  "position": {
+                    "x": 1098,
+                    "y": 801
+                  },
+                  "data": {
+                    "name": "Email",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "svc",
+                    "metrics": {
+                      "avg": "5.20 ms",
+                      "min": "0.70 ms",
+                      "max": "40.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": []
+                },
+                {
+                  "id": "quote",
+                  "name": "Quote",
+                  "type": "service3d",
+                  "position": {
+                    "x": 1100,
+                    "y": 976
+                  },
+                  "data": {
+                    "name": "Quote",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "svc",
+                    "metrics": {
+                      "avg": "8.60 ms",
+                      "min": "1.10 ms",
+                      "max": "60.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": []
+                },
+                {
+                  "id": "shipping",
+                  "name": "Shipping",
+                  "type": "service3d",
+                  "position": {
+                    "x": 856,
+                    "y": 892
+                  },
+                  "data": {
+                    "name": "Shipping",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "svc",
+                    "metrics": {
+                      "avg": "13.30 ms",
+                      "min": "1.60 ms",
+                      "max": "90.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": []
+                },
+                {
+                  "id": "recommendation",
+                  "name": "Recommendation",
+                  "type": "service3d",
+                  "position": {
+                    "x": 1104,
+                    "y": 1347
+                  },
+                  "data": {
+                    "name": "Recommendation",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "svc",
+                    "metrics": {
+                      "avg": "7.40 ms",
+                      "min": "0.90 ms",
+                      "max": "55.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": [
+                    {
+                      "id": "product-catalog",
+                      "label": "gRPC"
+                    }
+                  ]
+                },
+                {
+                  "id": "product-catalog",
+                  "name": "Product Catalog",
+                  "type": "service3d",
+                  "position": {
+                    "x": 1415,
+                    "y": 1178
+                  },
+                  "data": {
+                    "name": "Product Catalog",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "svc",
+                    "metrics": {
+                      "avg": "6.10 ms",
+                      "min": "0.80 ms",
+                      "max": "48.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": []
+                },
+                {
+                  "id": "ad",
+                  "name": "Ad",
+                  "type": "service3d",
+                  "position": {
+                    "x": 556,
+                    "y": 91
+                  },
+                  "data": {
+                    "name": "Ad",
+                    "type": "api",
+                    "status": "healthy",
+                    "zone": "svc",
+                    "metrics": {
+                      "avg": "3.90 ms",
+                      "min": "0.40 ms",
+                      "max": "20.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": []
+                },
+                {
+                  "id": "flagd",
+                  "name": "Flagd",
+                  "type": "service3d",
+                  "position": {
+                    "x": 1379,
+                    "y": 230
+                  },
+                  "data": {
+                    "name": "Flagd",
+                    "type": "api",
+                    "status": "warning",
+                    "zone": "control",
+                    "metrics": {
+                      "avg": "9.80 ms",
+                      "min": "1.20 ms",
+                      "max": "65.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": [
+                    {
+                      "id": "database",
+                      "label": "gRPC"
+                    }
+                  ]
+                },
+                {
+                  "id": "database",
+                  "name": "Database\\n(PostgreSQL)",
+                  "type": "service3d",
+                  "position": {
+                    "x": 1693,
+                    "y": 711
+                  },
+                  "data": {
+                    "name": "Database\\n(PostgreSQL)",
+                    "type": "database",
+                    "status": "healthy",
+                    "zone": "db",
+                    "metrics": {
+                      "avg": "2.40 ms",
+                      "min": "0.30 ms",
+                      "max": "18.00 ms"
+                    }
+                  },
+                  "operations": [],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "targets": []
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 2000,
+                "height": 1600
+              },
+              "position": {
+                "x": 24,
+                "y": 294
+              },
+              "groupPosition": {
+                "x": 0,
+                "y": 1050
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/opentelemetry.svg"
             },
             {
               "name": "JVMs",
@@ -221,7 +1134,11 @@
                       "path": "/orders",
                       "avg_latency_ms": 126,
                       "p95_ms": 250,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     },
                     {
                       "name": "Process Payment",
@@ -229,7 +1146,11 @@
                       "path": "/orders/{id}/pay",
                       "avg_latency_ms": 567,
                       "p95_ms": 980,
-                      "status": "warning"
+                      "status": "warning",
+                      "position": {
+                        "x": 224,
+                        "y": 24
+                      }
                     },
                     {
                       "name": "Ship Order",
@@ -237,9 +1158,25 @@
                       "path": "/orders/{id}/ship",
                       "avg_latency_ms": 345,
                       "p95_ms": 640,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 424,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 600,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 1800,
+                    "y": 0
+                  }
                 },
                 {
                   "name": "spring-boot-apps",
@@ -261,11 +1198,40 @@
                       "path": "/actuator/health",
                       "avg_latency_ms": 10,
                       "p95_ms": 20,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 224,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 350
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 400,
+                "height": 300
+              },
+              "position": {
+                "x": 224,
+                "y": 294
+              },
+              "groupPosition": {
+                "x": 1000,
+                "y": 0
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/openjdk.svg"
             },
             {
               "name": "Tomcat",
@@ -293,11 +1259,40 @@
                       "path": "/legacy/*",
                       "avg_latency_ms": 95,
                       "p95_ms": 210,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 250,
+                    "y": 350
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 424,
+                "y": 294
+              },
+              "groupPosition": {
+                "x": 1450,
+                "y": 0
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/apachetomcat.svg"
             },
             {
               "name": "Python Runtime",
@@ -325,11 +1320,40 @@
                       "path": "gs://bucket",
                       "avg_latency_ms": 5000,
                       "p95_ms": 9000,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 500,
+                    "y": 350
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 564
+              },
+              "groupPosition": {
+                "x": 1700,
+                "y": 0
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/python.svg"
             },
             {
               "name": "PHP Runtime",
@@ -357,11 +1381,40 @@
                       "path": "/admin/users",
                       "avg_latency_ms": 120,
                       "p95_ms": 260,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 750,
+                    "y": 350
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 224,
+                "y": 564
+              },
+              "groupPosition": {
+                "x": 1950,
+                "y": 0
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/php.svg"
             },
             {
               "name": "Instana Agent",
@@ -387,11 +1440,40 @@
                       "path": "/api",
                       "avg_latency_ms": 30,
                       "p95_ms": 60,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 1000,
+                    "y": 350
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 424,
+                "y": 564
+              },
+              "groupPosition": {
+                "x": 0,
+                "y": 350
+              },
+              "imageUrl": "https://static.vecteezy.com/system/resources/previews/055/041/037/large_2x/hotel-3d-icon-illustration-rendering-png.png"
             },
             {
               "name": "Processes",
@@ -416,16 +1498,53 @@
                       "path": "-",
                       "avg_latency_ms": 1,
                       "p95_ms": 2,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 1250,
+                    "y": 350
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 834
+              },
+              "groupPosition": {
+                "x": 250,
+                "y": 350
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/linux.svg"
             }
           ],
           "position": {
             "x": 24,
             "y": 24
+          },
+          "groupPosition": {
+            "x": 0,
+            "y": 0
+          },
+          "groupSize": {
+            "width": 600,
+            "height": 1200
           }
         },
         {
@@ -472,11 +1591,40 @@
                       "method": "SQL",
                       "avg_latency_ms": 22,
                       "p95_ms": 60,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 1500,
+                    "y": 350
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 500,
+                "y": 350
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibmdb.svg"
             },
             {
               "name": "IBM i Core",
@@ -501,23 +1649,64 @@
                       "method": "MQ",
                       "avg_latency_ms": 5,
                       "p95_ms": 12,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     },
                     {
                       "name": "Dequeue",
                       "method": "MQ",
                       "avg_latency_ms": 4,
                       "p95_ms": 10,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 224,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 400,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 1750,
+                    "y": 350
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 224,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 750,
+                "y": 350
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg"
             }
           ],
           "position": {
-            "x": 244,
+            "x": 224,
             "y": 24
+          },
+          "groupPosition": {
+            "x": 650,
+            "y": 0
+          },
+          "groupSize": {
+            "width": 400,
+            "height": 300
           }
         },
         {
@@ -568,7 +1757,11 @@
                       "path": "/v1/*",
                       "avg_latency_ms": 15,
                       "p95_ms": 40,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     },
                     {
                       "name": "JWT Verify",
@@ -576,16 +1769,53 @@
                       "path": "auth",
                       "avg_latency_ms": 6,
                       "p95_ms": 15,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 224,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 400,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 700
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 1000,
+                "y": 350
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg"
             }
           ],
           "position": {
-            "x": 464,
+            "x": 424,
             "y": 24
+          },
+          "groupPosition": {
+            "x": 1100,
+            "y": 0
+          },
+          "groupSize": {
+            "width": 200,
+            "height": 300
           }
         },
         {
@@ -633,16 +1863,53 @@
                       "path": "SAP",
                       "avg_latency_ms": 75,
                       "p95_ms": 150,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 450,
+                    "y": 700
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 1250,
+                "y": 350
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/openjdk.svg"
             }
           ],
           "position": {
             "x": 24,
-            "y": 304
+            "y": 294
+          },
+          "groupPosition": {
+            "x": 1350,
+            "y": 0
+          },
+          "groupSize": {
+            "width": 200,
+            "height": 300
           }
         },
         {
@@ -691,16 +1958,53 @@
                       "path": "/stream",
                       "avg_latency_ms": 6,
                       "p95_ms": 15,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 700,
+                    "y": 700
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 1500,
+                "y": 350
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/linux.svg"
             }
           ],
           "position": {
-            "x": 244,
-            "y": 304
+            "x": 224,
+            "y": 294
+          },
+          "groupPosition": {
+            "x": 1600,
+            "y": 0
+          },
+          "groupSize": {
+            "width": 200,
+            "height": 300
           }
         },
         {
@@ -747,16 +2051,53 @@
                       "path": "/tasks",
                       "avg_latency_ms": 210,
                       "p95_ms": 420,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 950,
+                    "y": 700
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 1750,
+                "y": 350
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/docker.svg"
             }
           ],
           "position": {
-            "x": 464,
-            "y": 304
+            "x": 424,
+            "y": 294
+          },
+          "groupPosition": {
+            "x": 1850,
+            "y": 0
+          },
+          "groupSize": {
+            "width": 200,
+            "height": 300
           }
         },
         {
@@ -806,16 +2147,53 @@
                       "path": "topic://events",
                       "avg_latency_ms": 7,
                       "p95_ms": 15,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 1200,
+                    "y": 700
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 2000,
+                "y": 350
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg"
             }
           ],
           "position": {
             "x": 24,
-            "y": 584
+            "y": 564
+          },
+          "groupPosition": {
+            "x": 0,
+            "y": 1250
+          },
+          "groupSize": {
+            "width": 200,
+            "height": 300
           }
         },
         {
@@ -864,22 +2242,67 @@
                       "path": "/alt/*",
                       "avg_latency_ms": 40,
                       "p95_ms": 95,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 1450,
+                    "y": 700
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 0,
+                "y": 700
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/wildfly.svg"
             }
           ],
           "position": {
-            "x": 244,
-            "y": 584
+            "x": 224,
+            "y": 564
+          },
+          "groupPosition": {
+            "x": 250,
+            "y": 1250
+          },
+          "groupSize": {
+            "width": 200,
+            "height": 300
           }
         }
       ],
       "position": {
         "x": 60,
         "y": 60
+      },
+      "groupPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "groupSize": {
+        "width": 600,
+        "height": 900
       }
     },
     {
@@ -932,22 +2355,67 @@
                       "path": "/inventory",
                       "avg_latency_ms": 90,
                       "p95_ms": 180,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 1700,
+                    "y": 700
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 250,
+                "y": 700
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/kubernetes.svg"
             }
           ],
           "position": {
             "x": 24,
             "y": 24
+          },
+          "groupPosition": {
+            "x": 500,
+            "y": 1250
+          },
+          "groupSize": {
+            "width": 200,
+            "height": 300
           }
         }
       ],
       "position": {
         "x": 728,
         "y": 60
+      },
+      "groupPosition": {
+        "x": 650,
+        "y": 0
+      },
+      "groupSize": {
+        "width": 200,
+        "height": 300
       }
     },
     {
@@ -997,22 +2465,67 @@
                       "path": "cron",
                       "avg_latency_ms": 2,
                       "p95_ms": 4,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 1950,
+                    "y": 700
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 500,
+                "y": 700
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg"
             }
           ],
           "position": {
             "x": 24,
             "y": 24
+          },
+          "groupPosition": {
+            "x": 750,
+            "y": 1250
+          },
+          "groupSize": {
+            "width": 200,
+            "height": 300
           }
         }
       ],
       "position": {
         "x": 956,
         "y": 60
+      },
+      "groupPosition": {
+        "x": 900,
+        "y": 0
+      },
+      "groupSize": {
+        "width": 200,
+        "height": 300
       }
     },
     {
@@ -1061,22 +2574,67 @@
                       "path": "OID:1.3.6.1.2",
                       "avg_latency_ms": 5,
                       "p95_ms": 15,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 0,
+                    "y": 1050
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 750,
+                "y": 700
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg"
             }
           ],
           "position": {
             "x": 24,
             "y": 24
+          },
+          "groupPosition": {
+            "x": 1000,
+            "y": 1250
+          },
+          "groupSize": {
+            "width": 200,
+            "height": 300
           }
         }
       ],
       "position": {
         "x": 60,
         "y": 968
+      },
+      "groupPosition": {
+        "x": 1150,
+        "y": 0
+      },
+      "groupSize": {
+        "width": 200,
+        "height": 300
       }
     },
     {
@@ -1127,16 +2685,53 @@
                       "path": "/lpars/migrate",
                       "avg_latency_ms": 1200,
                       "p95_ms": 2400,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 250,
+                    "y": 1050
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 1000,
+                "y": 700
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg"
             }
           ],
           "position": {
             "x": 24,
             "y": 24
+          },
+          "groupPosition": {
+            "x": 1250,
+            "y": 1250
+          },
+          "groupSize": {
+            "width": 200,
+            "height": 300
           }
         },
         {
@@ -1183,22 +2778,67 @@
                       "path": "/lpar/ipl",
                       "avg_latency_ms": 2500,
                       "p95_ms": 5000,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 500,
+                    "y": 1050
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 1250,
+                "y": 700
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg"
             }
           ],
           "position": {
-            "x": 244,
+            "x": 224,
             "y": 24
+          },
+          "groupPosition": {
+            "x": 1500,
+            "y": 1250
+          },
+          "groupSize": {
+            "width": 200,
+            "height": 300
           }
         }
       ],
       "position": {
         "x": 288,
         "y": 968
+      },
+      "groupPosition": {
+        "x": 1400,
+        "y": 0
+      },
+      "groupSize": {
+        "width": 400,
+        "height": 300
       }
     },
     {
@@ -1250,22 +2890,67 @@
                       "path": "/*",
                       "avg_latency_ms": 22,
                       "p95_ms": 55,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 750,
+                    "y": 1050
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 1500,
+                "y": 700
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/nginx.svg"
             }
           ],
           "position": {
             "x": 24,
             "y": 24
+          },
+          "groupPosition": {
+            "x": 1750,
+            "y": 1250
+          },
+          "groupSize": {
+            "width": 200,
+            "height": 300
           }
         }
       ],
       "position": {
         "x": 736,
         "y": 968
+      },
+      "groupPosition": {
+        "x": 1850,
+        "y": 0
+      },
+      "groupSize": {
+        "width": 200,
+        "height": 300
       }
     },
     {
@@ -1314,16 +2999,53 @@
                       "path": "-",
                       "avg_latency_ms": 3,
                       "p95_ms": 8,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 1000,
+                    "y": 1050
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 200,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 1750,
+                "y": 700
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/cplusplus.svg"
             }
           ],
           "position": {
             "x": 24,
             "y": 24
+          },
+          "groupPosition": {
+            "x": 2000,
+            "y": 1250
+          },
+          "groupSize": {
+            "width": 200,
+            "height": 300
           }
         },
         {
@@ -1372,7 +3094,11 @@
                       "path": "topic://orders",
                       "avg_latency_ms": 4,
                       "p95_ms": 10,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     },
                     {
                       "name": "Consume",
@@ -1380,9 +3106,25 @@
                       "path": "topic://orders",
                       "avg_latency_ms": 6,
                       "p95_ms": 15,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 224,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 400,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 24,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 1250,
+                    "y": 1050
+                  }
                 },
                 {
                   "name": "app-connect",
@@ -1404,22 +3146,67 @@
                       "path": "/flows/*",
                       "avg_latency_ms": 140,
                       "p95_ms": 310,
-                      "status": "ok"
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      }
                     }
-                  ]
+                  ],
+                  "groupSize": {
+                    "width": 200,
+                    "height": 300
+                  },
+                  "position": {
+                    "x": 224,
+                    "y": 24
+                  },
+                  "groupPosition": {
+                    "x": 1700,
+                    "y": 1050
+                  }
                 }
-              ]
+              ],
+              "groupSize": {
+                "width": 400,
+                "height": 300
+              },
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "groupPosition": {
+                "x": 2000,
+                "y": 700
+              },
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibmcloud.svg"
             }
           ],
           "position": {
-            "x": 244,
+            "x": 224,
             "y": 24
+          },
+          "groupPosition": {
+            "x": 0,
+            "y": 1600
+          },
+          "groupSize": {
+            "width": 200,
+            "height": 300
           }
         }
       ],
       "position": {
         "x": 60,
         "y": 1316
+      },
+      "groupPosition": {
+        "x": 0,
+        "y": 950
+      },
+      "groupSize": {
+        "width": 400,
+        "height": 300
       }
     }
   ]

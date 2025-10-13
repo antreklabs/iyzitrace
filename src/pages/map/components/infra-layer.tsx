@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
+import React, { useMemo, useCallback, useRef, forwardRef, useImperativeHandle, useEffect, useState } from 'react';
 import {
   ReactFlowProvider,
   ReactFlow,
@@ -7,261 +7,27 @@ import {
   MiniMap,
   useNodesState,
   useEdgesState,
-  Panel,
   Node,
-  Edge,
-  Handle,
-  Position
+  Edge
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import infra from '../data/map.json'; // <= JSON’i buradan içeri alıyoruz (gerekirse yolu değiştir)
+import { Host, Position as CustomPosition, CustomSize } from '../interfaces';
+import { InfraIsoBlockNode, ApplicationIsoBlockNode, ServiceIsoBlockNode, OperationIsoBlockNode, GroupNode, statusColor } from '../map-3d.page';
 
-// ---------- Tipler ----------
-type Operation = {
-  name: string;
-  method: string;
-  path?: string;
-  avg_latency_ms?: number;
-  p95_ms?: number;
-  status?: 'ok' | 'warning' | 'error';
-};
 
-type Service = {
-  name: string;
-  kind: string;
-  port: number;
-  health: 'healthy' | 'degraded' | 'warning';
-  replicas?: number;
-  dependencies?: string[];
-  metrics?: Record<string, number>;
-  operations?: Operation[];
-};
+// ID yardımcıları - removed unused function
+// Uygulama/servis/operasyon id yardımcıları bu layer'da kullanılmıyor (yalın altyapı görünümü)
 
-type Application = {
-  name: string;
-  platform: string;
-  version: string;
-  status: 'running' | 'stopped' | 'warning';
-  services: Service[];
-};
-
-type Host = {
-  id: string;
-  name: string;
-  type: string;
-  os: string;
-  region: string;
-  ip: string;
-  cpu: { cores: number; usage_pct: number };
-  memory: { used_gb: number; total_gb: number };
-  status: 'healthy' | 'warning' | 'error' | 'degraded';
-  tags?: string[];
-  applications: Application[];
-  position?: { x: number; y: number };
-};
-
-type InfraJSON = {
-  schema_version: string;
-  generated_at: string;
-  infrastructure: Host[];
-};
-
-// Yeni şema (opsiyonel): regions -> infrastructures -> applications -> services -> operations
-type RegionSchema = {
-  name: string;
-  infrastructures: Host[]; // Host ile aynı alanlar
-  position?: { x: number; y: number };
-};
-type InfraJSONV2 = {
-  schema_version: string;
-  generated_at: string;
-  regions: RegionSchema[];
-};
-
-// ---------- Renk ve durum yardımcıları ----------
-const statusColor = (s?: string) =>
-  s === 'ok' || s === 'healthy'
-    ? '#22c55e'
-    : s === 'warning' || s === 'degraded'
-    ? '#f59e0b'
-    : s === 'error'
-    ? '#ef4444'
-    : '#6b7280';
-
-const cardBg = (hex: string) =>
-  `linear-gradient(180deg, ${hex} 0%, rgba(6,10,19,0.9) 100%)`;
-
-// ---------- İzometrik blok node ----------
-const IsoBlockNode: React.FC<any> = ({ data }) => {
-  const accent = data?.accent || '#22c55e';
-  const label = data?.label || 'node';
-  const sub = data?.sub || '';
-  const baseW = data?.w ?? 120;
-  const baseH = data?.h ?? 160; // blok yüksekliği (yan yüzler)
-  const W = Math.max(8, Math.round(baseW * 0.5));
-  const H = Math.max(8, Math.round(baseH * 0.5));
-  const k = W / baseW; // ölçek
-
-  const wrap: React.CSSProperties = {
-    position: 'relative',
-    top: 80,
-    left: 40,
-    width: Math.round(W + 40 * k),
-    height: Math.round(H + 80 * k),
-    filter: 'drop-shadow(0 14px 28px rgba(0,0,0,0.6))'
-  };
-
-  // Üst yüz: hexagon (clip-path)
-  // const top: React.CSSProperties = {
-  //   position: 'absolute',
-  //   left: Math.round(0 * k),
-  //   top: 0,
-  //   width: W,
-  //   height: Math.round(70 * k),
-  //   background: 'linear-gradient(180deg, #eef2ff 0%, #e2e8f0 100%)',
-  //   border: '1px solid rgba(148,163,184,0.8)',
-  //   clipPath: 'polygon(15% 0%, 85% 0%, 100% 50%, 85% 100%, 15% 100%, 0% 50%)'
-  // };
-
-  // Sağ ve sol yan yüzler: paralelkenar (skew)
-  const sideCommon: React.CSSProperties = {
-    position: 'absolute',
-    top: Math.round(50 * k),
-    width: W,
-    height: H,
-    background: 'linear-gradient(180deg, #e5e7eb 0%, #cbd5e1 100%)',
-    border: '1px solid rgba(148,163,184,0.7)'
-  };
-  const right: React.CSSProperties = {
-    ...sideCommon,
-    left: Math.round(40 * k) + 20,
-    top: Math.round(50 * k)+ 20,
-    transform: 'skewY(-28deg)',
-    background: 'linear-gradient(180deg, #dbeafe 0%, #c7d2fe 100%)'
-  };
-  const left: React.CSSProperties = {
-    ...sideCommon,
-    left: -40 + 20,
-    top: Math.round(50 * k)+ 20,
-    transform: 'skewY(28deg)',
-    background: 'linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%)'
-  };
-  const rightBack: React.CSSProperties = {
-    ...sideCommon,
-    left: Math.round(-80 * k) + 20,
-    top: Math.round(50 * k) - 15,
-    transform: 'skewY(-28deg)',
-    background: 'linear-gradient(180deg, #dbeafe 0%, #c7d2fe 100%)'
-  };
-  const leftBack: React.CSSProperties = {
-    ...sideCommon,
-    left: 20 + 20,
-    top: Math.round(50 * k) - 15,
-    transform: 'skewY(28deg)',
-    background: 'linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%)'
-  };
-
-  const badge: React.CSSProperties = {
-    position: 'absolute',
-    top: -50,
-    left: -6,
-    background: accent,
-    color: '#0b1220',
-    fontWeight: 700,
-    fontSize: 11,
-    padding: '4px 8px',
-    borderRadius: 6
-  };
-
-  const title: React.CSSProperties = {
-    position: 'absolute',
-    bottom: -50,
-    left: '50%',
-    transform: 'translateX(-50%)',
-    color: '#e2e8f0',
-    fontWeight: 600,
-    fontSize: 14,
-    whiteSpace: 'nowrap',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    padding: '2px 4px',
-    borderRadius: '4px'
-  };
-
-  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.currentTarget.style.textDecoration = 'underline';
-    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-  };
-
-  const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.currentTarget.style.textDecoration = 'none';
-    e.currentTarget.style.backgroundColor = 'transparent';
-  };
-
-  return (
-    <div style={wrap}>
-      {sub && <div style={badge}>{sub}</div>}
-      <div style={rightBack} />
-      <div style={left} />
-      <div style={leftBack} />
-      <div style={right} />
-      {/* <div style={top} /> */}
-      <div 
-        style={title}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        {label}
-      </div>
-      <Handle type="source" position={Position.Right} id="r" style={{ opacity: 0 }} />
-      <Handle type="target" position={Position.Left} id="l" style={{ opacity: 0 }} />
-    </div>
-  );
-};
-
-// ---------- Grup node (zone/cluster çerçevesi) ----------
-const GroupNode: React.FC<any> = ({ data }) => {
-  const { label, w = 560, h = 300, accent = '#6b7fa4' } = data || {};
-  return (
-    <div
-      style={{
-        width: w,
-        height: h,
-        borderRadius: 14,
-        border: `1px dashed ${accent}60`,
-        background:
-          'repeating-linear-gradient(45deg, rgba(34,48,71,0.2), rgba(34,48,71,0.2) 10px, rgba(34,48,71,0.25) 10px, rgba(34,48,71,0.25) 20px)',
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)'
-      }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          bottom: -18,
-          left: 12,
-          color: '#a3b2cc',
-          fontSize: 12,
-          background: '#0b1220',
-          padding: '4px 8px',
-          borderRadius: 8,
-          border: '1px solid rgba(163,178,204,0.18)'
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
-};
-
-// ---------- Infrastructure Detail Panel ----------
 const InfrastructureDetailPanel: React.FC<{ 
-  host: Host | null; 
-}> = ({ host }) => {
+  host: Host | null;
+  onApplicationClick?: (appName: string, targetLayer?: string) => void;
+}> = ({ host, onApplicationClick }) => {
   if (!host) return null;
 
   const { name, ip, os, cpu, memory, applications, status } = host;
 
   return (
+    <>
     <div
       style={{
         position: 'absolute',
@@ -273,9 +39,11 @@ const InfrastructureDetailPanel: React.FC<{
         color: '#ffffff',
         boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
         backdropFilter: 'blur(10px)',
+        maxHeight: '700px',
         zIndex: 1000
       }}
     >
+      
       {/* Header */}
       <div style={{ 
         display: 'flex', 
@@ -356,7 +124,40 @@ const InfrastructureDetailPanel: React.FC<{
       {/* Applications */}
       {applications && applications.length > 0 && (
         <div style={{ marginBottom: '20px' }}>
-          <h4 style={{ color: '#ffffff', margin: '0 0 12px 0', fontSize: '14px' }}>Applications</h4>
+          <h4 
+            style={{ 
+              color: '#3b82f6', 
+              margin: '0 0 12px 0', 
+              fontSize: '14px',
+              cursor: onApplicationClick ? 'pointer' : 'default',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              transition: 'all 0.2s ease',
+              display: 'inline-block',
+              border: onApplicationClick ? '1px solid #3b82f6' : '1px solid transparent',
+              background: onApplicationClick ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+              fontWeight: '600'
+            }}
+            onClick={() => {
+              onApplicationClick?.(host.name, 'application');
+            }}
+            onMouseEnter={(e) => {
+              if (onApplicationClick) {
+                e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
+                e.currentTarget.style.borderColor = '#60a5fa';
+                e.currentTarget.style.color = '#60a5fa';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (onApplicationClick) {
+                e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                e.currentTarget.style.borderColor = '#3b82f6';
+                e.currentTarget.style.color = '#3b82f6';
+              }
+            }}
+          >
+            Applications →
+          </h4>
           <div style={{ 
             background: 'rgba(15, 23, 42, 0.8)',
             padding: '12px',
@@ -370,12 +171,29 @@ const InfrastructureDetailPanel: React.FC<{
                 paddingBottom: index < applications.length - 1 ? '12px' : '0',
                 borderBottom: index < applications.length - 1 ? '1px solid #334155' : 'none'
               }}>
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '8px',
-                  marginBottom: '6px'
-                }}>
+                <div 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '8px',
+                    marginBottom: '6px',
+                    cursor: onApplicationClick ? 'pointer' : 'default',
+                    padding: '4px',
+                    borderRadius: '4px',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onClick={() => onApplicationClick?.(app.name, 'service')}
+                  onMouseEnter={(e) => {
+                    if (onApplicationClick) {
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (onApplicationClick) {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }
+                  }}
+                >
                   <div style={{
                     width: '8px',
                     height: '8px',
@@ -478,182 +296,854 @@ const InfrastructureDetailPanel: React.FC<{
         </button>
       </div>
     </div>
+    </>
   );
 };
 
-// ========== Layout yardımcıları ==========
-// Basit grid yerleşim: parent içinde satır/sütun
-function gridLayout(
-  count: number,
-  startX: number,
-  startY: number,
-  cols: number,
-  gapX = 140,
-  gapY = 140
-) {
-  const pos: { x: number; y: number }[] = [];
-  for (let i = 0; i < count; i++) {
-    const r = Math.floor(i / cols);
-    const c = i % cols;
-    pos.push({ x: startX + c * gapX, y: startY + r * gapY });
-  }
-  return pos;
-}
+const ApplicationDetailPanel: React.FC<{ 
+  host: Host | null;
+  onApplicationClick?: (appName: string, targetLayer?: string) => void;
+}> = ({ host, onApplicationClick }) => {
+  if (!host) return null;
 
-// ID yardımcıları
-const idHost = (h: Host) => h.id;
-// Uygulama/servis/operasyon id yardımcıları bu layer'da kullanılmıyor (yalın altyapı görünümü)
+  // Application yapısı JSON'daki alanlara göre okunur
+  const name = (host as any)?.name;
+  const platform = (host as any)?.platform;
+  const version = (host as any)?.version;
+  const status = (host as any)?.status;
+  const services = (host as any)?.services || [];
+
+  return (
+    <>
+    <div
+      style={{
+        position: 'absolute',
+        width: '350px',
+        background: 'rgba(30, 41, 59, 0.95)',
+        border: '1px solid #334155',
+        borderRadius: '12px',
+        padding: '20px',
+        color: '#ffffff',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        backdropFilter: 'blur(10px)',
+        maxHeight: '700px',
+        zIndex: 1000
+      }}
+    >
+      {/* Header */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        marginBottom: '20px',
+        paddingBottom: '12px',
+        borderBottom: '1px solid #334155'
+      }}>
+        <div>
+          <h3 style={{ 
+            color: '#ffffff', 
+            margin: 0, 
+            fontSize: '16px',
+            fontWeight: 'bold'
+          }}>
+            {name}
+          </h3>
+          <div style={{
+            display: 'flex',
+            gap: 8,
+            marginTop: 6,
+            alignItems: 'center'
+          }}>
+            <div style={{
+              background: '#3b82f6',
+              color: '#ffffff',
+              padding: '2px 8px',
+              borderRadius: '4px',
+              fontSize: '10px',
+              fontWeight: 600
+            }}>
+              APPLICATION
+            </div>
+            {platform && (
+              <div style={{
+                background: '#64748b',
+                color: '#ffffff',
+                padding: '2px 6px',
+                borderRadius: '3px',
+                fontSize: '10px'
+              }}>
+                {platform}
+              </div>
+            )}
+            {version && (
+              <div style={{
+                background: '#334155',
+                color: '#e2e8f0',
+                padding: '2px 6px',
+                borderRadius: '3px',
+                fontSize: '10px'
+              }}>
+                v{version}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Status */}
+      <div style={{ 
+        marginBottom: '20px',
+        padding: '12px',
+        background: status === 'healthy' || status === 'ok' ? 'rgba(16, 185, 129, 0.1)' : 
+                   status === 'warning' || status === 'degraded' ? 'rgba(245, 158, 11, 0.1)' : 
+                   'rgba(239, 68, 68, 0.1)',
+        border: `1px solid ${status === 'healthy' || status === 'ok' ? '#10b981' : 
+                           status === 'warning' || status === 'degraded' ? '#f59e0b' : '#ef4444'}`,
+        borderRadius: '8px'
+      }}>
+        <div style={{ 
+          color: status === 'healthy' || status === 'ok' ? '#10b981' : 
+                 status === 'warning' || status === 'degraded' ? '#f59e0b' : '#ef4444',
+          fontWeight: 'bold',
+          fontSize: '14px',
+          marginBottom: '4px'
+        }}>
+          {(status?.toUpperCase() || 'UNKNOWN')}
+        </div>
+        <div style={{ color: '#94a3b8', fontSize: '12px' }}>
+          Application status monitoring active
+        </div>
+      </div>
+
+      {/* Services */}
+      {services && services.length > 0 && (
+        <div style={{ marginBottom: '16px' }}>
+          <h4 
+            style={{ 
+              color: '#3b82f6', 
+              margin: '0 0 12px 0', 
+              fontSize: '14px',
+              cursor: onApplicationClick ? 'pointer' : 'default',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              transition: 'all 0.2s ease',
+              display: 'inline-block',
+              border: onApplicationClick ? '1px solid #3b82f6' : '1px solid transparent',
+              background: onApplicationClick ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+              fontWeight: '600'
+            }}
+            onClick={() => {
+              onApplicationClick?.(name, 'service');
+            }}
+            onMouseEnter={(e) => {
+              if (onApplicationClick) {
+                e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
+                e.currentTarget.style.borderColor = '#60a5fa';
+                e.currentTarget.style.color = '#60a5fa';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (onApplicationClick) {
+                e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                e.currentTarget.style.borderColor = '#3b82f6';
+                e.currentTarget.style.color = '#3b82f6';
+              }
+            }}
+          >
+            Services →
+          </h4>
+          <div style={{ 
+            background: 'rgba(15, 23, 42, 0.8)',
+            padding: '12px',
+            borderRadius: '8px',
+            maxHeight: '400px',
+            overflowY: 'auto'
+          }}>
+            {services.map((svc: any, idx: number) => (
+              <div key={idx} style={{
+                borderBottom: idx < services.length - 1 ? '1px solid #334155' : 'none',
+                paddingBottom: idx < services.length - 1 ? 12 : 0,
+                marginBottom: idx < services.length - 1 ? 12 : 0
+              }}>
+                <div 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between',
+                    cursor: onApplicationClick ? 'pointer' : 'default',
+                    padding: '4px 6px',
+                    borderRadius: 6,
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onClick={() => onApplicationClick?.(svc.name, 'operation')}
+                  onMouseEnter={(e) => {
+                    if (onApplicationClick) {
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.06)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (onApplicationClick) {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }
+                  }}
+                >
+                  <div style={{ color: '#e5e7eb', fontWeight: 600 }}>{svc.name}</div>
+                  <div style={{
+                    background: svc.data?.status === 'healthy' ? 'rgba(16,185,129,0.15)' : svc.data?.status === 'warning' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
+                    border: `1px solid ${svc.data?.status === 'healthy' ? '#10b981' : svc.data?.status === 'warning' ? '#f59e0b' : '#ef4444'}`,
+                    color: svc.data?.status === 'healthy' ? '#10b981' : svc.data?.status === 'warning' ? '#f59e0b' : '#ef4444',
+                    padding: '2px 8px',
+                    borderRadius: 6,
+                    fontSize: 10
+                  }}>{(svc.data?.status || 'unknown').toUpperCase()}</div>
+                </div>
+                <div style={{ color: '#94a3b8', fontSize: 12, marginTop: 6 }}>
+                  <div><strong>Average Latency:</strong> {svc.data?.metrics?.avg ?? 'n/a'}</div>
+                  <div><strong>Min Latency:</strong> {svc.data?.metrics?.min ?? 'n/a'}</div>
+                  <div><strong>Max Latency:</strong> {svc.data?.metrics?.max ?? 'n/a'}</div>
+                  {svc.dependencies && Array.isArray(svc.dependencies) && svc.dependencies.length > 0 && (
+                    <div style={{ marginTop: 6 }}>
+                      <strong>Dependencies:</strong>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                        {svc.dependencies.map((dep: string, dIdx: number) => (
+                          <span key={dIdx} style={{
+                            background: '#334155',
+                            color: '#e2e8f0',
+                            border: '1px solid #475569',
+                            borderRadius: 6,
+                            padding: '2px 6px',
+                            fontSize: 10
+                          }}>{dep}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+    </>
+  );
+};
+
+const ServiceDetailPanel: React.FC<{ 
+  host: any | null;
+  onApplicationClick?: (appName: string, targetLayer?: string) => void;
+}> = ({ host, onApplicationClick }) => {
+  if (!host) return null;
+
+  const name = host.name;
+  const type = host.data.type;
+  const operations = host.operations || [];
+  // const targets: Array<{ id: string; label?: string }> = host.targets || [];
+  const status = host.data.status;
+  const zone = host.data.zone;
+  const metricsAvg = host.data.metrics.avg;
+  const metricsMin = host.data.metrics.min;
+  const metricsMax = host.data.metrics.max;
+
+  return (
+    <>
+    <div
+      style={{
+        position: 'absolute',
+        width: '350px',
+        background: 'rgba(30, 41, 59, 0.95)',
+        border: '1px solid #334155',
+        borderRadius: '12px',
+        padding: '20px',
+        color: '#ffffff',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        backdropFilter: 'blur(10px)',
+        maxHeight: '700px',
+        zIndex: 1000
+      }}
+    >
+      
+      {/* Header */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        marginBottom: '20px',
+        paddingBottom: '12px',
+        borderBottom: '1px solid #334155'
+      }}>
+        <div>
+          <h3 style={{ 
+            color: '#ffffff', 
+            margin: 0, 
+            fontSize: '16px',
+            fontWeight: 'bold'
+          }}>
+            {name}
+          </h3>
+          <div style={{
+            background: '#64748b',
+            color: '#ffffff',
+            padding: '2px 8px',
+            borderRadius: '4px',
+            fontSize: '10px',
+            marginTop: '4px',
+            display: 'inline-block'
+          }}>
+            SERVICE
+          </div>
+        </div>
+      </div>
+
+      {/* System Resources */}
+      <div style={{ marginBottom: '16px', display: 'flex', gap: '16px' }}>
+        <div style={{ flex: 1 }}>
+          <h4 style={{ color: '#ffffff', margin: '0 0 8px 0', fontSize: '14px' }}>Service Info</h4>
+          <div style={{ color: '#94a3b8', fontSize: '12px', lineHeight: '1.4' }}>
+            <div><strong>Name:</strong> {name || 'N/A'}</div>
+            <div><strong>Zone:</strong> {zone || 'N/A'}</div>
+            <div><strong>Type:</strong> {type || 'N/A'}</div>
+          </div>
+        </div>
+        <div style={{ flex: 1 }}>
+          <h4 style={{ color: '#ffffff', margin: '0 0 8px 0', fontSize: '14px' }}>Metrics</h4>
+          <div style={{ color: '#94a3b8', fontSize: '12px', lineHeight: '1.4' }}>
+            <div><strong>Avg Lat:</strong> {metricsAvg || 'N/A'}</div>
+            <div><strong>Min Lat:</strong> {metricsMin || 'N/A'}</div>
+            <div><strong>Max Lat:</strong> {metricsMax || 'N/A'}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Status */}
+      <div style={{ 
+        marginBottom: '20px',
+        padding: '12px',
+        background: status === 'healthy' ? 'rgba(16, 185, 129, 0.1)' : 
+                   status === 'warning' ? 'rgba(245, 158, 11, 0.1)' : 
+                   'rgba(239, 68, 68, 0.1)',
+        border: `1px solid ${status === 'healthy' ? '#10b981' : 
+                           status === 'warning' ? '#f59e0b' : '#ef4444'}`,
+        borderRadius: '8px'
+      }}>
+        <div style={{ 
+          color: status === 'healthy' ? '#10b981' : 
+                 status === 'warning' ? '#f59e0b' : '#ef4444',
+          fontWeight: 'bold',
+          fontSize: '14px',
+          marginBottom: '4px'
+        }}>
+          {status?.toUpperCase() || 'UNKNOWN'}
+        </div>
+        <div style={{ color: '#94a3b8', fontSize: '12px' }}>
+          System status monitoring active
+        </div>
+      </div>
+
+      {/* operations */}
+      {operations && operations.length > 0 && (
+        <div style={{ marginBottom: '20px' }}>
+          <h4 
+            style={{ 
+              color: '#3b82f6', 
+              margin: '0 0 12px 0', 
+              fontSize: '14px',
+              cursor: onApplicationClick ? 'pointer' : 'default',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              transition: 'all 0.2s ease',
+              display: 'inline-block',
+              border: onApplicationClick ? '1px solid #3b82f6' : '1px solid transparent',
+              background: onApplicationClick ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+              fontWeight: '600'
+            }}
+            onClick={() => {
+              onApplicationClick?.(name, 'operation');
+            }}
+            onMouseEnter={(e) => {
+              if (onApplicationClick) {
+                e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
+                e.currentTarget.style.borderColor = '#60a5fa';
+                e.currentTarget.style.color = '#60a5fa';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (onApplicationClick) {
+                e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                e.currentTarget.style.borderColor = '#3b82f6';
+                e.currentTarget.style.color = '#3b82f6';
+              }
+            }}
+          >
+            Operations →
+          </h4>
+          <div style={{ 
+            background: 'rgba(15, 23, 42, 0.8)',
+            padding: '12px',
+            borderRadius: '8px',
+            maxHeight: '200px',
+            overflowY: 'auto'
+          }}>
+            {operations.map((op: any, index: number) => (
+              <div key={index} style={{ 
+                marginBottom: index < operations.length - 1 ? '12px' : '0',
+                paddingBottom: index < operations.length - 1 ? '12px' : '0',
+                borderBottom: index < operations.length - 1 ? '1px solid #334155' : 'none'
+              }}>
+                <div 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '8px',
+                    marginBottom: '6px',
+                    cursor: onApplicationClick ? 'pointer' : 'default',
+                    padding: '4px',
+                    borderRadius: '4px',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onClick={() => onApplicationClick?.(op.name, 'operation')}
+                  onMouseEnter={(e) => {
+                    if (onApplicationClick) {
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (onApplicationClick) {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }
+                  }}
+                >
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: op.method === 'POST' ? '#f59e0b' : 
+                               op.method === 'GET' ? '#10b981' : 
+                               op.method === 'PUT' ? '#3b82f6' : '#64748b'
+                  }} />
+                  <span style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '13px' }}>
+                  {op.name} - {op.method}
+                  </span>
+                  <span style={{
+                    background: '#64748b',
+                    color: '#ffffff',
+                    padding: '2px 6px',
+                    borderRadius: '3px',
+                    fontSize: '10px'
+                  }}>
+                    {op.path}
+                  </span>
+                </div>
+                <div style={{ color: '#94a3b8', fontSize: '12px', lineHeight: '1.4', display: 'flex', gap: '12px' }}>
+                  <div><strong>Avg Lat:</strong> {op.avg_latency_ms || 'N/A'}ms</div>
+                  <div><strong>P95 Lat:</strong> {op.p95_ms || 'N/A'}ms</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+
+
+      {/* Action Buttons */}
+      <div style={{ 
+        display: 'flex', 
+        gap: '8px',
+        background: 'rgba(15, 23, 42, 0.8)',
+        padding: '12px',
+        borderRadius: '8px'
+      }}>
+        <button style={{
+          flex: 1,
+          background: 'rgba(30, 41, 59, 0.8)',
+          border: '1px solid #334155',
+          borderRadius: '6px',
+          padding: '8px 12px',
+          color: '#ffffff',
+          fontSize: '12px',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '6px'
+        }}>
+          📊 Logs
+        </button>
+        <button style={{
+          flex: 1,
+          background: 'rgba(30, 41, 59, 0.8)',
+          border: '1px solid #334155',
+          borderRadius: '6px',
+          padding: '8px 12px',
+          color: '#ffffff',
+          fontSize: '12px',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '6px'
+        }}>
+          📈 Metrics
+        </button>
+        <button style={{
+          flex: 1,
+          background: 'rgba(30, 41, 59, 0.8)',
+          border: '1px solid #334155',
+          borderRadius: '6px',
+          padding: '8px 12px',
+          color: '#ffffff',
+          fontSize: '12px',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '6px'
+        }}>
+          🔍 Traces
+        </button>
+      </div>
+    </div>
+    </>
+  );
+};
+
+const OperationDetailPanel: React.FC<{ 
+  host: Host | null;
+  onApplicationClick?: (appName: string, targetLayer?: string) => void;
+}> = ({ host }) => {
+  if (!host) return null;
+
+  const name = (host as any)?.name;
+  const method = (host as any)?.method;
+  const path = (host as any)?.path;
+  const avgLatency = (host as any)?.avg_latency_ms;
+  const p95Latency = (host as any)?.p95_ms;
+  const status = (host as any)?.status;
+
+  return (
+    <>
+    <div
+      style={{
+        position: 'absolute',
+        width: '350px',
+        background: 'rgba(30, 41, 59, 0.95)',
+        border: '1px solid #334155',
+        borderRadius: '12px',
+        padding: '20px',
+        color: '#ffffff',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        backdropFilter: 'blur(10px)',
+        maxHeight: '700px',
+        zIndex: 1000
+      }}
+    >
+      {/* Header */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        marginBottom: '20px',
+        paddingBottom: '12px',
+        borderBottom: '1px solid #334155'
+      }}>
+        <div>
+          <h3 style={{ 
+            color: '#ffffff', 
+            margin: 0, 
+            fontSize: '16px',
+            fontWeight: 'bold'
+          }}>
+            {name}
+          </h3>
+          <div style={{
+            display: 'flex',
+            gap: 8,
+            marginTop: 6,
+            alignItems: 'center'
+          }}>
+            <div style={{
+              background: '#f59e0b',
+              color: '#0b1220',
+              padding: '2px 8px',
+              borderRadius: '4px',
+              fontSize: '10px',
+              fontWeight: 700
+            }}>
+              OPERATION
+            </div>
+            {typeof method !== 'undefined' && (
+              <div style={{
+                background: '#334155',
+                color: '#e2e8f0',
+                padding: '2px 6px',
+                borderRadius: '3px',
+                fontSize: '10px'
+              }}>
+                {method}
+              </div>
+            )}
+            {typeof status !== 'undefined' && (
+              <div style={{
+                background: status === 'ok' ? 'rgba(16,185,129,0.15)' : status === 'warning' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
+                border: `1px solid ${status === 'ok' ? '#10b981' : status === 'warning' ? '#f59e0b' : '#ef4444'}`,
+                color: status === 'ok' ? '#10b981' : status === 'warning' ? '#f59e0b' : '#ef4444',
+                padding: '2px 8px',
+                borderRadius: 6,
+                fontSize: 10
+              }}>{(status || 'unknown').toUpperCase()}</div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Operation Info */}
+      <div style={{ color: '#94a3b8', fontSize: 12, lineHeight: 1.6 }}>
+        <div><strong>Path:</strong> {path ?? '-'}</div>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <span><strong>Avg:</strong> {avgLatency ?? 0}ms</span>
+          <span><strong>P95:</strong> {p95Latency ?? 0}ms</span>
+        </div>
+      </div>
+    </div>
+    </>
+  );
+};
 
 // ========== Ana İç Bileşen ==========
-interface InfraLayerProps {
+interface MapLayerProps {
   selectedNodeId?: string;
-  onNodeClick?: (nodeId: string, nodeType: string) => void;
+  onNodeClick?: (nodeId: string, nodeType: string, newLayer?: string) => void;
+  onApplicationClick?: (appName: string, targetLayer?: string) => void;
+  setDetailPanelContent?: (content: React.ReactNode) => void;
+  data?: any;
+  groupKeyName?: string;
+  hostKeyName?: string;
+  layer?: string;
 }
 
-const InfraInner = forwardRef<any, InfraLayerProps>(({ selectedNodeId, onNodeClick }, ref) => {
-  // İlk açılışta localStorage'dan veri al, yoksa JSON'dan al
-  const getInitialData = () => {
-    const stored = localStorage.getItem('infra-map-data');
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch (e) {
-        console.warn('localStorage data corrupted, using JSON fallback');
-        return infra;
-      }
+// Data processing helper function
+const processLayerData = (data: any, layer: string) => {
+  let groups: Array<{
+    name: string;
+    items: any[];
+    groupPosition: CustomPosition | undefined;
+    groupSize: CustomSize | undefined;
+  }> = [];
+
+  // console.log('processLayerData called with layer:', layer, 'data:', data);
+
+  if (layer === 'infra') {
+    if (!data?.regions || !Array.isArray(data.regions)) {
+      console.error('Invalid data.regions:', data?.regions);
+      return { groups: [], groupsRef: null };
     }
-    return infra;
-  };
-
-  const raw: any = getInitialData();
-  // Açılış flag'i: true → otomatik hesapla, false → JSON pozisyonlarını kullan
-  const USE_AUTO_LAYOUT = false;
-  const regionsRef = useRef<any>(null);
-
-  // Region bazlı veri: V2 (regions) varsa onu kullan, yoksa V1'den inşa et
-  let regions: Array<[string, Host[]]> = [];
-  if (Array.isArray(raw?.regions)) {
-    const v2 = raw as InfraJSONV2;
-    regions = v2.regions.map((r) => [r.name, r.infrastructures] as [string, Host[]]);
-    regionsRef.current = v2.regions; // canlı kopya
-  } else {
-    const v1 = raw as InfraJSON;
-    const hosts = v1.infrastructure || [];
-    regions = Array.from(
-      hosts.reduce((m, h) => m.set(h.region || 'unknown', [...(m.get(h.region || 'unknown') || []), h]), new Map<string, Host[]>())
-    );
+    groups = data.regions.map((r: any) => ({
+      name: r.name,
+      items: r.infrastructures,
+      groupPosition: r.groupPosition,
+      groupSize: r.groupSize
+    }));
+  } else if (layer === 'application') {
+    if (!data?.regions || !Array.isArray(data.regions)) {
+      console.error('Invalid data.regions for application layer:', data?.regions);
+      return { groups: [], groupsRef: null };
+    }
+    
+    data.regions.forEach((region: any) => {
+      region.infrastructures.forEach((infra: any) => {
+        if (infra.applications) {
+          groups.push({
+            name: infra.name,
+            items: infra.applications,
+            groupPosition: infra.groupPosition,
+            groupSize: infra.groupSize
+          });
+        }
+      });
+    });
+  } else if (layer === 'service') {
+    if (!data?.regions || !Array.isArray(data.regions)) {
+      console.error('Invalid data.regions for service layer:', data?.regions);
+      return { groups: [], groupsRef: null };
+    }
+    
+    data.regions.forEach((region: any) => {
+      region.infrastructures.forEach((infra: any) => {
+        infra.applications.forEach((app: any) => {
+          if (app.services) {
+            groups.push({
+              name: app.name,
+              items: app.services,
+              groupPosition: app.groupPosition,
+              groupSize: app.groupSize
+            });
+          }
+        });
+      });
+    });
+  } else if (layer === 'operation') {
+    if (!data?.regions || !Array.isArray(data.regions)) {
+      console.error('Invalid data.regions for operation layer:', data?.regions);
+      return { groups: [], groupsRef: null };
+    }
+    
+    data.regions.forEach((region: any) => {
+      region.infrastructures.forEach((infra: any) => {
+        infra.applications.forEach((app: any) => {
+          app.services.forEach((service: any) => {
+            if (service.operations) {
+              groups.push({
+                name: service.name,
+                items: service.operations,
+                groupPosition: service.groupPosition,
+                groupSize: service.groupSize
+              });
+            }
+          });
+        });
+      });
+    });
   }
-  // Region yerleşimi manuel (üst üste gelmeyi önlemek için sıra ile yerleştiriyoruz)
 
-  // Node & Edge üretimi (yalnızca region ve host blokları, edges yok)
+  let groupsRef: any = null;
+  groupsRef = groups;
+  
+  // console.log('processLayerData returning:', { groups, groupsRef });
+  return { groups, groupsRef };
+};
+
+const MapInner = forwardRef<any, MapLayerProps>(({ selectedNodeId, onNodeClick, onApplicationClick, setDetailPanelContent, data, layer }, ref) => {
+  const groupsRef = useRef<any>(null);
+  const [processedData, setProcessedData] = useState<{ 
+    groups: Array<{
+      name: string;
+      items: any[];
+      groupPosition: CustomPosition | undefined;
+      groupSize: CustomSize | undefined;
+    }>, 
+    groupsRef: any 
+  }>(() => 
+    processLayerData(data, layer || 'infra')
+  );
+  
+  // Process layer data only when layer changes
+  useEffect(() => {
+    // console.log('Layer changed to:', layer, '- reprocessing data');
+    const newProcessedData = processLayerData(data, layer || 'infra');
+    setProcessedData(newProcessedData);
+    groupsRef.current = newProcessedData.groupsRef;
+  }, [layer]); // Only depend on layer
+  
+  const { groups } = processedData;  
   const { initialNodes, initialEdges } = useMemo(() => {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
 
-    // Akış yerleşim parametreleri
-    const outerMarginX = 60;
-    const outerMarginY = 60;
-    const regionGapX = 40;
-    const regionGapY = 60;
-    const maxCols = 3; // aynı satırda en fazla 3 region
-    let cursorX = outerMarginX;
-    let cursorY = outerMarginY;
-    let colIndex = 0;
-    let rowMaxHeight = 0;
+    // Debug: Check if groups is valid
+    if (!groups || !Array.isArray(groups)) {
+      console.error('Groups is not valid:', groups);
+      return { initialNodes: nodes, initialEdges: [] };
+    }
 
-    regions.forEach(([regionName, regionHosts]) => {
-      const groupId = `region::${regionName}`;
+    groups.forEach((group) => {
+      const { name: groupName, items: groupItems, groupPosition: groupPos, groupSize: groupSize } = group;
+      const groupId = `group::${groupName}`;
       const startX = 24;
       const startY = 24;
-      const cellGapX = 220;
-      const cellGapY = 280;
-      const blockW = 140;
-      const blockH = 180;
 
-      if (USE_AUTO_LAYOUT) {
-        // Dinamik yerleşim: en fazla 3 sütun, satırlar otomatik
-        const cols = Math.min(3, Math.max(1, regionHosts.length));
-        const rows = Math.max(1, Math.ceil(regionHosts.length / cols));
-
-        const groupW = startX * 2 + cols * blockW + (cols - 1) * (cellGapX - blockW);
-        const groupH = startY * 2 + rows * blockH + (rows - 1) * (cellGapY - blockH) + 60;
-
-        if (colIndex >= maxCols) {
-          colIndex = 0;
-          cursorX = outerMarginX;
-          cursorY += rowMaxHeight + regionGapY;
-          rowMaxHeight = 0;
-        }
-
-        nodes.push({
-          id: groupId,
-          type: 'group',
-          position: { x: cursorX, y: cursorY },
-          data: { label: regionName, w: groupW, h: groupH, accent: '#6b7fa4' },
-          style: { background: 'transparent' }
-        } as any);
-
-        const itemPositions = gridLayout(regionHosts.length, startX, startY, cols, cellGapX, cellGapY);
-        regionHosts.forEach((h, hi) => {
-          nodes.push({
-            id: idHost(h),
-            type: 'iso',
-            position: itemPositions[hi],
-            data: {
-              label: h.name.split(' - ')[0],
-              sub: `${h.status ?? 'healthy'} ${h.cpu?.usage_pct ?? 0}%`,
-              accent: statusColor(h.status),
-              w: 120,
-              h: 160
-            },
-            parentNode: groupId,
-            extent: 'parent'
-          });
-        });
-
-        cursorX += groupW + regionGapX;
-        rowMaxHeight = Math.max(rowMaxHeight, groupH);
-        colIndex += 1;
-      } else {
-        // JSON'daki kaydedilmiş pozisyonları kullan
-        const regionPos = (raw.regions || []).find((r: any) => r.name === regionName)?.position || { x: cursorX, y: cursorY };
-        // Grupların genişliği/yüksekliği: host pozisyonlarının bounding box'ına göre
-        const hostPositions = regionHosts.map((h) => h.position || { x: startX, y: startY });
-        const maxX = Math.max(startX, ...hostPositions.map((p) => p.x));
-        const maxY = Math.max(startY, ...hostPositions.map((p) => p.y));
-        const groupW = startX * 2 + maxX + blockW - startX; // startX'i iki kez eklememek için
-        const groupH = startY * 2 + maxY + blockH + 60 - startY; // startY'i iki kez eklememek için
-
+      // Debug: Check if groupItems is valid
+      if (!groupItems || !Array.isArray(groupItems)) {
+        console.error('GroupItems is not valid for group:', groupName, groupItems);
+        return;
+      }
       nodes.push({
           id: groupId,
           type: 'group',
-          position: regionPos,
-          data: { label: regionName, w: groupW, h: groupH, accent: '#6b7fa4' },
+          position: groupPos || { x: 0, y: 0 },
+          data: { 
+            label: groupName, 
+            groupSize: groupSize || { width: 560, height: 300 },
+            accent: '#6b7fa4' 
+          },
           style: { background: 'transparent' }
         } as any);
 
-        regionHosts.forEach((h) => {
-          const pos = h.position || { x: startX, y: startY };
-          nodes.push({
-            id: idHost(h),
-            type: 'iso',
-            position: pos,
-            data: {
-              label: h.name.split(' - ')[0],
-              sub: `${h.status ?? 'healthy'} ${h.cpu?.usage_pct ?? 0}%`,
-              accent: statusColor(h.status),
+        groupItems.forEach((item) => {
+          const pos = item.position || { x: startX, y: startY };
+          let nodeData: any = {};
+          
+          if (layer === 'infra') {
+            // Infrastructure items (hosts)
+            nodeData = {
+              label: item.name.split(' - ')[0],
+              sub: `${item.status ?? 'healthy'} ${item.cpu?.usage_pct ?? 0}%`,
+              accent: statusColor(item.status),
               w: 120,
               h: 160
+            };
+          } else if (layer === 'application') {
+            // Application items
+            nodeData = {
+              label: item.name,
+              sub: `${item.platform} ${item.version}`,
+              accent: item.platform === 'java' ? '#f59e0b' : 
+                      item.platform === 'go' ? '#10b981' : 
+                      item.platform === 'node' ? '#3b82f6' : '#64748b',
+              w: 120,
+              h: 160
+            };
+          } else if (layer === 'service') {
+            // Service items
+            nodeData = {
+              label: item.name,
+              sub: `${item.kind}:${item.port} (${item.health})`,
+              accent: item.health === 'healthy' ? '#10b981' : 
+                      item.health === 'warning' ? '#f59e0b' : '#ef4444',
+              w: 120,
+              h: 160
+            };
+          } else if (layer === 'operation') {
+            // Operation items
+            nodeData = {
+              label: item.name,
+              sub: `${item.method} ${item.avg_latency_ms ?? 0}ms`,
+              accent: item.status === 'ok' ? '#10b981' : 
+                      item.status === 'warning' ? '#f59e0b' : '#ef4444',
+              w: 120,
+              h: 160
+            };
+          }
+          
+          nodes.push({
+            id: item.id || item.name,
+            type: layer === 'infra' ? 'isoInfra' : layer === 'application' ? 'isoApp' : layer === 'service' ? 'isoSvc' : 'isoOp',
+            position: pos,
+            data: {
+              ...nodeData,
+              id: item.id || item.name,
+              ...item
             },
             parentNode: groupId,
             extent: 'parent'
           });
+
+
+          item.targets?.forEach((target: any) => {
+            edges.push({
+              id: `${item.id}-${target.id}`,
+              source: item.id,
+              target: target.id,
+              label: target.label,
+              type: 'smoothstep', 
+              animated: true
+            });
+          });
         });
-      }
-    });
+      });
 
     return { initialNodes: nodes, initialEdges: edges };
-  }, [regions]);
+  }, [groups]);
 
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
@@ -661,16 +1151,42 @@ const InfraInner = forwardRef<any, InfraLayerProps>(({ selectedNodeId, onNodeCli
 
   // nodeTypes'i memoize et
   const nodeTypes = useMemo(() => ({
-    iso: IsoBlockNode,
+    isoInfra: InfraIsoBlockNode,
+    isoApp: ApplicationIsoBlockNode,
+    isoSvc: ServiceIsoBlockNode,
+    isoOp: OperationIsoBlockNode,
     group: GroupNode
   }), []);
 
-  // Seçili node için host bilgisini bul
+  // Seçili node için host bilgisini bul ve detail panel'i güncelle
   const selectedHost = useMemo(() => {
-    if (!selectedNodeId) return undefined;
-    const allHosts = regions.flatMap(([, hosts]) => hosts);
-    return allHosts.find(host => host.id === selectedNodeId || host.name === selectedNodeId);
-  }, [selectedNodeId, regions]);
+    if (!selectedNodeId) return null;
+    const allItems = groups.flatMap((group) => group.items);
+    return allItems.find(item => (item.id || item.name) === selectedNodeId);
+  }, [selectedNodeId, groups]);
+
+  // selectedHost değiştiğinde detail panel'i güncelle
+  useEffect(() => {
+    if (selectedHost && setDetailPanelContent) {
+      setDetailPanelContent(
+        (() => {
+          if (layer === 'infra') {
+            return <InfrastructureDetailPanel host={selectedHost} onApplicationClick={onApplicationClick}/>;
+          } else if (layer === 'application') {
+            return <ApplicationDetailPanel host={selectedHost} onApplicationClick={onApplicationClick}/>;
+          } else if (layer === 'service') {
+            return <ServiceDetailPanel host={selectedHost} onApplicationClick={onApplicationClick}/>;
+          } else if (layer === 'operation') {
+            return <OperationDetailPanel host={selectedHost} onApplicationClick={onApplicationClick}/>;
+          }
+          return null;
+        })()
+      );
+    } else if (setDetailPanelContent) {
+      setDetailPanelContent(null);
+    }
+  }, [selectedHost, setDetailPanelContent, onApplicationClick]);
+
 
   // Zoom to node fonksiyonu
   const zoomToNode = useCallback((nodeId: string) => {
@@ -716,97 +1232,185 @@ const InfraInner = forwardRef<any, InfraLayerProps>(({ selectedNodeId, onNodeCli
     }
   }, [selectedNodeId, zoomToNode]);
 
-  // Kaydet: güncel regionsRef içeriğini localStorage'a yaz
   const handleSaveStorage = useCallback(() => {
-    if (regionsRef.current) {
-      const base = { ...(raw || {}) } as any;
-      base.regions = regionsRef.current;
-      delete base.infrastructure;
-      localStorage.setItem('infra-map-data', JSON.stringify(base));
-      // console.log('Data saved to localStorage');
+    if (groupsRef.current) {
+      const base = { ...(data || {}) } as any;
+      
+      // Layer'a göre pozisyon bilgilerini güncelle
+      if (layer === 'infra') {
+        // Group pozisyonlarını güncelle
+        groupsRef.current.forEach((group: any) => {
+          const region = base.regions.find((r: any) => r.name === group.name);
+          if (region) {
+            region.groupPosition = group.groupPosition;
+          }
+        });
+        
+        // Item pozisyonlarını güncelle
+        groupsRef.current.forEach((group: any) => {
+          const region = base.regions.find((r: any) => r.name === group.name);
+          if (region && region.infrastructures) {
+            group.items.forEach((item: any) => {
+              const infrastructure = region.infrastructures.find((infra: any) => infra.name === item.name);
+              if (infrastructure) {
+                infrastructure.position = item.position;
+              }
+            });
+          }
+        });
+      } else if (layer === 'application') {
+        // Group pozisyonlarını güncelle (infrastructure level)
+        groupsRef.current.forEach((group: any) => {
+          base.regions.forEach((region: any) => {
+            if (region.infrastructures) {
+              const infrastructure = region.infrastructures.find((infra: any) => infra.name === group.name);
+              if (infrastructure) {
+                infrastructure.groupPosition = group.groupPosition;
+              }
+            }
+          });
+        });
+        
+        // Item pozisyonlarını güncelle (application level)
+        groupsRef.current.forEach((group: any) => {
+          base.regions.forEach((region: any) => {
+            if (region.infrastructures) {
+              const infrastructure = region.infrastructures.find((infra: any) => infra.name === group.name);
+              if (infrastructure && infrastructure.applications) {
+                group.items.forEach((item: any) => {
+                  const application = infrastructure.applications.find((app: any) => app.name === item.name);
+                  if (application) {
+                    application.position = item.position;
+                  }
+                });
+              }
+            }
+          });
+        });
+      }
+      else if (layer === 'service') {
+        // Group pozisyonlarını güncelle
+        groupsRef.current.forEach((group: any) => {
+          base.regions.forEach((region: any) => {
+            region.infrastructures.forEach((infrastructure: any) => {
+              if (infrastructure.services) {
+                const service = infrastructure.services.find((service: any) => service.name === group.name);
+                if (service) {
+                  service.groupPosition = group.groupPosition;
+                }
+              }
+            });
+          });
+        });
+        
+        // Item pozisyonlarını güncelle (application level)
+        groupsRef.current.forEach((group: any) => {
+          base.regions.forEach((region: any) => {
+            region.infrastructures.forEach((infrastructure: any) => {
+              if (infrastructure.services) {
+                const service = infrastructure.services.find((service: any) => service.name === group.name);
+                if (service && service.operations) {
+                  group.items.forEach((item: any) => {
+                    const operation = service.operations.find((op: any) => op.name === item.name);
+                    if (operation) {
+                      operation.position = item.position;
+                    }
+                  });
+                }
+              }
+            });
+          });
+        });
+      }
+      else if (layer === 'operation') {
+        // Group pozisyonlarını güncelle
+        groupsRef.current.forEach((group: any) => {
+          base.regions.forEach((region: any) => {
+            region.infrastructures.forEach((infrastructure: any) => {
+              infrastructure.services.forEach((service: any) => {
+                if (service.operations) {
+                  const operation = service.operations.find((op: any) => op.name === group.name);
+                  if (operation) {
+                    operation.groupPosition = group.groupPosition;
+                  }
+                }
+              });
+            });
+          });
+        });
+      }
+      // console.log(`Saving data for layer ${layer}:`, base);
+      localStorage.setItem('map-data', JSON.stringify(base));
     }
-  }, [raw]);
+  }, [data, layer]);
 
-  // Reset: JSON'dan veri al ve localStorage'a yaz
-  const handleResetPositions = useCallback(() => {
-    const base = { ...(infra || {}) } as any;
-    localStorage.setItem('infra-map-data', JSON.stringify(base));
-    // console.log('Positions reset from JSON');
-    // Sayfayı yenile
-    window.location.reload();
-  }, []);
 
-  // Drag sırasında limitleri kontrol et (dragging anında)
   const onNodeDrag = useCallback((_: any, node: any) => {
-    if (!regionsRef.current || USE_AUTO_LAYOUT || node.type !== 'iso') return;
+    if (!groupsRef.current || !['isoInfra','isoApp','isoSvc','isoOp'].includes(node.type)) return;
     
     const parentId = node.parentNode;
-    const regionName = (parentId || '').replace('region::', '');
-    const region = regionsRef.current.find((r: any) => r.name === regionName);
-    if (!region) return;
+    const groupName = (parentId || '').replace(`group::`, '');
+    const group = groupsRef.current.find((r: any) => r.name === groupName);
+    if (!group) return;
 
     const startX = 24;
     const startY = 24;
     const blockW = 140;
     const blockH = 180;
     
-    // Region'ın gerçek genişliğini hesapla: tüm infra'ların pozisyonlarına göre
-    const allHostPositions = (region.infrastructures || []).map((h: any) => h.position || { x: startX, y: startY });
-    const maxHostX = Math.max(0, ...allHostPositions.map((p: any) => p.x));
-    const maxHostY = Math.max(0, ...allHostPositions.map((p: any) => p.y));
-    const groupW = startX * 2 + maxHostX + blockW;
-    const groupH = startY * 2 + maxHostY + blockH + 60;
+    const itemArray = group.items;
+    
+    const allItemPositions = itemArray.map((item: any) => item.position || { x: startX, y: startY });
+    const maxItemX = Math.max(0, ...allItemPositions.map((p: any) => p.x));
+    const maxItemY = Math.max(0, ...allItemPositions.map((p: any) => p.y));
+    const groupW = startX * 2 + maxItemX + blockW;
+    const groupH = startY * 2 + maxItemY + blockH + 60;
 
-    // Infra sayısına göre sütun sayısını hesapla (max 3)
-    const infraCount = (region.infrastructures || []).length;
-    const infraColumnCount = Math.min(infraCount, 3);
+    const itemCount = itemArray.length;
+    const itemColumnCount = Math.min(itemCount, 3);
 
-    // Clamp: region sınırları içinde kal - DRAGGING ANINDA
-    const maxX = Math.max(startX, groupW - blockW - startX) * infraColumnCount;
-    const maxY = Math.max(startY, groupH - blockH - startY) * infraColumnCount; 
+    const maxX = Math.max(startX, groupW - blockW - startX) * itemColumnCount;
+    const maxY = Math.max(startY, groupH - blockH - startY) * itemColumnCount; 
     const clampedX = Math.max(Math.max(node.position.x, startX), maxX);
     const clampedY = Math.max(Math.max(node.position.y, startY), maxY);
 
     // Pozisyonu güncelle
     node.position = { x: clampedX, y: clampedY };
-  }, [USE_AUTO_LAYOUT]);
+  }, []);
 
   // Drag stop: konumu localStorage'a yaz
   const onNodeDragStop = useCallback((_: any, node: any) => {
-    if (!regionsRef.current || USE_AUTO_LAYOUT) return;
+    if (!groupsRef.current) return;
     
-    // Region grubu
-    if (node.type === 'group' && node.id.startsWith('region::')) {
-      const name = node.id.replace('region::', '');
-      const region = regionsRef.current.find((r: any) => r.name === name);
-      if (region) {
-        region.position = { x: Math.round(node.position.x), y: Math.round(node.position.y) };
-        // console.log('Region position updated:', name, region.position);
+    // Group pozisyonu kaydetme
+    if (node.type === 'group' && node.id.startsWith(`group::`)) {
+      const name = node.id.replace(`group::`, '');
+      const group = groupsRef.current.find((g: any) => g.name === name);
+      if (group) {
+        group.groupPosition = { x: Math.round(node.position.x), y: Math.round(node.position.y) };
+        console.log(`Group ${name} position saved to groupPosition:`, group.groupPosition);
       }
-      // localStorage'a kaydet
       handleSaveStorage();
       return;
     }
     
-    // Infra: pozisyonu güncelle
+    // Item pozisyonu kaydetme
     const parentId = node.parentNode;
-    const regionName = (parentId || '').replace('region::', '');
-    const region = regionsRef.current.find((r: any) => r.name === regionName);
-    if (!region) {
+    const groupName = (parentId || '').replace(`group::`, '');
+    const group = groupsRef.current.find((g: any) => g.name === groupName);
+    if (!group) {
       handleSaveStorage();
       return;
     }
 
-    // Pozisyonu güncelle
-    const host = (region.infrastructures || []).find((h: any) => h.id === node.id);
-    if (host) {
-      host.position = { x: Math.round(node.position.x), y: Math.round(node.position.y) };
-      // console.log('Host position updated:', node.id, host.position);
+    const item = group.items.find((item: any) => (item.id || item.name) === node.id);
+    if (item) {
+      item.position = { x: Math.round(node.position.x), y: Math.round(node.position.y) };
+      // console.log(`Item ${node.id} position saved to position:`, item.position);
     }
     
-    // localStorage'a kaydet
     handleSaveStorage();
-  }, [USE_AUTO_LAYOUT, handleSaveStorage]);
+  }, [handleSaveStorage, layer]);
 
   return (
     <div style={{ width: '100%', height: '100%', background: '#060a13' }}>
@@ -821,20 +1425,12 @@ const InfraInner = forwardRef<any, InfraLayerProps>(({ selectedNodeId, onNodeCli
         nodesDraggable={true}
         nodesConnectable={false}
         onNodeClick={(_, node) => {
-          // console.log('Node clicked:', node);
-          // console.log('onNodeClick function:', onNodeClick);
-          // console.log('node.data:', node.data);
-          // console.log('node.id:', node.id);
-          // Node tıklandığında onNodeClick'i çağır
           const nodeId = node.data?.id || node.id;
           if (onNodeClick && nodeId) {
-            // console.log('Calling onNodeClick with:', nodeId);
-            onNodeClick(nodeId, 'infrastructure');
+            onNodeClick(nodeId, layer);
           }
         }}
         onPaneClick={(event) => {
-          //  console.log('Pane clicked:', event);
-          // Pane click'te clearSelection yap
           if (onNodeClick) {
             onNodeClick('', 'clear');
           }
@@ -850,39 +1446,6 @@ const InfraInner = forwardRef<any, InfraLayerProps>(({ selectedNodeId, onNodeCli
         <Background gap={24} color="#223047" />
         <MiniMap pannable zoomable nodeColor={() => '#6b7fa4'} maskColor="rgba(2,6,23,0.65)" />
         <Controls position="bottom-left" showInteractive={false} />
-        <Panel position="top-left" style={{ background: 'transparent' }}>
-          <div
-            style={{
-              padding: 10,
-              borderRadius: 10,
-              border: '1px solid rgba(148,163,184,0.18)',
-              background: cardBg('#1b2a44'),
-              color: '#cbd5e1',
-              fontSize: 12
-            }}
-          >
-            <div style={{ fontWeight: 700, marginBottom: 6 }}>Legend</div>
-            <div>
-              <span style={{ color: '#22c55e', marginRight: 8 }}>● healthy</span>
-              <span style={{ color: '#f59e0b', marginRight: 8 }}>● warning / degraded</span>
-              <span style={{ color: '#ef4444' }}>● error</span>
-            </div>
-            <div hidden style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <button onClick={handleSaveStorage} style={{ padding: '4px 8px', borderRadius: 6, background: '#111827', color: '#e5e7eb', border: '1px solid #1f2937' }}>Save to Storage</button>
-              <button onClick={handleResetPositions} style={{ padding: '4px 8px', borderRadius: 6, background: '#dc2626', color: '#e5e7eb', border: '1px solid #b91c1c' }}>Reset Positions</button>
-              <span style={{ opacity: 0.7, fontSize: 11 }}>autoLayout: {String(USE_AUTO_LAYOUT)}</span>
-            </div>
-          </div>
-        </Panel>
-
-        {/* Selected node detail panel - sol orta */}
-        {selectedHost && selectedHost?.id && (
-          <div style={{ position: 'absolute', left: 15, top: 100, maxHeight: '100px' }}>
-            <InfrastructureDetailPanel 
-              host={selectedHost} 
-            />
-          </div>
-        )}
       </ReactFlow>
       
     </div>
@@ -890,10 +1453,10 @@ const InfraInner = forwardRef<any, InfraLayerProps>(({ selectedNodeId, onNodeCli
 });
 
 // ---------- Dış sarmalayıcı ----------
-const InfraLayer = forwardRef<any, InfraLayerProps>((props, ref) => (
+const MapLayer = forwardRef<any, MapLayerProps>((props, ref) => (
   <ReactFlowProvider>
-    <InfraInner ref={ref} {...props} />
+    <MapInner ref={ref} {...props} />
   </ReactFlowProvider>
 ));
 
-export default InfraLayer;
+export default MapLayer;
