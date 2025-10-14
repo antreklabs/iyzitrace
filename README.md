@@ -301,8 +301,8 @@ git checkout dev
 # Pull latest changes including your merged PR
 git pull origin dev
 
-git branch -m feature/tracev2 merged-feature/tracev2
-git push origin merged-feature/tracev2
-git push origin --delete feature/tracev2
+git branch -m feature/your-feature-name merged-feature/your-feature-name
+git push origin merged-feature/your-feature-name
+git push origin --delete feature/your-feature-name
 
 ```

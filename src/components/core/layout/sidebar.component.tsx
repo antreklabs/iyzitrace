@@ -92,17 +92,17 @@ const Sidebar: React.FC = () => {
           { key: 'alerts', icon: <AlertOutlined style={{ fontSize: 16 }} />, label: 'Alerts' },
           { key: 'exceptions', icon: <RadarChartOutlined style={{ fontSize: 16 }} />, label: 'Exceptions' },
           { 
-            key: 'service-map', 
+            key: 'map-3d', 
             icon: <DeploymentUnitOutlined style={{ fontSize: 16 }} />, 
             label: 'Service Map'
           },
           { 
-            key: 'service-map-v2', 
+            key: 'service-map-3d', 
             icon: <DeploymentUnitOutlined style={{ fontSize: 16 }} />, 
             label: 'Service Map v2'
           },
           { 
-            key: 'service-map-3d', 
+            key: 'service-map-v4', 
             icon: <DeploymentUnitOutlined style={{ fontSize: 16 }} />, 
             label: 'Service Map v3'
           },

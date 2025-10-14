@@ -46,9 +46,7 @@ export LOCAL_DIR=/Users/gokhansipahi/projects/iyzitrace/iyzitrace
 rsync -avz --delete \
   --exclude 'node_modules' \
   --exclude '.git' \
-  --exclude 'dist' \
   --exclude 'docker-compose.yaml' \
-  --exclude 'package.json' \
   "$LOCAL_DIR/" "$SERVER_USER@$SERVER_HOST:$REMOTE_DIR/"
 ```
 

@@ -20,6 +20,18 @@
   "includes": [
     {
       "type": "page",
+      "name": "Service Map v4",
+      "path": "/a/iyzitrace-app/service-map-v4",
+      "addToNav": true
+    },
+    {
+      "type": "page",
+      "name": "Map 3D",
+      "path": "/a/iyzitrace-app/map-3d",
+      "addToNav": true
+    },
+    {
+      "type": "page",
       "name": "Infra Overview",
       "path": "/a/iyzitrace-app/landing",
       "addToNav": true,

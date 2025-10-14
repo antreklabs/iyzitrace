@@ -16,6 +16,7 @@ interface BaseContainerProps {
   id?: string | null;
   onFetchData: (pageState?: PageState | null) => Promise<any[]>;
   onExpandedRowRender: (record: any) => React.ReactNode;
+  showExpandableRowRender?: boolean;
   columns: any[];
   filterComponent?: React.ReactElement;
   datasourceType?: 'tempo' | 'loki';
@@ -28,6 +29,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   id,
   onFetchData,
   onExpandedRowRender,
+  showExpandableRowRender = true,
   columns,
   filterComponent,
   datasourceType = 'tempo',
@@ -142,7 +144,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
                 rowKey={(record: any) => record.id ?? record.key ?? record.text ?? record.name ?? JSON.stringify(record)}
                 dataSource={modelData}
                 columns={columns}
-                expandable={{
+                expandable={showExpandableRowRender ? {
                   expandedRowRender: onExpandedRowRender,
                   expandIcon: ({ expanded, onExpand, record }) =>
                     expanded ? (
@@ -156,6 +158,9 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
                         className="base-container-icon"
                       />
                     ),
+                } : {
+                  expandedRowRender: onExpandedRowRender,
+                  expandIcon: () => null,
                 }}
                 scroll={{ x: 'max-content', y: 'calc(100vh - 300px)' }}
                 pagination={{
