@@ -6,7 +6,7 @@
       "name": "us-west-1",
       "infrastructures": [
         {
-          "id": "host-uw1-233-228",
+          "id": "infra:us-west-1:internal",
           "name": "internal",
           "type": "vm",
           "os": "Ubuntu 22.04 LTS",
@@ -45,7 +45,11 @@
                   ],
                   "metrics": {
                     "rps": 110,
-                    "error_rate_pct": 0.4
+                    "error_rate_pct": 0.4,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 103
                   },
                   "operations": [
                     {
@@ -58,7 +62,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:go-orders:post:orders",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     },
                     {
                       "name": "Get Order",
@@ -70,7 +77,10 @@
                       "position": {
                         "x": 224,
                         "y": 24
-                      }
+                      },
+                      "id": "op:go-orders:get:orders-id",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -84,7 +94,11 @@
                   "groupPosition": {
                     "x": 0,
                     "y": 0
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:internal:go-runtime:go-orders"
                 }
               ],
               "groupSize": {
@@ -99,7 +113,8 @@
                 "x": 0,
                 "y": 0
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/go.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/go.svg",
+              "id": "app:us-west-1:internal:go-runtime"
             },
             {
               "name": "Nginx Server",
@@ -119,7 +134,11 @@
                   ],
                   "metrics": {
                     "rps": 420,
-                    "error_rate_pct": 0.2
+                    "error_rate_pct": 0.2,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 278
                   },
                   "operations": [
                     {
@@ -132,7 +151,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:edge-proxy:proxy:api",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -146,7 +168,11 @@
                   "groupPosition": {
                     "x": 450,
                     "y": 0
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:internal:nginx-server:edge-proxy"
                 }
               ],
               "groupSize": {
@@ -161,7 +187,8 @@
                 "x": 250,
                 "y": 0
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/nginx.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/nginx.svg",
+              "id": "app:us-west-1:internal:nginx-server"
             },
             {
               "name": "Node.js Runtime",
@@ -181,7 +208,11 @@
                   ],
                   "metrics": {
                     "rps": 135,
-                    "error_rate_pct": 0.3
+                    "error_rate_pct": 0.3,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 371
                   },
                   "operations": [
                     {
@@ -194,7 +225,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:user-management:post:users",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     },
                     {
                       "name": "Validate User",
@@ -206,7 +240,10 @@
                       "position": {
                         "x": 224,
                         "y": 24
-                      }
+                      },
+                      "id": "op:user-management:get:users-validate",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     },
                     {
                       "name": "Update Profile",
@@ -218,7 +255,10 @@
                       "position": {
                         "x": 424,
                         "y": 24
-                      }
+                      },
+                      "id": "op:user-management:put:users-id",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -232,7 +272,11 @@
                   "groupPosition": {
                     "x": 700,
                     "y": 0
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:internal:node-js-runtime:user-management"
                 }
               ],
               "groupSize": {
@@ -247,7 +291,8 @@
                 "x": 500,
                 "y": 0
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/nodedotjs.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/nodedotjs.svg",
+              "id": "app:us-west-1:internal:node-js-runtime"
             },
             {
               "name": "OpenTelemetry",
@@ -256,27 +301,22 @@
               "status": "running",
               "services": [
                 {
-                  "id": "internet",
+                  "id": "svc:us-west-1:internal:opentelemetry:internet",
                   "name": "Internet",
-                  "type": "service3d",
-                  "position": {
-                    "x": 83,
-                    "y": 379
-                  },
-                  "data": {
-                    "name": "Internet",
-                    "type": "api",
-                    "status": "healthy",
-                    "zone": "external",
-                    "metrics": {
-                      "avg": "12.10 ms",
-                      "min": "1.20 ms",
-                      "max": "44.00 ms"
-                    }
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "external",
+                  "metrics": {
+                    "avg": "12.10 ms",
+                    "min": "1.20 ms",
+                    "max": "44.00 ms",
+                    "count": 100
                   },
                   "operations": [
                     {
                       "name": "Create User",
+                      "type": "HTTP",
+                      "targetServiceId": "svc:us-west-1:internal:opentelemetry:frontend-proxy",
                       "method": "POST",
                       "path": "/users",
                       "avg_latency_ms": 142,
@@ -285,7 +325,8 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:internet:post:users"
                     },
                     {
                       "name": "Validate User",
@@ -297,7 +338,10 @@
                       "position": {
                         "x": 224,
                         "y": 24
-                      }
+                      },
+                      "id": "op:internet:get:users-validate",
+                      "type": "HTTP",
+                      "targetServiceId": "svc:us-west-1:internal:opentelemetry:frontend-proxy"
                     },
                     {
                       "name": "Update Profile",
@@ -309,9 +353,16 @@
                       "position": {
                         "x": 424,
                         "y": 24
-                      }
+                      },
+                      "id": "op:internet:put:users-id",
+                      "type": "gRPC",
+                      "targetServiceId": "svc:us-west-1:internal:opentelemetry:frontend-proxy"
                     }
                   ],
+                  "position": {
+                    "x": 83,
+                    "y": 379
+                  },
                   "groupSize": {
                     "width": 200,
                     "height": 300
@@ -319,16 +370,10 @@
                   "groupPosition": {
                     "x": 0,
                     "y": 0
-                  },
-                  "targets": [
-                    {
-                      "id": "frontend-proxy",
-                      "label": "HTTP"
-                    }
-                  ]
+                  }
                 },
                 {
-                  "id": "loadgen",
+                  "id": "svc:us-west-1:internal:opentelemetry:load-generator",
                   "name": "Load Generator",
                   "type": "service3d",
                   "position": {
@@ -346,7 +391,53 @@
                       "max": "25.00 ms"
                     }
                   },
-                  "operations": [],
+                  "operations": [
+                    {
+                      "name": "Create User",
+                      "type": "HTTP",
+                      "targetServiceId": "svc:us-west-1:internal:opentelemetry:flagd-ui",
+                      "method": "POST",
+                      "path": "/users",
+                      "avg_latency_ms": 142,
+                      "p95_ms": 265,
+                      "status": "ok",
+                      "position": {
+                        "x": 24,
+                        "y": 24
+                      },
+                      "id": "op:internet:post:users"
+                    },
+                    {
+                      "name": "Validate User",
+                      "method": "GET",
+                      "path": "/users/validate",
+                      "avg_latency_ms": 89,
+                      "p95_ms": 180,
+                      "status": "ok",
+                      "position": {
+                        "x": 224,
+                        "y": 24
+                      },
+                      "id": "op:internet:get:users-validate",
+                      "type": "HTTP",
+                      "targetServiceId": "svc:us-west-1:internal:opentelemetry:flagd-ui"
+                    },
+                    {
+                      "name": "Update Profile",
+                      "method": "PUT",
+                      "path": "/users/{id}",
+                      "avg_latency_ms": 234,
+                      "p95_ms": 420,
+                      "status": "ok",
+                      "position": {
+                        "x": 424,
+                        "y": 24
+                      },
+                      "id": "op:internet:put:users-id",
+                      "type": "gRPC",
+                      "targetServiceId": "svc:us-west-1:internal:opentelemetry:checkout"
+                    }
+                  ],
                   "groupSize": {
                     "width": 200,
                     "height": 300
@@ -355,15 +446,17 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": [
-                    {
-                      "id": "frontend-proxy",
-                      "label": "HTTP"
-                    }
-                  ]
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 320
+                  }
                 },
                 {
-                  "id": "reactnative",
+                  "id": "svc:us-west-1:internal:opentelemetry:react-native-app",
                   "name": "React Native App",
                   "type": "service3d",
                   "position": {
@@ -390,23 +483,25 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": [
-                    {
-                      "id": "frontend-proxy",
-                      "label": "HTTP"
-                    }
-                  ]
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 303
+                  }
                 },
                 {
-                  "id": "frontend-proxy",
-                  "name": "Frontend Proxy\\n(Envoy)",
+                  "id": "svc:us-west-1:internal:opentelemetry:frontend-proxy",
+                  "name": "Frontend Proxy (Envoy)",
                   "type": "service3d",
                   "position": {
                     "x": 548,
                     "y": 637
                   },
                   "data": {
-                    "name": "Frontend Proxy\\n(Envoy)",
+                    "name": "Frontend Proxy",
                     "type": "api",
                     "status": "warning",
                     "zone": "edge",
@@ -425,23 +520,17 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": [
-                    {
-                      "id": "frontend",
-                      "label": "HTTP"
-                    },
-                    {
-                      "id": "flagd-ui",
-                      "label": "HTTP"
-                    },
-                    {
-                      "id": "image-provider",
-                      "label": "HTTP"
-                    }
-                  ]
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 387
+                  }
                 },
                 {
-                  "id": "flagd-ui",
+                  "id": "svc:us-west-1:internal:opentelemetry:flagd-ui",
                   "name": "Flagd-ui",
                   "type": "service3d",
                   "position": {
@@ -468,18 +557,25 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": []
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 475
+                  }
                 },
                 {
-                  "id": "image-provider",
-                  "name": "Image Provider\\n(nginx)",
+                  "id": "svc:us-west-1:internal:opentelemetry:image-provider-n-nginx",
+                  "name": "Image Provider (nginx)",
                   "type": "service3d",
                   "position": {
                     "x": 315,
                     "y": 1269
                   },
                   "data": {
-                    "name": "Image Provider\\n(nginx)",
+                    "name": "Image Provider (nginx)",
                     "type": "api",
                     "status": "healthy",
                     "zone": "media",
@@ -498,10 +594,17 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": []
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 461
+                  }
                 },
                 {
-                  "id": "frontend",
+                  "id": "svc:us-west-1:internal:opentelemetry:frontend",
                   "name": "Frontend",
                   "type": "service3d",
                   "position": {
@@ -528,23 +631,17 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": [
-                    {
-                      "id": "checkout",
-                      "label": "HTTP"
-                    },
-                    {
-                      "id": "recommendation",
-                      "label": "gRPC"
-                    },
-                    {
-                      "id": "ad",
-                      "label": "gRPC"
-                    }
-                  ]
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 364
+                  }
                 },
                 {
-                  "id": "checkout",
+                  "id": "svc:us-west-1:internal:opentelemetry:checkout",
                   "name": "Checkout",
                   "type": "service3d",
                   "position": {
@@ -571,43 +668,25 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": [
-                    {
-                      "id": "currency",
-                      "label": "gRPC"
-                    },
-                    {
-                      "id": "cart",
-                      "label": "gRPC"
-                    },
-                    {
-                      "id": "queue",
-                      "label": "TCP"
-                    },
-                    {
-                      "id": "shipping",
-                      "label": "HTTP"
-                    },
-                    {
-                      "id": "email",
-                      "label": "HTTP"
-                    },
-                    {
-                      "id": "quote",
-                      "label": "gRPC"
-                    }
-                  ]
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 297
+                  }
                 },
                 {
-                  "id": "queue",
-                  "name": "queue\\n(Kafka)",
+                  "id": "svc:us-west-1:internal:opentelemetry:queue-n-kafka",
+                  "name": "queue (Kafka)",
                   "type": "service3d",
                   "position": {
                     "x": 1392,
                     "y": 707
                   },
                   "data": {
-                    "name": "queue\\n(Kafka)",
+                    "name": "queue (Kafka)",
                     "type": "api",
                     "status": "healthy",
                     "zone": "messaging",
@@ -626,10 +705,17 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": []
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 452
+                  }
                 },
                 {
-                  "id": "currency",
+                  "id": "svc:us-west-1:internal:opentelemetry:currency",
                   "name": "Currency",
                   "type": "service3d",
                   "position": {
@@ -656,15 +742,17 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": [
-                    {
-                      "id": "cache",
-                      "label": "gRPC"
-                    }
-                  ]
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 134
+                  }
                 },
                 {
-                  "id": "cart",
+                  "id": "svc:us-west-1:internal:opentelemetry:cart",
                   "name": "Cart",
                   "type": "service3d",
                   "position": {
@@ -691,23 +779,25 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": [
-                    {
-                      "id": "accounting",
-                      "label": "gRPC"
-                    }
-                  ]
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 484
+                  }
                 },
                 {
-                  "id": "cache",
-                  "name": "Cache\\n(Valkey)",
+                  "id": "svc:us-west-1:internal:opentelemetry:cache-n-valkey",
+                  "name": "Cache (Valkey)",
                   "type": "service3d",
                   "position": {
                     "x": 830,
                     "y": 88
                   },
                   "data": {
-                    "name": "Cache\\n(Valkey)",
+                    "name": "Cache (Valkey)",
                     "type": "api",
                     "status": "healthy",
                     "zone": "infra",
@@ -726,10 +816,17 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": []
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 57
+                  }
                 },
                 {
-                  "id": "accounting",
+                  "id": "svc:us-west-1:internal:opentelemetry:accounting",
                   "name": "Accounting",
                   "type": "service3d",
                   "position": {
@@ -756,15 +853,17 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": [
-                    {
-                      "id": "flagd",
-                      "label": "gRPC"
-                    }
-                  ]
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 57
+                  }
                 },
                 {
-                  "id": "fraud",
+                  "id": "svc:us-west-1:internal:opentelemetry:fraud-detection",
                   "name": "Fraud Detection",
                   "type": "service3d",
                   "position": {
@@ -791,19 +890,17 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": [
-                    {
-                      "id": "queue",
-                      "label": "TCP"
-                    },
-                    {
-                      "id": "flagd",
-                      "label": "gRPC"
-                    }
-                  ]
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 398
+                  }
                 },
                 {
-                  "id": "payment",
+                  "id": "svc:us-west-1:internal:opentelemetry:payment",
                   "name": "Payment",
                   "type": "service3d",
                   "position": {
@@ -830,19 +927,17 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": [
-                    {
-                      "id": "queue",
-                      "label": "TCP"
-                    },
-                    {
-                      "id": "flagd",
-                      "label": "gRPC"
-                    }
-                  ]
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 178
+                  }
                 },
                 {
-                  "id": "email",
+                  "id": "svc:us-west-1:internal:opentelemetry:email",
                   "name": "Email",
                   "type": "service3d",
                   "position": {
@@ -869,10 +964,17 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": []
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 345
+                  }
                 },
                 {
-                  "id": "quote",
+                  "id": "svc:us-west-1:internal:opentelemetry:quote",
                   "name": "Quote",
                   "type": "service3d",
                   "position": {
@@ -899,10 +1001,17 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": []
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 207
+                  }
                 },
                 {
-                  "id": "shipping",
+                  "id": "svc:us-west-1:internal:opentelemetry:shipping",
                   "name": "Shipping",
                   "type": "service3d",
                   "position": {
@@ -929,10 +1038,17 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": []
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 112
+                  }
                 },
                 {
-                  "id": "recommendation",
+                  "id": "svc:us-west-1:internal:opentelemetry:recommendation",
                   "name": "Recommendation",
                   "type": "service3d",
                   "position": {
@@ -959,15 +1075,17 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": [
-                    {
-                      "id": "product-catalog",
-                      "label": "gRPC"
-                    }
-                  ]
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 116
+                  }
                 },
                 {
-                  "id": "product-catalog",
+                  "id": "svc:us-west-1:internal:opentelemetry:product-catalog",
                   "name": "Product Catalog",
                   "type": "service3d",
                   "position": {
@@ -994,10 +1112,17 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": []
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 366
+                  }
                 },
                 {
-                  "id": "ad",
+                  "id": "svc:us-west-1:internal:opentelemetry:ad",
                   "name": "Ad",
                   "type": "service3d",
                   "position": {
@@ -1024,10 +1149,17 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": []
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 173
+                  }
                 },
                 {
-                  "id": "flagd",
+                  "id": "svc:us-west-1:internal:opentelemetry:flagd",
                   "name": "Flagd",
                   "type": "service3d",
                   "position": {
@@ -1054,23 +1186,25 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": [
-                    {
-                      "id": "database",
-                      "label": "gRPC"
-                    }
-                  ]
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 202
+                  }
                 },
                 {
-                  "id": "database",
-                  "name": "Database\\n(PostgreSQL)",
+                  "id": "svc:us-west-1:internal:opentelemetry:database-n-postgresql",
+                  "name": "Database (PostgreSQL)",
                   "type": "service3d",
                   "position": {
                     "x": 1693,
                     "y": 711
                   },
                   "data": {
-                    "name": "Database\\n(PostgreSQL)",
+                    "name": "Database (PostgreSQL)",
                     "type": "database",
                     "status": "healthy",
                     "zone": "db",
@@ -1089,7 +1223,14 @@
                     "x": 0,
                     "y": 0
                   },
-                  "targets": []
+                  "status": "healthy",
+                  "zone": "default",
+                  "metrics": {
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 123
+                  }
                 }
               ],
               "groupSize": {
@@ -1104,7 +1245,8 @@
                 "x": 0,
                 "y": 1050
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/opentelemetry.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/opentelemetry.svg",
+              "id": "app:us-west-1:internal:opentelemetry"
             },
             {
               "name": "JVMs",
@@ -1125,7 +1267,11 @@
                   ],
                   "metrics": {
                     "rps": 80,
-                    "error_rate_pct": 1.1
+                    "error_rate_pct": 1.1,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 255
                   },
                   "operations": [
                     {
@@ -1138,7 +1284,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:order-processing:post:orders",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     },
                     {
                       "name": "Process Payment",
@@ -1150,7 +1299,10 @@
                       "position": {
                         "x": 224,
                         "y": 24
-                      }
+                      },
+                      "id": "op:order-processing:post:orders-id-pay",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     },
                     {
                       "name": "Ship Order",
@@ -1162,7 +1314,10 @@
                       "position": {
                         "x": 424,
                         "y": 24
-                      }
+                      },
+                      "id": "op:order-processing:post:orders-id-ship",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -1176,7 +1331,11 @@
                   "groupPosition": {
                     "x": 1800,
                     "y": 0
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:internal:jvms:order-processing"
                 },
                 {
                   "name": "spring-boot-apps",
@@ -1189,7 +1348,11 @@
                   ],
                   "metrics": {
                     "rps": 60,
-                    "error_rate_pct": 0.2
+                    "error_rate_pct": 0.2,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 239
                   },
                   "operations": [
                     {
@@ -1202,7 +1365,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:spring-boot-apps:get:actuator-health",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -1216,7 +1382,11 @@
                   "groupPosition": {
                     "x": 0,
                     "y": 350
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:internal:jvms:spring-boot-apps"
                 }
               ],
               "groupSize": {
@@ -1231,7 +1401,8 @@
                 "x": 1000,
                 "y": 0
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/openjdk.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/openjdk.svg",
+              "id": "app:us-west-1:internal:jvms"
             },
             {
               "name": "Tomcat",
@@ -1250,7 +1421,11 @@
                   ],
                   "metrics": {
                     "rps": 25,
-                    "error_rate_pct": 0.5
+                    "error_rate_pct": 0.5,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 123
                   },
                   "operations": [
                     {
@@ -1263,7 +1438,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:legacy-ui:get:legacy",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -1277,7 +1455,11 @@
                   "groupPosition": {
                     "x": 250,
                     "y": 350
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:internal:tomcat:legacy-ui"
                 }
               ],
               "groupSize": {
@@ -1292,7 +1474,8 @@
                 "x": 1450,
                 "y": 0
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/apachetomcat.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/apachetomcat.svg",
+              "id": "app:us-west-1:internal:tomcat"
             },
             {
               "name": "Python Runtime",
@@ -1311,7 +1494,11 @@
                   ],
                   "metrics": {
                     "jobs_min": 12,
-                    "failures_pct": 0
+                    "failures_pct": 0,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 159
                   },
                   "operations": [
                     {
@@ -1324,7 +1511,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:etl-worker:batch:gs-bucket",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -1338,7 +1528,11 @@
                   "groupPosition": {
                     "x": 500,
                     "y": 350
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:internal:python-runtime:etl-worker"
                 }
               ],
               "groupSize": {
@@ -1353,7 +1547,8 @@
                 "x": 1700,
                 "y": 0
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/python.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/python.svg",
+              "id": "app:us-west-1:internal:python-runtime"
             },
             {
               "name": "PHP Runtime",
@@ -1372,7 +1567,11 @@
                   ],
                   "metrics": {
                     "rps": 18,
-                    "error_rate_pct": 0.3
+                    "error_rate_pct": 0.3,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 72
                   },
                   "operations": [
                     {
@@ -1385,7 +1584,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:admin-portal:get:admin-users",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -1399,7 +1601,11 @@
                   "groupPosition": {
                     "x": 750,
                     "y": 350
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:internal:php-runtime:admin-portal"
                 }
               ],
               "groupSize": {
@@ -1414,7 +1620,8 @@
                 "x": 1950,
                 "y": 0
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/php.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/php.svg",
+              "id": "app:us-west-1:internal:php-runtime"
             },
             {
               "name": "Instana Agent",
@@ -1431,7 +1638,11 @@
                   "dependencies": [],
                   "metrics": {
                     "spans_collected_s": 2800,
-                    "metrics_collected_s": 4200
+                    "metrics_collected_s": 4200,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 163
                   },
                   "operations": [
                     {
@@ -1444,7 +1655,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:instana-agent:https:api",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -1458,7 +1672,11 @@
                   "groupPosition": {
                     "x": 1000,
                     "y": 350
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:internal:instana-agent:instana-agent"
                 }
               ],
               "groupSize": {
@@ -1473,7 +1691,8 @@
                 "x": 0,
                 "y": 350
               },
-              "imageUrl": "https://static.vecteezy.com/system/resources/previews/055/041/037/large_2x/hotel-3d-icon-illustration-rendering-png.png"
+              "imageUrl": "https://static.vecteezy.com/system/resources/previews/055/041/037/large_2x/hotel-3d-icon-illustration-rendering-png.png",
+              "id": "app:us-west-1:internal:instana-agent"
             },
             {
               "name": "Processes",
@@ -1489,7 +1708,11 @@
                   "replicas": 1,
                   "dependencies": [],
                   "metrics": {
-                    "proc_count": 247
+                    "proc_count": 247,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 308
                   },
                   "operations": [
                     {
@@ -1502,7 +1725,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:systemd:os:",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -1516,7 +1742,11 @@
                   "groupPosition": {
                     "x": 1250,
                     "y": 350
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:internal:processes:systemd"
                 }
               ],
               "groupSize": {
@@ -1531,7 +1761,8 @@
                 "x": 250,
                 "y": 350
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/linux.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/linux.svg",
+              "id": "app:us-west-1:internal:processes"
             }
           ],
           "position": {
@@ -1548,7 +1779,7 @@
           }
         },
         {
-          "id": "ibmi-demo-01",
+          "id": "infra:us-west-1:ibm-i-demo",
           "name": "IBM i - Demo",
           "type": "ibmi",
           "os": "IBM i 7.4",
@@ -1583,7 +1814,11 @@
                   "dependencies": [],
                   "metrics": {
                     "qps": 320,
-                    "active_sessions": 18
+                    "active_sessions": 18,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 271
                   },
                   "operations": [
                     {
@@ -1595,7 +1830,11 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "path": "/",
+                      "id": "op:db2-catalog:sql:",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -1609,7 +1848,11 @@
                   "groupPosition": {
                     "x": 1500,
                     "y": 350
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:ibm-i-demo:demo-database:db2-catalog"
                 }
               ],
               "groupSize": {
@@ -1624,7 +1867,8 @@
                 "x": 500,
                 "y": 350
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibmdb.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibmdb.svg",
+              "id": "app:us-west-1:ibm-i-demo:demo-database"
             },
             {
               "name": "IBM i Core",
@@ -1641,7 +1885,11 @@
                   "dependencies": [],
                   "metrics": {
                     "msgs_s": 210,
-                    "queue_depth": 54
+                    "queue_depth": 54,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 352
                   },
                   "operations": [
                     {
@@ -1653,7 +1901,11 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "path": "/",
+                      "id": "op:mq-on-ibmi:mq:",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     },
                     {
                       "name": "Dequeue",
@@ -1664,7 +1916,11 @@
                       "position": {
                         "x": 224,
                         "y": 24
-                      }
+                      },
+                      "path": "/",
+                      "id": "op:mq-on-ibmi:mq::2",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -1678,7 +1934,11 @@
                   "groupPosition": {
                     "x": 1750,
                     "y": 350
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:ibm-i-demo:ibm-i-core:mq-on-ibmi"
                 }
               ],
               "groupSize": {
@@ -1693,7 +1953,8 @@
                 "x": 750,
                 "y": 350
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg",
+              "id": "app:us-west-1:ibm-i-demo:ibm-i-core"
             }
           ],
           "position": {
@@ -1710,7 +1971,7 @@
           }
         },
         {
-          "id": "datapower-01",
+          "id": "infra:us-west-1:datapower",
           "name": "DataPower",
           "type": "appliance",
           "os": "IBM DataPower",
@@ -1748,7 +2009,11 @@
                   ],
                   "metrics": {
                     "rps": 260,
-                    "blocked_pct": 0.5
+                    "blocked_pct": 0.5,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 53
                   },
                   "operations": [
                     {
@@ -1761,7 +2026,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:api-proxy:proxy:v1",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     },
                     {
                       "name": "JWT Verify",
@@ -1773,7 +2041,10 @@
                       "position": {
                         "x": 224,
                         "y": 24
-                      }
+                      },
+                      "id": "op:api-proxy:policy:auth",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -1787,7 +2058,11 @@
                   "groupPosition": {
                     "x": 0,
                     "y": 700
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:datapower:api-gateway:api-proxy"
                 }
               ],
               "groupSize": {
@@ -1802,7 +2077,8 @@
                 "x": 1000,
                 "y": 350
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg",
+              "id": "app:us-west-1:datapower:api-gateway"
             }
           ],
           "position": {
@@ -1819,7 +2095,7 @@
           }
         },
         {
-          "id": "sap-jco-monitor-01",
+          "id": "infra:us-west-1:sap-jco-remote-monitoring",
           "name": "SAP JCo Remote Monitoring",
           "type": "service",
           "os": "RHEL 9",
@@ -1854,7 +2130,11 @@
                   "dependencies": [],
                   "metrics": {
                     "rfcs_min": 120,
-                    "errors_pct": 0.2
+                    "errors_pct": 0.2,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 139
                   },
                   "operations": [
                     {
@@ -1867,7 +2147,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:rfc-poller:rfc:sap",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -1881,7 +2164,11 @@
                   "groupPosition": {
                     "x": 450,
                     "y": 700
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:sap-jco-remote-monitoring:sap-connector:rfc-poller"
                 }
               ],
               "groupSize": {
@@ -1896,7 +2183,8 @@
                 "x": 1250,
                 "y": 350
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/openjdk.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/openjdk.svg",
+              "id": "app:us-west-1:sap-jco-remote-monitoring:sap-connector"
             }
           ],
           "position": {
@@ -1913,7 +2201,7 @@
           }
         },
         {
-          "id": "rtp-01",
+          "id": "infra:us-west-1:rtp",
           "name": "RTP",
           "type": "service",
           "os": "AIX 7.3",
@@ -1949,7 +2237,11 @@
                   ],
                   "metrics": {
                     "events_s": 1200,
-                    "lag_ms": 12
+                    "lag_ms": 12,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 261
                   },
                   "operations": [
                     {
@@ -1962,7 +2254,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:rtp-core:tcp:stream",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -1976,7 +2271,11 @@
                   "groupPosition": {
                     "x": 700,
                     "y": 700
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:rtp:real-time-processor:rtp-core"
                 }
               ],
               "groupSize": {
@@ -1991,7 +2290,8 @@
                 "x": 1500,
                 "y": 350
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/linux.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/linux.svg",
+              "id": "app:us-west-1:rtp:real-time-processor"
             }
           ],
           "position": {
@@ -2008,7 +2308,7 @@
           }
         },
         {
-          "id": "lxc-01",
+          "id": "infra:us-west-1:lxc-container",
           "name": "LXC Container",
           "type": "container-host",
           "os": "Ubuntu 22.04",
@@ -2042,7 +2342,11 @@
                   "dependencies": [],
                   "metrics": {
                     "tasks_min": 60,
-                    "failures_pct": 0
+                    "failures_pct": 0,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 409
                   },
                   "operations": [
                     {
@@ -2055,7 +2359,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:task-runner:post:tasks",
+                      "type": "HTTP",
+                      "targetServiceId": "svc:us-west-1:internal:opentelemetry:internet"
                     }
                   ],
                   "groupSize": {
@@ -2069,7 +2376,11 @@
                   "groupPosition": {
                     "x": 950,
                     "y": 700
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:lxc-container:app-container:task-runner"
                 }
               ],
               "groupSize": {
@@ -2084,7 +2395,8 @@
                 "x": 1750,
                 "y": 350
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/docker.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/docker.svg",
+              "id": "app:us-west-1:lxc-container:app-container"
             }
           ],
           "position": {
@@ -2101,7 +2413,7 @@
           }
         },
         {
-          "id": "ibm-middleware-01",
+          "id": "infra:us-west-1:ibm-middleware",
           "name": "IBM Middleware",
           "type": "middleware",
           "os": "RHEL 8",
@@ -2138,7 +2450,11 @@
                   ],
                   "metrics": {
                     "msgs_s": 430,
-                    "dlq_depth": 2
+                    "dlq_depth": 2,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 164
                   },
                   "operations": [
                     {
@@ -2151,7 +2467,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:jms-bridge:jms:topic-events",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -2165,7 +2484,11 @@
                   "groupPosition": {
                     "x": 1200,
                     "y": 700
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:ibm-middleware:liberty-mq:jms-bridge"
                 }
               ],
               "groupSize": {
@@ -2180,7 +2503,8 @@
                 "x": 2000,
                 "y": 350
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg",
+              "id": "app:us-west-1:ibm-middleware:liberty-mq"
             }
           ],
           "position": {
@@ -2197,7 +2521,7 @@
           }
         },
         {
-          "id": "other-middleware-01",
+          "id": "infra:us-west-1:other-middleware",
           "name": "Other Middleware",
           "type": "middleware",
           "os": "RHEL 8",
@@ -2233,7 +2557,11 @@
                   ],
                   "metrics": {
                     "rps": 60,
-                    "error_rate_pct": 0.6
+                    "error_rate_pct": 0.6,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 261
                   },
                   "operations": [
                     {
@@ -2246,7 +2574,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:api-gateway-alt:proxy:alt",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -2260,7 +2591,11 @@
                   "groupPosition": {
                     "x": 1450,
                     "y": 700
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-west-1:other-middleware:jboss-platform:api-gateway-alt"
                 }
               ],
               "groupSize": {
@@ -2275,7 +2610,8 @@
                 "x": 0,
                 "y": 700
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/wildfly.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/wildfly.svg",
+              "id": "app:us-west-1:other-middleware:jboss-platform"
             }
           ],
           "position": {
@@ -2303,13 +2639,14 @@
       "groupSize": {
         "width": 600,
         "height": 900
-      }
+      },
+      "id": "region:us-west-1"
     },
     {
       "name": "us-central1-a",
       "infrastructures": [
         {
-          "id": "us-central1-a-01",
+          "id": "infra:us-central1-a:us-central1-a",
           "name": "us-central1-a",
           "type": "k8s-cluster",
           "os": "GKE 1.29",
@@ -2346,7 +2683,11 @@
                   ],
                   "metrics": {
                     "rps": 140,
-                    "error_rate_pct": 0.3
+                    "error_rate_pct": 0.3,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 194
                   },
                   "operations": [
                     {
@@ -2359,7 +2700,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:inventory-svc:get:inventory",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -2373,7 +2717,11 @@
                   "groupPosition": {
                     "x": 1700,
                     "y": 700
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:us-central1-a:us-central1-a:microservices-mesh:inventory-svc"
                 }
               ],
               "groupSize": {
@@ -2388,7 +2736,8 @@
                 "x": 250,
                 "y": 700
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/kubernetes.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/kubernetes.svg",
+              "id": "app:us-central1-a:us-central1-a:microservices-mesh"
             }
           ],
           "position": {
@@ -2416,13 +2765,14 @@
       "groupSize": {
         "width": 200,
         "height": 300
-      }
+      },
+      "id": "region:us-central1-a"
     },
     {
       "name": "datacenter-1",
       "infrastructures": [
         {
-          "id": "aix-01",
+          "id": "infra:datacenter-1:aix",
           "name": "AIX",
           "type": "power",
           "os": "AIX 7.3",
@@ -2456,7 +2806,11 @@
                   "replicas": 1,
                   "dependencies": [],
                   "metrics": {
-                    "jobs_queued": 12
+                    "jobs_queued": 12,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 189
                   },
                   "operations": [
                     {
@@ -2469,7 +2823,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:batch-scheduler:os:cron",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -2483,7 +2840,11 @@
                   "groupPosition": {
                     "x": 1950,
                     "y": 700
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:datacenter-1:aix:aix-core-services:batch-scheduler"
                 }
               ],
               "groupSize": {
@@ -2498,7 +2859,8 @@
                 "x": 500,
                 "y": 700
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg",
+              "id": "app:datacenter-1:aix:aix-core-services"
             }
           ],
           "position": {
@@ -2526,13 +2888,14 @@
       "groupSize": {
         "width": 200,
         "height": 300
-      }
+      },
+      "id": "region:datacenter-1"
     },
     {
       "name": "primary-dc",
       "infrastructures": [
         {
-          "id": "datacenter-01",
+          "id": "infra:primary-dc:datacenter",
           "name": "Datacenter",
           "type": "site",
           "os": "n/a",
@@ -2565,7 +2928,11 @@
                   "replicas": 1,
                   "dependencies": [],
                   "metrics": {
-                    "uptime_days": 423
+                    "uptime_days": 423,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 353
                   },
                   "operations": [
                     {
@@ -2578,7 +2945,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:power-monitor:snmp:oid-1-3-6-1-2",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -2592,7 +2962,11 @@
                   "groupPosition": {
                     "x": 0,
                     "y": 1050
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:primary-dc:datacenter:facility-services:power-monitor"
                 }
               ],
               "groupSize": {
@@ -2607,7 +2981,8 @@
                 "x": 750,
                 "y": 700
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg",
+              "id": "app:primary-dc:datacenter:facility-services"
             }
           ],
           "position": {
@@ -2635,13 +3010,14 @@
       "groupSize": {
         "width": 200,
         "height": 300
-      }
+      },
+      "id": "region:primary-dc"
     },
     {
       "name": "remote-dc",
       "infrastructures": [
         {
-          "id": "ibm-power-remote-01",
+          "id": "infra:remote-dc:ibm-power-remote-129-40-156-x",
           "name": "IBM Power Remote - 129.40.156.x",
           "type": "power-remote",
           "os": "PowerVM",
@@ -2676,7 +3052,11 @@
                   "dependencies": [],
                   "metrics": {
                     "lpars": 6,
-                    "live_migrations_week": 2
+                    "live_migrations_week": 2,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 265
                   },
                   "operations": [
                     {
@@ -2689,7 +3069,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:lpar-mgmt:api:lpars-migrate",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -2703,7 +3086,11 @@
                   "groupPosition": {
                     "x": 250,
                     "y": 1050
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:remote-dc:ibm-power-remote-129-40-156-x:lpar-stack:lpar-mgmt"
                 }
               ],
               "groupSize": {
@@ -2718,7 +3105,8 @@
                 "x": 1000,
                 "y": 700
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg",
+              "id": "app:remote-dc:ibm-power-remote-129-40-156-x:lpar-stack"
             }
           ],
           "position": {
@@ -2735,7 +3123,7 @@
           }
         },
         {
-          "id": "zhmc-01",
+          "id": "infra:remote-dc:zhmc-wschmc-wsclab-washington-ibm-com",
           "name": "zHMC - wschmc.wsclab.washington.ibm.com",
           "type": "mainframe-controller",
           "os": "z/OS HMC",
@@ -2769,7 +3157,11 @@
                   "replicas": 1,
                   "dependencies": [],
                   "metrics": {
-                    "lpars": 4
+                    "lpars": 4,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 213
                   },
                   "operations": [
                     {
@@ -2782,7 +3174,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:lpar-control:api:lpar-ipl",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -2796,7 +3191,11 @@
                   "groupPosition": {
                     "x": 500,
                     "y": 1050
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:remote-dc:zhmc-wschmc-wsclab-washington-ibm-com:mainframe-control:lpar-control"
                 }
               ],
               "groupSize": {
@@ -2811,7 +3210,8 @@
                 "x": 1250,
                 "y": 700
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibm.svg",
+              "id": "app:remote-dc:zhmc-wschmc-wsclab-washington-ibm-com:mainframe-control"
             }
           ],
           "position": {
@@ -2839,13 +3239,14 @@
       "groupSize": {
         "width": 400,
         "height": 300
-      }
+      },
+      "id": "region:remote-dc"
     },
     {
       "name": "apac-zone26",
       "infrastructures": [
         {
-          "id": "chin-zone26-01",
+          "id": "infra:apac-zone26:chin-zone26",
           "name": "Chin zone26",
           "type": "site",
           "os": "n/a",
@@ -2881,7 +3282,11 @@
                   ],
                   "metrics": {
                     "rps": 60,
-                    "error_rate_pct": 0.4
+                    "error_rate_pct": 0.4,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 352
                   },
                   "operations": [
                     {
@@ -2894,7 +3299,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:edge-proxy-apac:proxy:",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -2908,7 +3316,11 @@
                   "groupPosition": {
                     "x": 750,
                     "y": 1050
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:apac-zone26:chin-zone26:edge-proxy:edge-proxy-apac"
                 }
               ],
               "groupSize": {
@@ -2923,7 +3335,8 @@
                 "x": 1500,
                 "y": 700
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/nginx.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/nginx.svg",
+              "id": "app:apac-zone26:chin-zone26:edge-proxy"
             }
           ],
           "position": {
@@ -2951,13 +3364,14 @@
       "groupSize": {
         "width": 200,
         "height": 300
-      }
+      },
+      "id": "region:apac-zone26"
     },
     {
       "name": "undefined-zone",
       "infrastructures": [
         {
-          "id": "turbo-01",
+          "id": "infra:undefined-zone:turbo",
           "name": "Turbo",
           "type": "appliance",
           "os": "Linux",
@@ -2990,7 +3404,11 @@
                   "replicas": 1,
                   "dependencies": [],
                   "metrics": {
-                    "optimizations_min": 220
+                    "optimizations_min": 220,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 377
                   },
                   "operations": [
                     {
@@ -3003,7 +3421,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:turbo-optimizer:internal:",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -3017,7 +3438,11 @@
                   "groupPosition": {
                     "x": 1000,
                     "y": 1050
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:undefined-zone:turbo:turbo-engine:turbo-optimizer"
                 }
               ],
               "groupSize": {
@@ -3032,7 +3457,8 @@
                 "x": 1750,
                 "y": 700
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/cplusplus.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/cplusplus.svg",
+              "id": "app:undefined-zone:turbo:turbo-engine"
             }
           ],
           "position": {
@@ -3049,7 +3475,7 @@
           }
         },
         {
-          "id": "cp4i-01",
+          "id": "infra:undefined-zone:cp4i",
           "name": "cp4i",
           "type": "integration",
           "os": "OpenShift 4.15",
@@ -3085,7 +3511,11 @@
                   "dependencies": [],
                   "metrics": {
                     "msgs_s": 2200,
-                    "lag_msgs": 340
+                    "lag_msgs": 340,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 342
                   },
                   "operations": [
                     {
@@ -3098,7 +3528,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:event-streams:kafka:topic-orders",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     },
                     {
                       "name": "Consume",
@@ -3110,7 +3543,10 @@
                       "position": {
                         "x": 224,
                         "y": 24
-                      }
+                      },
+                      "id": "op:event-streams:kafka:topic-orders:2",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -3124,7 +3560,11 @@
                   "groupPosition": {
                     "x": 1250,
                     "y": 1050
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:undefined-zone:cp4i:ibm-cloud-pak-for-integration:event-streams"
                 },
                 {
                   "name": "app-connect",
@@ -3137,7 +3577,11 @@
                   ],
                   "metrics": {
                     "flows_min": 45,
-                    "errors_pct": 0.7
+                    "errors_pct": 0.7,
+                    "avg": "10.00 ms",
+                    "min": "1.00 ms",
+                    "max": "50.00 ms",
+                    "count": 333
                   },
                   "operations": [
                     {
@@ -3150,7 +3594,10 @@
                       "position": {
                         "x": 24,
                         "y": 24
-                      }
+                      },
+                      "id": "op:app-connect:http:flows",
+                      "type": "HTTP",
+                      "targetServiceId": ""
                     }
                   ],
                   "groupSize": {
@@ -3164,7 +3611,11 @@
                   "groupPosition": {
                     "x": 1700,
                     "y": 1050
-                  }
+                  },
+                  "type": "api",
+                  "status": "healthy",
+                  "zone": "default",
+                  "id": "svc:undefined-zone:cp4i:ibm-cloud-pak-for-integration:app-connect"
                 }
               ],
               "groupSize": {
@@ -3179,7 +3630,8 @@
                 "x": 2000,
                 "y": 700
               },
-              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibmcloud.svg"
+              "imageUrl": "https://cdn.jsdelivr.net/npm/simple-icons@11.11.0/icons/ibmcloud.svg",
+              "id": "app:undefined-zone:cp4i:ibm-cloud-pak-for-integration"
             }
           ],
           "position": {
@@ -3207,7 +3659,8 @@
       "groupSize": {
         "width": 400,
         "height": 300
-      }
+      },
+      "id": "region:undefined-zone"
     }
   ]
 }

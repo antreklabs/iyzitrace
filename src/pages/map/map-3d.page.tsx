@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { Card, Dropdown, Input, Tree, Button } from 'antd';
 import { AppstoreOutlined, SearchOutlined, CloseOutlined, ContainerOutlined, ApiOutlined, DatabaseOutlined, CloudServerOutlined } from '@ant-design/icons';
-import MapLayer from './components/infra-layer';
+import MapLayer from './components/layer.component';
 import { LayerKey, TreeNode } from './interfaces';
 import infraJson from './data/map.json';
 import { Handle, Position } from 'reactflow';
@@ -385,40 +385,6 @@ export const ServiceIsoBlockNode: React.FC<any> = ({ data, selected }) => {
   );
 };
 
-// Operation block - orange/red theme
-export const OperationIsoBlockNode: React.FC<any> = ({ data }) => {
-  const accent = data?.accent || '#f59e0b';
-  const label = data?.label || 'operation';
-  const sub = data?.sub || '';
-  const baseW = data?.w ?? 120;
-  const baseH = data?.h ?? 160;
-  const W = Math.max(8, Math.round(baseW * 0.5));
-  const H = Math.max(8, Math.round(baseH * 0.5));
-  const k = W / baseW;
-  const wrap: React.CSSProperties = { position: 'relative', top: 80, left: 40, width: Math.round(W + 40 * k), height: Math.round(H + 80 * k), filter: 'drop-shadow(0 14px 28px rgba(0,0,0,0.6))' };
-  const sideCommon: React.CSSProperties = { position: 'absolute', top: Math.round(50 * k), width: W, height: H, background: 'linear-gradient(180deg, #fed7aa 0%, #fca5a5 100%)', border: '1px solid rgba(148,163,184,0.7)' };
-  const right = { ...sideCommon, left: Math.round(40 * k) + 20, top: Math.round(50 * k)+ 20, transform: 'skewY(-28deg)' } as React.CSSProperties;
-  const left = { ...sideCommon, left: -40 + 20, top: Math.round(50 * k)+ 20, transform: 'skewY(28deg)' } as React.CSSProperties;
-  const rightBack = { ...sideCommon, left: Math.round(-80 * k) + 20, top: Math.round(50 * k) - 15, transform: 'skewY(-28deg)' } as React.CSSProperties;
-  const leftBack = { ...sideCommon, left: 40, top: Math.round(50 * k) - 15, transform: 'skewY(28deg)' } as React.CSSProperties;
-  const badge: React.CSSProperties = { position: 'absolute', top: -50, left: -6, background: accent, color: '#0b1220', fontWeight: 700, fontSize: 11, padding: '4px 8px', borderRadius: 6 };
-  const title: React.CSSProperties = { position: 'absolute', bottom: -50, left: '50%', transform: 'translateX(-50%)', color: '#e2e8f0', fontWeight: 600, fontSize: 14, whiteSpace: 'nowrap', cursor: 'pointer', transition: 'all 0.2s ease', padding: '2px 4px', borderRadius: '4px' };
-  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => { e.currentTarget.style.textDecoration = 'underline'; e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'; };
-  const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => { e.currentTarget.style.textDecoration = 'none'; e.currentTarget.style.backgroundColor = 'transparent'; };
-  return (
-    <div style={wrap}>
-      {sub && <div style={badge}>{sub}</div>}
-      <div style={rightBack} />
-      <div style={left} />
-      <div style={leftBack} />
-      <div style={right} />
-      <div style={title} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>{label}</div>
-      <Handle type="source" position={Position.Right} id="r" style={{ opacity: 0 }} />
-      <Handle type="target" position={Position.Left} id="l" style={{ opacity: 0 }} />
-    </div>
-  );
-};
-
 // ---------- Grup node (zone/cluster çerçevesi) ----------
 export const GroupNode: React.FC<any> = ({ data }) => {
   const { label, groupSize, accent = '#6b7fa4' } = data || {};
@@ -485,7 +451,6 @@ const Map3DPage: React.FC = () => {
   const infraLayerRef = useRef<any>(null);
   const applicationLayerRef = useRef<any>(null);
   const serviceLayerRef = useRef<any>(null);
-  const operationLayerRef = useRef<any>(null);
 
   // Sayfa yüklendiğinde console log
   useEffect(() => {
@@ -493,18 +458,18 @@ const Map3DPage: React.FC = () => {
   }, []);
 
   // İlk açılışta Service layer'a geç ve OpenTelemetry grubuna zoom yap
-  useEffect(() => {
-    setLayer('service');
-    setSelectedKey('');
-    setSelectedNodeId('');
-    const t = setTimeout(() => {
-      const ref = serviceLayerRef.current;
-      if (ref && ref.zoomToNode) {
-        ref.zoomToNode('group::OpenTelemetry');
-      }
-    }, 200);
-    return () => clearTimeout(t);
-  }, []);
+  // useEffect(() => {
+  //   setLayer('application');
+  //   setSelectedKey('');
+  //   setSelectedNodeId('');
+  //   const t = setTimeout(() => {
+  //     const ref = applicationLayerRef.current;
+  //     if (ref && ref.zoomToNode) {
+  //       ref.zoomToNode('group::internal');
+  //     }
+  //   }, 200);
+  //   return () => clearTimeout(t);
+  // }, []);
 
   // İlk açılışta localStorage'dan veri al, yoksa JSON'dan al ve localStorage'a kaydet
   const getInitialData = () => {
@@ -536,7 +501,7 @@ const Map3DPage: React.FC = () => {
       regions.forEach((region: any) => {
         const regionNode: TreeNode = {
           title: region.name,
-          key: `region-${region.name}`,
+          key: `region-${region.id}`,
           type: 'infra',
           children: []
         };
@@ -544,7 +509,7 @@ const Map3DPage: React.FC = () => {
         (region.infrastructures || []).forEach((infra: any) => {
           const infraNode: TreeNode = {
             title: infra.name,
-            key: `infra-${infra.name}`,
+            key: `infra-${infra.id}`,
             type: 'infra',
             children: []
           };
@@ -552,7 +517,7 @@ const Map3DPage: React.FC = () => {
           (infra.applications || []).forEach((app: any) => {
             const appNode: TreeNode = {
               title: app.name,
-              key: `app-${app.name}`,
+              key: `app-${app.id}`,
               type: 'application',
               children: []
             };
@@ -560,20 +525,10 @@ const Map3DPage: React.FC = () => {
             (app.services || []).forEach((service: any) => {
               const serviceNode: TreeNode = {
                 title: service.name,
-                key: `service-${service.name}`,
+                key: `service-${service.id}`,
                 type: 'service',
                 children: []
               };
-              
-              (service.operations || []).forEach((op: any) => {
-                const opNode: TreeNode = {
-                  title: op.name,
-                  key: `op-${op.name}`,
-                  type: 'operation',
-                  children: []
-                };
-                serviceNode.children!.push(opNode);
-              });
               
               appNode.children!.push(serviceNode);
             });
@@ -630,30 +585,24 @@ const Map3DPage: React.FC = () => {
       // Node ID'yi belirle (zoom için)
       let nodeId = '';
       if (key.startsWith('region-')) {
-        nodeId = key.replace('region-', '');
+        nodeId = `group::${key.replace('region-', '')}`;
         setLayer('infra');
       } else if (key.startsWith('infra-')) {
-        nodeId = key.replace('infra-', '');
-        setLayer('infra');
-      } else if (key.startsWith('app-')) {
-        nodeId = key.replace('app-', '');
+        nodeId = `group::${key.replace('infra-', '')}`;
         setLayer('application');
-      } else if (key.startsWith('service-')) {
-        nodeId = key.replace('service-', '');
+      } else if (key.startsWith('app-')) {
+        nodeId = `group::${key.replace('app-', '')}`;
         setLayer('service');
-      } else if (key.startsWith('op-')) {
-        nodeId = key.replace('op-', '');
-        setLayer('operation');
+      } else if (key.startsWith('service-')) {
+        nodeId = `${key.replace('service-', '')}`;
+        setLayer('service');
       }
-      
       setSelectedNodeId(nodeId);
       
       // Zoom ve fit işlemi için timeout (layer değişiminden sonra)
       setTimeout(() => {
-        const currentRef = layer === 'infra' ? infraLayerRef.current :
-                          layer === 'application' ? applicationLayerRef.current :
-                          layer === 'service' ? serviceLayerRef.current :
-                          operationLayerRef.current;
+        const currentRef = layer === 'application' ? applicationLayerRef.current :
+                          layer === 'service' ? serviceLayerRef.current : infraLayerRef.current;
         
         if (currentRef && currentRef.zoomToNode) {
           currentRef.zoomToNode(nodeId);
@@ -689,10 +638,8 @@ const Map3DPage: React.FC = () => {
       
       // Zoom out to show full map for the new layer
       setTimeout(() => {
-        const currentRef = newLayer === 'infra' ? infraLayerRef.current :
-                          newLayer === 'application' ? applicationLayerRef.current :
-                          newLayer === 'service' ? serviceLayerRef.current :
-                          operationLayerRef.current;
+        const currentRef = newLayer === 'application' ? applicationLayerRef.current :
+                          newLayer === 'service' ? serviceLayerRef.current : infraLayerRef.current;
         
         if (currentRef && currentRef.zoomToNode) {
           currentRef.zoomToNode('');
@@ -723,12 +670,7 @@ const Map3DPage: React.FC = () => {
           if (currentRef && currentRef.zoomToNode) {
             currentRef.zoomToNode('');
           }
-        } else if (layer === 'operation') {
-          const currentRef = operationLayerRef.current;
-          if (currentRef && currentRef.zoomToNode) {
-            currentRef.zoomToNode('');
-          }
-        }
+        } 
       }, 100);
     } else {
       // Normal node selection - sadece infra layer'da
@@ -773,35 +715,15 @@ const Map3DPage: React.FC = () => {
             currentRef.zoomToNode(nodeId);
           }
         }, 100);
-      } else if (nodeType === 'operation') {
-        // Operation node selection - sadece operation layer'da
-        setSelectedKey(nodeId);
-        setSelectedNodeId(nodeId);
-        setLayer('operation');
-        
-        // Zoom to node
-        setTimeout(() => {
-          const currentRef = operationLayerRef.current;
-          if (currentRef && currentRef.zoomToNode) {
-            console.log('Zooming to operation:', nodeId);
-            currentRef.zoomToNode(nodeId);
-          }
-        }, 100);
       }
     }
   }, [clearSelection, layer]);
 
-  const handleApplicationClick = useCallback((appName: string, targetLayer?: string) => {
+  const handleClick = useCallback((id: string, targetLayer?: string, isItem: boolean = false) => {
 
     setLayer(targetLayer as LayerKey);
-    if (targetLayer === 'operationItem') {
-      setSelectedKey(appName);
-      setSelectedNodeId(appName);
-    }
-    else {
-      setSelectedKey('');
-      setSelectedNodeId('');
-    }
+    setSelectedKey('');
+    setSelectedNodeId('');
 
     setTimeout(() => {
       let currentRef: any;
@@ -810,16 +732,12 @@ const Map3DPage: React.FC = () => {
         currentRef = applicationLayerRef.current;
       } else if (targetLayer === 'service') {
         currentRef = serviceLayerRef.current;
-      } else if (targetLayer === 'operation') {
-        currentRef = operationLayerRef.current;
-      } else if (targetLayer === 'operationItem') {
-        currentRef = operationLayerRef.current;
       } else {
         currentRef = infraLayerRef.current;
       }
 
       if (currentRef && currentRef.zoomToNode) {
-        const nodeId = `${targetLayer !== 'operationItem' ? 'group::' : ''}${appName}`;
+        const nodeId = isItem ? id : `group::${id}`;
         console.log('click to node:', nodeId);
         currentRef.zoomToNode(nodeId);
       }
@@ -914,44 +832,11 @@ const Map3DPage: React.FC = () => {
               }}
             >
               <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                {layer === 'infra' ? 'Infrastructure Layer' : 
-                 layer === 'application' ? 'Application Layer' :
-                 layer === 'service' ? 'Service Layer' : 'Operation Layer'}
+                {layer === 'application' ? 'Application Layer' :
+                 layer === 'service' ? 'Service Layer' : 'Infrastructure Layer'}
               </div>
               <div style={{ opacity: 0.7, fontSize: 11 }}>
-                {layer === 'infra' ? (
-                  <>
-                    <span 
-                      style={{ cursor: 'pointer', textDecoration: 'underline', color: '#60a5fa' }}
-                      onClick={() => {
-                        setLayer('infra');
-                        setTimeout(() => {
-                          const currentRef = infraLayerRef.current;
-                          if (currentRef && currentRef.zoomToNode) {
-                            currentRef.zoomToNode('');
-                          }
-                        }, 100);
-                      }}
-                    >
-                      Regions
-                    </span>
-                    {' → '}
-                    <span 
-                      style={{ cursor: 'pointer', textDecoration: 'underline', color: '#60a5fa' }}
-                      onClick={() => {
-                        setLayer('infra');
-                        setTimeout(() => {
-                          const currentRef = infraLayerRef.current;
-                          if (currentRef && currentRef.zoomToNode) {
-                            currentRef.zoomToNode('');
-                          }
-                        }, 100);
-                      }}
-                    >
-                      Infrastructures
-                    </span>
-                  </>
-                ) : layer === 'application' ? (
+                {layer === 'application' ? (
                   <>
                     <span 
                       style={{ cursor: 'pointer', textDecoration: 'underline', color: '#60a5fa' }}
@@ -1020,31 +905,31 @@ const Map3DPage: React.FC = () => {
                     <span 
                       style={{ cursor: 'pointer', textDecoration: 'underline', color: '#60a5fa' }}
                       onClick={() => {
-                        setLayer('service');
+                        setLayer('infra');
                         setTimeout(() => {
-                          const currentRef = serviceLayerRef.current;
+                          const currentRef = infraLayerRef.current;
                           if (currentRef && currentRef.zoomToNode) {
                             currentRef.zoomToNode('');
                           }
                         }, 100);
                       }}
                     >
-                      Services
+                      Regions
                     </span>
                     {' → '}
                     <span 
                       style={{ cursor: 'pointer', textDecoration: 'underline', color: '#60a5fa' }}
                       onClick={() => {
-                        setLayer('operation');
+                        setLayer('infra');
                         setTimeout(() => {
-                          const currentRef = operationLayerRef.current;
+                          const currentRef = infraLayerRef.current;
                           if (currentRef && currentRef.zoomToNode) {
                             currentRef.zoomToNode('');
                           }
                         }, 100);
                       }}
                     >
-                      Operations
+                      Infrastructures
                     </span>
                   </>
                 )}
@@ -1115,7 +1000,7 @@ const Map3DPage: React.FC = () => {
               ref={infraLayerRef}
               selectedNodeId={selectedNodeId} 
               onNodeClick={handleNodeClick} 
-              onApplicationClick={handleApplicationClick} 
+              onButtonClick={handleClick} 
               setDetailPanelContent={setDetailPanelContent} 
               data={getInitialData()}
               layer={layer}
@@ -1126,7 +1011,7 @@ const Map3DPage: React.FC = () => {
               ref={applicationLayerRef}
               selectedNodeId={selectedNodeId} 
               onNodeClick={handleNodeClick} 
-              onApplicationClick={handleApplicationClick} 
+              onButtonClick={handleClick} 
               setDetailPanelContent={setDetailPanelContent} 
               data={getInitialData()}
               layer={layer}
@@ -1137,18 +1022,7 @@ const Map3DPage: React.FC = () => {
               ref={serviceLayerRef}
               selectedNodeId={selectedNodeId} 
               onNodeClick={handleNodeClick} 
-              onApplicationClick={handleApplicationClick} 
-              setDetailPanelContent={setDetailPanelContent} 
-              data={getInitialData()}
-              layer={layer}
-            />
-            )}
-            {layer === 'operation' && (
-            <MapLayer 
-              ref={operationLayerRef}
-              selectedNodeId={selectedNodeId} 
-              onNodeClick={handleNodeClick} 
-              onApplicationClick={handleApplicationClick} 
+              onButtonClick={handleClick} 
               setDetailPanelContent={setDetailPanelContent} 
               data={getInitialData()}
               layer={layer}
