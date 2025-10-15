@@ -293,7 +293,7 @@ gh pr view [PR_NUMBER]
 
 ```bash
 # Merge PR and delete remote branch (can be done by reviewer)
-gh pr merge [PR_NUMBER] --merge --delete-branch
+gh pr merge [PR_NUMBER] --merge
 
 # Switch back to dev branch
 git checkout dev
@@ -301,8 +301,8 @@ git checkout dev
 # Pull latest changes including your merged PR
 git pull origin dev
 
-git branch -m feature/your-feature-name merged-feature/your-feature-name
-git push origin merged-feature/your-feature-name
-git push origin --delete feature/your-feature-name
+git branch -m feature/service-map merged-feature/service-map
+git push origin merged-feature/service-map
+git push origin --delete feature/service-map
 
 ```

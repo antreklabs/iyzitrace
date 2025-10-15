@@ -385,7 +385,7 @@
                     "type": "api",
                     "status": "healthy",
                     "zone": "tools",
-                    "metrics": {
+                  "metrics": {
                       "avg": "6.80 ms",
                       "min": "0.90 ms",
                       "max": "25.00 ms"

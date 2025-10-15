@@ -1,10 +1,10 @@
 import React, { Suspense, lazy } from 'react';
-import { AppPlugin, type AppRootProps } from '@grafana/data';
+import { AppPlugin, type AppRootProps, type PluginConfigPageProps, type AppPluginMeta } from '@grafana/data';
+import { ConfigPage } from './plugins/config/ConfigPage';
 import { LoadingPlaceholder } from '@grafana/ui';
-import type { AppConfigProps } from './components/AppConfig/AppConfig';
 
 const LazyApp = lazy(() => import('./components/App/App'));
-const LazyAppConfig = lazy(() => import('./components/AppConfig/AppConfig'));
+// (no app-config page here)
 
 const App = (props: AppRootProps) => (
   <Suspense fallback={<LoadingPlaceholder text="" />}>
@@ -12,15 +12,13 @@ const App = (props: AppRootProps) => (
   </Suspense>
 );
 
-const AppConfig = (props: AppConfigProps) => (
-  <Suspense fallback={<LoadingPlaceholder text="" />}>
-    <LazyAppConfig {...props} />
-  </Suspense>
-);
+// removed old AppConfig usage
 
-export const plugin = new AppPlugin<{}>().setRootPage(App).addConfigPage({
-  title: 'Configuration',
-  icon: 'cog',
-  body: AppConfig,
-  id: 'configuration',
-});
+export const plugin = new AppPlugin<{}>()
+  .setRootPage(App)
+  .addConfigPage({
+    title: 'Configuration',
+    icon: 'cog',
+    body: (props: PluginConfigPageProps<AppPluginMeta<{}>>) => <ConfigPage {...(props as any)} />,
+    id: 'configuration',
+  });

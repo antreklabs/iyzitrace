@@ -71,7 +71,24 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
     // eslint-disable-next-line no-console
     setLoading(true);
     try {
-      const currentPageState = getPageState(pageName);
+      // Check if range start and end are the same (within 1 minute)
+      let currentRange = range;
+      if (Math.abs(range[1] - range[0]) < 60 * 1000) {
+        // If they're the same, set to last 1 hour
+        const newStart = Date.now() - 60 * 60 * 1000; // 1 hour ago
+        const newEnd = Date.now();
+        currentRange = [newStart, newEnd];
+        setRange(currentRange);
+        saveState({ range: currentRange });
+      }
+      
+      // Always use current state values (which include saved values from localStorage)
+      const currentPageState = {
+        selectedDataSourceUid: selectedUid,
+        range: currentRange,
+        filters,
+        pageSize,
+      };
       const data = await onFetchData(currentPageState);
       // console.log('data', data);
       setModelData(data);
@@ -90,12 +107,33 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
     }
   }, [selectedUid]);
 
-  // İlk yükleme ve datasource/filter değişikliklerinde veri çek
+  // İlk yüklemede default state'i persist et (persist yoksa)
+  useEffect(() => {
+    if (!savedState) {
+      savePageState(pageName, {
+        selectedDataSourceUid: selectedUid,
+        range,
+        filters,
+        pageSize,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // İlk yükleme ve datasource/filter/range değişikliklerinde veri çek
   useEffect(() => {
     if (selectedUid) {
       fetchModelData();
     }
-  }, [effectiveId, selectedUid, filters]);
+  }, [effectiveId, selectedUid, filters, range]);
+
+  // İlk mount'ta da veri çek (selectedUid varsa)
+  useEffect(() => {
+    if (selectedUid) {
+      fetchModelData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <BaseContainer

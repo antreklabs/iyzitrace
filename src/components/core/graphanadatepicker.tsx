@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Popover,
   Input,
@@ -57,10 +57,40 @@ const GrafanaLikeRangePicker = ({
   const [to, setTo] = useState('now');
   const [search, setSearch] = useState('');
   const [selectedQuickLabel, setSelectedQuickLabel] = useState<string | null>('Last 1 hour');
-  const [fromDate, setFromDate] = useState<dayjs.Dayjs | null>(dayjs().subtract(1, 'hour'));
-  const [toDate, setToDate] = useState<dayjs.Dayjs | null>(dayjs());
-  const [fromTime, setFromTime] = useState<dayjs.Dayjs | null>(dayjs().subtract(1, 'hour'));
-  const [toTime, setToTime] = useState<dayjs.Dayjs | null>(dayjs());
+  
+  // Initialize with value prop if available, otherwise use defaults
+  const initialFrom = value ? dayjs(value[0]) : dayjs().subtract(1, 'hour');
+  const initialTo = value ? dayjs(value[1]) : dayjs();
+  
+  const [fromDate, setFromDate] = useState<dayjs.Dayjs | null>(initialFrom);
+  const [toDate, setToDate] = useState<dayjs.Dayjs | null>(initialTo);
+  const [fromTime, setFromTime] = useState<dayjs.Dayjs | null>(initialFrom);
+  const [toTime, setToTime] = useState<dayjs.Dayjs | null>(initialTo);
+
+  // Derive quick label from absolute value when provided
+  const applyQuickLabelFromValue = (start?: number, end?: number) => {
+    if (typeof start === 'number' && typeof end === 'number') {
+      const diffMin = Math.round((end - start) / 60000);
+      const match =
+        diffMin === 5 ? 'Last 5 minutes' :
+        diffMin === 15 ? 'Last 15 minutes' :
+        diffMin === 30 ? 'Last 30 minutes' :
+        diffMin === 60 ? 'Last 1 hour' :
+        diffMin === 180 ? 'Last 3 hours' :
+        diffMin === 360 ? 'Last 6 hours' :
+        diffMin === 720 ? 'Last 12 hours' :
+        diffMin === 1440 ? 'Last 24 hours' :
+        diffMin === 2880 ? 'Last 2 days' : null;
+      setSelectedQuickLabel(match);
+    }
+  };
+
+  useEffect(() => {
+    if (value) {
+      applyQuickLabelFromValue(value[0], value[1]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value?.[0], value?.[1]]);
 
   const handleApply = () => {
     // Use absolute date/time if available, otherwise fall back to relative input
@@ -80,7 +110,18 @@ const GrafanaLikeRangePicker = ({
     }
 
     if (fromParsed && toParsed) {
-      onApply(fromParsed.valueOf(), toParsed.valueOf());
+      const startMs = fromParsed.valueOf();
+      const endMs = toParsed.valueOf();
+      
+      // Check if start and end are the same (within 1 minute)
+      if (Math.abs(endMs - startMs) < 60 * 1000) {
+        // If they're the same, set to last 1 hour
+        const newStart = dayjs().subtract(1, 'hour').valueOf();
+        const newEnd = dayjs().valueOf();
+        onApply(newStart, newEnd);
+      } else {
+        onApply(startMs, endMs);
+      }
       setVisible(false);
     }
   };
