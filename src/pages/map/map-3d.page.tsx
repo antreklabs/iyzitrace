@@ -5,6 +5,7 @@ import MapLayer from './components/layer.component';
 import { LayerKey, TreeNode } from './interfaces';
 import infraJson from './data/map.json';
 import { Handle, Position } from 'reactflow';
+// import { getBackendSrv } from '@grafana/runtime';
 
 // ---------- Renk ve durum yardımcıları ----------
 const cardBg = (hex: string) =>
@@ -456,6 +457,83 @@ const Map3DPage: React.FC = () => {
   useEffect(() => {
     // console.log('Map 3D sayfa yüklendi');
   }, []);
+
+  // --- Seed helper: build serviceMap config from map.json and write to plugin settings ---
+  // useEffect(() => {
+  //   async function seedServiceMapFromJsonOnce() {
+  //     try {
+  //       const pluginId = 'iyzitrace-app';
+  //       // Build flat list from map.json
+  //       const list: Array<{ id: string; name: string; layer: string; position: string; groupPosition: string; groupSize: string; imageUrl: string }> = [];
+
+  //       const pushItem = (layer: string, id: string, name: string, position?: any, groupPosition?: any, groupSize?: any, imageUrl?: string) => {
+  //         list.push({
+  //           id,
+  //           name,
+  //           layer,
+  //           position: position ? JSON.stringify(position) : '',
+  //           groupPosition: groupPosition ? JSON.stringify(groupPosition) : '',
+  //           groupSize: groupSize ? JSON.stringify(groupSize) : '',
+  //           imageUrl: imageUrl || ''
+  //         });
+  //       };
+
+  //       // regions
+  //       (infraJson.regions || []).forEach((region: any) => {
+  //         pushItem('region', region.id || `region:${region.name}`, region.name, region.position, region.groupPosition, region.groupSize, region.imageUrl);
+
+  //         // infrastructures
+  //         (region.infrastructures || []).forEach((infra: any) => {
+  //           pushItem('infrastructure', infra.id, infra.name, infra.position, infra.groupPosition, infra.groupSize, infra.imageUrl);
+
+  //           // applications
+  //           (infra.applications || []).forEach((app: any) => {
+  //             pushItem('application', app.id, app.name, app.position, app.groupPosition, app.groupSize, app.imageUrl);
+
+  //             // services (schema differs - try both service3d and classic)
+  //             (app.services || []).forEach((svc: any) => {
+  //               const img = svc.imageUrl || svc.data?.imageUrl || '';
+  //               pushItem('service', svc.id, svc.name, svc.position, svc.groupPosition, svc.groupSize, img);
+  //             });
+  //           });
+  //         });
+  //       });
+
+  //       // Read current plugin settings, merge and save
+  //       const settings = await getBackendSrv().get(`/api/plugins/${pluginId}/settings`);
+  //       const jsonData = { ...(settings?.jsonData || {}) };
+  //       jsonData.serviceMap = list;
+  //       await getBackendSrv().post(`/api/plugins/${pluginId}/settings`, {
+  //         jsonData,
+  //         enabled: true
+  //       });
+  //       // eslint-disable-next-line no-console
+  //       console.log('seedServiceMapFromJson: wrote', list.length, 'items to plugin settings');
+  //     } catch (e) {
+  //       // eslint-disable-next-line no-console
+  //       console.warn('seedServiceMapFromJson failed', e);
+  //     }
+  //   }
+
+  //   // Yalnızca ilk açılışta tetikle
+  //   // seedServiceMapFromJsonOnce();
+
+  //   // Debug: mevcut serviceMap'i getir ve yaz
+  //   (async () => {
+  //     try {
+  //       const pluginId = 'iyzitrace-app';
+  //       const settings = await getBackendSrv().get(`/api/plugins/${pluginId}/settings`);
+  //       // eslint-disable-next-line no-console
+  //       console.log('serviceMap(current):', settings?.jsonData?.serviceMap);
+  //     } catch (e) {
+  //       // eslint-disable-next-line no-console
+  //       console.warn('debugPrintServiceMap failed', e);
+  //     }
+  //   })();
+
+  //   // Referans bırakarak TS6133 uyarısını engelle
+  //   void seedServiceMapFromJsonOnce;
+  // }, []);
 
   // İlk açılışta Service layer'a geç ve OpenTelemetry grubuna zoom yap
   // useEffect(() => {

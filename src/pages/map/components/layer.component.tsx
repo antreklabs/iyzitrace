@@ -1776,10 +1776,17 @@ const MapInner = forwardRef<any, MapLayerProps>(({ selectedNodeId, onNodeClick, 
           }
         }}
         onNodeMouseEnter={(_, node) => {
-          setHoveredNodeId(node.id);
+          if (node.type === 'group') {
+            // Group'un üzerindeyken hover'ı temizle
+            setHoveredNodeId(null);
+          } else {
+            setHoveredNodeId(node.id);
+          }
         }}
-        onNodeMouseLeave={() => {
-          setHoveredNodeId(null);
+        onNodeMouseLeave={(_, node) => {
+          if (node.type !== 'group') {
+            setHoveredNodeId(null);
+          }
         }}
         onPaneClick={(event) => {
           if (onNodeClick) {
@@ -1787,6 +1794,7 @@ const MapInner = forwardRef<any, MapLayerProps>(({ selectedNodeId, onNodeClick, 
           }
           // Collapse expanded grouped edges on pane click
           setExpandedEdgeKey(null);
+          // Clear hover states
           setHoveredNodeId(null);
         }}
         fitView
