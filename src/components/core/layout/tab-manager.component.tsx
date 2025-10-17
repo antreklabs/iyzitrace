@@ -23,15 +23,19 @@ const TabManager: React.FC = () => {
     const currentFullPath = location.pathname + location.search;
     const currentPath = normalizePath(location.pathname);
 
-    let matchedRoute = null;
-    let matchedParams = null;
+    let matchedRoute: any = null;
+    let matchedParams: any = null;
+    let bestLen = -1;
 
     for (const route of appRoutes) {
       const match = matchPath({ path: route.path, end: false }, currentPath);
       if (match) {
-        matchedRoute = route;
-        matchedParams = match.params;
-        break;
+        const len = (route.path || '').length;
+        if (len > bestLen) {
+          bestLen = len;
+          matchedRoute = route;
+          matchedParams = match.params;
+        }
       }
     }
 

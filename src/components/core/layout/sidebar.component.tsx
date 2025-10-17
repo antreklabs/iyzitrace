@@ -81,31 +81,13 @@ const Sidebar: React.FC = () => {
         }}
         items={[
           { key: 'landing', icon: <HomeOutlined style={{ fontSize: 16 }} />, label: 'Infra Overview' },
-          { key: 'services', icon: <BarChartOutlined style={{ fontSize: 16 }} />, label: 'Services' },
-          { key: 'services-v2', icon: <BarChartOutlined style={{ fontSize: 16 }} />, label: 'Services v2' },  
-          { key: 'traces', icon: <FileSearchOutlined style={{ fontSize: 16 }} />, label: 'Traces' },
-          { key: 'traces-v2', icon: <FileSearchOutlined style={{ fontSize: 16 }} />, label: 'Traces v2' },
-          { key: 'logs', icon: <ProfileOutlined style={{ fontSize: 16 }} />, label: 'Logs' },
-          { key: 'logs-v2', icon: <ProfileOutlined style={{ fontSize: 16 }} />, label: 'Logs v2' },
-          // { key: 'logs-pipelines', icon: <SettingOutlined style={{ fontSize: 16 }} />, label: 'Logs Pipelines' },
-          { key: 'dashboards', icon: <ClusterOutlined style={{ fontSize: 16 }} />, label: 'Dashboards' },
+          { key: 'map-3d', icon: <DeploymentUnitOutlined style={{ fontSize: 16 }} />, label: 'Service Map' },
+          { key: 'services-v2', icon: <BarChartOutlined style={{ fontSize: 16 }} />, label: 'Services' },  
+          { key: 'traces-v2', icon: <FileSearchOutlined style={{ fontSize: 16 }} />, label: 'Traces' },
+          { key: 'logs-v2', icon: <ProfileOutlined style={{ fontSize: 16 }} />, label: 'Logs' },
+          { key: 'dashboards', icon: <ClusterOutlined style={{ fontSize: 16 }} />, label: 'Views' },
           { key: 'alerts', icon: <AlertOutlined style={{ fontSize: 16 }} />, label: 'Alerts' },
           { key: 'exceptions', icon: <RadarChartOutlined style={{ fontSize: 16 }} />, label: 'Exceptions' },
-          { 
-            key: 'map-3d', 
-            icon: <DeploymentUnitOutlined style={{ fontSize: 16 }} />, 
-            label: 'Service Map'
-          },
-          { 
-            key: 'service-map-3d', 
-            icon: <DeploymentUnitOutlined style={{ fontSize: 16 }} />, 
-            label: 'Service Map v2'
-          },
-          { 
-            key: 'service-map-v4', 
-            icon: <DeploymentUnitOutlined style={{ fontSize: 16 }} />, 
-            label: 'Service Map v3'
-          },
           { key: 'team', icon: <TeamOutlined style={{ fontSize: 16 }} />, label: 'Team' },
           { key: 'settings', icon: <SettingOutlined style={{ fontSize: 16 }} />, label: 'Settings' },
         ]}

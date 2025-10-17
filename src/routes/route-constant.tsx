@@ -17,6 +17,8 @@ const Map3D = React.lazy(() => import('../pages/map/map-3d.page'));
 const LogsPage = React.lazy(() => import('../pages/logs.page'));
 const LogsPipelines = React.lazy(() => import('../pages/logs-pipelines/logs-pipelines.page'));
 const LogsV2Page = React.lazy(() => import('../pages/logs/logs.page'));
+const ComingSoon = React.lazy(() => import('../pages/coming-soon.page'));
+const SettingsPage = React.lazy(() => import('../pages/settings.page'));
 
 export const appRoutes: AppRoute[] = [
   {
@@ -151,6 +153,34 @@ export const appRoutes: AppRoute[] = [
     element: <Dashboard />,
     name: 'dashboards',
     title: 'Dashboards',
+    showInMenu: true,
+  },
+  {
+    path: '/alerts',
+    element: <ComingSoon title="Alerts – Coming Soon" />,
+    name: 'alerts',
+    title: 'Alerts',
+    showInMenu: true,
+  },
+  {
+    path: '/exceptions',
+    element: <ComingSoon title="Exceptions – Coming Soon" />,
+    name: 'exceptions',
+    title: 'Exceptions',
+    showInMenu: true,
+  },
+  {
+    path: '/team',
+    element: <ComingSoon title="Team – Coming Soon" />,
+    name: 'team',
+    title: 'Team',
+    showInMenu: true,
+  },
+  {
+    path: '/settings',
+    element: <SettingsPage />,
+    name: 'settings',
+    title: 'Settings',
     showInMenu: true,
   },
 ];
