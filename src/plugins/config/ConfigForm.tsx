@@ -267,21 +267,6 @@ const ConfigForm: React.FC = () => {
                 Sets the default absolute range when pages first load. Prevents empty data if a zero-width window is detected.
               </div>
             </div>
-
-            {(jsonData.defaultTimeRanges && jsonData.defaultTimeRanges.length > 0) && (
-              <div className="gf-form-group" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
-                {(jsonData.defaultTimeRanges || []).map((t, idx) => (
-                  <span key={idx} className="gf-form-label" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#1f1f1f', padding: '2px 8px', borderRadius: 4 }}>
-                    {t}
-                    <Button size="sm" variant="destructive" onClick={() => {
-                      const copy = [...(jsonData.defaultTimeRanges || [])];
-                      copy.splice(idx, 1);
-                      setJsonData({ ...jsonData, defaultTimeRanges: copy });
-                    }}>×</Button>
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
 
         </>

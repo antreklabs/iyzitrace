@@ -71,21 +71,9 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
     // eslint-disable-next-line no-console
     setLoading(true);
     try {
-      // Check if range start and end are the same (within 1 minute)
-      let currentRange = range;
-      if (Math.abs(range[1] - range[0]) < 60 * 1000) {
-        // If they're the same, set to last 1 hour
-        const newStart = Date.now() - 60 * 60 * 1000; // 1 hour ago
-        const newEnd = Date.now();
-        currentRange = [newStart, newEnd];
-        setRange(currentRange);
-        saveState({ range: currentRange });
-      }
-      
-      // Always use current state values (which include saved values from localStorage)
       const currentPageState = {
         selectedDataSourceUid: selectedUid,
-        range: currentRange,
+        range: range,
         filters,
         pageSize,
       };
