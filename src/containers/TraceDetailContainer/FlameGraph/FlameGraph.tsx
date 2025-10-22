@@ -29,6 +29,7 @@ const FlameGraph: React.FC<FlameGraphProps> = ({ data, selectedSpanId, onSpanSel
 console.log(gridWidth, "gridWidth")
 
   const spans = flattenSpans(data);
+  console.log('spans', spans);
 
   if (!spans.length) {
     return (

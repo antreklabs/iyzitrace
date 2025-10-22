@@ -11,6 +11,7 @@ interface SpanNode {
   endTime: number;
   durationMs: number;
   children?: SpanNode[];
+  tags?: Record<string, any>;
 }
 
 interface ServiceMeta {
@@ -30,6 +31,52 @@ interface FlameGraphRowProps {
 }
 
 const LABEL_WIDTH = 350; // Sol label alanı genişliği
+
+const getOperationType = (span: SpanNode): string => {
+  let type = span.tags?.['type'];
+  
+  if (type === 'http') {
+    return 'HTTP';
+  }
+  else if (type === 'messaging') {
+    return 'MESSAGING';
+  }
+  else if (type === 'cache') {
+    return 'CACHE';
+  }
+  else if (type === 'database') {
+    return 'DATABASE';
+  }
+  else if (type === 'rpc') {
+    return 'RPC';
+  }
+  else {
+    const name = span.serviceName?.toLowerCase() || '';
+    if (span.tags && Object.keys(span.tags).includes('http.method') || name.includes('http')) {
+      return 'HTTP';
+    }
+    if (
+      ['postgre', 'postgresql', 'mysql', 'mariadb', 'mongo', 'mongodb', 'db', 'database'].some((db) =>
+        name.includes(db)
+      )
+    ) {
+      return 'DATABASE';
+    }
+    const netPeerName = span.tags?.['net.peer.name'];
+    if (
+      ['postgre', 'postgresql', 'mysql', 'mariadb', 'mongo', 'mongodb', 'db', 'database'].some((db) =>
+        name.includes(db)
+      ) &&
+      netPeerName
+    ) {
+      return 'DATABASE';
+    }
+    if (name.includes('redis') || name.includes('cache')) {
+      return 'CACHE';
+    }
+    return 'GENERAL';
+  }
+};
 
 const FlameGraphRow: React.FC<FlameGraphRowProps> = ({
   span,
@@ -55,6 +102,15 @@ const FlameGraphRow: React.FC<FlameGraphRowProps> = ({
   const isSelected = span.id === selectedSpanId;
 
   const serviceMeta = serviceMetaMap[span.serviceName];
+  const operationType = getOperationType(span);
+  const OPERATION_TYPES = [
+    { type: 'HTTP', color: 'blue', icon: '🌐' },
+    { type: 'MESSAGING', color: 'orange', icon: '💬' },
+    { type: 'CACHE', color: 'purple', icon: '⚡' },
+    { type: 'DATABASE', color: 'green', icon: '🗄️' },
+    { type: 'RPC', color: 'red', icon: '🔄' },
+  ];
+  const spanIcon = OPERATION_TYPES.find((type) => type.type === operationType)?.icon || serviceMeta?.icon;
 
   return (
     <>
@@ -65,7 +121,7 @@ const FlameGraphRow: React.FC<FlameGraphRowProps> = ({
               {collapsed ? <FiChevronRight /> : <FiChevronDown />}
             </span>
           )}
-          {serviceMeta?.icon} {span.serviceName} → {span.name}
+          {spanIcon} {span.serviceName} → {span.name}
         </div>
         <div className="flamegraph-bar-container">
           <div
@@ -84,8 +140,8 @@ const FlameGraphRow: React.FC<FlameGraphRowProps> = ({
             {widthPx > 80 ? (
               <>
                 <span className="flamegraph-bar-start">
-                  {(span as any).tags?.['http.method'] || ''} {(span as any).tags?.['http.target'] || ''}{' '}
-                  {(span as any).tags?.['http.status_code'] || ''}
+                  {span.tags?.['http.method'] || ''} {span.tags?.['http.target'] || ''}{' '}
+                  {span.tags?.['http.status_code'] || ''}
                 </span>
                 <span className="duration-label">
                   {spanDurationMs > 1000

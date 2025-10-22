@@ -32,7 +32,7 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [resourcedetection, memory_limiter, transform, batch]
+      processors: [resourcedetection, memory_limiter, transform, batch, transform/type_classifier]
       exporters: [otlp, otlphttp/tempo, debug, spanmetrics, servicegraph]
     metrics:
       receivers: [docker_stats, httpcheck/frontend-proxy, hostmetrics, nginx, otlp, postgresql, redis, spanmetrics, servicegraph]
@@ -45,6 +45,42 @@ service:
 
 processors:
   # var olan memory_limiter / batch varsa kalsın; aşağıdaki yeni blokları ekliyoruz/override ediyoruz
+  batch:
+  transform/type_classifier:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          - set(attributes["type"], "http")
+            where (
+              attributes["http.request.method"] != nil or
+              attributes["http.method"] != nil or
+              attributes["url.full"] != nil or
+              attributes["server.address"] != nil
+            ) and attributes["type"] == nil
+          - set(attributes["type"], "messaging")
+            where (
+              attributes["messaging.system"] != nil or
+              attributes["messaging.destination.name"] != nil
+            ) and attributes["type"] == nil
+          - set(attributes["type"], "cache")
+            where (
+              attributes["db.system"] != nil and attributes["db.system"] == "redis"
+            ) and attributes["type"] == nil
+          - set(attributes["type"], "database")
+            where (
+              attributes["db.system"] != nil or
+              attributes["db.namespace"] != nil or
+              attributes["db.operation.name"] != nil or
+              attributes["db.operation"] != nil
+            ) and attributes["type"] == nil
+          - set(attributes["type"], "rpc")
+            where (
+              attributes["rpc.system"] != nil or
+              attributes["rpc.service"] != nil or
+              attributes["rpc.method"] != nil
+            ) and attributes["type"] == nil
+
   metricstransform:
     transforms:
       - include: ^traces_service_graph(.*)$
@@ -78,7 +114,10 @@ processors:
           - set(resource.attributes["service_namespace"], resource.attributes["service.namespace"])
 
 connectors:
-  spanmetrics: {}
+  spanmetrics:
+    dimensions:
+      - name: type
+
   servicegraph:
     metrics_flush_interval: 30s
     dimensions:

@@ -39,8 +39,9 @@ const ServiceExpandedRowComponent: React.FC<ServiceExpandedRowProps> = ({ record
         const attach = (res: any[], key: string, scale = 1) => {
           res?.forEach((s: any) => {
             const op = s?.metric?.span_name ?? 'unknown';
+            const type = (s?.metric?.type ?? 'unknown').toUpperCase();
             const val = parseFloat(s?.value?.[1] ?? '0') * scale;
-            byOp[op] = { ...(byOp[op] || { name: op }), [key]: val };
+            byOp[op] = { ...(byOp[op] || { name: op }), [key]: val, operationType: type };
           });
         };
         attach(p50Res, 'p50');
@@ -53,11 +54,6 @@ const ServiceExpandedRowComponent: React.FC<ServiceExpandedRowProps> = ({ record
           .values(byOp)
           .sort((a: any, b: any) => (b.calls ?? 0) - (a.calls ?? 0))
           .slice(0, 5);
-
-        // code here to add operation type by choosing from the list [HTTP, DATABASE, GENERAL] by random
-        sortedByOp.forEach((op: any) => {
-          op.operationType = ['HTTP', 'DATABASE', 'GENERAL'][Math.floor(Math.random() * 3)];
-        });
 
         setRows(sortedByOp);
       } finally {
@@ -73,10 +69,18 @@ const ServiceExpandedRowComponent: React.FC<ServiceExpandedRowProps> = ({ record
         return 'blue';
       case 'DATABASE':
         return 'green';
-      case 'GENERAL':
+      case 'MESSAGING':
         return 'orange';
+      case 'CACHE':
+        return 'purple';
+      case 'RPC':
+        return 'red';
+      case 'DATABASE':
+        return 'yellow';
+      case 'GENERAL':
+        return 'gray';
       default:
-        return 'default';
+        return 'gray';
     }
   };
 
