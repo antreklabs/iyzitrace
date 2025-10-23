@@ -12,7 +12,8 @@ import {
   SettingOutlined,
   TeamOutlined,
   DeploymentUnitOutlined,
-  HomeOutlined
+  HomeOutlined,
+  BuildOutlined
 } from '@ant-design/icons';
 import { FaChevronCircleLeft, FaChevronCircleRight } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -80,7 +81,8 @@ const Sidebar: React.FC = () => {
           background: 'transparent',
         }}
         items={[
-          { key: 'landing', icon: <HomeOutlined style={{ fontSize: 16 }} />, label: 'Infra Overview' },
+          { key: 'landing-page', icon: <HomeOutlined style={{ fontSize: 16 }} />, label: 'Home' },
+          { key: 'landing', icon: <BuildOutlined style={{ fontSize: 16 }} />, label: 'Infra Overview' },
           { key: 'map-3d', icon: <DeploymentUnitOutlined style={{ fontSize: 16 }} />, label: 'Service Map' },
           { key: 'services-v2', icon: <BarChartOutlined style={{ fontSize: 16 }} />, label: 'Services' },  
           { key: 'traces-v2', icon: <FileSearchOutlined style={{ fontSize: 16 }} />, label: 'Traces' },
@@ -88,7 +90,7 @@ const Sidebar: React.FC = () => {
           { key: 'dashboards', icon: <ClusterOutlined style={{ fontSize: 16 }} />, label: 'Views' },
           { key: 'alerts', icon: <AlertOutlined style={{ fontSize: 16 }} />, label: 'Alerts' },
           { key: 'exceptions', icon: <RadarChartOutlined style={{ fontSize: 16 }} />, label: 'Exceptions' },
-          { key: 'team', icon: <TeamOutlined style={{ fontSize: 16 }} />, label: 'Team' },
+          { key: 'teams', icon: <TeamOutlined style={{ fontSize: 16 }} />, label: 'Teams' },
           { key: 'settings', icon: <SettingOutlined style={{ fontSize: 16 }} />, label: 'Settings' },
         ]}
       />

@@ -3,6 +3,7 @@ import { AppRoute } from '@/interfaces';
 
 const Dashboard = React.lazy(() => import('../pages/dashboard.page'));
 const Landing = React.lazy(() => import('../pages/landing.page'));
+const LandingPage = React.lazy(() => import('../pages/landing-page'));
 const Services = React.lazy(() => import('../pages/services/services.old.page'));
 const ServicesV2 = React.lazy(() => import('../pages/services/services.page'));
 const ServiveDetail = React.lazy(() => import('../pages/services/servicedetail.page'));
@@ -19,6 +20,9 @@ const LogsPipelines = React.lazy(() => import('../pages/logs-pipelines/logs-pipe
 const LogsV2Page = React.lazy(() => import('../pages/logs/logs.page'));
 const ComingSoon = React.lazy(() => import('../pages/coming-soon.page'));
 const SettingsPage = React.lazy(() => import('../pages/settings.page'));
+const TeamsPage = React.lazy(() => import('../pages/teams/teams.page'));
+const TeamsManagePage = React.lazy(() => import('../pages/teams/teams-manage.page'));
+const AlertsPage = React.lazy(() => import('../pages/alerts/alerts.page'));
 
 export const appRoutes: AppRoute[] = [
   {
@@ -138,6 +142,14 @@ export const appRoutes: AppRoute[] = [
     element: <Landing />,
     name: 'landing',
     title: 'Infra Overview',
+    icon: 'building',
+    showInMenu: true,
+  },
+  {
+    path: '/landing-page',
+    element: <LandingPage />,
+    name: 'landingPage',
+    title: 'Home',
     icon: 'home',
     showInMenu: true,
   },
@@ -156,17 +168,31 @@ export const appRoutes: AppRoute[] = [
     showInMenu: true,
   },
   {
-    path: '/alerts',
-    element: <ComingSoon title="Alerts – Coming Soon" />,
-    name: 'alerts',
-    title: 'Alerts',
-    showInMenu: true,
-  },
-  {
     path: '/exceptions',
     element: <ComingSoon title="Exceptions – Coming Soon" />,
     name: 'exceptions',
     title: 'Exceptions',
+    showInMenu: true,
+  },
+  {
+    path: '/teams',
+    element: <TeamsPage />,
+    name: 'teams',
+    title: 'Teams',
+    showInMenu: true,
+  },
+  {
+    path: '/teams/:teamId/manage',
+    element: <TeamsManagePage />,
+    name: 'teamsManage',
+    title: 'Team Management',
+    showInMenu: false,
+  },
+  {
+    path: '/alerts',
+    element: <AlertsPage />,
+    name: 'alerts',
+    title: 'Alerts',
     showInMenu: true,
   },
   {
