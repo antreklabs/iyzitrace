@@ -22,9 +22,15 @@ exporters:
     tls:
       insecure: false
     headers:
-      signoz-ingestion-key: 5d333cea-ea9b-49bb-901f-484b076ce949
+      signoz-ingestion-key: 28da4fd2-539f-4a45-a282-15cecdb5643e
   debug:
     verbosity: detailed
+
+  otlphttp/dash0:
+    endpoint: https://ingress.europe-west4.gcp.dash0.com
+    headers:
+      Authorization: Bearer auth_T2zx9Nu7ohOMTe6YEoT0yhivKvnzdANJ
+      Dash0-Dataset: default
 
 
     
@@ -33,15 +39,15 @@ service:
     traces:
       receivers: [otlp]
       processors: [resourcedetection, memory_limiter, transform, batch, transform/type_classifier]
-      exporters: [otlp, otlphttp/tempo, debug, spanmetrics, servicegraph]
+      exporters: [otlp, otlphttp/tempo, debug, spanmetrics, servicegraph, otlphttp/dash0]
     metrics:
       receivers: [docker_stats, httpcheck/frontend-proxy, hostmetrics, nginx, otlp, postgresql, redis, spanmetrics, servicegraph]
       processors: [resourcedetection, memory_limiter, batch, metricstransform]
-      exporters: [otlp, otlphttp/prometheus, debug]
+      exporters: [otlp, otlphttp/prometheus, debug, otlphttp/dash0]
     logs:
       receivers: [otlp]
       processors: [resourcedetection, memory_limiter, transform, batch]
-      exporters: [otlp, opensearch, otlphttp/loki, debug]
+      exporters: [otlp, opensearch, otlphttp/loki, debug, otlphttp/dash0]
 
 processors:
   # var olan memory_limiter / batch varsa kalsın; aşağıdaki yeni blokları ekliyoruz/override ediyoruz
