@@ -8,9 +8,8 @@ import { TempoApi } from '../../providers';
 import BaseContainer from '../../components/core/basecontainer/basecontainer';
 import { Spin } from 'antd';
 import ServiceLegendPanel from './ServiceLegend/ServiceLegend';
-import { FiDatabase, FiZap, FiBox } from 'react-icons/fi';
+import { FiBox } from 'react-icons/fi';
 import { useAppSelector } from '../../store/hooks';
-import { MdHttp } from 'react-icons/md';
 
 const COLORS = [
   '#1890ff',
@@ -54,132 +53,274 @@ interface TraceDetailContainerProps {
 
 const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId }) => {
   const [traceData, setTraceData] = useState<SpanNode[]>([]);
+  const [filteredTraceData, setFilteredTraceData] = useState<SpanNode[]>([]);
   const [selectedSpanId, setSelectedSpanId] = useState<string | null>(null);
   const [gridWidth, setGridWidth] = useState(0);
+  const [selectedOperationTypes, setSelectedOperationTypes] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasError, setHasError] = useState<boolean>(false);
   const { selectedUid } = useAppSelector((state) => state.datasource);
 
   const flattenSpans = (nodes: SpanNode[]): SpanNode[] =>
     nodes.flatMap((n) => [n, ...(n.children ? flattenSpans(n.children) : [])]);
 
+  const getOperationType = (s: any): string => {
+    let type = s.tags['type'];
+    
+    if (type === 'http') {
+      return 'HTTP';
+    }
+    else if (type === 'messaging') {
+      return 'MESSAGING';
+    }
+    else if (type === 'cache') {
+      return 'CACHE';
+    }
+    else if (type === 'database') {
+      return 'DATABASE';
+    }
+    else if (type === 'rpc') {
+      return 'RPC';
+    }
+    else {
+      const name = s.serviceName?.toLowerCase() || '';
+      if (Object.keys(s.tags).includes('http.method') || name.includes('http')) {
+        return 'HTTP';
+      }
+      if (
+        ['postgre', 'postgresql', 'mysql', 'mariadb', 'mongo', 'mongodb', 'db', 'database'].some((db) =>
+          name.includes(db)
+        )
+      ) {
+        return 'DATABASE';
+      }
+      const netPeerName = s.tags['net.peer.name'];
+      if (
+        ['postgre', 'postgresql', 'mysql', 'mariadb', 'mongo', 'mongodb', 'db', 'database'].some((db) =>
+          name.includes(db)
+        ) &&
+        netPeerName
+      ) {
+        return 'DATABASE';
+      }
+      if (name.includes('redis') || name.includes('cache')) {
+        return 'CACHE';
+      }
+      return 'GENERAL';
+    }
+  };
+
   const getServiceIcon = (serviceName: string, s: any) => {
     console.log('span', s);
-    const name = serviceName.toLowerCase();
-    if (Object.keys(s.tags).includes('http.method') || name.includes('http')) {
-      return <MdHttp />;
-    }
-    if (
-      ['postgre', 'postgresql', 'mysql', 'mariadb', 'mongo', 'mongodb', 'db', 'database'].some((db) =>
-        name.includes(db)
-      )
-    ) {
-      return <FiDatabase />;
-    }
-    const netPeerName = s.tags['net.peer.name'];
-    if (
-      ['postgre', 'postgresql', 'mysql', 'mariadb', 'mongo', 'mongodb', 'db', 'database'].some((db) =>
-        name.includes(db)
-      ) &&
-      netPeerName
-    ) {
-      return <FiDatabase />;
-    }
-    if (name.includes('redis') || name.includes('cache')) {
-      return <FiZap />;
-    }
-    return <FiBox />;
+
+    const operationType = getOperationType(s);
+    
+
+    const OPERATION_TYPES = [
+      { type: 'HTTP', color: 'blue', icon: '🌐' },
+      { type: 'MESSAGING', color: 'orange', icon: '💬' },
+      { type: 'CACHE', color: 'purple', icon: '⚡' },
+      { type: 'DATABASE', color: 'green', icon: '🗄️' },
+      { type: 'RPC', color: 'red', icon: '🔄' },
+    ];
+    
+    return OPERATION_TYPES.find((type) => type.type === operationType)?.icon || <FiBox />;
   };
 
   useEffect(() => {
     const fetchTrace = async () => {
-      const trace = await TempoApi.getTrace(traceId);
+      try {
+        setIsLoading(true);
+        setHasError(false);
+        
+        const trace = await TempoApi.getTrace(traceId);
 
-      const spans: SpanNode[] = trace.batches.flatMap((batch: any) =>
-        batch.scopeSpans.flatMap((scopeSpan: any) =>
-          scopeSpan.spans.map((span: any) => {
-            const serviceName = batch.resource.attributes.find((attr: any) => attr.key === 'service.name')?.value
-              ?.stringValue;
-            const statusCode = span.attributes.find((attr: any) => attr.key === 'otel.status_code')?.value?.stringValue;
-            const tags = Object.fromEntries(
-              span.attributes.map((attr: any) => [
-                attr.key,
-                attr.value.stringValue || attr.value.intValue || attr.value.boolValue || '',
-              ])
-            );
+        if (!trace || !trace.batches || trace.batches.length === 0) {
+          console.log('No trace data received');
+          setTraceData([]);
+          setFilteredTraceData([]);
+          setIsLoading(false);
+          return;
+        }
 
-            return {
-              id: span.spanId,
-              parentId: span.parentSpanId || null,
-              serviceName,
-              name: span.name,
-              startTime: Number(span.startTimeUnixNano),
-              endTime: Number(span.endTimeUnixNano),
-              durationMs: (Number(span.endTimeUnixNano) - Number(span.startTimeUnixNano)) / 1e6,
-              statusCode,
-              tags,
-            };
-          })
-        )
-      );
+        const spans: SpanNode[] = trace.batches.flatMap((batch: any) =>
+          batch.scopeSpans.flatMap((scopeSpan: any) =>
+            scopeSpan.spans.map((span: any) => {
+              const serviceName = batch.resource.attributes.find((attr: any) => attr.key === 'service.name')?.value
+                ?.stringValue;
+              const statusCode = span.attributes.find((attr: any) => attr.key === 'otel.status_code')?.value?.stringValue;
+              const tags = Object.fromEntries(
+                span.attributes.map((attr: any) => [
+                  attr.key,
+                  attr.value.stringValue || attr.value.intValue || attr.value.boolValue || '',
+                ])
+              );
 
-      const buildTree = (spans: SpanNode[]): SpanNode[] => {
-        const idSet = new Set(spans.map((s) => s.id));
-        const rootCandidates = spans.filter((s) => !s.parentId || !idSet.has(s.parentId));
-        const build = (parentId: string): SpanNode[] =>
-          spans
-            .filter((s) => s.parentId === parentId)
-            .map((s) => ({
-              ...s,
-              children: build(s.id),
-            }));
-      
-        return rootCandidates.map((s) => ({
-          ...s,
-          children: build(s.id),
-        }));
-      };
+              return {
+                id: span.spanId,
+                parentId: span.parentSpanId || null,
+                serviceName,
+                name: span.name,
+                startTime: Number(span.startTimeUnixNano),
+                endTime: Number(span.endTimeUnixNano),
+                durationMs: (Number(span.endTimeUnixNano) - Number(span.startTimeUnixNano)) / 1e6,
+                statusCode,
+                tags,
+              };
+            })
+          )
+        );
+
+        if (spans.length === 0) {
+          console.log('No spans found in trace data');
+          setTraceData([]);
+          setFilteredTraceData([]);
+          setIsLoading(false);
+          return;
+        }
+
+        const buildTree = (spans: SpanNode[]): SpanNode[] => {
+          const idSet = new Set(spans.map((s) => s.id));
+          const rootCandidates = spans.filter((s) => !s.parentId || !idSet.has(s.parentId));
+          const build = (parentId: string): SpanNode[] =>
+            spans
+              .filter((s) => s.parentId === parentId)
+              .map((s) => ({
+                ...s,
+                children: build(s.id),
+              }));
+        
+          return rootCandidates.map((s) => ({
+            ...s,
+            children: build(s.id),
+          }));
+        };
+        
         const result = buildTree(spans);
-      setTraceData(result);
+        setTraceData(result);
+        setFilteredTraceData(result);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching trace:', error);
+        setHasError(true);
+        setIsLoading(false);
+        setTraceData([]);
+        setFilteredTraceData([]);
+      }
     };
 
     fetchTrace();
   }, [traceId, selectedUid]);
 
-  const spans = useMemo(() => flattenSpans(traceData), [traceData]);
-  const minStartTime = Math.min(...spans.map((s) => s.startTime));
-  const maxEndTime = Math.max(...spans.map((s) => s.endTime));
-  const selectedSpan = spans.find((s) => s.id === selectedSpanId);
+  // Filter trace data based on selected operation types
+  useEffect(() => {
+    console.log('Filtering effect triggered. Selected types:', selectedOperationTypes);
+    console.log('Original trace data length:', traceData.length);
+    
+    if (selectedOperationTypes.length === 0) {
+      console.log('No filters selected, showing all spans');
+      setFilteredTraceData(traceData);
+      return;
+    }
+
+    const filterSpans = (nodes: SpanNode[]): SpanNode[] => {
+      return nodes.filter(node => {
+        const operationType = getOperationType(node);
+        const matchesFilter = selectedOperationTypes.includes(operationType);
+        
+        console.log(`Span ${node.serviceName} -> ${node.name}: operationType=${operationType}, matches=${matchesFilter}`);
+        
+        // If this node matches, include it and all its children
+        if (matchesFilter) {
+          return true;
+        }
+        
+        // If this node doesn't match but has children that might match, check children
+        if (node.children && node.children.length > 0) {
+          const filteredChildren = filterSpans(node.children);
+          if (filteredChildren.length > 0) {
+            // Update the node with filtered children
+            node.children = filteredChildren;
+            return true;
+          }
+        }
+        
+        return false;
+      });
+    };
+
+    const filtered = filterSpans(traceData);
+    console.log('Filtered trace data length:', filtered.length);
+    setFilteredTraceData(filtered);
+  }, [traceData, selectedOperationTypes]);
+
+  const allSpans = useMemo(() => flattenSpans(traceData), [traceData]);
+  const minStartTime = allSpans.length > 0 ? Math.min(...allSpans.map((s) => s.startTime)) : 0;
+  const maxEndTime = allSpans.length > 0 ? Math.max(...allSpans.map((s) => s.endTime)) : 0;
+  const selectedSpan = allSpans.find((s) => s.id === selectedSpanId);
 
   const serviceMetaMap = useMemo(() => {
-    const map: Record<string, { color: string; icon: JSX.Element }> = {};
-    spans.forEach((s, i) => {
+    const map: Record<string, { color: string; icon: JSX.Element; operationType: string }> = {};
+    allSpans.forEach((s, i) => {
       if (!map[s.serviceName]) {
         map[s.serviceName] = {
           color: COLORS[i % COLORS.length],
-          icon: getServiceIcon(s.serviceName, s),
+          icon: getServiceIcon(s.serviceName, s) as JSX.Element,
+          operationType: getOperationType(s),
         };
       }
     });
+
+    console.log('serviceMetaMap', map);
     return map;
-  }, [spans]);
+  }, [allSpans]);
+
+  const handleOperationTypeFilter = (selectedTypes: string[]) => {
+    console.log('Filtering by operation types:', selectedTypes);
+    setSelectedOperationTypes(selectedTypes);
+  };
 
   return (
     <BaseContainer title="Trace Detail">
       <TraceMetaHeader
         traceId={traceId}
-        serviceName={spans[0]?.serviceName}
-        httpMethod={spans[0]?.tags?.['http.method']}
-        startTimeUnixNano={spans[0]?.startTime}
-        durationMs={(maxEndTime - minStartTime) / 1e6}
-        totalSpans={spans.length}
-        errorSpans={spans.filter((s) => s.statusCode === 'ERROR').length}
+        serviceName={allSpans[0]?.serviceName || 'Unknown'}
+        httpMethod={allSpans[0]?.tags?.['http.method']}
+        startTimeUnixNano={allSpans[0]?.startTime || 0}
+        durationMs={allSpans.length > 0 ? (maxEndTime - minStartTime) / 1e6 : 0}
+        totalSpans={allSpans.length}
+        errorSpans={allSpans.filter((s) => s.statusCode === 'ERROR').length}
       />
-      <ServiceLegendPanel serviceMetaMap={serviceMetaMap} />
+      <ServiceLegendPanel 
+        serviceMetaMap={serviceMetaMap} 
+        onOperationTypeFilter={handleOperationTypeFilter}
+      />
       <TimelineHeader startTime={minStartTime} endTime={maxEndTime} setGridWidth={setGridWidth} />
       <div className="trace-detail-body">
         <div className="trace-flamegraph">
-          {gridWidth > 0 ? (
+          {isLoading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+              <Spin size="large" />
+              <span style={{ marginLeft: '8px' }}>Loading trace data...</span>
+            </div>
+          ) : hasError ? (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px', flexDirection: 'column' }}>
+              <div style={{ color: '#ff4d4f', fontSize: '16px', marginBottom: '8px' }}>Error loading trace</div>
+              <div style={{ color: '#8c8c8c', fontSize: '14px' }}>Unable to fetch trace data. Please try again.</div>
+            </div>
+          ) : filteredTraceData.length === 0 ? (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px', flexDirection: 'column' }}>
+              <div style={{ color: '#8c8c8c', fontSize: '16px', marginBottom: '8px' }}>No trace data found</div>
+              <div style={{ color: '#666', fontSize: '14px' }}>
+                {selectedOperationTypes.length > 0 
+                  ? 'No spans match the selected operation types.' 
+                  : 'This trace contains no spans or the trace ID is invalid.'
+                }
+              </div>
+            </div>
+          ) : gridWidth > 0 ? (
             <FlameGraph
-              data={traceData}
+              data={filteredTraceData}
               selectedSpanId={selectedSpanId}
               onSpanSelect={(id) => setSelectedSpanId(id)}
               gridWidth={gridWidth}
@@ -188,7 +329,7 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId }) 
           ) : (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
               <Spin size="large" />
-              <span style={{ marginLeft: '8px' }}>Loading flamegraph...</span>
+              <span style={{ marginLeft: '8px' }}>Preparing flamegraph...</span>
             </div>
           )}
         </div>

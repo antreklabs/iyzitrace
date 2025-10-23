@@ -16,6 +16,7 @@ const ServiceFilter: React.FC<ServiceFilterProps> = ({ onChange, collapsed, colu
       collapsed={collapsed}
       columns={columns}
       hasServiceFilter={true}
+      hasTypesFilter={true}
       hasDurationFilter={false}
       hasTagsFilter={false}
       hasLabelsFilter={false}

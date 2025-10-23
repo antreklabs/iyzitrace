@@ -24,6 +24,7 @@ interface BaseFilterProps {
   hasOptionsFilter?: boolean;
   hasLabelsFilter?: boolean;
   hasFieldsFilter?: boolean;
+  hasTypesFilter?: boolean;
   columns?: any[];
   data?: any[]; // Grid data to extract fields from
   datasourceType?: 'tempo' | 'loki';
@@ -42,12 +43,14 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
   hasLabelsFilter = false,
   hasOptionsFilter = false,
   hasFieldsFilter = false,
+  hasTypesFilter = false,
   columns = [],
   data = [],
   datasourceType = 'tempo',
   onExpressionUpdate
 }) => {
   const [services, setServices] = useState<string[]>([]);
+  const [types, setTypes] = useState<string[]>([]);
   const [labels, setLabels] = useState<string[]>([]);
   const [operations, setOperations] = useState<string[]>([]);
   const [statuses, setStatuses] = useState<string[]>([]);
@@ -76,6 +79,12 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     const values = await tempoReadApi.getLabelValues('status');
     const statuses: string[] = Array.isArray(values) ? values : [];
     setStatuses(statuses);
+  };
+
+  const fetchTypes = async () => {
+    const values = await tempoReadApi.getLabelValues('type');
+    const types: string[] = Array.isArray(values) ? values : [];
+    setTypes(types);
   };
 
   const fetchLabels = async () => {
@@ -136,6 +145,11 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     if (selectedService) {
       parts.push(`service_name${selectedServiceNameOperator}"${selectedService}"`);
     }
+    const selectedType = formValues?.filters?.type;
+    const selectedTypeOperator = formValues?.filters?.typeOperator || '=';
+    if (selectedType) {
+      parts.push(`type${selectedTypeOperator}"${selectedType}"`);
+    }
     
     // Add dynamic label filters
     const labelFilters = formValues?.labels || {};
@@ -184,7 +198,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       if (hasServiceFilter) await fetchServices();
       if (hasLabelsFilter)  await fetchLabels();
       if (hasOperationsFilter) await fetchOperations();
-  
+      if (hasTypesFilter) await fetchTypes();
       // timeSrv/DS sync için 1 frame beklet
       await new Promise(r => requestAnimationFrame(() => r(null)));
   
@@ -404,6 +418,40 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                   return (
                     <Option key={serviceKey} value={serviceValue}>
                       {serviceValue}
+                    </Option>
+                  );
+                })}
+              </Select>
+            </Form.Item>
+          </Space.Compact>
+        
+        </Form.Item>
+      )}
+      {hasTypesFilter && (
+        <Form.Item label="Type">
+          <Space.Compact className="filter-compact-space">
+            <Form.Item name={['filters', 'typeOperator']} noStyle initialValue="=">
+              <Select className="filter-operator-select">
+                {EQUAL_OPERATOR_OPTIONS.map((op) => (
+                  <Option key={op} value={op}>
+                    {op}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item name={['filters', 'type']} noStyle>
+              <Select
+                showSearch
+                allowClear
+                placeholder="Select type"
+                className="filter-value-select"
+              >
+                {types.map((type) => {
+                  const typeValue = typeof type === 'string' ? type : (type as any)?.text || (type as any)?.value || String(type);
+                  const typeKey = typeof type === 'string' ? type : (type as any)?.text || (type as any)?.value || String(type);
+                  return (
+                    <Option key={typeKey} value={typeValue}>
+                      {typeValue}
                     </Option>
                   );
                 })}

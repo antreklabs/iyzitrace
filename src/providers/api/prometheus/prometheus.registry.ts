@@ -19,6 +19,7 @@ export type MetricKey = keyof typeof MetricKeys;
 export const LabelKeys = {
   service: 'service_name',
   span_name: 'span_name',
+  type: 'type',
 } as const;
 
 export type LabelKey = keyof typeof LabelKeys;
@@ -90,6 +91,7 @@ export const DEFAULT_METRICS: Record<MetricKey, string> = {
 export const DEFAULT_LABELS: Record<LabelKey, string> = {
   service: LabelKeys.service,
   span_name: LabelKeys.span_name,
+  type: LabelKeys.type,
 };
 
 // Default query builders constructed from metrics/labels
@@ -98,7 +100,7 @@ const defaultQueryBuilders: ResolvedPrometheusConfig['queries'] = {
     `count(count by (${cfg.labels.span_name}) (rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])))`,
 
   totalCalls: ({ serviceName, windowSeconds }, cfg) =>
-    `sum(increase(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name})`,
+    `sum(increase(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}, ${cfg.labels.type})`,
 
   maxLatencySpan: ({ serviceName, windowSeconds }, cfg) =>
     `topk(1, sum_over_time(${cfg.metrics.traces_spanmetrics_latency_sum}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s]) / sum_over_time(${cfg.metrics.traces_spanmetrics_latency_count}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name})`,
@@ -108,13 +110,13 @@ const defaultQueryBuilders: ResolvedPrometheusConfig['queries'] = {
 
   // CallMetrics queries (use fixed 1m rate window as in UI today)
   p50Latency: ({ serviceName, windowSeconds }, cfg) =>
-    `histogram_quantile(0.50, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}, le))`,
+    `histogram_quantile(0.50, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}, ${cfg.labels.type}, le))`,
   
   p90Latency: ({ serviceName, windowSeconds }, cfg) =>
-    `histogram_quantile(0.90, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}, le))`,
+    `histogram_quantile(0.90, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}, ${cfg.labels.type}, le))`,
   
   p99Latency: ({ serviceName, windowSeconds }, cfg) =>
-    `histogram_quantile(0.99, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}, le))`,
+    `histogram_quantile(0.99, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}, ${cfg.labels.type}, le))`,
   
   callsPerSecond: ({ serviceName, windowSeconds }, cfg) =>
     `sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name})`,
@@ -153,7 +155,7 @@ const defaultQueryBuilders: ResolvedPrometheusConfig['queries'] = {
 
   // TraceQLBuilder queries (span-specific)
   errorRate: ({ spanName, rateInterval = '5m' }, cfg) =>
-    `sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}", status_code!="STATUS_CODE_UNSET"}[${rateInterval}])) / sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}"}[${rateInterval}])) by (${cfg.labels.span_name})`,
+    `sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}", status_code!="STATUS_CODE_UNSET"}[${rateInterval}])) / sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}"}[${rateInterval}])) by (${cfg.labels.span_name}, ${cfg.labels.type})`,
   
   opsPerSec: ({ spanName, rateInterval = '5m' }, cfg) =>
     `sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}"}[${rateInterval}]))`,
