@@ -3,7 +3,7 @@ import { Layout, Table, Spin, Empty } from 'antd';
 import { IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
 import { useAppSelector } from '../store/hooks';
 import { useParams, useLocation } from 'react-router-dom';
-import BaseContainer from '../components/core/basecontainer/basecontainer';
+import BaseContainer from '../components/core/basecontainer/basecontainer.component';
 import GrafanaLikeRangePicker from '../components/core/graphanadatepicker';
 import FiltersSider from '../components/core/layout/filters-sider.component';
 import { getPageState, updatePageState, getDefaultPageState, savePageState, PageState } from '../utils/localstorage.util';

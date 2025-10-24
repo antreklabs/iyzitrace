@@ -1,21 +1,14 @@
 import React, { useRef, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import BaseContainerComponent, { PageState, getPageState } from '../base.container';
+import { useNavigate } from 'react-router-dom';
+import BaseContainerComponent, { PageState } from '../base.container';
 import TraceFilter from './trace.filter';
-import TraceExpandedRowComponent from '../../components/trace/trace.container.expanded-row.component';
 import TraceMetricsCard from '../../components/trace/trace.container.card.component';
 import { TraceItem } from '../../interfaces/pages/trace/trace.response.interface';
-// import { TempoRequestModel } from '../../interfaces/tempo/tempo.request.interface';
-// import { getIntervalLabel } from '../../utils/extensions.utils';
 import { tempoReadApi } from '../../providers/api/tempo/tempo.api.read';
 import dayjs from 'dayjs';
-// import { dateTime } from '@grafana/data';
 
 const TraceContainer: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const pageName = location.pathname.split('/').filter(Boolean).join('_') || 'home';
-  const currentPageState = getPageState(pageName);
   const [statsData, setStatsData] = useState<any[]>([]);
 
   const fetchModelData = async (pageState?: PageState | null): Promise<TraceItem[]> => {
@@ -209,12 +202,6 @@ const TraceContainer: React.FC = () => {
     setStatsData(statsData);
   };
 
-  const expandedRowRender = (record: any) => {
-    const start = currentPageState?.range?.[0] || (Date.now() - 60 * 60 * 1000); // Default: 1 hour ago
-    const end = currentPageState?.range?.[1] || Date.now(); // Default: now
-    return <TraceExpandedRowComponent record={record} start={start} end={end} />;
-  };
-
   const columns = [
     {
       title: 'Trace ID',
@@ -298,7 +285,7 @@ const TraceContainer: React.FC = () => {
       title="Traces"
       initialFilterCollapsed={false}
       onFetchData={fetchModelData}
-      onExpandedRowRender={expandedRowRender}
+      onExpandedRowRender={() => null}
       showExpandableRowRender={false}
       columns={columns}
       filterComponent={<TraceFilter onChange={fetchModelData} collapsed={false} columns={columns} />}

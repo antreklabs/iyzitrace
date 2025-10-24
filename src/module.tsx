@@ -1,9 +1,9 @@
 import React, { Suspense, lazy } from 'react';
 import { AppPlugin, type AppRootProps, type PluginConfigPageProps, type AppPluginMeta } from '@grafana/data';
-import { ConfigPage } from './plugins/config/ConfigPage';
 import { LoadingPlaceholder } from '@grafana/ui';
+import SettingsPage from './pages/settings/settings.page';
 
-const LazyApp = lazy(() => import('./components/App/App'));
+const LazyApp = lazy(() => import('./components/app/app'));
 // (no app-config page here)
 
 const App = (props: AppRootProps) => (
@@ -19,6 +19,6 @@ export const plugin = new AppPlugin<{}>()
   .addConfigPage({
     title: 'Configuration',
     icon: 'cog',
-    body: (props: PluginConfigPageProps<AppPluginMeta<{}>>) => <ConfigPage {...(props as any)} />,
+    body: (props: PluginConfigPageProps<AppPluginMeta<{}>>) => <SettingsPage {...(props as any)} />,
     id: 'configuration',
   });

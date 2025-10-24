@@ -82,7 +82,7 @@ const Sidebar: React.FC = () => {
         }}
         items={[
           { key: 'landing-page', icon: <HomeOutlined style={{ fontSize: 16 }} />, label: 'Home' },
-          { key: 'landing', icon: <BuildOutlined style={{ fontSize: 16 }} />, label: 'Infra Overview' },
+          { key: 'landing', icon: <BuildOutlined style={{ fontSize: 16 }} />, label: 'Overview' },
           { key: 'map-3d', icon: <DeploymentUnitOutlined style={{ fontSize: 16 }} />, label: 'Service Map' },
           { key: 'services-v2', icon: <BarChartOutlined style={{ fontSize: 16 }} />, label: 'Services' },  
           { key: 'traces-v2', icon: <FileSearchOutlined style={{ fontSize: 16 }} />, label: 'Traces' },

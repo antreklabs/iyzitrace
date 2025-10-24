@@ -28,7 +28,7 @@
     },
     {
       "type": "page",
-      "name": "Infra Overview",
+      "name": "Overview",
       "path": "/a/iyzitrace-app/landing",
       "addToNav": true,
       "showingTabs": false,

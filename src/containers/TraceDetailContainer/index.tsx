@@ -5,7 +5,7 @@ import TimelineHeader from './TimelineHeader/TimelineHeader';
 import FlameGraph from './FlameGraph/FlameGraph';
 import SelectedSpanDetails from './SelectedSpanDetails/SelectedSpanDetails';
 import { TempoApi } from '../../providers';
-import BaseContainer from '../../components/core/basecontainer/basecontainer';
+import BaseContainer from '../../components/core/basecontainer/basecontainer.component';
 import { Spin } from 'antd';
 import ServiceLegendPanel from './ServiceLegend/ServiceLegend';
 import { FiBox } from 'react-icons/fi';

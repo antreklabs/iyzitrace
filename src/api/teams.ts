@@ -417,7 +417,7 @@ export const mockTeamsData = {
     },
     {
       id: '5',
-      name: 'Infra Overview',
+      name: 'Overview',
       route: '/landing',
       description: 'High-level infrastructure health',
       icon: '🏠',
