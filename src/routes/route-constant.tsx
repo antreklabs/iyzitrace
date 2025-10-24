@@ -23,6 +23,8 @@ const SettingsPage = React.lazy(() => import('../pages/settings.page'));
 const TeamsPage = React.lazy(() => import('../pages/teams/teams.page'));
 const TeamsManagePage = React.lazy(() => import('../pages/teams/teams-manage.page'));
 const AlertsPage = React.lazy(() => import('../pages/alerts/alerts.page'));
+const ExceptionsPage = React.lazy(() => import('../pages/exceptions/exceptions.page'));
+const ExceptionDetailPage = React.lazy(() => import('../pages/exceptions/exception-detail.page'));
 
 export const appRoutes: AppRoute[] = [
   {
@@ -69,7 +71,7 @@ export const appRoutes: AppRoute[] = [
     path: '/service-map-v2',
     element: <ServiceMapV2 />,
     name: 'serviceMapV2',
-    title: 'Service Map v2',
+    title: 'Service Map',
     icon: 'search',
     showInMenu: true,
   },
@@ -109,7 +111,7 @@ export const appRoutes: AppRoute[] = [
     path: '/traces-v2',
     element: <TracesV2 />,
     name: 'tracesV2',
-    title: 'Traces v2',
+    title: 'Traces',
     icon: 'search',
     showInMenu: true,
   },
@@ -125,7 +127,7 @@ export const appRoutes: AppRoute[] = [
     path: '/logs-v2',
     element: <LogsV2Page />,
     name: 'logsV2',
-    title: 'Logs v2',
+    title: 'Logs',
     icon: 'search',
     showInMenu: true,
   },
@@ -155,23 +157,16 @@ export const appRoutes: AppRoute[] = [
   },
   {
     path: '/',
-    element: <Dashboard />,
-    name: 'dashboard',
-    title: 'Dashboard',
+    element: <LandingPage />,
+    name: 'landingPage',
+    title: 'Home',
     showInMenu: true,
   },
   {
     path: '/dashboards',
     element: <Dashboard />,
     name: 'dashboards',
-    title: 'Dashboards',
-    showInMenu: true,
-  },
-  {
-    path: '/exceptions',
-    element: <ComingSoon title="Exceptions – Coming Soon" />,
-    name: 'exceptions',
-    title: 'Exceptions',
+    title: 'Views',
     showInMenu: true,
   },
   {
@@ -194,6 +189,20 @@ export const appRoutes: AppRoute[] = [
     name: 'alerts',
     title: 'Alerts',
     showInMenu: true,
+  },
+  {
+    path: '/exceptions',
+    element: <ExceptionsPage />,
+    name: 'exceptions',
+    title: 'Exceptions',
+    showInMenu: true,
+  },
+  {
+    path: '/exceptions/:groupId',
+    element: <ExceptionDetailPage />,
+    name: 'exceptionDetail',
+    title: 'Exception Detail',
+    showInMenu: false,
   },
   {
     path: '/team',

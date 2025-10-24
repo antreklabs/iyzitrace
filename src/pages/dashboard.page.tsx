@@ -198,9 +198,9 @@ function DashboardPage() {
       <div style={{ padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div>
-            <Title level={2} style={{ color: 'white', margin: 0 }}>Dashboard</Title>
+            <Title level={2} style={{ color: 'white', margin: 0 }}>Views</Title>
             <Text style={{ color: '#8c8c8c' }}>
-              Manage your monitoring widgets and quick access to different views
+              Manage your views and quick access to different screens
             </Text>
           </div>
           <Button
@@ -208,7 +208,7 @@ function DashboardPage() {
             icon={<PlusOutlined />}
             onClick={handleAddWidget}
           >
-            Add Widget
+            Add View
           </Button>
         </div>
 
@@ -217,9 +217,9 @@ function DashboardPage() {
             image={Empty.PRESENTED_IMAGE_SIMPLE}
             description={
               <div>
-                <Text style={{ color: '#8c8c8c' }}>No widgets added to dashboard yet.</Text>
+                <Text style={{ color: '#8c8c8c' }}>No views added yet.</Text>
                 <p style={{ color: '#595959', fontSize: '12px', marginTop: '8px' }}>
-                  Click "Add Widget" to create your first dashboard widget, or use "Add to Dashboard" from other pages.
+                  Click "Add View" to create your first view, or use "Save as View" from other pages.
                 </p>
               </div>
             }
@@ -232,7 +232,7 @@ function DashboardPage() {
 
         {/* Add/Edit Widget Modal */}
         <Modal
-          title={editingWidget ? 'Edit Widget' : 'Add Widget to Dashboard'}
+          title={editingWidget ? 'Edit View' : 'Add View to Dashboard'}
           open={modalVisible}
           onOk={handleModalOk}
           onCancel={handleModalCancel}
@@ -249,23 +249,25 @@ function DashboardPage() {
             }}
           >
             <Form.Item
-              label="Widget Title"
+              label="View Title"
               name="title"
-              rules={[{ required: true, message: 'Please enter widget title' }]}
+              rules={[{ required: true, message: 'Please enter view title' }]}
             >
-              <Input placeholder="Enter widget title" />
+              <Input placeholder="Enter view title" />
             </Form.Item>
 
             <Form.Item
-              label="Widget Type"
+              label="View Type"
               name="type"
-              rules={[{ required: true, message: 'Please select widget type' }]}
+              rules={[{ required: true, message: 'Please select view type' }]}
             >
-              <Select placeholder="Select widget type">
-                <Option value="logs">Logs</Option>
-                <Option value="traces">Traces</Option>
+              <Select placeholder="Select view type">
+                <Option value="serviceMap">Service Map</Option>
                 <Option value="services">Services</Option>
-                <Option value="metrics">Metrics</Option>
+                <Option value="traces">Traces</Option>
+                <Option value="logs">Logs</Option>
+                <Option value="alerts">Alerts</Option>
+                <Option value="exceptions">Exceptions</Option>
               </Select>
             </Form.Item>
 
@@ -295,7 +297,7 @@ function DashboardPage() {
               name="description"
             >
               <Input.TextArea 
-                placeholder="Optional description for this widget"
+                placeholder="Optional description for this view"
                 rows={2}
               />
             </Form.Item>
