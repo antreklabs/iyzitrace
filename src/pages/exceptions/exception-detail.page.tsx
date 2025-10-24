@@ -1,0 +1,510 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Button,
+  message,
+  Table,
+} from 'antd';
+import {
+  ArrowLeftOutlined,
+  LeftOutlined,
+  RightOutlined,
+  LinkOutlined,
+  CodeOutlined,
+} from '@ant-design/icons';
+import { css } from '@emotion/css';
+import { useNavigate, useParams } from 'react-router-dom';
+import { api, type ExceptionDetail, type ExceptionNavigation } from '../../api/exceptions';
+import pluginJson from '../../plugin.json';
+
+const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
+
+const getStyles = () => ({
+  container: css`
+    padding: 24px;
+    background: #0f0f0f;
+    min-height: 100vh;
+    color: #fff;
+  `,
+  header: css`
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+  `,
+  breadcrumb: css`
+    color: #8c8c8c;
+    font-size: 14px;
+    margin-bottom: 16px;
+  `,
+  backButton: css`
+    background: #1f1f1f;
+    border: 1px solid #404040;
+    color: #fff;
+    margin-bottom: 16px;
+    
+    &:hover {
+      background: #2a2a2a;
+      border-color: #555;
+    }
+  `,
+  exceptionInfo: css`
+    flex: 1;
+  `,
+  exceptionType: css`
+    font-size: 24px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 8px 0;
+  `,
+  errorMessage: css`
+    color: #8c8c8c;
+    font-size: 14px;
+    margin-bottom: 16px;
+    word-break: break-all;
+  `,
+  eventInfo: css`
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  `,
+  eventId: css`
+    color: #8c8c8c;
+    font-family: monospace;
+    font-size: 12px;
+  `,
+  timestamp: css`
+    color: #8c8c8c;
+    font-size: 14px;
+  `,
+  navigationButtons: css`
+    display: flex;
+    gap: 8px;
+  `,
+  navButton: css`
+    background: #1f1f1f;
+    border: 1px solid #404040;
+    color: #fff;
+    
+    &:hover {
+      background: #2a2a2a;
+      border-color: #555;
+    }
+    
+    &:disabled {
+      background: #2a2a2a;
+      border-color: #404040;
+      color: #666;
+      cursor: not-allowed;
+    }
+  `,
+  actionCardsContainer: css`
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  `,
+  actionCard: css`
+    background: #2a2a2a;
+    border: 1px solid #404040;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+  `,
+  actionCardText: css`
+    color: #8c8c8c;
+    margin-bottom: 12px;
+    font-size: 14px;
+  `,
+  serviceButton: css`
+    background: #16a34a;
+    border-color: #16a34a;
+    color: #fff;
+    
+    &:hover {
+      background: #22c55e;
+      border-color: #22c55e;
+    }
+  `,
+  traceButton: css`
+    background: #7c3aed;
+    border-color: #7c3aed;
+    color: #fff;
+    
+    &:hover {
+      background: #8b5cf6;
+      border-color: #8b5cf6;
+    }
+  `,
+  spanButton: css`
+    background: #ea580c;
+    border-color: #ea580c;
+    color: #fff;
+    
+    &:hover {
+      background: #f97316;
+      border-color: #f97316;
+    }
+  `,
+  stacktraceCard: css`
+    background: #1a1a1a;
+    border: 1px solid #404040;
+    border-radius: 8px;
+    margin-bottom: 24px;
+  `,
+  stacktraceHeader: css`
+    background: #2a2a2a;
+    padding: 12px 16px;
+    border-bottom: 1px solid #404040;
+    font-weight: 600;
+    color: #fff;
+  `,
+  stacktraceContent: css`
+    padding: 16px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #e0e0e0;
+    background: #0f0f0f;
+    white-space: pre-wrap;
+    overflow-x: auto;
+  `,
+  keyValueCard: css`
+    background: #1a1a1a;
+    border: 1px solid #404040;
+    border-radius: 8px;
+  `,
+  keyValueHeader: css`
+    background: #2a2a2a;
+    padding: 12px 16px;
+    border-bottom: 1px solid #404040;
+    font-weight: 600;
+    color: #fff;
+  `,
+  keyValueContent: css`
+    padding: 16px;
+  `,
+  keyValueTable: css`
+    .ant-table {
+      background: transparent;
+      color: #fff;
+    }
+    
+    .ant-table-thead > tr > th {
+      background: #2a2a2a;
+      border-bottom: 1px solid #404040;
+      color: #fff;
+    }
+    
+    .ant-table-tbody > tr > td {
+      border-bottom: 1px solid #404040;
+      color: #fff;
+    }
+    
+    .ant-table-tbody > tr:hover > td {
+      background: #2a2a2a;
+    }
+  `,
+  linkButton: css`
+    color: #7c3aed;
+    cursor: pointer;
+    text-decoration: none;
+    
+    &:hover {
+      color: #8b5cf6;
+      text-decoration: underline;
+    }
+  `,
+  monospaceValue: css`
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    color: #8c8c8c;
+  `,
+});
+
+const ExceptionDetailPage: React.FC = () => {
+  const styles = getStyles();
+  const navigate = useNavigate();
+  const { groupId } = useParams<{ groupId: string }>();
+  const [loading, setLoading] = useState(false);
+  const [exception, setException] = useState<ExceptionDetail | null>(null);
+  const [navigation, setNavigation] = useState<ExceptionNavigation | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (groupId) {
+      fetchExceptionDetail(0);
+    }
+  }, [groupId]);
+
+  const fetchExceptionDetail = async (index: number) => {
+    if (!groupId) return;
+    
+    setLoading(true);
+    try {
+      const data = await api.getExceptionDetails(groupId, index);
+      setException(data.exception);
+      setNavigation(data.navigation);
+      setCurrentIndex(index);
+    } catch (error) {
+      console.error('Error fetching exception detail:', error);
+      message.error('Failed to fetch exception details');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNavigate = (direction: 'older' | 'newer') => {
+    if (!navigation) return;
+    
+    const newIndex = direction === 'older' ? currentIndex - 1 : currentIndex + 1;
+    fetchExceptionDetail(newIndex);
+  };
+
+  const handleBack = () => {
+    navigate(`${PLUGIN_BASE_URL}/exceptions`);
+  };
+
+  const handleLinkClick = (type: 'service' | 'trace' | 'span' | 'logs', value: string) => {
+    switch (type) {
+      case 'service':
+        navigate(`${PLUGIN_BASE_URL}/services/${value}`);
+        break;
+      case 'trace':
+        navigate(`${PLUGIN_BASE_URL}/traces/${value}`);
+        break;
+      case 'span':
+        navigate(`${PLUGIN_BASE_URL}/traces/${exception?.traceId}?spanId=${value}`);
+        break;
+      case 'logs':
+        navigate(`${PLUGIN_BASE_URL}/logs?query=${encodeURIComponent(value)}`);
+        break;
+    }
+  };
+
+  const getKeyValueColumns = () => [
+    {
+      title: 'Key',
+      dataIndex: 'key',
+      key: 'key',
+      width: 200,
+      render: (text: string) => (
+        <span style={{ color: '#fff', fontWeight: 500 }}>{text}</span>
+      ),
+    },
+    {
+      title: 'Value',
+      dataIndex: 'value',
+      key: 'value',
+      render: (value: any, record: { key: string }) => {
+        const key = record.key.toLowerCase();
+        
+        // Service link
+        if (key.includes('service') && typeof value === 'string') {
+          return (
+            <Button
+              type="link"
+              className={styles.linkButton}
+              onClick={() => handleLinkClick('service', value)}
+              icon={<LinkOutlined />}
+            >
+              {value}
+            </Button>
+          );
+        }
+        
+        // Trace link
+        if ((key.includes('trace') || key.includes('traceid')) && typeof value === 'string') {
+          return (
+            <Button
+              type="link"
+              className={styles.linkButton}
+              onClick={() => handleLinkClick('trace', value)}
+              icon={<LinkOutlined />}
+            >
+              <span className={styles.monospaceValue}>{value}</span>
+            </Button>
+          );
+        }
+        
+        // Span link
+        if ((key.includes('span') || key.includes('spanid')) && typeof value === 'string') {
+          return (
+            <Button
+              type="link"
+              className={styles.linkButton}
+              onClick={() => handleLinkClick('trace', value)}
+              icon={<LinkOutlined />}
+            >
+              <span className={styles.monospaceValue}>{value}</span>
+            </Button>
+          );
+        }
+        
+        // Log link
+        if (key.includes('log') && typeof value === 'string') {
+          return (
+            <Button
+              type="link"
+              className={styles.linkButton}
+              onClick={() => handleLinkClick('logs', value)}
+              icon={<LinkOutlined />}
+            >
+              {value}
+            </Button>
+          );
+        }
+        
+        // Default value display
+        if (typeof value === 'string' && (value.length > 50 || value.includes('http'))) {
+          return <span className={styles.monospaceValue}>{value}</span>;
+        }
+        
+        return <span style={{ color: '#8c8c8c' }}>{String(value)}</span>;
+      },
+    },
+  ];
+
+  if (loading && !exception) {
+    return (
+      <div className={styles.container}>
+        <div style={{ textAlign: 'center', padding: '40px', color: '#8c8c8c' }}>
+          Loading exception details...
+        </div>
+      </div>
+    );
+  }
+
+  if (!exception) {
+    return (
+      <div className={styles.container}>
+        <div style={{ textAlign: 'center', padding: '40px', color: '#8c8c8c' }}>
+          Exception not found
+        </div>
+      </div>
+    );
+  }
+
+  const keyValueData = Object.entries(exception.keyValuePairs).map(([key, value]) => ({
+    key,
+    value,
+  }));
+
+  return (
+    <div className={styles.container}>
+      {/* Back Button */}
+      <Button
+        className={styles.backButton}
+        icon={<ArrowLeftOutlined />}
+        onClick={handleBack}
+      >
+        Back to Exceptions
+      </Button>
+
+      {/* Header */}
+      <div className={styles.header}>
+        <div className={styles.exceptionInfo}>
+          <h1 className={styles.exceptionType}>{exception.exceptionType}</h1>
+          <div className={styles.errorMessage}>{exception.errorMessage}</div>
+          
+          <div className={styles.eventInfo}>
+            <span className={styles.eventId}>Event {exception.eventId}</span>
+            <span className={styles.timestamp}>{exception.timestamp}</span>
+          </div>
+        </div>
+        
+        <div className={styles.navigationButtons}>
+          <Button
+            className={styles.navButton}
+            icon={<LeftOutlined />}
+            disabled={!navigation?.hasOlder}
+            onClick={() => handleNavigate('older')}
+          >
+            Previous Exception
+          </Button>
+          <Button
+            className={styles.navButton}
+            icon={<RightOutlined />}
+            disabled={!navigation?.hasNewer}
+            onClick={() => handleNavigate('newer')}
+          >
+            Next Exception
+          </Button>
+        </div>
+      </div>
+
+{/* Action Cards */}
+<div className={styles.actionCardsContainer}>
+  {/* Service Card */}
+  <div className={styles.actionCard}>
+    <div className={styles.actionCardText}>
+      View service details and performance metrics for this error
+    </div>
+    <Button
+      className={styles.serviceButton}
+      icon={<CodeOutlined />}
+      onClick={() => handleLinkClick('service', exception.serviceName || exception.application)}
+      disabled={!exception.serviceName && !exception.application}
+    >
+      View Service Details
+    </Button>
+  </div>
+
+  {/* Trace Card */}
+  <div className={styles.actionCard}>
+    <div className={styles.actionCardText}>
+      See what happened before and after this error in a trace graph
+    </div>
+    <Button
+      className={styles.traceButton}
+      icon={<CodeOutlined />}
+      onClick={() => handleLinkClick('trace', exception.traceId || '')}
+      disabled={!exception.traceId}
+    >
+      See the error in trace graph
+    </Button>
+  </div>
+
+  {/* Span Card */}
+  <div className={styles.actionCard}>
+    <div className={styles.actionCardText}>
+      View specific span details and execution context
+    </div>
+    <Button
+      className={styles.spanButton}
+      icon={<CodeOutlined />}
+      onClick={() => handleLinkClick('span', exception.spanId || '')}
+      disabled={!exception.spanId}
+    >
+      View Span Details
+    </Button>
+  </div>
+</div>
+
+      {/* Key-Value Pairs */}
+      <div className={styles.keyValueCard}>
+        <div className={styles.keyValueHeader}>Key-Value Pairs</div>
+        <div className={styles.keyValueContent}>
+          <Table
+            className={styles.keyValueTable}
+            columns={getKeyValueColumns()}
+            dataSource={keyValueData}
+            pagination={false}
+            rowKey="key"
+            size="small"
+          />
+        </div>
+      </div>
+
+{/* Stacktrace */}
+<div className={styles.stacktraceCard}>
+  <div className={styles.stacktraceHeader}>Stacktrace</div>
+  <div className={styles.stacktraceContent}>
+    {exception.stacktrace}
+  </div>
+</div>
+    </div>
+  );
+};
+
+export default ExceptionDetailPage;
