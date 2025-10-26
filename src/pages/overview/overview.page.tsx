@@ -21,7 +21,7 @@ import {
 
 const { Title, Text } = Typography;
 
-const LandingPage: React.FC = () => {
+const OverviewPage: React.FC = () => {
   // Static data for servers
   const servers = [
     {
@@ -403,4 +403,4 @@ const LandingPage: React.FC = () => {
   );
 };
 
-export default LandingPage;
+export default OverviewPage;

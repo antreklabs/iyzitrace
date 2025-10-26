@@ -19,7 +19,7 @@ interface DashboardWidget {
   createdAt: string;
 }
 
-function DashboardPage() {
+function ViewsPage() {
   const [widgets, setWidgets] = useState<DashboardWidget[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingWidget, setEditingWidget] = useState<DashboardWidget | null>(null);
@@ -308,4 +308,4 @@ function DashboardPage() {
   );
 }
 
-export default DashboardPage;
+export default ViewsPage;

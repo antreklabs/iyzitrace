@@ -443,7 +443,7 @@ export function gridLayout(
 }
 
 
-const Map3DPage: React.FC = () => {
+const ServiceMapPage: React.FC = () => {
   const [layer, setLayer] = useState<LayerKey>('infra');
   const [searchValue, setSearchValue] = useState('');
   const [selectedKey, setSelectedKey] = useState<string>('');
@@ -1113,6 +1113,6 @@ const Map3DPage: React.FC = () => {
   );
 };
 
-export default Map3DPage;
+export default ServiceMapPage;
 
 

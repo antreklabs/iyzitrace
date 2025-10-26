@@ -6,19 +6,19 @@ import { setDataSourceUids, setSelectedDataSourceUid } from '../../../store/slic
 import { getDataSourceSrv } from '@grafana/runtime';
 import { getPageState, updatePageState } from '../../../utils';
 import tempoLogoSvg from '../../../assets/images/tempo_logo.svg';
+import GrafanaLikeRangePicker from '../graphanadatepicker';
 
 interface BaseContainerHeaderProps {
   title: string;
-  headerActions?: React.ReactNode;
+  datasourceType?: string;
   children?: React.ReactNode;
-  datasourceType?: 'tempo' | 'loki';
 }
 
-const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, headerActions, children, datasourceType = 'tempo' }) => {
+const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, datasourceType, children }) => {
   const dispatch = useAppDispatch();
   const { selectedUid } = useAppSelector((state) => state.datasource);
   const [allList, setAllList] = useState<any[]>([]);
-
+  const [range, setRange] = useState<[number, number]>([Date.now() - 60 * 15 * 1000, Date.now()]);
   useEffect(() => {
     const loadDatasources = async () => {
       const listFromGrafana = getDataSourceSrv()
@@ -65,17 +65,19 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, header
         wrap={false}
         style={{width: '100%', height: 50 }}
       >
-        {/* Left: Data source selector (and optional children) */}
-        <Col style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Select
-            value={selectedUid ?? undefined}
-            style={{ minWidth: 200 }}
-            onChange={handleChange}
-            placeholder={`Select ${datasourceType === 'loki' ? 'Loki' : 'Tempo'} Instance`}
-            options={allList.map((ds) => ({
-              value: ds.uid,
-              label: (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {datasourceType && (
+          <>
+            {/* Left: Data source selector (and optional children) */}
+            <Col style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <Select
+                value={selectedUid ?? undefined}
+                style={{ minWidth: 200 }}
+                onChange={handleChange}
+                placeholder={`Select ${datasourceType === 'loki' ? 'Loki' : 'Tempo'} Instance`}
+                options={allList.map((ds) => ({
+                  value: ds.uid,
+                  label: (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {ds.type === 'tempo' && <img src={tempoLogoSvg} width={16} height={16} alt="tempo" />}
                   {ds.type === 'loki' && <img src="public/app/plugins/datasource/loki/img/loki_icon.svg" width={16} height={16} alt="loki" />}
                   {ds.type === 'prometheus' && (
@@ -89,20 +91,39 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, header
                   <span>{ds.name}</span>
                 </span>
               ),
-            }))}
-          />
-          {children as any}
-        </Col>
+                }))}
+              />
+              {children as any}
+            </Col>
+          </>
+        )}
 
         {/* Center: Title */}
-        <Col flex={1} style={{ display: 'flex', justifyContent: 'center' }}>
-          <h3 style={{ margin: 0, fontSize: 20, textAlign: 'center' }}>{title}</h3>
-        </Col>
+        {title && (
+          <Col flex={1} style={{ display: 'flex', justifyContent: 'center' }}>
+            <h3 style={{ margin: 0, fontSize: 20, textAlign: 'center' }}>{title}</h3>
+          </Col>
+        )}
 
         {/* Right: Header actions */}
+        {datasourceType && (
+          <>
         <Col flex="none">
-          <div style={{ display: 'flex', gap: 12 }}>{headerActions}</div>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <GrafanaLikeRangePicker 
+            title="Date Range" 
+            onChange={(start, end) => {
+              setRange([start, end]);
+            }}
+            onApply={(start, end) => {
+              setRange([start, end]);
+            }}
+            value={range}
+          />
+          </div>
         </Col>
+        </>
+      )}
       </Row>
     </motion.div>
   );

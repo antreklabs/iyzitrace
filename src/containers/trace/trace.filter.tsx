@@ -3,17 +3,15 @@ import BaseFilter from '../base.filter';
 
 interface TraceFilterProps {
   onChange: (values: any) => void;
-  collapsed?: boolean;
   columns?: any[];
   data?: any[];
 }
 
-const TraceFilter: React.FC<TraceFilterProps> = ({ onChange, collapsed, columns, data }) => {
+const TraceFilter: React.FC<TraceFilterProps> = ({ onChange, columns, data }) => {
   
   return (
     <BaseFilter 
       onChange={onChange} 
-      collapsed={collapsed}
       columns={columns}
       hasServiceFilter={true}
       hasOperationsFilter={true}

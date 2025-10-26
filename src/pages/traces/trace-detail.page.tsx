@@ -6,7 +6,7 @@ import { PageLayoutType } from '@grafana/data';
 import TraceDetailContainer from '../../containers/TraceDetailContainer';
 import { useParams } from 'react-router-dom';
 
-function TraceDetail() {
+function TraceDetailPage() {
   const { traceId } = useParams<{ traceId: string }>();
 
   if (!traceId) {
@@ -20,4 +20,4 @@ function TraceDetail() {
   );
 }
 
-export default TraceDetail;
+export default TraceDetailPage;

@@ -1,19 +1,17 @@
 import React from 'react';
-import BaseFilter from '../base.filter';
+import BaseFilter from '../../containers/base.filter';
 
 interface ServiceFilterProps {
   onChange: (values: any) => void;
-  collapsed?: boolean;
   columns?: any[];
   data?: any[];
 }
 
-const ServiceFilter: React.FC<ServiceFilterProps> = ({ onChange, collapsed, columns, data }) => {
+const ServiceFilter: React.FC<ServiceFilterProps> = ({ onChange, columns, data }) => {
   
   return (
     <BaseFilter 
       onChange={onChange} 
-      collapsed={collapsed}
       columns={columns}
       hasServiceFilter={true}
       hasTypesFilter={true}

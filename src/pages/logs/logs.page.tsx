@@ -3,7 +3,7 @@ import React from 'react';
 import BasePage from '../core/base.page';
 import LogContainer from '../../containers/log/log.container';
 
-function Logs() {
+function LogsPage() {
 
   return (
     <BasePage>
@@ -12,4 +12,4 @@ function Logs() {
   );
 }
 
-export default Logs;
+export default LogsPage;

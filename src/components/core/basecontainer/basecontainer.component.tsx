@@ -6,26 +6,26 @@ import BaseContainerHeader from './basecontainerheader.component';
 
 interface BaseConatinerProps {
   title: string;
-  headerActions?: React.ReactNode;
+  datasourceType?: string;
   children?: React.ReactNode;
-  datasourceType?: 'tempo' | 'loki';
+  headerActions?: React.ReactNode;
 }
 
-const BaseContainer: React.FC<BaseConatinerProps> = ({ title, headerActions, children, datasourceType }) => {
+const BaseContainer: React.FC<BaseConatinerProps> = ({ title, datasourceType, children, headerActions }) => {
+  if (datasourceType === undefined) {
+    return (
+      <Card style={{ height: 'calc(100vh - 75px)' }} 
+            className="base-container" 
+            styles={{ body: { height: 'calc(100vh - 75px)',  overflow: 'auto' } }}>
+        {children as any}
+      </Card>
+    );
+  }
   return (
-    <Card 
-      title={<BaseContainerHeader title={title} headerActions={headerActions} datasourceType={datasourceType} />} 
-      style={{
-        height: 'calc(100vh - 75px)'
-      }} 
-      className="base-container" 
-      styles={{
-        body: {
-          height: 'calc(100vh - 75px)', 
-          overflow: 'auto'
-        }
-      }}
-    >
+    <Card title={<BaseContainerHeader title={title} datasourceType={datasourceType} />} 
+          style={{ height: 'calc(100vh - 75px)' }} 
+          className="base-container" 
+          styles={{ body: { height: 'calc(100vh - 75px)',  overflow: 'auto' } }}>
       {children as any}
     </Card>
   );

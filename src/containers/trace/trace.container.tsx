@@ -285,10 +285,8 @@ const TraceContainer: React.FC = () => {
       title="Traces"
       initialFilterCollapsed={false}
       onFetchData={fetchModelData}
-      onExpandedRowRender={() => null}
-      showExpandableRowRender={false}
       columns={columns}
-      filterComponent={<TraceFilter onChange={fetchModelData} collapsed={false} columns={columns} />}
+      filterComponent={<TraceFilter onChange={fetchModelData} columns={columns} />}
       datasourceType="tempo">
         <div style={{ position: 'relative' }}>
           <button
