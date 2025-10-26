@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Select, Input, Button, Divider, Form, Row, Col, InputNumber, Typography, Space } from 'antd';
+import { Select, Input, Button, Divider, Form, Row, Col, InputNumber, Space } from 'antd';
 import { lokiReadApi } from '../providers/api/loki/loki.api.read';
 import { tempoReadApi } from '../providers/api/tempo/tempo.api.read';
 import { useAppSelector } from '../store/hooks';
@@ -14,7 +14,6 @@ export const EQUAL_OPERATOR_OPTIONS = ['=', '!='];
 
 interface BaseFilterProps {
   onChange: (values: any) => void;
-  collapsed?: boolean;
   children?: React.ReactNode;
   hasServiceFilter?: boolean;
   hasOperationsFilter?: boolean;
@@ -33,7 +32,6 @@ interface BaseFilterProps {
 
 const BaseFilter: React.FC<BaseFilterProps> = ({ 
   onChange, 
-  collapsed, 
   children,
   hasServiceFilter = false,
   hasOperationsFilter = false,
@@ -532,13 +530,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
 
       {hasDurationFilter && (
         <Form.Item label="Duration (ms)">
-        {collapsed ? (
-          <Typography.Text type="secondary">
-            {form.getFieldValue('durationMin')?.length > 0
-              ? form.getFieldValue('durationMin').length + ' Select'
-              : 'All'}
-          </Typography.Text>
-        ) : (
           <Row gutter={8}>
             <Col span={12}>
               <Form.Item name={['filters', 'durationMin']} noStyle>
@@ -551,20 +542,14 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
               </Form.Item>
             </Col>
           </Row>
-        )}
         </Form.Item>
       )}
 
       {hasTagsFilter && (
         <>
-          <Divider orientation={collapsed ? 'left':'center'}>Tags</Divider>
+          <Divider orientation={'center'}>Tags</Divider>
 
       <Row gutter={8}>
-        {collapsed ? (
-          <Typography.Text type="secondary">
-            {form.getFieldValue('tags')?.length > 0 ? form.getFieldValue('tags').length + ' Select' : 'All'}
-          </Typography.Text>
-        ) : (
           <>
             <Col span={10}>
               <Form.Item name={['filters', 'tagKey']} noStyle>
@@ -588,7 +573,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
               </Form.Item>
             </Col>
           </>
-        )}
       </Row>
         </>
       )}
@@ -597,16 +581,11 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
 
       {hasLabelsFilter && (
         <>
-          <Divider orientation={collapsed ? 'left':'center'}>Labels</Divider>
+          <Divider orientation={'center'}>Labels</Divider>
 
           {labelFilters.map((filter, index) => (
             <React.Fragment key={filter.id}>
               <Row gutter={8} className="base-filter-label-filter-row">
-                {collapsed ? (
-                  <Typography.Text type="secondary">
-                    {filter.label ? `${filter.label} = ${form.getFieldValue(['labels', filter.id, 'value']) || 'any'}` : 'All'}
-                  </Typography.Text>
-                ) : (
                   <>
                     <Col span={24}>
                       <Form.Item name={['labels', filter.id, 'name']} label="" initialValue={''}>
@@ -647,15 +626,13 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                       </Form.Item>
                     </Col>
                   </>
-                )}
               </Row>
               {index < labelFilters.length - 1 && (
-                <Divider orientation={collapsed ? 'left':'center'} />
+                <Divider orientation={'center'} />
               )}
             </React.Fragment>
           ))}
 
-          {!collapsed && (
             <Row gutter={8}>
               <Col span={24}>
                 <Button 
@@ -668,9 +645,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 </Button>
               </Col>
             </Row>
-          )}
+          
 
-          {!collapsed && labelFilters.length > 0 && (
+          {labelFilters.length > 0 && (
             <Row gutter={8} className="base-filter-remove-button-row">
               <Col span={24}>
                 <Button 
@@ -691,16 +668,11 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
 
       {hasFieldsFilter && (
         <>
-          <Divider orientation={collapsed ? 'left':'center'}>Fields</Divider>
+          <Divider orientation={'center'}>Fields</Divider>
 
           {fieldFilters.map((filter, index) => (
             <React.Fragment key={filter.id}>
               <Row gutter={8} className="base-filter-field-filter-row">
-                {collapsed ? (
-                  <Typography.Text type="secondary">
-                    {filter.field ? `${filter.field} = ${form.getFieldValue(['fields', filter.id, 'value']) || 'any'}` : 'All'}
-                  </Typography.Text>
-                ) : (
                   <>
                     <Col span={24}>
                       <Form.Item name={['fields', filter.id, 'name']} label="" initialValue={''}>
@@ -741,15 +713,13 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                       </Form.Item>
                     </Col>
                   </>
-                )}
               </Row>
               {index < fieldFilters.length - 1 && (
-                <Divider orientation={collapsed ? 'left':'center'} />
+                <Divider orientation={'center'} />
               )}
             </React.Fragment>
           ))}
 
-          {!collapsed && (
             <Row gutter={8}>
               <Col span={24}>
                 <Button 
@@ -762,9 +732,8 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 </Button>
               </Col>
             </Row>
-          )}
 
-          {!collapsed && fieldFilters.length > 0 && (
+          {fieldFilters.length > 0 && (
             <Row gutter={8} className="base-filter-remove-button-row">
               <Col span={24}>
                 <Button 
@@ -785,7 +754,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
 
       {hasOptionsFilter && (
         <>
-          <Divider orientation={collapsed ? 'left':'center'}>Options</Divider>
+          <Divider orientation={'center'}>Options</Divider>
 
       <Row gutter={8}>
         {

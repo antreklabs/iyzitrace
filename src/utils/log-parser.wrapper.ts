@@ -15,7 +15,7 @@ import {
   isLogLineJSON as grafanaIsLogLineJSON,
   isLogLineLogfmt as grafanaIsLogLineLogfmt,
   parseLogfmtKeyValues as grafanaParseLogfmtKeyValues
-} from '../plugins/datasource/loki/lineParser';
+} from './line-parser.util';
 
 /**
  * Log Parser Wrapper Implementation

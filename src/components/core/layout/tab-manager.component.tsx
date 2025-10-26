@@ -3,7 +3,7 @@ import { Tabs } from 'antd';
 import { matchPath, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { appRoutes } from '../../../routes';
-import { RootState } from '../../../store/rootReducer';
+import { RootState } from '../../../store/root-reducer';
 import { addTab, removeTab, setActiveKey } from '../../../store/slices/tab.slice';
 
 const TabManager: React.FC = () => {

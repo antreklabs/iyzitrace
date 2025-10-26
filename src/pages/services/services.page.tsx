@@ -1,9 +1,9 @@
 import React from 'react';
 
-import BasePage from '../base.page';
+import BasePage from '../core/base.page';
 import ServiceContainer from '../../containers/service/service.container';
 
-function ServiceV2() {
+function ServicesPage() {
 
   return (
     <BasePage>
@@ -12,4 +12,4 @@ function ServiceV2() {
   );
 }
 
-export default ServiceV2;
+export default ServicesPage;

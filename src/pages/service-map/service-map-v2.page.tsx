@@ -1,9 +1,15 @@
 import React from 'react';
-// import ServiceMapContainer from '../../containers/service-map/service-map.container';
-import ServiceMap from '../../containers/service-map/service-map.container.old';
 
-const ServiceMapPageV2: React.FC = () => {
-  return <ServiceMap />;
-};
+import BasePage from '../core/base.page';
+import ServiceMapContainer from '../../containers/service-map/service-map.container';
 
-export default ServiceMapPageV2;
+function ServiceMapV2Page() {
+
+  return (
+    <BasePage>
+      <ServiceMapContainer />
+    </BasePage>
+  );
+}
+
+export default ServiceMapV2Page;

@@ -20,92 +20,69 @@
   "includes": [
     {
       "type": "page",
-      "name": "Home",
-      "path": "/a/iyzitrace-app/landing-page",
-      "addToNav": true,
-      "showingTabs": false,
-      "hideFromTabs": true
+      "name": "Landing",
+      "path": "/a/iyzitrace-app/landing",
+      "addToNav": true
     },
     {
       "type": "page",
-      "name": "Infra Overview",
-      "path": "/a/iyzitrace-app/landing",
-      "addToNav": true,
-      "showingTabs": false,
-      "hideFromTabs": true
+      "name": "Overview",
+      "path": "/a/iyzitrace-app/overview",
+      "addToNav": true
     },
     {
       "type": "page",
       "name": "Service Map",
-      "path": "/a/iyzitrace-app/map-3d",
-      "addToNav": true,
-      "defaultNav": true,
-      "showingTabs": false,
-      "hideFromTabs": true
+      "path": "/a/iyzitrace-app/service-map",
+      "addToNav": true
     },
     {
       "type": "page",
       "name": "Services",
-      "path": "/a/iyzitrace-app/services-v2",
-      "addToNav": true,
-      "showingTabs": false,
-      "hideFromTabs": true
+      "path": "/a/iyzitrace-app/services",
+      "addToNav": true
     },
     {
       "type": "page",
       "name": "Traces",
-      "path": "/a/iyzitrace-app/traces-v2",
-      "addToNav": true,
-      "showingTabs": false,
-      "hideFromTabs": true
+      "path": "/a/iyzitrace-app/traces",
+      "addToNav": true
     },
     {
       "type": "page",
       "name": "Logs",
-      "path": "/a/iyzitrace-app/logs-v2",
-      "addToNav": true,
-      "showingTabs": false,
-      "hideFromTabs": true
+      "path": "/a/iyzitrace-app/logs",
+      "addToNav": true
     },
     {
       "type": "page",
       "name": "Views",
-      "path": "/a/iyzitrace-app/dashboards",
-      "addToNav": true,
-      "showingTabs": false,
-      "hideFromTabs": true
+      "path": "/a/iyzitrace-app/views",
+      "addToNav": true
     },
     {
       "type": "page",
       "name": "Alerts",
       "path": "/a/iyzitrace-app/alerts",
-      "addToNav": true,
-      "showingTabs": false,
-      "hideFromTabs": true
+      "addToNav": true
     },
     {
       "type": "page",
       "name": "Exceptions",
       "path": "/a/iyzitrace-app/exceptions",
-      "addToNav": true,
-      "showingTabs": false,
-      "hideFromTabs": true
+      "addToNav": true
     },
     {
       "type": "page",
       "name": "Teams",
       "path": "/a/iyzitrace-app/teams",
-      "addToNav": true,
-      "showingTabs": false,
-      "hideFromTabs": true
+      "addToNav": true
     },
     {
       "type": "page",
       "name": "Settings",
       "path": "/a/iyzitrace-app/settings",
-      "addToNav": true,
-      "showingTabs": false,
-      "hideFromTabs": true
+      "addToNav": true
     },
     {
       "type": "page",
@@ -113,9 +90,7 @@
       "name": "Configuration",
       "path": "/plugins/iyzitrace-app",
       "role": "Admin",
-      "addToNav": true,
-      "showingTabs": false,
-      "hideFromTabs": true
+      "addToNav": true
     }
   ],
   "dependencies": {

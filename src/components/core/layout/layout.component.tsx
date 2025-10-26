@@ -1,9 +1,8 @@
 import React from 'react';
 import { Layout } from 'antd';
-//import { Outlet } from 'react-router-dom';
 import './layout.component.css';
 import Sidebar from './sidebar.component';
-import TabManager from './tab-manager.component';
+// import TabManager from './tab-manager.component';
 
 const { Content } = Layout;
 
@@ -12,11 +11,9 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     <Layout style={{ minHeight: '100vh' }}>
       <Sidebar></Sidebar>
       <Layout>
-        <Layout.Header
-          style={{ height: 40, padding: 3, display: 'flex', alignItems: 'center', background: 'transparent' }}
-        >
+        {/* <Layout.Header style={{ height: 40, padding: 3, display: 'flex', alignItems: 'center', background: 'transparent' }}>
           <TabManager />
-        </Layout.Header>
+        </Layout.Header> */}
         <Content className="main-content">{children as any}</Content>
       </Layout>
     </Layout>

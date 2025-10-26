@@ -1,9 +1,9 @@
 import React from 'react';
 
-import BasePage from '../base.page';
+import BasePage from '../core/base.page';
 import TraceContainer from '../../containers/trace/trace.container';
 
-function TraceV2() {
+function TracesPage() {
 
   return (
     <BasePage>
@@ -12,4 +12,4 @@ function TraceV2() {
   );
 }
 
-export default TraceV2;
+export default TracesPage;

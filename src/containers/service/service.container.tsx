@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Row, Col, Card, Select } from 'antd';
 import ApexCharts from 'react-apexcharts';
 import BaseContainerComponent, { PageState, getPageState } from '../base.container';
-import ServiceFilter from './service.filter';
+import ServiceFilter from '../../components/service/service.filter';
 import ServiceExpandedRowComponent from '../../components/service/service.container.expanded-row.component';
 import ServiceMetricsCard from '../../components/service/service.container.card.component';
 import { tempoReadApi } from '../../providers/api/tempo/tempo.api.read';
@@ -148,7 +148,7 @@ const ServiceContainer: React.FC = () => {
       onFetchData={fetchModelData}
       onExpandedRowRender={expandedRowRender}
       columns={columns}
-      filterComponent={<ServiceFilter onChange={fetchModelData} collapsed={true} columns={columns} />}
+      filterComponent={<ServiceFilter onChange={fetchModelData} columns={columns} />}
       datasourceType="tempo">
         <div style={{ position: 'relative' }}>
           <button

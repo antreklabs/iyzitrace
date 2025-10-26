@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Row, Tabs } from 'antd';
-import BaseContainer from '../../components/core/basecontainer/basecontainer';
+import BaseContainer from '../../components/core/basecontainer/basecontainer.component';
 
 import GrafanaLikeRangePicker from '../../components/core/graphanadatepicker';
 import CallMetrics from './CallMetrics/CallMetrics';

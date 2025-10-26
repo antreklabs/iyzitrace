@@ -39,7 +39,6 @@ const LogFilter: React.FC<LogFilterProps> = ({ onChange, collapsed, columns, dat
   return (
     <BaseFilter 
       onChange={onChange} 
-      collapsed={collapsed}
       columns={columns}
       hasServiceFilter={true}
       hasDurationFilter={false}

@@ -3,8 +3,7 @@ import { Layout, Table, Spin, Empty } from 'antd';
 import { IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
 import { useAppSelector } from '../store/hooks';
 import { useParams, useLocation } from 'react-router-dom';
-import BaseContainer from '../components/core/basecontainer/basecontainer';
-import GrafanaLikeRangePicker from '../components/core/graphanadatepicker';
+import BaseContainer from '../components/core/basecontainer/basecontainer.component';
 import FiltersSider from '../components/core/layout/filters-sider.component';
 import { getPageState, updatePageState, getDefaultPageState, savePageState, PageState } from '../utils/localstorage.util';
 import '../assets/styles/base/base.container.css';
@@ -12,14 +11,13 @@ import '../assets/styles/base/base.container.css';
 const { Content } = Layout;
 
 interface BaseContainerProps {
-  title: string;
+  title?: string;
   id?: string | null;
-  onFetchData: (pageState?: PageState | null) => Promise<any[]>;
-  onExpandedRowRender: (record: any) => React.ReactNode;
-  showExpandableRowRender?: boolean;
-  columns: any[];
+  onFetchData?: (pageState?: PageState | null) => Promise<any[]>;
+  onExpandedRowRender?: (record: any) => React.ReactNode;
+  columns?: any[];
   filterComponent?: React.ReactElement;
-  datasourceType?: 'tempo' | 'loki';
+  datasourceType?: string;
   initialFilterCollapsed?: boolean;
   children?: React.ReactNode;
 }
@@ -29,10 +27,9 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   id,
   onFetchData,
   onExpandedRowRender,
-  showExpandableRowRender = true,
   columns,
   filterComponent,
-  datasourceType = 'tempo',
+  datasourceType,
   initialFilterCollapsed = true,
   children
 }) => {
@@ -42,7 +39,6 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   const savedState = getPageState(pageName);
 
   // Initialize states with saved values or defaults
-  const [range, setRange] = useState<[number, number]>(savedState?.range || defaultState.range);
   const [filters, setFilters] = useState<any>(savedState?.filters || defaultState.filters);
   const [modelData, setModelData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -73,7 +69,6 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
     try {
       const currentPageState = {
         selectedDataSourceUid: selectedUid,
-        range: range,
         filters,
         pageSize,
       };
@@ -100,7 +95,6 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
     if (!savedState) {
       savePageState(pageName, {
         selectedDataSourceUid: selectedUid,
-        range,
         filters,
         pageSize,
       });
@@ -113,7 +107,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
     if (selectedUid) {
       fetchModelData();
     }
-  }, [effectiveId, selectedUid, filters, range]);
+  }, [effectiveId, selectedUid, filters]);
 
   // İlk mount'ta da veri çek (selectedUid varsa)
   useEffect(() => {
@@ -124,33 +118,18 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   }, []);
 
   return (
-    <BaseContainer
-      title={title}
-      datasourceType={datasourceType}
-      headerActions={
-        <GrafanaLikeRangePicker 
-          title="Date Range" 
-          value={range}
-          onChange={(start, end) => {
-            const newRange: [number, number] = [start, end];
-            setRange(newRange);
-          }}
-          onApply={(start, end) => {
-            const newRange: [number, number] = [start, end];
-            setRange(newRange);
-            saveState({ range: newRange });
-            fetchModelData();
-          }}
-        />
-      }
-    >
+    <BaseContainer title={title} datasourceType={datasourceType}>
       <Layout className="base-container-layout">
-        <FiltersSider title="Filters" collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)}>
-          {React.cloneElement(filterComponent as React.ReactElement<any>, { 
-            onChange: handleFilterChange,
-            data: modelData 
-          })}
-        </FiltersSider>
+        {filterComponent && (
+          <>  
+            <FiltersSider title="Filters" collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)}>
+          {filterComponent && React.cloneElement(filterComponent as React.ReactElement<any>, { 
+                onChange: handleFilterChange,
+                data: modelData 
+              })}
+            </FiltersSider>
+          </>
+        )}
 
         <Content className="base-container-content">
           {loading ? (
@@ -159,18 +138,19 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
                 <div className="base-container-loading-spinner" />
               </Spin>
             </div>
-          ) : modelData.length === 0 ? (
+          ) : onFetchData !== undefined && onFetchData.length > 0 && modelData.length === 0 ? (
             <Empty description="No data found for selected range." />
           ) : (
             <>
               
               {children}
               
+              {columns && columns.length > 0 && (
               <Table
                 rowKey={(record: any) => record.id ?? record.key ?? record.text ?? record.name ?? JSON.stringify(record)}
                 dataSource={modelData}
                 columns={columns}
-                expandable={showExpandableRowRender ? {
+                expandable={onExpandedRowRender ? {
                   expandedRowRender: onExpandedRowRender,
                   expandIcon: ({ expanded, onExpand, record }) =>
                     expanded ? (
@@ -202,6 +182,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
                 size="middle"
                 bordered
               />
+              )}
             </>
           )}
         </Content>
