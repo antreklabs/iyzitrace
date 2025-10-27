@@ -1,6 +1,7 @@
 stream_over_http_enabled: true
 server:
   http_listen_port: 3200
+  grpc_listen_port: 9095
   log_level: info
 
 query_frontend:
@@ -18,7 +19,9 @@ distributor:
     otlp:
       protocols:
         grpc:
-          endpoint: "tempo-platform:4317"
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
 
 ingester:
   max_block_duration: 5m # cut the headblock when this much time passes. this is being set for demo purposes and should probably be left alone normally
