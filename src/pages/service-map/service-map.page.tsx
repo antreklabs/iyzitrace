@@ -508,7 +508,7 @@ const ServiceMapPage: React.FC = () => {
           enabled: true
         });
         // eslint-disable-next-line no-console
-        console.log('seedServiceMapFromJson: wrote', list.length, 'items to plugin settings');
+        // console.log('seedServiceMapFromJson: wrote', list.length, 'items to plugin settings');
       } catch (e) {
         // eslint-disable-next-line no-console
         console.warn('seedServiceMapFromJson failed', e);
@@ -789,7 +789,7 @@ const ServiceMapPage: React.FC = () => {
         setTimeout(() => {
           const currentRef = serviceLayerRef.current;
           if (currentRef && currentRef.zoomToNode) {
-            console.log('Zooming to service:', nodeId);
+            // console.log('Zooming to service:', nodeId);
             currentRef.zoomToNode(nodeId);
           }
         }, 100);
@@ -816,7 +816,7 @@ const ServiceMapPage: React.FC = () => {
 
       if (currentRef && currentRef.zoomToNode) {
         const nodeId = isItem ? id : `group::${id}`;
-        console.log('click to node:', nodeId);
+        // console.log('click to node:', nodeId);
         currentRef.zoomToNode(nodeId);
       }
     }, 100);

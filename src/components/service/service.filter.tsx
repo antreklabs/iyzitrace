@@ -11,7 +11,7 @@ const ServiceFilter: React.FC<ServiceFilterProps> = ({ onChange, columns, data }
   
   return (
     <BaseFilter 
-      onChange={onChange} 
+      onApply={onChange} 
       columns={columns}
       hasServiceFilter={true}
       hasTypesFilter={true}

@@ -20,7 +20,19 @@ const FiltersSider: React.FC<FiltersSiderProps> = ({
   children,
 }) => {
   return (
-    <Sider width={width} style={{ background: '#1f1f1f', padding: 16 }} collapsedWidth={0} collapsed={collapsed}>
+    <Sider 
+      width={width} 
+      style={{ 
+        background: '#1f1f1f', 
+        padding: 25,
+        top: 0,
+        marginBottom: '16px',
+        position: 'sticky',
+        zIndex: 10,
+      }} 
+      collapsedWidth={0} 
+      collapsed={collapsed}
+    >
       <Button
         type="primary"
         icon={collapsed ? <i className="fa fa-angle-right" /> : <i className="fa fa-angle-left" />}
@@ -30,7 +42,9 @@ const FiltersSider: React.FC<FiltersSiderProps> = ({
       <Title level={5} style={{ color: '#fff' }}>
         {title}
       </Title>
-      {children}
+      <div style={{ height: 'calc(100vh - 220px)', overflowY: 'auto' }}>
+        {children}
+      </div>
     </Sider>
   );
 };

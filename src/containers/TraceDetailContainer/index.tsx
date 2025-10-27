@@ -111,7 +111,7 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId }) 
   };
 
   const getServiceIcon = (serviceName: string, s: any) => {
-    console.log('span', s);
+    // console.log('span', s);
 
     const operationType = getOperationType(s);
     
@@ -136,7 +136,7 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId }) 
         const trace = await TempoApi.getTrace(traceId);
 
         if (!trace || !trace.batches || trace.batches.length === 0) {
-          console.log('No trace data received');
+          // console.log('No trace data received');
           setTraceData([]);
           setFilteredTraceData([]);
           setIsLoading(false);
@@ -172,7 +172,7 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId }) 
         );
 
         if (spans.length === 0) {
-          console.log('No spans found in trace data');
+          // console.log('No spans found in trace data');
           setTraceData([]);
           setFilteredTraceData([]);
           setIsLoading(false);
@@ -214,11 +214,11 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId }) 
 
   // Filter trace data based on selected operation types
   useEffect(() => {
-    console.log('Filtering effect triggered. Selected types:', selectedOperationTypes);
-    console.log('Original trace data length:', traceData.length);
+    // console.log('Filtering effect triggered. Selected types:', selectedOperationTypes);
+    // console.log('Original trace data length:', traceData.length);
     
     if (selectedOperationTypes.length === 0) {
-      console.log('No filters selected, showing all spans');
+      // console.log('No filters selected, showing all spans');
       setFilteredTraceData(traceData);
       return;
     }
@@ -228,7 +228,7 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId }) 
         const operationType = getOperationType(node);
         const matchesFilter = selectedOperationTypes.includes(operationType);
         
-        console.log(`Span ${node.serviceName} -> ${node.name}: operationType=${operationType}, matches=${matchesFilter}`);
+        // console.log(`Span ${node.serviceName} -> ${node.name}: operationType=${operationType}, matches=${matchesFilter}`);
         
         // If this node matches, include it and all its children
         if (matchesFilter) {
@@ -250,7 +250,7 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId }) 
     };
 
     const filtered = filterSpans(traceData);
-    console.log('Filtered trace data length:', filtered.length);
+    // console.log('Filtered trace data length:', filtered.length);
     setFilteredTraceData(filtered);
   }, [traceData, selectedOperationTypes]);
 
@@ -271,12 +271,12 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId }) 
       }
     });
 
-    console.log('serviceMetaMap', map);
+    // console.log('serviceMetaMap', map);
     return map;
   }, [allSpans]);
 
   const handleOperationTypeFilter = (selectedTypes: string[]) => {
-    console.log('Filtering by operation types:', selectedTypes);
+    // console.log('Filtering by operation types:', selectedTypes);
     setSelectedOperationTypes(selectedTypes);
   };
 

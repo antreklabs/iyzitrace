@@ -88,7 +88,7 @@ const FlameGraphRow: React.FC<FlameGraphRowProps> = ({
   onSpanSelect,
   serviceMetaMap,
 }) => {
-  console.log('rowspan', span);
+  // console.log('rowspan', span);
   const [collapsed, setCollapsed] = useState(false);
 
   const totalDurationMs = (maxTime - minTime) / 1e6;

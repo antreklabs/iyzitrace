@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BaseContainerComponent, { PageState } from '../base.container';
+import BaseContainerComponent from '../base.container';
 import TraceFilter from './trace.filter';
 import TraceMetricsCard from '../../components/trace/trace.container.card.component';
 import { TraceItem } from '../../interfaces/pages/trace/trace.response.interface';
@@ -11,18 +11,10 @@ const TraceContainer: React.FC = () => {
   const navigate = useNavigate();
   const [statsData, setStatsData] = useState<any[]>([]);
 
-  const fetchModelData = async (pageState?: PageState | null): Promise<TraceItem[]> => {
-    const selectedOptions = pageState?.filters?.options;
-    const limit = selectedOptions?.limit || 100;
-    // const intervalMs = selectedOptions?.interval || 1000;
-    // const interval = getIntervalLabel(intervalMs);
-    const [rangeStart, rangeEnd] = pageState?.range || [Date.now() - 15 * 60 * 1000, Date.now()];
-    const rangeStartSeconds = Math.floor(rangeStart / 1000);
-    const rangeEndSeconds = Math.floor(rangeEnd / 1000);
-
+  const fetchModelData = async (): Promise<TraceItem[]> => {
     try {
-      const res = await tempoReadApi.search("{}", rangeStartSeconds, rangeEndSeconds, limit);
-      console.log('apiResult', res);
+      const res = await tempoReadApi.search("{}", 0, 0, 100);
+      // console.log('apiResult', res);
       
       // Convert apiResult.traces to TraceItem[]
       if (res && res.traces && Array.isArray(res.traces)) {
@@ -287,7 +279,7 @@ const TraceContainer: React.FC = () => {
       onFetchData={fetchModelData}
       columns={columns}
       filterComponent={<TraceFilter onChange={fetchModelData} columns={columns} />}
-      datasourceType="tempo">
+    >
         <div style={{ position: 'relative' }}>
           <button
             onClick={() => scrollBy(-400)}

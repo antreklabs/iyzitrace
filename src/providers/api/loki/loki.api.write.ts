@@ -68,10 +68,10 @@ class LokiWriteApi {
 
       for (const streamBatch of batches) {
         const payload = { streams: streamBatch };
-        console.log('Sending payload to Loki:', JSON.stringify(payload, null, 2));
-        console.log('Payload streams count:', payload.streams.length);
-        console.log('First stream labels:', payload.streams[0]?.stream);
-        console.log('First stream values count:', payload.streams[0]?.values?.length);
+        // console.log('Sending payload to Loki:', JSON.stringify(payload, null, 2));
+        // console.log('Payload streams count:', payload.streams.length);
+        // console.log('First stream labels:', payload.streams[0]?.stream);
+        // console.log('First stream values count:', payload.streams[0]?.values?.length);
 
         if (grafanaProxyUrl) {
           await getBackendSrv().post(grafanaProxyUrl, payload);
@@ -166,10 +166,10 @@ class LokiWriteApi {
 
     for (const streamBatch of batches) {
       const payload = { streams: streamBatch };
-      console.log('Sending payload to Loki:', JSON.stringify(payload, null, 2));
-      console.log('Payload streams count:', payload.streams.length);
-      console.log('First stream labels:', payload.streams[0]?.stream);
-      console.log('First stream values count:', payload.streams[0]?.values?.length);
+      // console.log('Sending payload to Loki:', JSON.stringify(payload, null, 2));
+      // console.log('Payload streams count:', payload.streams.length);
+      // console.log('First stream labels:', payload.streams[0]?.stream);
+      // console.log('First stream values count:', payload.streams[0]?.values?.length);
 
       if (grafanaProxyUrl) {
         await getBackendSrv().post(grafanaProxyUrl, payload);

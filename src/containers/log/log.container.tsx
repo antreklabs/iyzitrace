@@ -1,5 +1,5 @@
 import React from 'react';
-import BaseContainerComponent, { PageState } from '../base.container';
+import BaseContainerComponent from '../base.container';
 import LogFilter from './log.filter';
 import LogExpandedRowComponent from '../../components/log/log.container.expanded-row.component';
 import { lokiReadApi } from '../../providers/api/loki/loki.api.read';
@@ -8,18 +8,17 @@ import { getIntervalLabel } from '../../utils/extensions.utils';
 import '../../assets/styles/pages/log/log.container.css';
 
 const LogContainer: React.FC = () => {
-  const fetchModelData = async (pageState?: PageState | null) => {
-    let expr = pageState?.filters?.expression || '{service_namespace="opentelemetry-demo"}';
+  const fetchModelData = async () => {
+    let expr = '{service_namespace="opentelemetry-demo"}';
     
-    console.log('[LogContainer] Using LogQL expression from pageState:', expr);
+    // console.log('[LogContainer] Using LogQL expression from pageState:', expr);
     
-    const selectedOptions = pageState?.filters?.options;
-    const limit = selectedOptions?.limit || 100;
-    const intervalMs = selectedOptions?.interval || 1000;
+    const limit = 100;
+    const intervalMs = 1000;
     const interval = getIntervalLabel(intervalMs);
-    const orderBy = selectedOptions?.orderBy || 'timestamp';
-    const orderDirection = selectedOptions?.orderDirection || 'desc';
-    const [rangeStart, rangeEnd] = pageState?.range || [Date.now() - 15 * 60 * 1000, Date.now()];
+    const orderBy = 'timestamp';
+    const orderDirection = 'desc';
+    const [rangeStart, rangeEnd] = [Date.now() - 15 * 60 * 1000, Date.now()];
 
     const requestModel: LogsRequestModel = {
       expr,
@@ -36,7 +35,7 @@ const LogContainer: React.FC = () => {
 
     try {
       const apiResult = await lokiReadApi.query({...requestModel});
-      console.log('[LogContainer] lokiReadApi.query result:', apiResult);
+      // console.log('[LogContainer] lokiReadApi.query result:', apiResult);
 
       return apiResult.list;
     } catch (e) {
@@ -113,7 +112,6 @@ const LogContainer: React.FC = () => {
       onExpandedRowRender={expandedRowRender}
       columns={columns}
       filterComponent={<LogFilter onChange={fetchModelData} collapsed={false} columns={columns} />}
-      datasourceType="loki"
     />
   );
 };

@@ -1481,7 +1481,7 @@ const MapInner = forwardRef<any, MapLayerProps>(({ selectedNodeId, onNodeClick, 
 
   // Zoom to node fonksiyonu
   const zoomToNode = useCallback((nodeId: string) => {
-    console.log('zoomToNode:', nodeId);
+    // console.log('zoomToNode:', nodeId);
     if (reactFlowInstance.current) {
       if (!nodeId || nodeId === '') {
         // Boş string ise tüm view'a fit yap
@@ -1679,7 +1679,7 @@ const MapInner = forwardRef<any, MapLayerProps>(({ selectedNodeId, onNodeClick, 
       const group = groupsRef.current.find((g: any) => g.id === groupId);
       if (group) {
         group.groupPosition = { x: Math.round(node.position.x), y: Math.round(node.position.y) };
-        console.log(`Group ${groupId} position saved to groupPosition:`, group.groupPosition);
+        // console.log(`Group ${groupId} position saved to groupPosition:`, group.groupPosition);
       }
       handleSaveStorage();
       return;

@@ -2,8 +2,6 @@ import React from 'react';
 import BaseFilter from '../base.filter';
 import { Form, Select, Space } from 'antd';
 import { EQUAL_OPERATOR_OPTIONS, Option } from '../base.filter';
-import { getPageState } from '../base.container';
-import { useLocation } from 'react-router-dom';
 import '../../assets/styles/pages/log/log.filter.css';
 
 interface LogFilterProps {
@@ -14,31 +12,15 @@ interface LogFilterProps {
 }
 
 const LogFilter: React.FC<LogFilterProps> = ({ onChange, collapsed, columns, data }) => {
-  const location = useLocation();
-  const pageName = location.pathname.split('/').filter(Boolean).join('_') || 'home';
   const levels = ['ERROR', 'WARN', 'INFO', 'DEBUG'];
 
-  // Simple function to add level filter to expression
   const handleExpressionUpdate = (labelExpressionParts: string[], expression: string) => {
-    const pageState = getPageState(pageName);
-    const selectedLevel = pageState?.filters?.filters?.level;
-    const levelOperator = pageState?.filters?.filters?.levelOperator || '=';
-    
-    if (selectedLevel) {
-      // Add level filter to parts
-      const updatedParts = [...labelExpressionParts, `level${levelOperator}"${selectedLevel}"`];
-      const updatedExpression = `{${updatedParts.join(',')}}`;
-      
-      // Call the callback with updated values
-      return { labelExpressionParts: updatedParts, expression: updatedExpression };
-    }
-    
     return { labelExpressionParts, expression };
   };
 
   return (
     <BaseFilter 
-      onChange={onChange} 
+      onApply={onChange} 
       columns={columns}
       hasServiceFilter={true}
       hasDurationFilter={false}

@@ -30,8 +30,8 @@ const CallMetrics: React.FC<CallMetricsProps> = ({ serviceName, start, end }) =>
     setLoading(true);
     try {
       const ctx = { serviceName, windowSeconds: Math.floor((end - start) / 1000) };
-      const queryApdex = await buildQuery(QueryKeys.apdex, ctx);
-      console.log(queryApdex);
+      // const queryApdex = await buildQuery(QueryKeys.apdex, ctx);
+      // console.log(queryApdex);
       
       const [p50, p90, p99, rate, apdex, keyops] = await Promise.all([
         getQueryRange(await buildQuery(QueryKeys.p50Latency, ctx)),

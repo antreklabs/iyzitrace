@@ -98,7 +98,7 @@ function ViewsPage() {
       setModalVisible(false);
       form.resetFields();
     }).catch(errorInfo => {
-      console.log('Validation failed:', errorInfo);
+      // console.log('Validation failed:', errorInfo);
     });
   };
 

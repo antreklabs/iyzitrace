@@ -9,7 +9,7 @@ export class BaseApi {
     // If uid is provided, use it; otherwise get from store
     let uid = uidOrName;
     if (!uid) {
-      uid = store.getState().datasource.selectedUid ?? undefined;
+      uid = 'tempo-demo';
       if (!uid) {
         throw new Error('No Datasource UID selected.');
       }

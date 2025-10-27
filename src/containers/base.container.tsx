@@ -1,23 +1,181 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout, Table, Spin, Empty } from 'antd';
 import { IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
-import { useAppSelector } from '../store/hooks';
-import { useParams, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import BaseContainer from '../components/core/basecontainer/basecontainer.component';
 import FiltersSider from '../components/core/layout/filters-sider.component';
-import { getPageState, updatePageState, getDefaultPageState, savePageState, PageState } from '../utils/localstorage.util';
 import '../assets/styles/base/base.container.css';
 
 const { Content } = Layout;
 
+// URL parametrelerini düzenli yapıya dönüştüren model sınıfı
+export class FilterParamsModel {
+  timeRange: {
+    from: string;
+    to: string;
+    readonly datetime: {
+      from: string;
+      to: string;
+    };
+    readonly rangeText: string;
+  };
+  
+  duration: {
+    min: string;
+    max: string;
+  };
+  
+  fields: Array<{
+    name: string;
+    value: string[];
+  }>;
+  
+  labels: Array<{
+    name: string;
+    value: string[];
+  }>;
+  
+  operation: {
+    name: string;
+    operator: string;
+  };
+  
+  service: {
+    name: string;
+    operator: string;
+  };
+  
+  tag: {
+    key: string;
+    operator: string;
+    value: string;
+  };
+  
+  type: {
+    name: string;
+    operator: string;
+  };
+  
+  status: {
+    name: string;
+    operator: string;
+  };
+  
+  options: {
+    interval: string;
+    limit: string;
+    orderBy: string;
+    orderDirection: string;
+  };
+
+  constructor(params: Record<string, string>) {
+    // Time Range
+    const from = params.from || '';
+    const to = params.to || '';
+    const fromTimestamp = parseInt(from);
+    const toTimestamp = parseInt(to);
+    
+    this.timeRange = {
+      from,
+      to,
+      get datetime() {
+        return {
+          from: fromTimestamp ? new Date(fromTimestamp).toISOString() : '',
+          to: toTimestamp ? new Date(toTimestamp).toISOString() : ''
+        };
+      },
+      get rangeText() {
+        if (!fromTimestamp || !toTimestamp) return '';
+        const diffMs = toTimestamp - fromTimestamp;
+        const diffMins = Math.round(diffMs / (1000 * 60));
+        return `Last ${diffMins} Min`;
+      }
+    };
+
+    // Duration
+    this.duration = {
+      min: params.durationMin || '',
+      max: params.durationMax || ''
+    };
+
+    // Fields - dynamic field filters
+    this.fields = [];
+    Object.keys(params).forEach(key => {
+      if (key.startsWith('field_') && key.endsWith('_name')) {
+        const id = key.replace('field_', '').replace('_name', '');
+        const valueKey = `field_${id}_value`;
+        const fieldValue = params[valueKey];
+        
+        this.fields.push({
+          name: params[key],
+          value: fieldValue ? fieldValue.split(',').map(v => v.trim()) : []
+        });
+      }
+    });
+
+    // Labels - dynamic label filters
+    this.labels = [];
+    Object.keys(params).forEach(key => {
+      if (key.startsWith('label_') && key.endsWith('_name')) {
+        const id = key.replace('label_', '').replace('_name', '');
+        const valueKey = `label_${id}_value`;
+        const labelValue = params[valueKey];
+        
+        this.labels.push({
+          name: params[key],
+          value: labelValue ? labelValue.split(',').map(v => v.trim()) : []
+        });
+      }
+    });
+
+    // Operation
+    this.operation = {
+      name: params.operationName || '',
+      operator: params.operationNameOperator || '='
+    };
+
+    // Service
+    this.service = {
+      name: params.serviceName || '',
+      operator: params.serviceNameOperator || '='
+    };
+
+    // Tag
+    this.tag = {
+      key: params.tagKey || '',
+      operator: params.tagOperator || '=',
+      value: params.tagValue || ''
+    };
+
+    // Type
+    this.type = {
+      name: params.type || '',
+      operator: params.typeOperator || '='
+    };
+
+    // Status
+    this.status = {
+      name: params.status || '',
+      operator: params.statusOperator || '='
+    };
+
+    // Options
+    this.options = {
+      interval: params.option_interval || '1000',
+      limit: params.option_limit || '100',
+      orderBy: params.option_orderBy || '',
+      orderDirection: params.option_orderDirection || 'desc'
+    };
+  }
+}
+
 interface BaseContainerProps {
   title?: string;
   id?: string | null;
-  onFetchData?: (pageState?: PageState | null) => Promise<any[]>;
+  onFetchData?: (filterModel: FilterParamsModel) => Promise<any[]>;
   onExpandedRowRender?: (record: any) => React.ReactNode;
   columns?: any[];
   filterComponent?: React.ReactElement;
-  datasourceType?: string;
   initialFilterCollapsed?: boolean;
   children?: React.ReactNode;
 }
@@ -29,51 +187,31 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   onExpandedRowRender,
   columns,
   filterComponent,
-  datasourceType,
   initialFilterCollapsed = true,
   children
 }) => {
   const location = useLocation();
-  const pageName = location.pathname.split('/').filter(Boolean).join('_') || 'home';
-  const defaultState = getDefaultPageState();
-  const savedState = getPageState(pageName);
-
-  // Initialize states with saved values or defaults
-  const [filters, setFilters] = useState<any>(savedState?.filters || defaultState.filters);
   const [modelData, setModelData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [collapsed, setCollapsed] = useState(initialFilterCollapsed);
-  const [pageSize, setPageSize] = useState(savedState?.pageSize || defaultState.pageSize);
-  
-  const { selectedUid } = useAppSelector((state) => state.datasource);
-  const routeParams = useParams<{ id?: string }>();
-  const effectiveId = id ?? routeParams?.id ?? null;
 
-  // Save state changes to localStorage
-  const saveState = (updates: Partial<PageState>) => {
-    updatePageState(pageName, updates);
-  };
-
-  // Filter handler
-  const handleFilterChange = (filterValues: any) => {
-    // eslint-disable-next-line no-console
-    setFilters(filterValues);
-    saveState({ filters: filterValues });
-    fetchModelData();
-  };
-
-  // Tekleştirilmiş fetch fonksiyonu
   const fetchModelData = async () => {
-    // eslint-disable-next-line no-console
+    // console.log('fetchModelData called, onFetchData:', !!onFetchData);
+    if (!onFetchData) {
+      // console.log('onFetchData is null, returning early');
+      return;
+    }
+    
     setLoading(true);
     try {
-      const currentPageState = {
-        selectedDataSourceUid: selectedUid,
-        filters,
-        pageSize,
-      };
-      const data = await onFetchData(currentPageState);
-      // console.log('data', data);
+      // console.log('Fetching data...');
+      const urlParams = new URLSearchParams(window.location.search);
+      const params = Object.fromEntries(urlParams.entries());
+      const filterModel = new FilterParamsModel(params);
+      // console.log('FilterModel created:', filterModel);
+
+      const data = await onFetchData(filterModel);
+      // console.log('Data received:', data);
       setModelData(data);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -83,50 +221,18 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
     }
   };
 
-  // selectedUid değiştiğinde localStorage'a kaydet
   useEffect(() => {
-    if (selectedUid) {
-      saveState({ selectedDataSourceUid: selectedUid });
-    }
-  }, [selectedUid]);
-
-  // İlk yüklemede default state'i persist et (persist yoksa)
-  useEffect(() => {
-    if (!savedState) {
-      savePageState(pageName, {
-        selectedDataSourceUid: selectedUid,
-        filters,
-        pageSize,
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // İlk yükleme ve datasource/filter/range değişikliklerinde veri çek
-  useEffect(() => {
-    if (selectedUid) {
-      fetchModelData();
-    }
-  }, [effectiveId, selectedUid, filters]);
-
-  // İlk mount'ta da veri çek (selectedUid varsa)
-  useEffect(() => {
-    if (selectedUid) {
-      fetchModelData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // console.log('useEffect triggered, location.search:', location.search);
+    fetchModelData();
+  }, [location.search]);
 
   return (
-    <BaseContainer title={title} datasourceType={datasourceType}>
+    <BaseContainer title={title}>
       <Layout className="base-container-layout">
         {filterComponent && (
           <>  
             <FiltersSider title="Filters" collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)}>
-          {filterComponent && React.cloneElement(filterComponent as React.ReactElement<any>, { 
-                onChange: handleFilterChange,
-                data: modelData 
-              })}
+              {filterComponent && React.cloneElement(filterComponent as React.ReactElement<any>)}
             </FiltersSider>
           </>
         )}
@@ -170,12 +276,10 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
                 }}
                 scroll={{ x: 'max-content', y: 'calc(100vh - 300px)' }}
                 pagination={{
-                  pageSize: pageSize,
+                  pageSize: 10,
                   showSizeChanger: true,
                   pageSizeOptions: ['10', '20', '50', '100'],
                   onShowSizeChange: (current, size) => {
-                    setPageSize(size);
-                    saveState({ pageSize: size });
                     fetchModelData();
                   }
                 }}
@@ -193,6 +297,3 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
 
 export default BaseContainerComponent;
 
-// Export the 4 page state management functions for use in child containers
-export { getPageState, updatePageState, getDefaultPageState, savePageState };
-export type { PageState };

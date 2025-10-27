@@ -39,7 +39,7 @@ const ConfigForm: React.FC = () => {
         setTempoOpts(list.filter((x: any) => x.type === 'tempo').map(map));
         const settings = await getBackendSrv().get(`/api/plugins/${PLUGIN_ID}/settings`);
         // eslint-disable-next-line no-console
-        console.log('plugin_settings(raw):', settings);
+        // console.log('plugin_settings(raw):', settings);
         if (settings) {
           const jd = (settings.jsonData || {}) as PluginJsonData;
           setJsonData(jd);

@@ -1,8 +1,8 @@
 import React, { useRef, useState, useMemo } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Row, Col, Card, Select } from 'antd';
 import ApexCharts from 'react-apexcharts';
-import BaseContainerComponent, { PageState, getPageState } from '../base.container';
+import BaseContainerComponent from '../base.container';
 import ServiceFilter from '../../components/service/service.filter';
 import ServiceExpandedRowComponent from '../../components/service/service.container.expanded-row.component';
 import ServiceMetricsCard from '../../components/service/service.container.card.component';
@@ -10,53 +10,22 @@ import { tempoReadApi } from '../../providers/api/tempo/tempo.api.read';
 import { ServiceItem } from '../../interfaces/pages/service/service.response.interface';
 import { prometheusApi } from '../../providers/api/prometheus/prometheus.api';
 import { buildQuery, QueryKeys } from '../../providers/api/prometheus/prometheus.registry';
-// import { dateTime } from '@grafana/data';
 
 const ServiceContainer: React.FC = () => {
   const [services, setServices] = useState<string[]>([]);
   const [durationMetric, setDurationMetric] = useState<string>('Avg');
   const navigate = useNavigate();
-  const location = useLocation();
-  const pageName = location.pathname.split('/').filter(Boolean).join('_') || 'home';
-  const currentPageState = getPageState(pageName);
 
-  const servicePredicates: Record<string, (left: string, right: string) => boolean> = {
-    '=': (a, b) => a === b,
-    '!=': (a, b) => a !== b,
-    'contains': (a, b) => a.toLowerCase().includes(b.toLowerCase()),
-    'startsWith': (a, b) => a.toLowerCase().startsWith(b.toLowerCase()),
-    'endsWith': (a, b) => a.toLowerCase().endsWith(b.toLowerCase()),
-    'regex': (a, b) => {
-      try { return new RegExp(b, 'i').test(a); } catch { return false; }
-    },
-    'in': (a, b) => b.split(',').map(x => x.trim().toLowerCase()).includes(a.toLowerCase()),
-  };
-  
-  function filterServices(
-    serviceNames: string[],
-    selectedService?: string,
-    selectedServiceNameOperator: keyof typeof servicePredicates = 'contains'
-  ) {
-    if (!selectedService) return serviceNames;
-    const predicate = servicePredicates[selectedServiceNameOperator] ?? servicePredicates.contains;
-    return serviceNames.filter(s => predicate(s, selectedService));
-  }
-
-  const fetchModelData = async (pageState?: PageState | null) => {
+  const fetchModelData = async () => {
     const values = await tempoReadApi.getLabelValues('service.name');
     const raw: any[] = Array.isArray(values) ? values : [];
     let serviceNames: string[] = raw.map((s: any) =>
       typeof s === 'string' ? s : (s?.text ?? s?.value ?? String(s))
     );
-    const selectedService = pageState?.filters?.filters?.serviceName;
-    const selectedServiceNameOperator = pageState?.filters?.filters?.serviceNameOperator || '=';
-    if (selectedService) {
-      serviceNames = filterServices(serviceNames, selectedService, selectedServiceNameOperator);
-    }
     setServices(serviceNames);
 
-    const startMs = pageState?.range?.[0] || (Date.now() - 60 * 60 * 1000); // Default: 1 hour ago
-    const endMs = pageState?.range?.[1] || Date.now(); // Default: now
+    const startMs = 0;
+    const endMs = 0;
     const fixedStart = Math.floor(startMs / 1000);
     const fixedEnd = Math.floor(endMs / 1000);
     const maxPoints = 1;
@@ -109,8 +78,8 @@ const ServiceContainer: React.FC = () => {
   };
 
   const expandedRowRender = (record: any) => {
-    const start = currentPageState?.range?.[0] || (Date.now() - 60 * 60 * 1000); // Default: 1 hour ago
-    const end = currentPageState?.range?.[1] || Date.now(); // Default: now
+    const start = 0;
+    const end = 0;
     return <ServiceExpandedRowComponent record={record} start={start} end={end} />;
   };
 
@@ -149,7 +118,7 @@ const ServiceContainer: React.FC = () => {
       onExpandedRowRender={expandedRowRender}
       columns={columns}
       filterComponent={<ServiceFilter onChange={fetchModelData} columns={columns} />}
-      datasourceType="tempo">
+    >
         <div style={{ position: 'relative' }}>
           <button
             onClick={() => scrollBy(-400)}
@@ -163,8 +132,8 @@ const ServiceContainer: React.FC = () => {
           >
             <div style={{ display: 'inline-flex', gap: 16 }}>
             {services.map((service) => {
-                const start = currentPageState?.range?.[0] || (Date.now() - 60 * 60 * 1000); // Default: 1 hour ago
-                const end = currentPageState?.range?.[1] || Date.now(); // Default: now
+                const start = 0;
+                const end = 0;
                 return (
                   <div key={service}>
                     <ServiceMetricsCard name={service} start={start} end={end} />
