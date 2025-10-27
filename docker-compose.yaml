@@ -5,52 +5,6 @@ networks:
 
 services:
   grafana:
-    # platform: linux/amd64
-    # image: grafana/grafana:latest
-    image: yahyaozturk/iyzitrace
-    container_name: iyzitrace-grafana
-    volumes:
-      - ./dist:/var/lib/grafana/plugins/iyzitrace-app
-      - ./provisioning:/etc/grafana/provisioning
-    environment:
-      - NODE_ENV=development
-      - GF_LOG_FILTERS=plugin.iyzitrace-app:debug
-      - GF_LOG_LEVEL=debug
-      - GF_DATAPROXY_LOGGING=1
-      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=iyzitrace-app
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-      - GF_AUTH_DISABLE_LOGIN_FORM=true
-      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
-    ports:
-      - "3000:3000"
-
-  # iyzitrace-dev:
-  #   platform: linux/amd64
-  #   image: node:22-alpine
-  #   container_name: iyzitrace-dev
-  #   working_dir: /app
-  #   environment:
-  #     - PNPM_STORE_DIR=/app/.pnpm-store   # store'u sabitle
-  #   command: >
-  #     sh -lc "
-  #       apk add --no-cache git &&
-  #       corepack enable &&
-  #       corepack prepare pnpm@latest --activate &&
-  #       pnpm config set store-dir /app/.pnpm-store --location project &&
-  #       rm -rf node_modules &&
-  #       pnpm add -D webpack-dev-server@latest &&
-  #       pnpm install --no-frozen-lockfile &&
-  #       pnpm exec webpack serve -c ./.config/webpack/webpack.config.ts --env development --port 3000 --host 0.0.0.0 --allowed-hosts all
-  #     "
-  #   volumes:
-  #     - /opt/iyzitrace:/app
-  #     - /opt/iyzitrace/.pnpm-store:/app/.pnpm-store
-  #   ports:
-  #     - "3001:3000"
-  #     - "35729:35729"
-  #   restart: unless-stopped
-  #   networks:
-  #     - default
-  #     - observability-platform_otel
-  #     - opentelemetry-demo
+    extends:
+      file: .config/docker-compose-base.yaml
+      service: grafana
