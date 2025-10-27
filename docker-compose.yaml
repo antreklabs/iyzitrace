@@ -1,9 +1,6 @@
 networks:
   default:
-    name: iyzitrace-network
-  observability-platform_otel:
-    external: true
-  opentelemetry-demo:
+    name: shared-network
     external: true
 
 services:
@@ -27,10 +24,6 @@ services:
       - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
     ports:
       - "3000:3000"
-    networks:
-      - default
-      - observability-platform_otel
-      - opentelemetry-demo
 
   # iyzitrace-dev:
   #   platform: linux/amd64

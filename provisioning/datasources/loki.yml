@@ -6,14 +6,6 @@ datasources:
     uid: loki-platform
     access: proxy
     orgId: 1
-    url: http://loki-platform.observability-platform_otel:3100
-    isDefault: false
-    editable: true
-  - name: Loki (OpenTelemetry Demo)
-    type: loki
-    uid: loki-demo
-    access: proxy
-    orgId: 1
-    url: http://loki.opentelemetry-demo:3100
+    url: http://loki-platform:3100
     isDefault: false
     editable: true

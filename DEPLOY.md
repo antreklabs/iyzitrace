@@ -89,6 +89,8 @@ Run them on the server like this:
 ```bash
 ssh $SERVER_USER@$SERVER_HOST \
   'cd /opt/iyzitrace && \
+   # Create shared network to communicate with all systems
+   docker network create shared-network
    # Option A: start root compose (Grafana plugin dev env)
    docker compose -f docker-compose.yaml up -d && \
    \
