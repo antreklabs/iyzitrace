@@ -7,15 +7,17 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 exporters:
-  prometheus:
-    endpoint: 0.0.0.0:8889
+  otlp:
+    endpoint: tempo-platform:4317
+    tls:
+      insecure: true
 
 processors:
   batch: {}
 
 service:
   pipelines:
-    metrics:
+    traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [prometheus]
+      exporters: [otlp]

@@ -6,7 +6,7 @@ datasources:
     uid: tempo-platform
     access: proxy
     orgId: 1
-    url: http://tempo-platform.observability-platform_otel:3200
+    url: http://tempo-platform:3200
     basicAuth: false
     isDefault: false
     version: 1
@@ -18,20 +18,3 @@ datasources:
         datasourceUid: prometheus-platform
       streamingEnabled:
         search: true
-  - name: Tempo (OpenTelemetry Demo)
-    type: tempo
-    uid: tempo-demo
-    access: proxy
-    orgId: 1
-    url: http://tempo.opentelemetry-demo:3200
-    basicAuth: false
-    isDefault: true
-    version: 1
-    editable: true
-    apiVersion: 1
-    jsonData:
-      httpMethod: GET
-      serviceMap:
-        datasourceUid: prometheus-demo
-      streamingEnabled:
-        search: false

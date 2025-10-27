@@ -8,14 +8,16 @@ receivers:
 
 exporters:
   otlphttp:
-    endpoint: http://loki-platform:3100/otlp
+    endpoint: "http://prometheus-platform:9090/api/v1/otlp"
+    tls:
+      insecure: true
 
 processors:
   batch: {}
 
 service:
   pipelines:
-    logs:
+    metrics:
       receivers: [otlp]
       processors: [batch]
       exporters: [otlphttp]

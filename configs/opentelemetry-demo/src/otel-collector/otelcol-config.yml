@@ -21,6 +21,7 @@ receivers:
   docker_stats:
     endpoint: unix:///var/run/docker.sock
   postgresql:
+    collection_interval: 10s
     endpoint: ${POSTGRES_HOST}:${POSTGRES_PORT}
     username: root
     password: ${POSTGRES_PASSWORD}
@@ -119,55 +120,31 @@ receivers:
             enabled: true
 exporters:
   debug:
-  otlp:
-    endpoint: "jaeger:4317"
-    tls:
-      insecure: true
-  otlphttp/prometheus:
-    endpoint: "http://prometheus:9090/api/v1/otlp"
-    tls:
-      insecure: true
-  opensearch:
-    logs_index: otel-logs
-    logs_index_time_format: "yyyy-MM-dd"
-    http:
-      endpoint: "http://opensearch:9200"
-      tls:
-        insecure: true
+
 processors:
   batch:
+    timeout: 10s
   memory_limiter:
     check_interval: 5s
     limit_percentage: 80
     spike_limit_percentage: 25
   resourcedetection:
     detectors: [env, docker, system]
-  transform:
-    error_mode: ignore
-    trace_statements:
-      - context: span
-        statements:
-          # could be removed when https://github.com/vercel/next.js/pull/64852 is fixed upstream
-          - replace_pattern(name, "\\?.*", "")
-          - replace_match(name, "GET /api/products/*", "GET /api/products/{productId}")
-
-connectors:
-  spanmetrics:
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [resourcedetection, memory_limiter, transform, batch]
-      exporters: [otlp, debug, spanmetrics]
+      exporters: [debug]
     metrics:
-      receivers: [docker_stats, httpcheck/frontend-proxy, hostmetrics, nginx, otlp, postgresql, redis, spanmetrics]
+      receivers: [docker_stats, httpcheck/frontend-proxy, hostmetrics, nginx, otlp, postgresql, redis]
       processors: [resourcedetection, memory_limiter, batch]
-      exporters: [otlphttp/prometheus, debug]
+      exporters: [debug]
     logs:
       receivers: [otlp]
       processors: [resourcedetection, memory_limiter, batch]
-      exporters: [opensearch, debug]
+      exporters: [debug]
   telemetry:
     metrics:
       level: detailed

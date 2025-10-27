@@ -5,53 +5,37 @@
 # do not delete this file
 
 exporters:
-  # Tempo exporter for traces
-  otlphttp/tempo:
-    endpoint: "http://tempo:4318"
+  debug:
+    verbosity: detailed
+
+  # OTLP exporter (observability platform)
+  otlp/iyzitrace:
+    endpoint: "nginx-platform:4317"
     tls:
       insecure: true
-  
-  # Loki exporter for logs via OTLP
-  otlphttp/loki:
-    endpoint: http://loki:3100/otlp
-    # tls:
-    #   insecure: true
 
-  otlp:
+# OTLP exporter (Signoz)
+  otlp/signoz:
     endpoint: "https://ingest.us.signoz.cloud:443"
     tls:
       insecure: false
     headers:
       signoz-ingestion-key: 28da4fd2-539f-4a45-a282-15cecdb5643e
-  debug:
-    verbosity: detailed
 
+# OTLP exporter (dash0)
   otlphttp/dash0:
     endpoint: https://ingress.europe-west4.gcp.dash0.com
     headers:
       Authorization: Bearer auth_T2zx9Nu7ohOMTe6YEoT0yhivKvnzdANJ
       Dash0-Dataset: default
 
-
-    
-service:
-  pipelines:
-    traces:
-      receivers: [otlp]
-      processors: [resourcedetection, memory_limiter, transform, batch, transform/type_classifier]
-      exporters: [otlp, otlphttp/tempo, debug, spanmetrics, servicegraph, otlphttp/dash0]
-    metrics:
-      receivers: [docker_stats, httpcheck/frontend-proxy, hostmetrics, nginx, otlp, postgresql, redis, spanmetrics, servicegraph]
-      processors: [resourcedetection, memory_limiter, batch, metricstransform]
-      exporters: [otlp, otlphttp/prometheus, debug, otlphttp/dash0]
-    logs:
-      receivers: [otlp]
-      processors: [resourcedetection, memory_limiter, transform, batch]
-      exporters: [otlp, opensearch, otlphttp/loki, debug, otlphttp/dash0]
-
 processors:
-  # var olan memory_limiter / batch varsa kalsın; aşağıdaki yeni blokları ekliyoruz/override ediyoruz
-  batch:
+  resource/metrics-tags:
+    attributes:
+      - key: cloud.region
+        action: upsert
+        value: onprem
+
   transform/type_classifier:
     error_mode: ignore
     trace_statements:
@@ -121,11 +105,19 @@ processors:
 
 connectors:
   spanmetrics:
+    exemplars:
+      enabled: true
+    resource_metrics_cache_size: 1600
     dimensions:
       - name: type
-
+    events:
+      enabled: true
+      dimensions:
+        - name: exception.type
+        - name: exception.message
+    metrics_flush_interval: 10s
   servicegraph:
-    metrics_flush_interval: 30s
+    metrics_flush_interval: 10s
     dimensions:
       - db.system
       - db.name
@@ -134,3 +126,18 @@ connectors:
       - db.system
       - peer.service
     virtual_node_extra_label: true
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [resourcedetection, memory_limiter, transform, batch, transform/type_classifier]
+      exporters: [debug, otlp/iyzitrace, otlp/signoz, otlphttp/dash0,spanmetrics, servicegraph]
+    metrics:
+      receivers: [docker_stats, httpcheck/frontend-proxy, hostmetrics, nginx, otlp, postgresql, redis, spanmetrics, servicegraph]
+      processors: [resourcedetection, memory_limiter, batch, metricstransform, resource/metrics-tags]
+      exporters: [debug, otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
+    logs:
+      receivers: [otlp]
+      processors: [resourcedetection, memory_limiter, transform, batch]
+      exporters: [debug, otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
