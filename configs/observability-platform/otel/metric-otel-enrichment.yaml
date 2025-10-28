@@ -13,11 +13,34 @@ exporters:
       insecure: true
 
 processors:
-  batch: {}
+  batch:
+    timeout: 10s
 
+  memory_limiter:
+    check_interval: 5s
+    limit_percentage: 80
+    spike_limit_percentage: 25
+  
+  resource/metrics-tags:
+    attributes:
+      - key: cloud.region
+        action: upsert
+        value: onprem  
+
+  metricstransform:
+    transforms:
+      - include: ^traces_service_graph(.*)$
+        match_type: regexp
+        action: update
+        new_name: iyzitrace_service_graph$$1
+      - include: ^traces\.span\.metrics\.(.*)$
+        match_type: regexp
+        action: update
+        new_name: iyzitrace.span.metrics.$$1
+  
 service:
   pipelines:
     metrics:
       receivers: [otlp]
-      processors: [batch]
+      processors: [batch, memory_limiter, resource/metrics-tags, metricstransform]
       exporters: [otlphttp]
