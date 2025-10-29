@@ -1,55 +1,59 @@
-import React from 'react';
-import BaseContainerComponent, { FilterParamsModel } from '../base.container';
+import React, { useState } from 'react';
+import BaseContainerComponent, { FetchedModel } from '../base.container';
+import { FilterParamsModel } from '../../api/service/query.service';
 import BaseFilter from '../base.filter';
+import { getServiceMapData } from '../../api/service/service-map.service';
+import { Infrastructure } from '../../api/service/interface.service';
+import { TableColumn, getTableColumns, columns as columnUtils } from '../../api/service/table.services';
+import BaseTable from '../base.table';
 
 const ServiceMapContainer: React.FC = () => {
-  const columns = [
-    {
-      title: 'Service',
-      dataIndex: 'service',
-      key: 'service',
-      width: 220
-    },
-    { title: 'Avg. Latency', dataIndex: 'avgLatency', key: 'avgLatency', width: 140, sorter: (a: any, b: any) => (a.avgLatency ?? 0) - (b.avgLatency ?? 0), render: (v: number) => `${(v ?? 0).toFixed(2)} ms` },
-    { title: 'Min. Latency', dataIndex: 'minLatency', key: 'minLatency', width: 140, sorter: (a: any, b: any) => (a.minLatency ?? 0) - (b.minLatency ?? 0), render: (v: number) => `${(v ?? 0).toFixed(2)} ms` },
-    { title: 'Max. Latency', dataIndex: 'maxLatency', key: 'maxLatency', width: 140, sorter: (a: any, b: any) => (a.maxLatency ?? 0) - (b.maxLatency ?? 0), render: (v: number) => `${(v ?? 0).toFixed(2)} ms` },
-    { title: 'Count', dataIndex: 'count', key: 'count', width: 100, sorter: (a: any, b: any) => (a.count ?? 0) - (b.count ?? 0) },
-  ];
 
-  const mockData = [
-    {
-      service: 'Service 1',
-      avgLatency: 1000,
-      minLatency: 500,
-      maxLatency: 1500,
-      count: 100
-    },
-    {
-      service: 'Service 2',
-      avgLatency: 800,
-      minLatency: 400,
-      maxLatency: 1200,
-      count: 150
-    },
-  ];
-  const fetchModelData = async (filterModel: FilterParamsModel) => {
-    console.log('ServiceMapContainer fetchModelData called with filterModel:', filterModel);
-    return mockData;
+  const [serviceMapData, setServiceMapData] = useState<Infrastructure[]>([]);
+  const [columns, setColumns] = useState<TableColumn>();
+
+  const fetchModelData = async (filterModel: FilterParamsModel): Promise<FetchedModel> => {
+    const data = await getServiceMapData();
+    setServiceMapData(data);
+    setColumnInDetail(data);
+
+    console.log('[ServiceMapContainer] data:', data);
+    console.log('[ServiceMapContainer] filterModel:', filterModel);
+    return { data: data, columns: columns };
+  };
+
+  const setColumnInDetail = (data: Infrastructure[]) => {
+    if(columns) {
+      return;
+    }
+    const cols = getTableColumns(data, 'applications', 'services', 'operations')
+    // Example: rename and reorder Root columns before hiding
+    let root = columnUtils.renameColumns(cols.RootColumns, {
+      osversion: 'OS Version',
+      ip: 'IP Address',
+      cpupercentage: 'CPU Usage',
+      memorypercentage: 'Memory Usage'
+    });
+    root = columnUtils.reorderColumns(root, ['region','name', 'osversion', 'ip', 'type']);
+
+    const hiddenCols: TableColumn = {
+      RootColumns: columnUtils.hideColumns(root, ['id', 'cpu.usage', 'cpu.capacity', 'memory.usage', 'memory.capacity']),
+      L1Columns: columnUtils.hideColumns(cols.L1Columns ?? [], ['id', 'infrastructureId']),
+      L2Columns: columnUtils.hideColumns(cols.L2Columns ?? [], ['id', 'applicationId']),
+      L3Columns: columnUtils.hideColumns(cols.L3Columns ?? [], ['id', 'serviceId'])
+    };
+
+    setColumns(hiddenCols);
   };
 
   return (
     <BaseContainerComponent
       title="Service Map"
+      pageName="service-map"
       initialFilterCollapsed={false}
       onFetchData={fetchModelData}
-      columns={columns}
       filterComponent={
         <BaseFilter 
-          onApply={() => {
-            // URL güncellendikten sonra fetchModelData otomatik tetiklenecek
-            // Burada sadece console log yazdıralım
-            // console.log('BaseFilter Apply button clicked');
-          }}
           hasServiceFilter={true}
           hasOperationsFilter={true}
           hasStatusesFilter={true}
@@ -59,13 +63,22 @@ const ServiceMapContainer: React.FC = () => {
           hasLabelsFilter={true}
           hasFieldsFilter={true}
           hasTypesFilter={true}
-          datasourceType="tempo"
-          columns={columns}
-          data={mockData}
+          hasLevelsFilter={true}
+          columns={columns?.RootColumns ?? []}
+          data={serviceMapData}
         />
       }
     >
-        
+
+      {columns && columns.RootColumns && columns.RootColumns.length > 0 && (
+        <BaseTable
+          data={serviceMapData}
+          columns={columns}
+          title="Service Map Overview"
+          showSearch={true}
+          searchPlaceholder="Search..."
+        />
+      )}
     </BaseContainerComponent>
   );
 };

@@ -11,6 +11,7 @@ export interface ServiceMapItem {
 export interface PluginJsonData {
   defaultLokiUid?: string;
   defaultTempoUid?: string;
+  defaultPrometheusUid?: string;
   defaultTimeRanges?: string[];
   defaultAbsoluteRange?: [number, number];
   serviceMap?: ServiceMapItem[];

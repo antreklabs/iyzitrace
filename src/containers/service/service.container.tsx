@@ -2,21 +2,23 @@ import React, { useRef, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Row, Col, Card, Select } from 'antd';
 import ApexCharts from 'react-apexcharts';
-import BaseContainerComponent from '../base.container';
+import BaseContainerComponent, { FetchedModel } from '../base.container';
 import ServiceFilter from '../../components/service/service.filter';
-import ServiceExpandedRowComponent from '../../components/service/service.container.expanded-row.component';
+// import ServiceExpandedRowComponent from '../../components/service/service.container.expanded-row.component';
 import ServiceMetricsCard from '../../components/service/service.container.card.component';
 import { tempoReadApi } from '../../providers/api/tempo/tempo.api.read';
 import { ServiceItem } from '../../interfaces/pages/service/service.response.interface';
 import { prometheusApi } from '../../providers/api/prometheus/prometheus.api';
 import { buildQuery, QueryKeys } from '../../providers/api/prometheus/prometheus.registry';
+import { TableColumn } from '../../api/service/table.services';
+import { FilterParamsModel } from '../../api/service/query.service';
 
 const ServiceContainer: React.FC = () => {
   const [services, setServices] = useState<string[]>([]);
   const [durationMetric, setDurationMetric] = useState<string>('Avg');
   const navigate = useNavigate();
 
-  const fetchModelData = async () => {
+  const fetchModelData = async (filterModel: FilterParamsModel): Promise<FetchedModel> => {
     const values = await tempoReadApi.getLabelValues('service.name');
     const raw: any[] = Array.isArray(values) ? values : [];
     let serviceNames: string[] = raw.map((s: any) =>
@@ -74,16 +76,17 @@ const ServiceContainer: React.FC = () => {
         }
     }
 
-    return response;
+    return { data: response, columns: columns };
   };
 
-  const expandedRowRender = (record: any) => {
-    const start = 0;
-    const end = 0;
-    return <ServiceExpandedRowComponent record={record} start={start} end={end} />;
-  };
+  // const expandedRowRender = (record: any) => {
+  //   const start = 0;
+  //   const end = 0;
+  //   return <ServiceExpandedRowComponent record={record} start={start} end={end} />;
+  // };
 
-  const columns = [
+  const columns: TableColumn = {
+    RootColumns: [
     {
       title: 'Service',
       dataIndex: 'service',
@@ -100,7 +103,8 @@ const ServiceContainer: React.FC = () => {
     { title: 'Min. Latency', dataIndex: 'minLatency', key: 'minLatency', width: 140, sorter: (a: any, b: any) => (a.minLatency ?? 0) - (b.minLatency ?? 0), render: (v: number) => `${(v ?? 0).toFixed(2)} ms` },
     { title: 'Max. Latency', dataIndex: 'maxLatency', key: 'maxLatency', width: 140, sorter: (a: any, b: any) => (a.maxLatency ?? 0) - (b.maxLatency ?? 0), render: (v: number) => `${(v ?? 0).toFixed(2)} ms` },
     { title: 'Count', dataIndex: 'count', key: 'count', width: 100, sorter: (a: any, b: any) => (a.count ?? 0) - (b.count ?? 0) },
-  ];
+  ]
+};
 
   const scrollerRef = useRef<HTMLDivElement | null>(null);
 
@@ -113,11 +117,10 @@ const ServiceContainer: React.FC = () => {
   return (
     <BaseContainerComponent
       title="Services"
+      pageName="services"
       initialFilterCollapsed={true}
       onFetchData={fetchModelData}
-      onExpandedRowRender={expandedRowRender}
-      columns={columns}
-      filterComponent={<ServiceFilter onChange={fetchModelData} columns={columns} />}
+      filterComponent={<ServiceFilter onChange={fetchModelData} columns={columns.RootColumns} />}
     >
         <div style={{ position: 'relative' }}>
           <button

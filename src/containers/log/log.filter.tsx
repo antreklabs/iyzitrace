@@ -14,13 +14,12 @@ interface LogFilterProps {
 const LogFilter: React.FC<LogFilterProps> = ({ onChange, collapsed, columns, data }) => {
   const levels = ['ERROR', 'WARN', 'INFO', 'DEBUG'];
 
-  const handleExpressionUpdate = (labelExpressionParts: string[], expression: string) => {
-    return { labelExpressionParts, expression };
-  };
+  // const handleExpressionUpdate = (labelExpressionParts: string[], expression: string) => {
+  //   return { labelExpressionParts, expression };
+  // };
 
   return (
     <BaseFilter 
-      onApply={onChange} 
       columns={columns}
       hasServiceFilter={true}
       hasDurationFilter={false}
@@ -29,8 +28,6 @@ const LogFilter: React.FC<LogFilterProps> = ({ onChange, collapsed, columns, dat
       hasFieldsFilter={true}
       hasOptionsFilter={true}
       data={data}
-      datasourceType="loki"
-      onExpressionUpdate={handleExpressionUpdate}
     >
       {levels?.length > 0 && (
       <Form.Item label="Levels">

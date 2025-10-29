@@ -3,12 +3,14 @@ import { motion } from 'framer-motion';
 import { Col, Row } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
 import GrafanaLikeRangePicker from '../graphanadatepicker';
+import ViewComponent from '../view.component';
 
 interface BaseContainerHeaderProps {
   title: string;
+  pageName: string;
 }
 
-const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title }) => {
+const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, pageName }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [range, setRange] = useState<[number, number]>([Date.now() - 60 * 15 * 1000, Date.now()]);
@@ -58,7 +60,8 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title }) => {
 
         {/* Right: Header actions */}
         <Col flex="none">
-          <div style={{ display: 'flex', gap: 12 }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <ViewComponent pageName={pageName} />
             <GrafanaLikeRangePicker 
               onChange={(start, end) => {
                 setRange([start, end]);

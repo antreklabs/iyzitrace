@@ -1,19 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Select, Input, Button, Divider, Form, Row, Col, InputNumber, Space } from 'antd';
-import { lokiReadApi } from '../providers/api/loki/loki.api.read';
-import { tempoReadApi } from '../providers/api/tempo/tempo.api.read';
-import { useAppSelector } from '../store/hooks';
+import { Select, Input, Button, Divider, Form, Row, Col, Space } from 'antd';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
-// localStorage kaldırıldı - sadece URL'den okuma
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../assets/styles/base/base.filter.css';
+import { DropdownOption, getPrometheusLabels, getPrometheusLabelValues, getPrometheusLokiLevels, getPrometheusOperations, getPrometheusOperationTypes, getPrometheusServices, getPrometheusTraceStatuses } from '../api/service/list.service';
 
 export const { Option } = Select;
 export const OPERATOR_OPTIONS = ['=', '!=', '>', '<', 'contains', 'regex'];
 export const EQUAL_OPERATOR_OPTIONS = ['=', '!='];
 
 interface BaseFilterProps {
-  onApply?: (values: any) => void;
   children?: React.ReactNode;
   hasServiceFilter?: boolean;
   hasOperationsFilter?: boolean;
@@ -24,14 +20,12 @@ interface BaseFilterProps {
   hasLabelsFilter?: boolean;
   hasFieldsFilter?: boolean;
   hasTypesFilter?: boolean;
+  hasLevelsFilter?: boolean;
   columns?: any[];
-  data?: any[]; // Grid data to extract fields from
-  datasourceType?: 'tempo' | 'loki';
-  onExpressionUpdate?: (labelExpressionParts: string[], expression: string) => { labelExpressionParts: string[], expression: string } | void; // Callback for expression updates
+  data?: any[];
 }
 
 const BaseFilter: React.FC<BaseFilterProps> = ({ 
-  onApply, 
   children,
   hasServiceFilter = false,
   hasOperationsFilter = false,
@@ -42,61 +36,50 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
   hasOptionsFilter = false,
   hasFieldsFilter = false,
   hasTypesFilter = false,
+  hasLevelsFilter = false,
   columns,
-  data,
-  datasourceType = 'tempo',
-  onExpressionUpdate
+  data
 }) => {
-  const [services, setServices] = useState<string[]>([]);
-  const [types, setTypes] = useState<string[]>([]);
-  const [labels, setLabels] = useState<string[]>([]);
-  const [operations, setOperations] = useState<string[]>([]);
-  const [statuses, setStatuses] = useState<string[]>([]);
-  const [fields, setFields] = useState<string[]>([]);
+  const [services, setServices] = useState<DropdownOption[]>([]);
+  const [types, setTypes] = useState<DropdownOption[]>([]);
+  const [labels, setLabels] = useState<DropdownOption[]>([]);
+  const [operations, setOperations] = useState<DropdownOption[]>([]);
+  const [statuses, setStatuses] = useState<DropdownOption[]>([]);
+  const [levels, setLevels] = useState<DropdownOption[]>([]);
+  const [fields, setFields] = useState<DropdownOption[]>([]);
   const [labelFilters, setLabelFilters] = useState<Array<{id: string, label: string, values: string[]}>>([]);
   const [fieldFilters, setFieldFilters] = useState<Array<{id: string, field: string, values: string[]}>>([]);
   const [form] = Form.useForm();
-  const { selectedUid } = useAppSelector((state) => state.datasource);
   const location = useLocation();
   const navigate = useNavigate();
 
-  const fetchServices = useCallback(async () => {
-    const values = datasourceType === 'loki' ? await lokiReadApi.getLabelValues('service_name') 
-      : await tempoReadApi.getLabelValues('service.name');
-    const serviceNames: string[] = Array.isArray(values) ? values : [];
-    setServices(serviceNames);
-  }, [datasourceType]);
-  
-  const fetchOperations = useCallback(async () => {
-    const values = await tempoReadApi.getLabelValues('operation.name');
-    const operations: string[] = Array.isArray(values) ? values : [];
-    setOperations(operations);
-  }, []);
-  
-  const fetchStatuses = useCallback(async () => {
-    const values = await tempoReadApi.getLabelValues('status');
-    const statuses: string[] = Array.isArray(values) ? values : [];
-    setStatuses(statuses);
-  }, []);
-
-  const fetchTypes = useCallback(async () => {
-    const values = await tempoReadApi.getLabelValues('type');
-    const types: string[] = Array.isArray(values) ? values : [];
-    setTypes(types);
-  }, []);
-
-  const fetchLabels = useCallback(async () => {
-    try {
-      const labels = datasourceType === 'loki' ? await lokiReadApi.getLabels() 
-        : await tempoReadApi.getLabels();
-      setLabels(Array.isArray(labels) ? labels : []);
-    } catch (error) {
-      console.error('Error fetching labels:', error);
-      setLabels([]);
+  const fetchLists = useCallback(async () => {
+    if (hasServiceFilter) {
+      const services = await getPrometheusServices();
+      setServices(services);
     }
-  }, [datasourceType]);
+    if (hasTypesFilter) {
+      const types = await getPrometheusOperationTypes();
+      setTypes(types);
+    }
+    if (hasLabelsFilter) {
+      const labels = await getPrometheusLabels();
+      setLabels(labels);
+    }
+    if (hasOperationsFilter) {
+      const operations = await getPrometheusOperations();
+      setOperations(operations);
+    }
+    if (hasStatusesFilter) {
+      const statuses = await getPrometheusTraceStatuses();
+      setStatuses(statuses);
+    }
+    if (hasLevelsFilter) {
+      const levels = await getPrometheusLokiLevels();
+      setLevels(levels);
+    }
+  }, [hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter, hasTypesFilter, hasLevelsFilter]);
 
-  // Function to extract fields from grid data
   const extractFieldsFromData = (data: any[]) => {
     if (!data || data.length === 0) {
       return;
@@ -117,7 +100,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     
     const extractedFields = Array.from(fieldNames);
     if (extractedFields.length > 0) {
-      setFields(extractedFields);
+      setFields(extractedFields.map(field => new DropdownOption(field)));
     }
   };
 
@@ -146,90 +129,18 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     return Array.from(fieldValues);
   };
 
-  // Function to build LogQL expression
-  const buildLogQLExpression = (formValues: any) => {
-    const parts: string[] = [];
-    
-    // Add default service namespace
-    parts.push(`service_namespace="opentelemetry-demo"`);
-    
-    // Add service filter
-    const selectedService = formValues?.filters?.serviceName;
-    const selectedServiceNameOperator = formValues?.filters?.serviceNameOperator || '=';
-    if (selectedService) {
-      parts.push(`service_name${selectedServiceNameOperator}"${selectedService}"`);
-    }
-    const selectedType = formValues?.filters?.type;
-    const selectedTypeOperator = formValues?.filters?.typeOperator || '=';
-    if (selectedType) {
-      parts.push(`type${selectedTypeOperator}"${selectedType}"`);
-    }
-    
-    // Add dynamic label filters
-    const labelFilters = formValues?.labels || {};
-    Object.values(labelFilters).forEach((labelFilter: any) => {
-      if (labelFilter && labelFilter.name && labelFilter.value) {
-        const labelName = labelFilter.name;
-        const labelValues = Array.isArray(labelFilter.value) ? labelFilter.value : [labelFilter.value];
-        
-        if (labelValues.length > 0) {
-          if (labelValues.length === 1) {
-            parts.push(`${labelName}="${labelValues[0]}"`);
-          } else {
-            const regexPattern = labelValues.map((val: string) => val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-            parts.push(`${labelName}=~"${regexPattern}"`);
-          }
-        }
-      }
-    });
-    
-    const baseExpression = `{${parts.join(',')}}`;
-    
-    return {
-      labelExpressionParts: parts,
-      expression: baseExpression
-    };
-  };
-
-  // useEffect(() => {
-  //   if (hasServiceFilter) {
-  //     fetchServices();
-  //   }
-  //   if (hasLabelsFilter) {
-  //     fetchLabels();
-  //   }
-  //   if (hasOperationsFilter) {
-  //     fetchOperations();
-  //   }
-  //   if (hasStatusesFilter) {
-  //     fetchStatuses();
-  //   }
-  // }, [selectedUid, hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter]);
-
   useEffect(() => {
     let alive = true;
     (async () => {
-      if (hasServiceFilter) {
-        await fetchServices();
-      }
-      if (hasLabelsFilter) {
-        await fetchLabels();
-      }
-      if (hasOperationsFilter) {
-        await fetchOperations();
-      }
-      if (hasTypesFilter) {
-        await fetchTypes();
-      }
       // timeSrv/DS sync için 1 frame beklet
       await new Promise(r => requestAnimationFrame(() => r(null)));
   
-      if (alive && hasStatusesFilter) {
-        await fetchStatuses();
+      if (alive && (hasServiceFilter || hasTypesFilter || hasLabelsFilter || hasOperationsFilter || hasStatusesFilter || hasLevelsFilter)) {
+        await fetchLists();
       }
     })();
     return () => { alive = false; };
-  }, [selectedUid, hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter, hasTypesFilter, fetchServices, fetchLabels, fetchOperations, fetchTypes, fetchStatuses]);
+  }, [fetchLists, hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter, hasTypesFilter, hasLevelsFilter]);
 
   // Extract fields from grid data when data changes
   useEffect(() => {
@@ -250,7 +161,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     }
   }, [data, hasFieldsFilter, fieldFilters]);
 
-  // Load filters from URL on mount
+  // Load filters from URL on mount and clear when URL changes
   useEffect(() => {
     const loadFiltersFromURL = () => {
       const searchParams = new URLSearchParams(location.search);
@@ -268,94 +179,104 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
           from: fromTimestamp,
           to: toTimestamp
         };
-        
-        // Console'a normal okunabilir format yazdır
-        // console.log('Loaded Time Range from URL:', {
-        //   from: new Date(fromTimestamp).toISOString(),
-        //   to: new Date(toTimestamp).toISOString(),
-        //   fromTimestamp,
-        //   toTimestamp
-        // });
       }
       
-      // Load basic filters
+      // Initialize filters object
+      filters.filters = {};
+      
+      // Load basic filters - only if they exist in URL
       if (searchParams.get('serviceName')) {
         const serviceName = searchParams.get('serviceName');
-        filters.filters = {
-          ...filters.filters,
-          serviceName: serviceName,
-          serviceNameOperator: searchParams.get('serviceNameOperator') || '='
-        };
+        filters.filters.serviceName = serviceName;
+        filters.filters.serviceNameOperator = searchParams.get('serviceNameOperator') || '=';
         
         // URL'den gelen service name'i services listesine ekle (eğer yoksa)
-        if (serviceName && !services.includes(serviceName)) {
-          setServices(prev => [...prev, serviceName]);
+        if (serviceName && !services.some(item => item.value === serviceName)) {
+          setServices(prev => [...prev, new DropdownOption(serviceName)]);
         }
+      }
+      else {
+        filters.filters.serviceName = undefined;
       }
       
       if (searchParams.get('type')) {
         const type = searchParams.get('type');
-        filters.filters = {
-          ...filters.filters,
-          type: type,
-          typeOperator: searchParams.get('typeOperator') || '='
-        };
+        filters.filters.type = type;
+        filters.filters.typeOperator = searchParams.get('typeOperator') || '=';
         
         // URL'den gelen type'ı types listesine ekle (eğer yoksa)
-        if (type && !types.includes(type)) {
-          setTypes(prev => [...prev, type]);
+        if (type && !types.some(item => item.value === type)) {
+          setTypes(prev => [...prev, new DropdownOption(type)]);
         }
+      }
+      else {
+        filters.filters.type = undefined;
       }
       
       if (searchParams.get('operationName')) {
         const operationName = searchParams.get('operationName');
-        filters.filters = {
-          ...filters.filters,
-          operationName: operationName,
-          operationNameOperator: searchParams.get('operationNameOperator') || '='
-        };
+        filters.filters.operationName = operationName;
+        filters.filters.operationNameOperator = searchParams.get('operationNameOperator') || '=';
         
         // URL'den gelen operation name'i operations listesine ekle (eğer yoksa)
-        if (operationName && !operations.includes(operationName)) {
-          setOperations(prev => [...prev, operationName]);
+        if (operationName && !operations.some(item => item.value === operationName)) {
+          setOperations(prev => [...prev, new DropdownOption(operationName)]);
         }
       }
-      
+      else {
+        filters.filters.operationName = undefined;
+      }
+
       if (searchParams.get('status')) {
         const status = searchParams.get('status');
-        filters.filters = {
-          ...filters.filters,
-          status: status,
-          statusOperator: searchParams.get('statusOperator') || '='
-        };
+        filters.filters.status = status;
+        filters.filters.statusOperator = searchParams.get('statusOperator') || '=';
         
         // URL'den gelen status'u statuses listesine ekle (eğer yoksa)
-        if (status && !statuses.includes(status)) {
-          setStatuses(prev => [...prev, status]);
+        if (status && !statuses.some(item => item.value === status)) {
+          setStatuses(prev => [...prev, new DropdownOption(status)]);
         }
       }
-      
+      else {
+        filters.filters.status = undefined;
+      }
+
+      if (searchParams.get('level')) {
+        const level = searchParams.get('level');
+        filters.filters.level = level;
+        filters.filters.levelOperator = searchParams.get('levelOperator') || '=';
+        
+        // URL'den gelen level'ı levels listesine ekle (eğer yoksa)
+        if (level && !levels.some(item => item.value === level)) {
+          setLevels(prev => [...prev, new DropdownOption(level)]);
+        }
+      }
+      else {
+        filters.filters.level = undefined;
+      }
+
       if (searchParams.get('durationMin')) {
-        filters.filters = {
-          ...filters.filters,
-          durationMin: searchParams.get('durationMin')
-        };
+        filters.filters.durationMin = searchParams.get('durationMin');
+      }
+      else {
+        filters.filters.durationMin = undefined;
       }
       
       if (searchParams.get('durationMax')) {
-        filters.filters = {
-          ...filters.filters,
-          durationMax: searchParams.get('durationMax')
-        };
+        filters.filters.durationMax = searchParams.get('durationMax');
       }
-      
+      else {
+        filters.filters.durationMax = undefined;
+      }
+
       if (searchParams.get('tagKey')) {
-        filters.filters = {
-          ...filters.filters,
-          tagKey: searchParams.get('tagKey'),
-          tagOperator: searchParams.get('tagOperator') || '=',
-          tagValue: searchParams.get('tagValue')
-        };
+        filters.filters.tagKey = searchParams.get('tagKey');
+        filters.filters.tagOperator = searchParams.get('tagOperator') || '=';
+        filters.filters.tagValue = searchParams.get('tagValue');
+      }
+      else {
+        filters.filters.tagKey = undefined;
+        filters.filters.tagValue = undefined;
       }
       
       // Load label filters
@@ -385,6 +306,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       if (Object.keys(labelFilters).length > 0) {
         filters.labels = labelFilters;
         setLabelFilters(labelFiltersArray);
+      } else {
+        // Clear label filters if no URL params
+        setLabelFilters([]);
       }
       
       // Load field filters
@@ -414,9 +338,12 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       if (Object.keys(fieldFilters).length > 0) {
         filters.fields = fieldFilters;
         setFieldFilters(fieldFiltersArray);
+      } else {
+        // Clear field filters if no URL params
+        setFieldFilters([]);
       }
       
-      // Load options
+      // Load options - only if they exist in URL
       const options: any = {};
       searchParams.forEach((value, key) => {
         if (key.startsWith('option_')) {
@@ -429,14 +356,12 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         filters.options = options;
       }
       
-      // Set form values if any filters found
-      if (Object.keys(filters).length > 0) {
-        form.setFieldsValue(filters);
-      }
+      // Always set form values - this will clear fields not in URL
+      form.setFieldsValue(filters);
     };
     
     loadFiltersFromURL();
-  }, [location.search, form, datasourceType]);
+  }, [location.search, form]);
 
   // localStorage kaldırıldı - sadece URL'den okuma
 
@@ -488,18 +413,17 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     // Fetch values for the selected label
     if (labelName) {
       try {
-        const values = datasourceType === 'loki' ? await lokiReadApi.getLabelValues(labelName) 
-          : await tempoReadApi.getLabelValues(labelName);
+        const values = await getPrometheusLabelValues(labelName);
         setLabelFilters(prev => prev.map(filter => 
-          filter.id === id 
-            ? { ...filter, label: labelName, values: Array.isArray(values) ? values : [] }
+          filter.label === labelName 
+            ? { ...filter, label: labelName, values: values.map(item => item.value) }
             : filter
         ));
       } catch (error) {
         console.error(`Error fetching label values for ${labelName}:`, error);
       }
     }
-  }, [datasourceType, form]);
+  }, [form]);
 
   const handleFieldFilterChange = useCallback((id: string, fieldName: string) => {
     setFieldFilters(prev => prev.map(filter => 
@@ -516,53 +440,12 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
   }, [form]);
 
   const handleApply = () => {
-    // console.log('BaseFilter handleApply called');
     const values = form.getFieldsValue();
-    // console.log('Form values:', values);
-    
-    // Build LogQL expression
-    const { labelExpressionParts, expression } = buildLogQLExpression(values);
-    
-    // Call callback if provided and get updated values
-    let finalLabelExpressionParts = labelExpressionParts;
-    let finalExpression = expression;
-    
-    if (onExpressionUpdate) {
-      const updated = onExpressionUpdate(labelExpressionParts, expression);
-      if (updated && typeof updated === 'object') {
-        finalLabelExpressionParts = updated.labelExpressionParts;
-        finalExpression = updated.expression;
-      }
-    }
-    
-    // Add expression data to values
-    const valuesWithExpression = {
-      ...values,
-      labelExpressionParts: finalLabelExpressionParts,
-      expression: finalExpression,
-      selectedTempoUid: selectedUid,
-      timeRange: {
-        from: Date.now() - 15 * 60 * 1000, // 15 minutes ago (timestamp)
-        to: Date.now() // now (timestamp)
-      }
-    };
-    
-    // Update URL with filters (localStorage kaldırıldı)
-    // console.log('Updating URL with filters:', valuesWithExpression);
-    updateURLWithFilters(valuesWithExpression);
-    
-    // Call onApply callback
-    // console.log('Calling onApply callback');
-    onApply(valuesWithExpression);
+    updateURLWithFilters(values);
   };
 
   const updateURLWithFilters = (filters: any) => {
     const searchParams = new URLSearchParams();
-    
-    // Add selectedTempoUid
-    if (filters.selectedTempoUid) {
-      searchParams.set('selectedTempoUid', filters.selectedTempoUid);
-    }
     
     // Add timeRange
     if (filters.timeRange) {
@@ -615,6 +498,14 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       searchParams.set('status', filters.filters.status);
       if (filters.filters.statusOperator) {
         searchParams.set('statusOperator', filters.filters.statusOperator);
+      }
+    }
+
+    // Add level filter
+    if (filters.filters?.level) {
+      searchParams.set('level', filters.filters.level);
+      if (filters.filters.levelOperator) {
+        searchParams.set('levelOperator', filters.filters.levelOperator);
       }
     }
     
@@ -703,11 +594,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 notFoundContent="No services found"
               >
                 {services.map((service) => {
-                  const serviceValue = typeof service === 'string' ? service : (service as any)?.text || (service as any)?.value || String(service);
-                  const serviceKey = typeof service === 'string' ? service : (service as any)?.text || (service as any)?.value || String(service);
                   return (
-                    <Option key={serviceKey} value={serviceValue}>
-                      {serviceValue}
+                    <Option key={service.key} value={service.value}>
+                      {service.name}
                     </Option>
                   );
                 })}
@@ -737,11 +626,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 className="filter-value-select"
               >
                 {types.map((type) => {
-                  const typeValue = typeof type === 'string' ? type : (type as any)?.text || (type as any)?.value || String(type);
-                  const typeKey = typeof type === 'string' ? type : (type as any)?.text || (type as any)?.value || String(type);
                   return (
-                    <Option key={typeKey} value={typeValue}>
-                      {typeValue}
+                    <Option key={type.key} value={type.value}>
+                      {type.name}
                     </Option>
                   );
                 })}
@@ -771,11 +658,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 className="filter-value-select"
               >
                 {operations.map((operation) => {
-                  const operationValue = typeof operation === 'string' ? operation : (operation as any)?.text || (operation as any)?.value || String(operation);
-                  const operationKey = typeof operation === 'string' ? operation : (operation as any)?.text || (operation as any)?.value || String(operation);
                   return (
-                    <Option key={operationKey} value={operationValue}>
-                      {operationValue}
+                    <Option key={operation.key} value={operation.value}>
+                      {operation.name}
                     </Option>
                   );
                 })}
@@ -805,11 +690,41 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 className="filter-value-select"
               >
                 {statuses.map((status) => {
-                  const statusValue = typeof status === 'string' ? status : (status as any)?.text || (status as any)?.value || String(status);
-                  const statusKey = typeof status === 'string' ? status : (status as any)?.text || (status as any)?.value || String(status);
                   return (
-                    <Option key={statusKey} value={statusValue}>
-                      {statusValue}
+                    <Option key={status.key} value={status.value}>
+                      {status.name}
+                    </Option>
+                  );
+                })}
+              </Select>
+            </Form.Item>
+          </Space.Compact>
+        
+        </Form.Item>
+      )}
+      {hasLevelsFilter && (
+        <Form.Item label="Level">
+          <Space.Compact className="filter-compact-space">
+            <Form.Item name={['filters', 'levelOperator']} noStyle initialValue="=">
+              <Select className="filter-operator-select">
+                {EQUAL_OPERATOR_OPTIONS.map((op) => (
+                  <Option key={op} value={op}>
+                    {op}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item name={['filters', 'level']} noStyle>
+              <Select
+                showSearch
+                allowClear
+                placeholder="Select level"
+                className="filter-value-select"
+              >
+                {levels.map((level) => {
+                  return (
+                    <Option key={level.key} value={level.value}>
+                      {level.name}
                     </Option>
                   );
                 })}
@@ -887,8 +802,8 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                           loading={labels.length === 0}
                         >
                           {labels.map((label) => (
-                            <Option key={label} value={label}>
-                              {label}
+                            <Option key={label.key} value={label.value}>
+                              {label.name}
                             </Option>
                           ))}
                         </Select>
@@ -973,8 +888,8 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                           loading={fields.length === 0}
                         >
                           {fields.map((field) => (
-                            <Option key={field} value={field}>
-                              {field}
+                            <Option key={field.key} value={field.value}>
+                              {field.name}
                             </Option>
                           ))}
                         </Select>
@@ -1047,14 +962,42 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       <Row gutter={8}>
         {
             <>
-                <Col span={12}>
-                    <Form.Item name={['options', 'limit']} label="Limit" initialValue={100}>
-                    <InputNumber min={0} className="base-filter-input-number" />
+                <Col span={6}>
+                    <Form.Item name={['options', 'limit']} label="Limit" initialValue="100">
+                    <Select className="base-filter-select">
+                      <Select.Option value="100">100</Select.Option>
+                      <Select.Option value="200">200</Select.Option>
+                      <Select.Option value="500">500</Select.Option>
+                      <Select.Option value="1000">1000</Select.Option>
+                    </Select>
                     </Form.Item>
                 </Col>
-                <Col span={12}>
-                    <Form.Item name={['options', 'interval']} label="Interval (ms)" initialValue={1000}>
-                    <InputNumber min={0} className="base-filter-input-number" />
+                <Col span={10}>
+                    <Form.Item name={['options', 'interval']} label="Interval" initialValue="15s">
+                    <Select className="base-filter-select">
+                      <Select.Option value="$__rate_interval">Optimum</Select.Option>
+                      <Select.Option value="15s">15s</Select.Option>
+                      <Select.Option value="30s">30s</Select.Option>
+                      <Select.Option value="1m">1m</Select.Option>
+                      <Select.Option value="5m">5m</Select.Option>
+                      <Select.Option value="15m">15m</Select.Option>
+                      <Select.Option value="30m">30m</Select.Option>
+                      <Select.Option value="1h">1h</Select.Option>
+                      <Select.Option value="2h">2h</Select.Option>
+                      <Select.Option value="4h">4h</Select.Option>
+                      <Select.Option value="8h">8h</Select.Option>
+                      <Select.Option value="12h">12h</Select.Option>
+                    </Select>
+                    </Form.Item>
+                </Col>
+                <Col span={8}>
+                    <Form.Item name={['options', 'pageCount']} label="Page Count" initialValue="20">
+                    <Select className="base-filter-select">
+                      <Select.Option value="10">10</Select.Option>
+                      <Select.Option value="20">20</Select.Option>
+                      <Select.Option value="50">50</Select.Option>
+                      <Select.Option value="100">100</Select.Option>
+                    </Select>
                     </Form.Item>
                 </Col>
                 </>
@@ -1095,7 +1038,14 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         <Button type="primary" htmlType="submit" block>
           Apply 
         </Button>
-        <Button block className="base-filter-reset-button" onClick={() => form.resetFields()}>
+        <Button block className="base-filter-reset-button" onClick={() => {
+          form.resetFields();
+          // Clear all filter states
+          setLabelFilters([]);
+          setFieldFilters([]);
+          // Clear URL parameters
+          navigate(location.pathname, { replace: true });
+        }}>
           Reset
         </Button>
       </Form.Item>

@@ -26,6 +26,7 @@ const ConfigForm: React.FC = () => {
   const [secureJsonFields, setSecureJsonFields] = useState<Record<string, boolean>>({});
   const [lokiOpts, setLokiOpts] = useState<Array<{ label: string; value: string }>>([]);
   const [tempoOpts, setTempoOpts] = useState<Array<{ label: string; value: string }>>([]);
+  const [prometheusOpts, setPrometheusOpts] = useState<Array<{ label: string; value: string }>>([]);
   const [absRange, setAbsRange] = useState<[number, number]>([Date.now() - 60 * 60 * 1000, Date.now()]);
   // copyOk removed; paste-only model
   const [activeTab, setActiveTab] = useState<typeof TAB_ITEMS[number]>('General');
@@ -37,6 +38,7 @@ const ConfigForm: React.FC = () => {
         const map = (x: any) => ({ label: x.name, value: x.uid });
         setLokiOpts(list.filter((x: any) => x.type === 'loki').map(map));
         setTempoOpts(list.filter((x: any) => x.type === 'tempo').map(map));
+        setPrometheusOpts(list.filter((x: any) => x.type === 'prometheus').map(map));
         const settings = await getBackendSrv().get(`/api/plugins/${PLUGIN_ID}/settings`);
         // eslint-disable-next-line no-console
         // console.log('plugin_settings(raw):', settings);
@@ -232,6 +234,20 @@ const ConfigForm: React.FC = () => {
                 </InlineField>
                 <div style={{ color: '#9CA3AF', marginTop: 6 }}>
                   Tempo powers distributed traces and dependencies; the default is used in trace and map views.
+                </div>
+              </div>
+              <div>
+                <InlineField label="Default Prometheus">
+                  <Select
+                    options={prometheusOpts}
+                    value={prometheusOpts.find((o) => o.value === jsonData.defaultPrometheusUid) ?? null}
+                    onChange={(v) => setJsonData({ ...jsonData, defaultPrometheusUid: v?.value })}
+                    width={40}
+                    placeholder="Select Prometheus datasource"
+                  />
+                </InlineField>
+                <div style={{ color: '#9CA3AF', marginTop: 6 }}>
+                  Prometheus is used for metrics queries and alerts; the default is used in metrics and alert views.
                 </div>
               </div>
             </div>

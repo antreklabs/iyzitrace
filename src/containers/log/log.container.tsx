@@ -1,14 +1,16 @@
 import React from 'react';
-import BaseContainerComponent from '../base.container';
+import BaseContainerComponent, { FetchedModel } from '../base.container';
 import LogFilter from './log.filter';
-import LogExpandedRowComponent from '../../components/log/log.container.expanded-row.component';
+// import LogExpandedRowComponent from '../../components/log/log.container.expanded-row.component';
 import { lokiReadApi } from '../../providers/api/loki/loki.api.read';
 import { LogsRequestModel } from '../../interfaces/pages/logs/logs.request.interface';
 import { getIntervalLabel } from '../../utils/extensions.utils';
 import '../../assets/styles/pages/log/log.container.css';
+import { TableColumn } from '../../api/service/table.services';
+import { FilterParamsModel } from '../../api/service/query.service';
 
 const LogContainer: React.FC = () => {
-  const fetchModelData = async () => {
+  const fetchModelData = async (filterModel: FilterParamsModel): Promise<FetchedModel> => {
     let expr = '{service_namespace="opentelemetry-demo"}';
     
     // console.log('[LogContainer] Using LogQL expression from pageState:', expr);
@@ -37,19 +39,20 @@ const LogContainer: React.FC = () => {
       const apiResult = await lokiReadApi.query({...requestModel});
       // console.log('[LogContainer] lokiReadApi.query result:', apiResult);
 
-      return apiResult.list;
+      return { data: apiResult.list, columns: columns };
     } catch (e) {
       console.error('[LogContainer] lokiReadApi.query error:', e);
     }
     
-    return [];
+    return { data: [], columns: { RootColumns: [] } };
   };
 
-  const expandedRowRender = (record: any) => {
-    return <LogExpandedRowComponent record={record} />;
-  };
+  // const expandedRowRender = (record: any) => {
+  //   return <LogExpandedRowComponent record={record} />;
+  // };
 
-  const columns = [
+  const columns: TableColumn = {
+    RootColumns: [
     {
       title: 'Timestamp',
       dataIndex: 'timestamp',
@@ -95,23 +98,22 @@ const LogContainer: React.FC = () => {
       title: 'Message',
       dataIndex: 'message',
       key: 'message',
-      ellipsis: true,
       render: (message: string) => (
         <span title={message} className="log-container-message">
           {message}
         </span>
       ),
     }
-  ];
+  ]
+};
 
   return (
     <BaseContainerComponent
       title="Logs"
+      pageName="logs"
       initialFilterCollapsed={false}
       onFetchData={fetchModelData}
-      onExpandedRowRender={expandedRowRender}
-      columns={columns}
-      filterComponent={<LogFilter onChange={fetchModelData} collapsed={false} columns={columns} />}
+      filterComponent={<LogFilter onChange={fetchModelData} collapsed={false} columns={columns.RootColumns} />}
     />
   );
 };
