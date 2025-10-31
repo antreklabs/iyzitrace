@@ -15,7 +15,7 @@ const BaseContainer: React.FC<BaseConatinerProps> = ({ title, pageName, children
     <Card title={<BaseContainerHeader title={title} pageName={pageName} />} 
           style={{ height: 'calc(100vh)' }} 
           className="base-container" 
-          styles={{ body: { height: 'calc(100vh - 75px)',  overflow: 'auto' } }}>
+          styles={{ body: { overflow: 'auto' } }}>
       {children as any}
     </Card>
   );

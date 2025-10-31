@@ -12,7 +12,8 @@ import {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { Position as CustomPosition, CustomSize } from '../../interfaces/service-map/service-map.interface';
-import { InfraIsoBlockNode, ApplicationIsoBlockNode, ServiceIsoBlockNode, GroupNode, statusColor } from '../../pages/service-map/service-map.page';
+import { InfraIsoBlockNode, ApplicationIsoBlockNode, ServiceIsoBlockNode, GroupNode, statusColor } from './map.component';
+import { Application, Operation, Service } from '../../api/service/interface.service';
 
 
 // ID yardımcıları - removed unused function
@@ -98,21 +99,21 @@ const InfrastructureDetailPanel: React.FC<{
       <div style={{ 
         marginBottom: '20px',
         padding: '12px',
-        background: data.status === 'healthy' ? 'rgba(16, 185, 129, 0.1)' : 
-                   data.status === 'warning' ? 'rgba(245, 158, 11, 0.1)' : 
+        background: data.status.value.toLowerCase() === 'healthy' ? 'rgba(16, 185, 129, 0.1)' : 
+                   data.status.value.toLowerCase() === 'warning' ? 'rgba(245, 158, 11, 0.1)' : 
                    'rgba(239, 68, 68, 0.1)',
-        border: `1px solid ${data.status === 'healthy' ? '#10b981' : 
-                           data.status === 'warning' ? '#f59e0b' : '#ef4444'}`,
+        border: `1px solid ${data.status.value.toLowerCase() === 'healthy' ? '#10b981' : 
+                           data.status.value.toLowerCase() === 'warning' ? '#f59e0b' : '#ef4444'}`,
         borderRadius: '8px'
       }}>
         <div style={{ 
-          color: data.status === 'healthy' ? '#10b981' : 
-                 data.status === 'warning' ? '#f59e0b' : '#ef4444',
+          color: data.status.value.toLowerCase() === 'healthy' ? '#10b981' : 
+                 data.status.value.toLowerCase() === 'warning' ? '#f59e0b' : '#ef4444',
           fontWeight: 'bold',
           fontSize: '14px',
           marginBottom: '4px'
         }}>
-          {data.status?.toUpperCase() || 'UNKNOWN'}
+          {data.status?.value?.toUpperCase() || 'UNKNOWN'}
         </div>
         <div style={{ color: '#94a3b8', fontSize: '12px' }}>
           System status monitoring active
@@ -299,7 +300,7 @@ const InfrastructureDetailPanel: React.FC<{
 };
 
 const ApplicationDetailPanel: React.FC<{ 
-  data: any | null;
+  data: Application;
   onButtonClick?: (id: string, targetLayer?: string, isItem?: boolean) => void;
 }> = ({ data, onButtonClick }) => {
   if (!data) return null;
@@ -385,21 +386,21 @@ const ApplicationDetailPanel: React.FC<{
       <div style={{ 
         marginBottom: '20px',
         padding: '12px',
-        background: data.status === 'healthy' || data.status === 'ok' ? 'rgba(16, 185, 129, 0.1)' : 
-                   data.status === 'warning' || data.status === 'degraded' ? 'rgba(245, 158, 11, 0.1)' : 
+        background: data.status.value.toLowerCase() === 'healthy' || data.status.value.toLowerCase() === 'ok' ? 'rgba(16, 185, 129, 0.1)' : 
+                   data.status.value.toLowerCase() === 'warning' || data.status.value.toLowerCase() === 'degraded' ? 'rgba(245, 158, 11, 0.1)' : 
                    'rgba(239, 68, 68, 0.1)',
-        border: `1px solid ${data.status === 'healthy' || data.status === 'ok' ? '#10b981' : 
-                           status === 'warning' || status === 'degraded' ? '#f59e0b' : '#ef4444'}`,
+        border: `1px solid ${data.status?.value?.toLowerCase() === 'healthy' || data.status?.value?.toLowerCase() === 'ok' ? '#10b981' : 
+                           data.status?.value?.toLowerCase() === 'warning' || data.status?.value?.toLowerCase() === 'degraded' ? '#f59e0b' : '#ef4444'}`,
         borderRadius: '8px'
       }}>
         <div style={{ 
-          color: data.status === 'healthy' || data.status === 'ok' ? '#10b981' : 
-                 data.status === 'warning' || data.status === 'degraded' ? '#f59e0b' : '#ef4444',
+          color: data.status.value.toLowerCase() === 'healthy' || data.status.value.toLowerCase() === 'ok' ? '#10b981' : 
+                 data.status.value.toLowerCase() === 'warning' || data.status.value.toLowerCase() === 'degraded' ? '#f59e0b' : '#ef4444',
           fontWeight: 'bold',
           fontSize: '14px',
           marginBottom: '4px'
         }}>
-          {(data.status?.toUpperCase() || 'UNKNOWN')}
+          {(data.status?.value?.toUpperCase() || 'UNKNOWN')}
         </div>
         <div style={{ color: '#94a3b8', fontSize: '12px' }}>
           Application status monitoring active
@@ -451,7 +452,7 @@ const ApplicationDetailPanel: React.FC<{
             overflowY: 'auto',
             marginBottom: 10
           }}>
-            {data.services.map((svc: any, idx: number) => (
+            {data.services.map((svc: Service, idx: number) => (
               <div key={idx} style={{
                 borderBottom: idx < data.services.length - 1 ? '1px solid #334155' : 'none',
                 paddingBottom: idx < data.services.length - 1 ? 12 : 0,
@@ -481,19 +482,19 @@ const ApplicationDetailPanel: React.FC<{
                 >
                   <div style={{ color: '#e5e7eb', fontWeight: 600 }}>{svc.name}</div>
                   <div style={{
-                    background: svc.data?.status === 'healthy' ? 'rgba(16,185,129,0.15)' : svc.data?.status === 'warning' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
-                    border: `1px solid ${svc.data?.status === 'healthy' ? '#10b981' : svc.data?.status === 'warning' ? '#f59e0b' : '#ef4444'}`,
-                    color: svc.data?.status === 'healthy' ? '#10b981' : svc.data?.status === 'warning' ? '#f59e0b' : '#ef4444',
+                    background: svc.status.value.toLowerCase() === 'healthy' ? 'rgba(16,185,129,0.15)' : svc.status.value.toLowerCase() === 'warning' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
+                    border: `1px solid ${svc.status.value.toLowerCase() === 'healthy' ? '#10b981' : svc.status.value.toLowerCase() === 'warning' ? '#f59e0b' : '#ef4444'}`,
+                    color: svc.status.value.toLowerCase() === 'healthy' ? '#10b981' : svc.status.value.toLowerCase() === 'warning' ? '#f59e0b' : '#ef4444',
                     padding: '2px 8px',
                     borderRadius: 6,
                     fontSize: 10
-                  }}>{(svc.data?.status || 'unknown').toUpperCase()}</div>
+                  }}>{(svc.status.value || 'unknown').toUpperCase()}</div>
                 </div>
                 <div style={{ color: '#94a3b8', fontSize: 12, marginTop: 6 }}>
-                  <div><strong>Average Latency:</strong> {svc.data?.metrics?.avg ?? 'n/a'}</div>
-                  <div><strong>Min Latency:</strong> {svc.data?.metrics?.min ?? 'n/a'}</div>
-                  <div><strong>Max Latency:</strong> {svc.data?.metrics?.max ?? 'n/a'}</div>
-                  {svc.dependencies && Array.isArray(svc.dependencies) && svc.dependencies.length > 0 && (
+                  <div><strong>Average Latency:</strong> {svc.metrics?.avgLatencyMs ?? 'n/a'}</div>
+                  <div><strong>Min Latency:</strong> {svc.metrics?.minLatencyMs ?? 'n/a'}</div>
+                  <div><strong>Max Latency:</strong> {svc.metrics?.maxLatencyMs ?? 'n/a'}</div>
+                  {/* {svc.dependencies && Array.isArray(svc.dependencies) && svc.dependencies.length > 0 && (
                     <div style={{ marginTop: 6 }}>
                       <strong>Dependencies:</strong>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
@@ -509,7 +510,7 @@ const ApplicationDetailPanel: React.FC<{
                         ))}
                       </div>
                     </div>
-                  )}
+                  )} */}
                 </div>
               </div>
             ))}
@@ -579,7 +580,7 @@ const ApplicationDetailPanel: React.FC<{
 };
 
 const ServiceDetailPanel: React.FC<{ 
-  data: any | null;
+  data: Service | null;
   onButtonClick?: (id: string, targetLayer?: string, isItem?: boolean) => void;
 }> = ({ data, onButtonClick }) => {
   if (!data) return null;
@@ -640,16 +641,15 @@ const ServiceDetailPanel: React.FC<{
           <h4 style={{ color: '#ffffff', margin: '0 0 8px 0', fontSize: '14px' }}>Service Info</h4>
           <div style={{ color: '#94a3b8', fontSize: '12px', lineHeight: '1.4' }}>
             <div><strong>Name:</strong> {data.name || 'N/A'}</div>
-            <div><strong>Zone:</strong> {data.zone || 'N/A'}</div>
             <div><strong>Type:</strong> {data.type || 'N/A'}</div>
           </div>
         </div>
         <div style={{ flex: 1 }}>
           <h4 style={{ color: '#ffffff', margin: '0 0 8px 0', fontSize: '14px' }}>Metrics</h4>
           <div style={{ color: '#94a3b8', fontSize: '12px', lineHeight: '1.4' }}>
-            <div><strong>Avg Lat:</strong> {data.metrics.avg || 'N/A'}</div>
-            <div><strong>Min Lat:</strong> {data.metrics.min || 'N/A'}</div>
-            <div><strong>Max Lat:</strong> {data.metrics.max || 'N/A'}</div>
+            <div><strong>Avg Lat:</strong> {data.metrics.avgLatencyMs || 'N/A'}</div>
+            <div><strong>Min Lat:</strong> {data.metrics.minLatencyMs || 'N/A'}</div>
+            <div><strong>Max Lat:</strong> {data.metrics.maxLatencyMs || 'N/A'}</div>
           </div>
         </div>
       </div>
@@ -658,21 +658,21 @@ const ServiceDetailPanel: React.FC<{
       <div style={{ 
         marginBottom: '20px',
         padding: '12px',
-        background: data.status === 'healthy' ? 'rgba(16, 185, 129, 0.1)' : 
-                   data.status === 'warning' ? 'rgba(245, 158, 11, 0.1)' : 
+        background: data.status.value.toLowerCase() === 'healthy' ? 'rgba(16, 185, 129, 0.1)' : 
+                   data.status.value.toLowerCase() === 'warning' ? 'rgba(245, 158, 11, 0.1)' : 
                    'rgba(239, 68, 68, 0.1)',
-        border: `1px solid ${data.status === 'healthy' ? '#10b981' : 
-                           status === 'warning' ? '#f59e0b' : '#ef4444'}`,
+        border: `1px solid ${data.status.value.toLowerCase() === 'healthy' ? '#10b981' : 
+                           data.status.value.toLowerCase() === 'warning' ? '#f59e0b' : '#ef4444'}`,
         borderRadius: '8px'
       }}>
         <div style={{ 
-          color: data.status === 'healthy' ? '#10b981' : 
-                 data.status === 'warning' ? '#f59e0b' : '#ef4444',
+          color: data.status.value.toLowerCase() === 'healthy' ? '#10b981' : 
+                 data.status.value.toLowerCase() === 'warning' ? '#f59e0b' : '#ef4444',
           fontWeight: 'bold',
           fontSize: '14px',
           marginBottom: '4px'
         }}>
-          {data.status?.toUpperCase() || 'UNKNOWN'}
+          {data.status?.value?.toUpperCase() || 'UNKNOWN'}
         </div>
         <div style={{ color: '#94a3b8', fontSize: '12px' }}>
           System status monitoring active
@@ -746,8 +746,8 @@ const ServiceDetailPanel: React.FC<{
                   </span>
                 </div>
                 <div style={{ color: '#94a3b8', fontSize: '12px', lineHeight: '1.4', display: 'flex', gap: '12px' }}>
-                  <div><strong>Avg Lat:</strong> {op.avg_latency_ms || 'N/A'}ms</div>
-                  <div><strong>P95 Lat:</strong> {op.p95_ms || 'N/A'}ms</div>
+                  <div><strong>Avg Lat:</strong> {op.metrics.avgLatencyMs || 'N/A'}ms</div>
+                  <div><strong>P95 Lat:</strong> {op.metrics.p95LatencyMs || 'N/A'}ms</div>
                 </div>
               </div>
             ))}
@@ -820,7 +820,7 @@ const ServiceDetailPanel: React.FC<{
 };
 
 const OperationDetailPanel: React.FC<{ 
-  data: any | null;
+  data: Operation | null;
 }> = ({ data }) => {
   if (!data) return null;
 
@@ -908,8 +908,8 @@ const OperationDetailPanel: React.FC<{
         <div style={{ flex: 1 }}>
           <h4 style={{ color: '#ffffff', margin: '0 0 8px 0', fontSize: '14px' }}>Metrics</h4>
           <div style={{ color: '#94a3b8', fontSize: '12px', lineHeight: '1.4' }}>
-            <div><strong>Avg Lat:</strong> {data.avg_latency_ms || 'N/A'}</div>
-            <div><strong>p95:</strong> {data.p95_ms || 'N/A'}</div>
+            <div><strong>Avg Lat:</strong> {data.metrics.avgLatencyMs || 'N/A'}</div>
+            <div><strong>p95:</strong> {data.metrics.p95LatencyMs || 'N/A'}</div>
           </div>
         </div>
       </div>
@@ -918,17 +918,17 @@ const OperationDetailPanel: React.FC<{
       <div style={{ 
         marginBottom: '20px',
         padding: '12px',
-        background: data.status === 'ok' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-        border: `1px solid ${data.status === 'ok' ? '#10b981' : '#ef4444'}`,
+        background: data.status.value.toLowerCase() === 'healthy' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+        border: `1px solid ${data.status.value.toLowerCase() === 'healthy' ? '#10b981' : '#ef4444'}`,
         borderRadius: '8px'
       }}>
         <div style={{ 
-          color: data.status === 'ok' ? '#10b981' : '#ef4444',
+          color: data.status.value.toLowerCase() === 'healthy' ? '#10b981' : '#ef4444',
           fontWeight: 'bold',
           fontSize: '14px',
           marginBottom: '4px'
         }}>
-          {data.status?.toUpperCase() || 'UNKNOWN'}
+          {data.status?.value?.toUpperCase() || 'UNKNOWN'}
         </div>
         <div style={{ color: '#94a3b8', fontSize: '12px' }}>
           System status monitoring active
@@ -1254,8 +1254,8 @@ const MapInner = forwardRef<any, MapLayerProps>(({ selectedNodeId, onNodeClick, 
             nodeData = {
               id: item.id,
               label: item.name,
-              sub: `${item.status ?? 'healthy'} ${item.cpu?.usage_pct ?? 0}%`,
-              accent: statusColor(item.status),
+              sub: `${item.status?.value} ${Math.round(item.status?.metrics?.errorPercentage)}%`,
+              accent: statusColor(item.status?.value),
               w: 120,
               h: 160
             };
@@ -1295,9 +1295,9 @@ const MapInner = forwardRef<any, MapLayerProps>(({ selectedNodeId, onNodeClick, 
               id: item.id,
               label: item.name,
               sub: `${item.platform} ${item.version}`,
-              accent: item.platform === 'java' ? '#f59e0b' : 
-                      item.platform === 'go' ? '#10b981' : 
-                      item.platform === 'node' ? '#3b82f6' : '#64748b',
+              accent: item.platform.toLowerCase() === 'java' ? '#f59e0b' : 
+                      item.platform.toLowerCase() === 'go' ? '#10b981' : 
+                      item.platform.toLowerCase() === 'node' ? '#3b82f6' : '#64748b',
               w: 120,
               h: 160
             };

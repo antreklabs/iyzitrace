@@ -1,11 +1,10 @@
-import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
+import React, { useMemo, useState, useCallback, useRef } from 'react';
 import { Card, Dropdown, Input, Tree, Button } from 'antd';
 import { AppstoreOutlined, SearchOutlined, CloseOutlined, ContainerOutlined, ApiOutlined, DatabaseOutlined, CloudServerOutlined } from '@ant-design/icons';
 import MapLayer from '../../components/service-map/layer.component';
 import { LayerKey, TreeNode } from '../../interfaces/service-map/service-map.interface';
-import infraJson from '../../assets/data/map.json';
 import { Handle, Position } from 'reactflow';
-// import { getBackendSrv } from '@grafana/runtime';
+import { Region, Application, Infrastructure, Service, ServiceMapData } from '../../api/service/interface.service';
 
 // ---------- Renk ve durum yardımcıları ----------
 const cardBg = (hex: string) =>
@@ -53,7 +52,7 @@ export const statusColor = (s?: string) =>
 export const InfraIsoBlockNode: React.FC<any> = ({ data }) => {
   const accent = data?.accent || '#22c55e';
   const label = data?.label || 'node';
-  const sub = data?.sub || '';
+  const sub = data?.sub || 'aa';
   const baseW = data?.w ?? 120;
   const baseH = data?.h ?? 160; // blok yüksekliği (yan yüzler)
   const W = Math.max(8, Math.round(baseW * 0.5));
@@ -228,7 +227,7 @@ export const ApplicationIsoBlockNode: React.FC<any> = ({ data }) => {
 };
 
 // Service block - green/health theme
-export const ServiceIsoBlockNode: React.FC<any> = ({ data, selected }) => {
+export const ServiceIsoBlockNode: React.FC<{ data: Service; selected?: boolean }> = ({ data, selected }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'healthy': return '#10b981';
@@ -249,10 +248,8 @@ export const ServiceIsoBlockNode: React.FC<any> = ({ data, selected }) => {
   };
 
   // Safeguards for optional props
-  const safeStatus = (data && data.status) ? String(data.status) : 'healthy';
-  const rawType = (data && typeof data.type === 'string') ? String(data.type) : 'api';
-  const safeType = rawType.toLowerCase() === 'service3d' ? 'api' : rawType;
-  const safeZone = (data && typeof data.zone !== 'undefined') ? data.zone : '-';
+  const safeStatus = data?.status?.value.toLowerCase() || 'healthy';
+  const safeType = data?.type.toLowerCase() || 'api';
 
   return (
     <div
@@ -313,20 +310,16 @@ export const ServiceIsoBlockNode: React.FC<any> = ({ data, selected }) => {
           {safeType.toUpperCase()}
         </div>
         
-        <div style={{ color: '#64748b', fontSize: '11px' }}>
-          Zone: {safeZone}
-        </div>
-        
         {/* Details */}
         <div style={{ marginTop: '8px', fontSize: '10px', color: '#94a3b8' }}>
-          {data?.details?.containers && (
-            <div>{data.details.containers} Containers</div>
+          {(data as any)?.details?.containers && (
+            <div>{(data as any).details.containers} Containers</div>
           )}
-          {data?.details?.processes && (
-            <div>{data.details.processes} Processes</div>
+          {(data as any)?.details?.processes && (
+            <div>{(data as any).details.processes} Processes</div>
           )}
-          {data?.details?.jvms && (
-            <div>{data.details.jvms} JVMs</div>
+          {(data as any)?.details?.jvms && (
+            <div>{(data as any).details.jvms} JVMs</div>
           )}
         </div>
 
@@ -342,19 +335,19 @@ export const ServiceIsoBlockNode: React.FC<any> = ({ data, selected }) => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
             <div>
               <div style={{ color: '#94a3b8', fontSize: '10px' }}>Avg. Lat</div>
-              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.avg}</div>
+              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.avgLatencyMs} ms</div>
             </div>
             <div>
               <div style={{ color: '#94a3b8', fontSize: '10px' }}>Min. Lat</div>
-              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.min}</div>
+              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.minLatencyMs} ms</div>
             </div>
             <div>
               <div style={{ color: '#94a3b8', fontSize: '10px' }}>Max. Lat</div>
-              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.max}</div>
+              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.maxLatencyMs} ms</div>
             </div>
             <div>
               <div style={{ color: '#94a3b8', fontSize: '10px' }}>Count</div>
-              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.count}</div>
+              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.requestCount}</div>
             </div>
           </div>
         </div>
@@ -443,7 +436,11 @@ export function gridLayout(
 }
 
 
-const ServiceMapPage: React.FC = () => {
+interface ServiceMapComponentProps {
+  data: ServiceMapData;
+}
+
+const ServiceMapComponent: React.FC<ServiceMapComponentProps> = ({ data }) => {
   const [layer, setLayer] = useState<LayerKey>('infra');
   const [searchValue, setSearchValue] = useState('');
   const [selectedKey, setSelectedKey] = useState<string>('');
@@ -452,131 +449,15 @@ const ServiceMapPage: React.FC = () => {
   const infraLayerRef = useRef<any>(null);
   const applicationLayerRef = useRef<any>(null);
   const serviceLayerRef = useRef<any>(null);
-
-  // Sayfa yüklendiğinde console log
-  useEffect(() => {
-    // console.log('Map 3D sayfa yüklendi');
-  }, []);
-
-  // --- Seed helper: build serviceMap config from map.json and write to plugin settings ---
-  useEffect(() => {
-    async function seedServiceMapFromJsonOnce() {
-      try {
-        // const pluginId = 'iyzitrace-app';
-        // Build flat list from map.json
-        const list: Array<{ id: string; name: string; layer: string; position: string; groupPosition: string; groupSize: string; imageUrl: string }> = [];
-
-        const pushItem = (layer: string, id: string, name: string, position?: any, groupPosition?: any, groupSize?: any, imageUrl?: string) => {
-          list.push({
-            id,
-            name,
-            layer,
-            position: position ? JSON.stringify(position) : '',
-            groupPosition: groupPosition ? JSON.stringify(groupPosition) : '',
-            groupSize: groupSize ? JSON.stringify(groupSize) : '',
-            imageUrl: imageUrl || ''
-          });
-        };
-
-        // regions
-        (infraJson.regions || []).forEach((region: any) => {
-          pushItem('region', region.id || `region:${region.name}`, region.name, region.position, region.groupPosition, region.groupSize, region.imageUrl);
-
-          // infrastructures
-          (region.infrastructures || []).forEach((infra: any) => {
-            pushItem('infrastructure', infra.id, infra.name, infra.position, infra.groupPosition, infra.groupSize, infra.imageUrl);
-
-            // applications
-            (infra.applications || []).forEach((app: any) => {
-              pushItem('application', app.id, app.name, app.position, app.groupPosition, app.groupSize, app.imageUrl);
-
-              // services (schema differs - try both service3d and classic)
-              (app.services || []).forEach((svc: any) => {
-                const img = svc.imageUrl || svc.data?.imageUrl || '';
-                pushItem('service', svc.id, svc.name, svc.position, svc.groupPosition, svc.groupSize, img);
-              });
-            });
-          });
-        });
-
-        // Read current plugin settings, merge and save
-        // const settings = await getBackendSrv().get(`/api/plugins/${pluginId}/settings`);
-        // const jsonData = { ...(settings?.jsonData || {}) };
-        // jsonData.serviceMap = list;
-        // await getBackendSrv().post(`/api/plugins/${pluginId}/settings`, {
-        //   jsonData,
-        //   enabled: true
-        // });
-        // eslint-disable-next-line no-console
-        // console.log('seedServiceMapFromJson: wrote', list.length, 'items to plugin settings');
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.warn('seedServiceMapFromJson failed', e);
-      }
-    }
-
-    // Yalnızca ilk açılışta tetikle
-    // seedServiceMapFromJsonOnce();
-
-    // Debug: mevcut serviceMap'i getir ve yaz
-    // (async () => {
-    //   try {
-    //     const pluginId = 'iyzitrace-app';
-    //     const settings = await getBackendSrv().get(`/api/plugins/${pluginId}/settings`);
-    //     // eslint-disable-next-line no-console
-    //     console.log('serviceMap(current):', settings?.jsonData?.serviceMap);
-    //   } catch (e) {
-    //     // eslint-disable-next-line no-console
-    //     console.warn('debugPrintServiceMap failed', e);
-    //   }
-    // })();
-
-    // Referans bırakarak TS6133 uyarısını engelle
-    void seedServiceMapFromJsonOnce;
-  }, []);
-
-  // İlk açılışta Service layer'a geç ve OpenTelemetry grubuna zoom yap
-  // useEffect(() => {
-  //   setLayer('application');
-  //   setSelectedKey('');
-  //   setSelectedNodeId('');
-  //   const t = setTimeout(() => {
-  //     const ref = applicationLayerRef.current;
-  //     if (ref && ref.zoomToNode) {
-  //       ref.zoomToNode('group::internal');
-  //     }
-  //   }, 200);
-  //   return () => clearTimeout(t);
-  // }, []);
-
-  // İlk açılışta localStorage'dan veri al, yoksa JSON'dan al ve localStorage'a kaydet
-  const getInitialData = () => {
-    const stored = localStorage.getItem('map-data');
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch (e) {
-        console.warn('localStorage data corrupted, using JSON fallback');
-        // JSON'u localStorage'a kaydet
-        localStorage.setItem('map-data', JSON.stringify(infraJson));
-        return infraJson;
-      }
-    }
-    // localStorage'da data yoksa JSON'u yükle ve kaydet
-    console.log('No data in localStorage, loading from JSON and saving to localStorage');
-    localStorage.setItem('map-data', JSON.stringify(infraJson));
-    return infraJson;
-  };
-
-  // localStorage'dan veri al ve tree yapısına çevir
+  
   const treeData = useMemo(() => {
     try {
-      const data = getInitialData();
-      const regions = data.regions || [];
-      
+      const regions = data?.regions || [];
+
+      console.log('regions', regions);
       const nodes: TreeNode[] = [];
       
-      regions.forEach((region: any) => {
+      regions.forEach((region: Region) => {
         const regionNode: TreeNode = {
           title: region.name,
           key: `region-${region.id}`,
@@ -584,7 +465,7 @@ const ServiceMapPage: React.FC = () => {
           children: []
         };
         
-        (region.infrastructures || []).forEach((infra: any) => {
+        (region.infrastructures || []).forEach((infra: Infrastructure) => {
           const infraNode: TreeNode = {
             title: infra.name,
             key: `infra-${infra.id}`,
@@ -592,7 +473,7 @@ const ServiceMapPage: React.FC = () => {
             children: []
           };
           
-          (infra.applications || []).forEach((app: any) => {
+          (infra.applications || []).forEach((app: Application) => {
             const appNode: TreeNode = {
               title: app.name,
               key: `app-${app.id}`,
@@ -600,7 +481,7 @@ const ServiceMapPage: React.FC = () => {
               children: []
             };
             
-            (app.services || []).forEach((service: any) => {
+            (app.services || []).forEach((service: Service) => {
               const serviceNode: TreeNode = {
                 title: service.name,
                 key: `service-${service.id}`,
@@ -625,7 +506,7 @@ const ServiceMapPage: React.FC = () => {
       console.error('Error parsing localStorage data:', error);
       return [];
     }
-  }, []);
+  }, [data]);
 
   // Arama fonksiyonu
   const filterTreeData = useCallback((data: TreeNode[], search: string): TreeNode[] => {
@@ -890,13 +771,13 @@ const ServiceMapPage: React.FC = () => {
   ), [searchValue, filteredTreeData, selectedKey, handleSelect, clearSelection]);
 
   return (
-    <div style={{ padding: 0, height: '100vh', overflow: 'hidden' }}>
+    <div style={{ paddingBottom: 100, height: '90vh', overflow: 'hidden' }}>
       {/* Override React Flow default width for group nodes */}
       <style>{`
         .react-flow__node-group { width: auto !important; }
       `}</style>
-      <Card style={{ background: '#0f172a', borderColor: '#1f2937', height: '100vh' }} styles={{ body: { padding: 0, height: '100%' } }}>
-        <div style={{ position: 'relative', height: '92%' }}>
+      <Card style={{ background: '#0f172a', borderColor: '#1f2937', height: '80vh' }} styles={{ body: { padding: 0, height: '100%' } }}>
+        <div style={{ position: 'relative', height: '100%' }}>
           {/* Legend - Sol Üst */}
           <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 10, width: '180px' }}>
             <div
@@ -1016,7 +897,7 @@ const ServiceMapPage: React.FC = () => {
           </div>
 
           {/* Legend - Üst Orta */}
-          <div style={{ position: 'fixed', top: 100, left: '50%', transform: 'translateX(-50%)', zIndex: 10, width: '250px' }}>
+          <div style={{ position: 'fixed', top: 165, right: 120, zIndex: 10, width: '250px' }}>
             <div
               style={{
                 padding: 5,
@@ -1080,7 +961,7 @@ const ServiceMapPage: React.FC = () => {
               onNodeClick={handleNodeClick} 
               onButtonClick={handleClick} 
               setDetailPanelContent={setDetailPanelContent} 
-              data={getInitialData()}
+              data={data}
               layer={layer}
             />
             )}
@@ -1091,7 +972,7 @@ const ServiceMapPage: React.FC = () => {
               onNodeClick={handleNodeClick} 
               onButtonClick={handleClick} 
               setDetailPanelContent={setDetailPanelContent} 
-              data={getInitialData()}
+              data={data}
               layer={layer}
             />
             )}
@@ -1102,7 +983,7 @@ const ServiceMapPage: React.FC = () => {
               onNodeClick={handleNodeClick} 
               onButtonClick={handleClick} 
               setDetailPanelContent={setDetailPanelContent} 
-              data={getInitialData()}
+              data={data}
               layer={layer}
             />
             )}
@@ -1113,6 +994,6 @@ const ServiceMapPage: React.FC = () => {
   );
 };
 
-export default ServiceMapPage;
+export default ServiceMapComponent;
 
 

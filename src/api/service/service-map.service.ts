@@ -1,50 +1,73 @@
 // Service Map Service - Infrastructure and service mapping data provider
 import mapData from '../../assets/data/map.json';
-import { Infrastructure, Application, Service, Operation, HealthValue } from './interface.service';
+import { Infrastructure, Application, Service, Operation, HealthValue, Region, ServiceMapData } from './interface.service';
+
+export const getRegions = async (): Promise<Region[]> => {
+  
+  const regions: Region[] = [];
+  
+  mapData.regions.forEach(region => {
+    regions.push({
+      id: region.id,
+      name: region.name,
+      position: region.position,
+      groupPosition: region.groupPosition,
+      groupSize: region.groupSize
+    });
+  });
+  
+  return regions;
+};
+
 /**
  * KAN-24 Query - Get all infrastructures
  * @returns Promise<Infrastructure[]> - List of all infrastructures
  */
 export const getInfrastructures = async (regionId?: string): Promise<Infrastructure[]> => {
-  
   const infrastructures: Infrastructure[] = [];
-  
-  mapData.regions.find(r => regionId ? r.id === regionId : true)?.infrastructures.forEach(infra => {
-    infrastructures.push({
-      id: infra.id,
-      name: infra.name,
-      osVersion: infra.os,
-      ip: infra.ip,
-      type: infra.type,
-      region: infra.region,
-      cpu: {
-        usage: infra.cpu.usage_pct,
-        capacity: infra.cpu.cores,
-        percentage: infra.cpu.usage_pct,
-      },
-      memory: {
-        usage: infra.memory.used_gb,
-        capacity: infra.memory.total_gb,
-        percentage: infra.memory.used_gb / infra.memory.total_gb,
-      },
-      status: {
-        value: infra.status as HealthValue,
-        metrics: {
-          errorCount: 10,
-          errorPercentage: 0.1,
-          warningCount: 20,
-          warningPercentage: 0.2,
-          degradedCount: 30,
-          degradedPercentage: 0.3,
-          totalCount: 100,
+
+  const regions = regionId
+    ? mapData.regions.filter(r => r.id === regionId)
+    : mapData.regions;
+
+  regions.forEach(region => {
+    (region.infrastructures || []).forEach(infra => {
+      infrastructures.push({
+        id: infra.id,
+        regionId: region.id,
+        name: infra.name,
+        osVersion: infra.os,
+        ip: infra.ip,
+        type: infra.type,
+        cpu: {
+          usage: infra.cpu.usage_pct,
+          capacity: infra.cpu.cores,
+          percentage: infra.cpu.usage_pct,
         },
-      },
-      position: infra.position,
-      groupPosition: infra.groupPosition,
-      groupSize: infra.groupSize,
+        memory: {
+          usage: infra.memory.used_gb,
+          capacity: infra.memory.total_gb,
+          percentage: infra.memory.used_gb / infra.memory.total_gb,
+        },
+        status: {
+          value: infra.status as HealthValue,
+          metrics: {
+            errorCount: 10,
+            errorPercentage: 0.1,
+            warningCount: 20,
+            warningPercentage: 0.2,
+            degradedCount: 30,
+            degradedPercentage: 0.3,
+            totalCount: 100,
+          },
+        },
+        position: infra.position,
+        groupPosition: infra.groupPosition,
+        groupSize: infra.groupSize,
+      });
     });
   });
-  
+
   return infrastructures;
 };
 
@@ -57,14 +80,21 @@ export const getApplicationsByInfrastructure = async (regionId?: string, infrast
   
   const applications: Application[] = [];
   
-  const region = mapData.regions.find(r => (regionId ? r.id === regionId : true));
-  const infra = region?.infrastructures.find(i => (infrastructureId ? i.id === infrastructureId : true));
+  const regions = regionId
+    ? mapData.regions.filter(r => r.id === regionId)
+    : mapData.regions;
 
-  infra?.applications.forEach(app => {
+  const infrastructures = infrastructureId
+    ? regions.flatMap(r => r.infrastructures.filter(i => i.id === infrastructureId))
+    : regions.flatMap(r => r.infrastructures);
+
+  infrastructures.forEach(infra => {
+    infra.applications.forEach(app => {
       applications.push({
         id: app.id,
         infrastructureId: infra.id,
         name: app.name,
+        platform: app.platform,
         version: app.version,
         imageUrl: app.imageUrl,
         status: {
@@ -83,6 +113,7 @@ export const getApplicationsByInfrastructure = async (regionId?: string, infrast
         groupPosition: app.groupPosition,
         groupSize: app.groupSize,
       });
+    });
   });
   
   return applications;
@@ -97,48 +128,20 @@ export const getApplicationsByInfrastructure = async (regionId?: string, infrast
 export const getServicesByApplication = async (regionId?: string, infrastructureId?: string, applicationId?: string): Promise<Service[]> => {
   
   const services: Service[] = [];
-  
-  const region = mapData.regions.find(r => (regionId ? r.id === regionId : true));
-  const infra = region?.infrastructures.find(i => (infrastructureId ? i.id === infrastructureId : true));
-  const app = infra?.applications.find(a => (applicationId ? a.id === applicationId : true));
+  const regions = regionId
+    ? mapData.regions.filter(r => r.id === regionId)
+    : mapData.regions;
 
-  app?.services.forEach(service => {
-      // Convert operations from map.json format to our interface format
-      const operations = service.operations?.map((op: any) => ({
-        id: op.id,
-        serviceId: service.id,
-        name: op.name,
-        type: op.type,
-        method: op.method,
-        path: op.path,
-        sourceServiceId: service.id,
-        targetServiceId: op.targetServiceId,
-        metrics: {
-          avgLatencyMs: op.avg_latency_ms,
-          p95LatencyMs: op.p95_ms,
-          p50DurationMs: op.avg_latency_ms,
-          p75DurationMs: op.avg_latency_ms,
-          p90DurationMs: op.avg_latency_ms,
-          p95DurationMs: op.avg_latency_ms,
-          p99DurationMs: op.avg_latency_ms,
-          avgDurationMs: op.avg_latency_ms,
-          count: 10,
-        },
-        status: {
-          value: op.status as HealthValue,
-          metrics: {
-            errorCount: 10,
-            errorPercentage: 0.1,
-            warningCount: 20,
-            warningPercentage: 0.2,
-            degradedCount: 30,
-            degradedPercentage: 0.3,
-            totalCount: 100,
-          },
-        },
-        position: op.position,
-      })) || [];
+  const infrastructures = infrastructureId
+    ? regions.flatMap(r => r.infrastructures.filter(i => i.id === infrastructureId))
+    : regions.flatMap(r => r.infrastructures);
 
+  const applications = applicationId
+    ? infrastructures.flatMap(i => i.applications.filter(a => a.id === applicationId))
+    : infrastructures.flatMap(a => a.applications);
+
+  applications.forEach(app => {
+    app.services.forEach(service => {
       services.push({
         id: service.id,
         applicationId: app.id,
@@ -160,7 +163,7 @@ export const getServicesByApplication = async (regionId?: string, infrastructure
           operationCounts: parseFloat(service.metrics.avg.replace(' ms', '')),
         },
         status: {
-          value: (service as any).health as HealthValue,
+          value: service.status as HealthValue,
           metrics: {
             errorCount: 10,
             errorPercentage: 0.1,
@@ -174,8 +177,8 @@ export const getServicesByApplication = async (regionId?: string, infrastructure
         position: service.position,
         groupPosition: service.groupPosition,
         groupSize: service.groupSize,
-        operations: operations, // Include operations directly
       });
+    });
   });
   
   return services;
@@ -190,21 +193,33 @@ export const getServicesByApplication = async (regionId?: string, infrastructure
 export const getOperationsByService = async (regionId?: string, infrastructureId?: string, applicationId?: string, serviceId?: string): Promise<Operation[]> => {
   
   const operations: Operation[] = [];
-  
-  const region = mapData.regions.find(r => (regionId ? r.id === regionId : true));
-  const infra = region?.infrastructures.find(i => (infrastructureId ? i.id === infrastructureId : true));
-  const app = infra?.applications.find(a => (applicationId ? a.id === applicationId : true));
-  const service = app?.services.find(s => (serviceId ? s.id === serviceId : true));
+ 
+  const regions = regionId
+    ? mapData.regions.filter(r => r.id === regionId)
+    : mapData.regions;
 
-  service?.operations.forEach(operation => {
+  const infrastructures = infrastructureId
+    ? regions.flatMap(r => (r.infrastructures || []).filter(i => i.id === infrastructureId))
+    : regions.flatMap(r => r.infrastructures || []);
+
+  const applications: any[] = applicationId
+    ? infrastructures.flatMap((i: any) => (i.applications || []).filter((a: any) => a.id === applicationId))
+    : infrastructures.flatMap((i: any) => i.applications || []);
+
+  const services: any[] = serviceId
+    ? applications.flatMap((a: any) => (a.services || []).filter((s: any) => s.id === serviceId))
+    : applications.flatMap((a: any) => a.services || []);
+
+  services.forEach((svc: any) => {
+    (svc.operations || []).forEach((operation: any) => {
       operations.push({
         id: operation.id,
-        serviceId: service.id,
+        serviceId: svc.id,
         name: operation.name,
         type: operation.type,
         method: operation.method,
         path: operation.path,
-        sourceServiceId: serviceId,
+        sourceServiceId: svc.id,
         targetServiceId: operation.targetServiceId,
         metrics: {
           avgLatencyMs: operation.avg_latency_ms,
@@ -231,18 +246,30 @@ export const getOperationsByService = async (regionId?: string, infrastructureId
         },
         position: operation.position,
       });
+    });
   });
   
   return operations;
 
 };
 
-export const getServiceMapData = async (regionId?: string, infrastructureId?: string, applicationId?: string, serviceId?: string): Promise<Infrastructure[]> => {
+export const getServiceMapData = async (regionId?: string, infrastructureId?: string, applicationId?: string, serviceId?: string): Promise<ServiceMapData> => {
   
+  const regions = await getRegions();
+  console.log('[getServiceMapData] regions:', regions);
   const infrastructures = await getInfrastructures(regionId);
+  console.log('[getServiceMapData] infrastructures:', infrastructures);
   const applications = await getApplicationsByInfrastructure(regionId, infrastructureId);
+  console.log('[getServiceMapData] applications:', applications);
   const services = await getServicesByApplication(regionId, infrastructureId, applicationId);
+  console.log('[getServiceMapData] services:', services);
   const operations = await getOperationsByService(regionId, infrastructureId, applicationId, serviceId);
+  console.log('[getServiceMapData] operations:', operations);
+
+
+  regions.forEach(region => {
+    region.infrastructures = infrastructures.filter(infrastructure => infrastructure.regionId === region.id);
+  });
 
   infrastructures.forEach(infrastructure => {
     infrastructure.applications = applications.filter(application => application.infrastructureId === infrastructure.id);
@@ -256,6 +283,6 @@ export const getServiceMapData = async (regionId?: string, infrastructureId?: st
     service.operations = operations.filter(operation => operation.serviceId === service.id);
   });
 
-  return infrastructures;
+  return { regions: regions };
 
 };

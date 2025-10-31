@@ -13,9 +13,9 @@ import {
   TeamOutlined,
   DeploymentUnitOutlined,
   HomeOutlined,
-  BuildOutlined
+  BuildOutlined,
+  MenuOutlined,
 } from '@ant-design/icons';
-import { FaChevronCircleLeft, FaChevronCircleRight } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import pluginJson from '../../../plugin.json';
 
@@ -23,7 +23,7 @@ export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
 const { Sider } = Layout;
 
 const Sidebar: React.FC = () => {
-  const [collapsed, setCollapsed] = React.useState(false);
+  const [collapsed, setCollapsed] = React.useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -56,17 +56,19 @@ const Sidebar: React.FC = () => {
         }}
       >
         <Button
-          type="text"
-          icon={
-            collapsed ? (
-              <FaChevronCircleRight style={{ fontSize: 20 }} />
-            ) : (
-              <FaChevronCircleLeft style={{ fontSize: 20 }} />
-            )
-          }
+          type="default"
+          icon={<MenuOutlined style={{ fontSize: 12, color: '#ffffff' }} />}
           onClick={() => setCollapsed(!collapsed)}
           style={{
-            color: 'rgb(255 255 255)',
+            color: '#ffffff',
+            backgroundColor: '#C75A2B',
+            width: 32,
+            height: 32,
+            borderRadius: 12,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.35)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         />
       </div>

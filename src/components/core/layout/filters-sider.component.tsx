@@ -24,9 +24,9 @@ const FiltersSider: React.FC<FiltersSiderProps> = ({
       width={width} 
       style={{ 
         background: '#1f1f1f', 
-        padding: 25,
+        padding: 10,
         top: 0,
-        marginBottom: '16px',
+        // marginBottom: '16px',
         position: 'sticky',
         zIndex: 10,
       }} 

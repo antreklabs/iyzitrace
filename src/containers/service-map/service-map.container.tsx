@@ -3,23 +3,27 @@ import BaseContainerComponent, { FetchedModel } from '../base.container';
 import { FilterParamsModel } from '../../api/service/query.service';
 import BaseFilter from '../base.filter';
 import { getServiceMapData } from '../../api/service/service-map.service';
-import { Infrastructure } from '../../api/service/interface.service';
+import { Infrastructure, Region, ServiceMapData } from '../../api/service/interface.service';
 import { TableColumn, getTableColumns, columns as columnUtils } from '../../api/service/table.services';
 import BaseTable from '../base.table';
+import ServiceMapComponent from '../../components/service-map/map.component';
 
 const ServiceMapContainer: React.FC = () => {
 
-  const [serviceMapData, setServiceMapData] = useState<Infrastructure[]>([]);
+  const [infraLevelData, setInfraLevelData] = useState<Infrastructure[]>([]);
+  const [mapLevelData, setMapLevelData] = useState<ServiceMapData>({});
   const [columns, setColumns] = useState<TableColumn>();
 
   const fetchModelData = async (filterModel: FilterParamsModel): Promise<FetchedModel> => {
     const data = await getServiceMapData();
-    setServiceMapData(data);
-    setColumnInDetail(data);
+    const infrastructures = (data.regions || []).flatMap((r: Region) => r.infrastructures || []);
+    setMapLevelData(data);
+    setInfraLevelData(infrastructures);
+    setColumnInDetail(infrastructures);
 
     console.log('[ServiceMapContainer] data:', data);
     console.log('[ServiceMapContainer] filterModel:', filterModel);
-    return { data: data, columns: columns };
+    return { data: infrastructures, columns: columns };
   };
 
   const setColumnInDetail = (data: Infrastructure[]) => {
@@ -50,7 +54,7 @@ const ServiceMapContainer: React.FC = () => {
     <BaseContainerComponent
       title="Service Map"
       pageName="service-map"
-      initialFilterCollapsed={false}
+      initialFilterCollapsed={true}
       onFetchData={fetchModelData}
       filterComponent={
         <BaseFilter 
@@ -65,18 +69,18 @@ const ServiceMapContainer: React.FC = () => {
           hasTypesFilter={true}
           hasLevelsFilter={true}
           columns={columns?.RootColumns ?? []}
-          data={serviceMapData}
+          data={infraLevelData}
         />
       }
     >
-
+      <ServiceMapComponent data={mapLevelData}/>
       {columns && columns.RootColumns && columns.RootColumns.length > 0 && (
         <BaseTable
-          data={serviceMapData}
-          columns={columns}
-          title="Service Map Overview"
-          showSearch={true}
-          searchPlaceholder="Search..."
+        data={infraLevelData}
+        columns={columns}
+        title="Service Map Overview"
+        showSearch={true}
+        searchPlaceholder="Search..."
         />
       )}
     </BaseContainerComponent>

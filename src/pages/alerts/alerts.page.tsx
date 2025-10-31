@@ -19,6 +19,7 @@ import {
 } from '@ant-design/icons';
 import { css } from '@emotion/css';
 import { api, type AlertRule, type FailedCheck, type TimeRange } from '../../api/alerts';
+import { StatusItem } from '@/api/service/interface.service';
 
 const { Search } = Input;
 const { TabPane } = Tabs;
@@ -318,10 +319,10 @@ const AlertsPage: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       width: 120,
-      render: (status: string) => (
+      render: (status: StatusItem) => (
         <Badge 
-          color={getStatusColor(status)} 
-          text={status.toUpperCase()}
+          color={getStatusColor(status?.value)} 
+          text={status?.value?.toUpperCase()}
           style={{ color: '#fff' }}
         />
       ),

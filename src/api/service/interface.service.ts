@@ -21,6 +21,18 @@ export interface SizeItem {
   height: number;
 }
 
+export interface ServiceMapData {
+  regions?: Region[] | [];
+}
+
+export interface Region {
+  id: string;
+  name: string;
+  position: PositionItem;
+  groupPosition: PositionItem;
+  groupSize: SizeItem;
+  infrastructures?: Infrastructure[] | [];
+  }
 
 export interface Infrastructure {
     id: string;
@@ -28,7 +40,7 @@ export interface Infrastructure {
     osVersion: string;
     ip: string;
     type: string;
-    region: string;
+    regionId: string;
     cpu: {
         usage: number;
         capacity: number;
@@ -50,6 +62,7 @@ export interface Infrastructure {
     id: string;
     infrastructureId: string;
     name: string;
+    platform: string;
     version: string;
     imageUrl: string;
     status: StatusItem;
