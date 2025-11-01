@@ -4,140 +4,15 @@
 # extra settings to be merged into OpenTelemetry Collector configuration
 # do not delete this file
 
-exporters:
-  debug:
-    verbosity: detailed
-
-  # OTLP exporter (observability platform)
-  otlp/iyzitrace:
-    endpoint: "nginx-platform:4317"
-    tls:
-      insecure: true
-
-# OTLP exporter (Signoz)
-  otlp/signoz:
-    endpoint: "https://ingest.us.signoz.cloud:443"
-    tls:
-      insecure: false
-    headers:
-      signoz-ingestion-key: 28da4fd2-539f-4a45-a282-15cecdb5643e
-
-# OTLP exporter (dash0)
-  otlphttp/dash0:
-    endpoint: https://ingress.europe-west4.gcp.dash0.com
-    headers:
-      Authorization: Bearer auth_T2zx9Nu7ohOMTe6YEoT0yhivKvnzdANJ
-      Dash0-Dataset: default
-
-processors:
-  resource/metrics-tags:
-    attributes:
-      - key: cloud.region
-        action: upsert
-        value: onprem
-
-  transform/type_classifier:
-    error_mode: ignore
-    trace_statements:
-      - context: span
-        statements:
-          - set(attributes["type"], "http")
-            where (
-              attributes["http.request.method"] != nil or
-              attributes["http.method"] != nil or
-              attributes["url.full"] != nil or
-              attributes["server.address"] != nil
-            ) and attributes["type"] == nil
-          - set(attributes["type"], "messaging")
-            where (
-              attributes["messaging.system"] != nil or
-              attributes["messaging.destination.name"] != nil
-            ) and attributes["type"] == nil
-          - set(attributes["type"], "cache")
-            where (
-              attributes["db.system"] != nil and attributes["db.system"] == "redis"
-            ) and attributes["type"] == nil
-          - set(attributes["type"], "database")
-            where (
-              attributes["db.system"] != nil or
-              attributes["db.namespace"] != nil or
-              attributes["db.operation.name"] != nil or
-              attributes["db.operation"] != nil
-            ) and attributes["type"] == nil
-          - set(attributes["type"], "rpc")
-            where (
-              attributes["rpc.system"] != nil or
-              attributes["rpc.service"] != nil or
-              attributes["rpc.method"] != nil
-            ) and attributes["type"] == nil
-
-  metricstransform:
-    transforms:
-      - include: ^traces_service_graph(.*)$
-        match_type: regexp
-        action: update
-        new_name: iyzitrace_service_graph$$1
-      - include: ^traces\.span\.metrics\.(.*)$
-        match_type: regexp
-        action: update
-        new_name: iyzitrace.span.metrics.$$1
-
-  transform:
-    error_mode: ignore
-    trace_statements:
-      - context: span
-        statements:
-          # Base'teki 2 kuralı koruyoruz ve 1 kural ekliyoruz
-          - replace_pattern(name, "\\?.*", "")
-          - replace_match(name, "GET /api/products/*", "GET /api/products/{productId}")
-          - set(span.attributes["operation.name"], span.name)
-    log_statements:
-      - context: log
-        statements:
-          # Level'ı resource attributes'a ekle
-          - set(resource.attributes["level"], "INFO")
-          # Test için basit bir attribute ekle
-          - set(attributes["test_attr"], "working")
-          # Service name'i resource'dan al
-          - set(resource.attributes["service_name"], resource.attributes["service.name"])
-          # Service namespace'i resource'dan al
-          - set(resource.attributes["service_namespace"], resource.attributes["service.namespace"])
-
-connectors:
-  spanmetrics:
-    exemplars:
-      enabled: true
-    resource_metrics_cache_size: 1600
-    dimensions:
-      - name: type
-    events:
-      enabled: true
-      dimensions:
-        - name: exception.type
-        - name: exception.message
-    metrics_flush_interval: 10s
-  servicegraph:
-    metrics_flush_interval: 10s
-    dimensions:
-      - db.system
-      - db.name
-      - operation.name
-    virtual_node_peer_attributes:
-      - db.system
-      - peer.service
-    virtual_node_extra_label: true
-
-service:
-  pipelines:
-    traces:
-      receivers: [otlp]
-      processors: [resourcedetection, memory_limiter, transform, batch, transform/type_classifier]
-      exporters: [debug, otlp/iyzitrace, otlp/signoz, otlphttp/dash0,spanmetrics, servicegraph]
-    metrics:
-      receivers: [docker_stats, httpcheck/frontend-proxy, hostmetrics, nginx, otlp, postgresql, redis, spanmetrics, servicegraph]
-      processors: [resourcedetection, memory_limiter, batch, metricstransform, resource/metrics-tags]
-      exporters: [debug, otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
-    logs:
-      receivers: [otlp]
-      processors: [resourcedetection, memory_limiter, transform, batch]
-      exporters: [debug, otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
+## Example configuration for sending data to your own OTLP HTTP backend
+## Note: the spanmetrics exporter must be included in the exporters array
+## if overriding the traces pipeline.
+##
+#  exporters:
+#    otlphttp/example:
+#      endpoint: <your-endpoint-url>
+#
+#  service:
+#    pipelines:
+#      traces:
+#        exporters: [spanmetrics, otlphttp/example]

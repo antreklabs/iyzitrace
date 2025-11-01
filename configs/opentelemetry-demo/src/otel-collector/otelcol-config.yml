@@ -118,9 +118,6 @@ receivers:
         metrics:
           system.uptime:
             enabled: true
-exporters:
-  debug:
-
 processors:
   batch:
     timeout: 10s
@@ -130,21 +127,50 @@ processors:
     spike_limit_percentage: 25
   resourcedetection:
     detectors: [env, docker, system]
+  transform/span:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          # Base'teki 2 kuralı koruyoruz ve 1 kural ekliyoruz
+          - replace_pattern(name, "\\?.*", "")
+          - replace_match(name, "GET /api/products/*", "GET /api/products/{productId}")
+
+exporters:
+  debug:
+# OTLP exporter (observability platform)
+  otlp/iyzitrace:
+    endpoint: "nginx-platform:4317"
+    tls:
+      insecure: true
+# OTLP exporter (Signoz)
+  otlp/signoz:
+    endpoint: "https://ingest.us.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: 28da4fd2-539f-4a45-a282-15cecdb5643e
+# OTLP exporter (dash0)
+  otlphttp/dash0:
+    endpoint: https://ingress.europe-west4.gcp.dash0.com
+    headers:
+      Authorization: Bearer auth_T2zx9Nu7ohOMTe6YEoT0yhivKvnzdANJ
+      Dash0-Dataset: default
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [resourcedetection, memory_limiter, transform, batch]
-      exporters: [debug]
+      processors: [resourcedetection, memory_limiter, batch, transform/span]
+      exporters: [debug, otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
     metrics:
       receivers: [docker_stats, httpcheck/frontend-proxy, hostmetrics, nginx, otlp, postgresql, redis]
       processors: [resourcedetection, memory_limiter, batch]
-      exporters: [debug]
+      exporters: [debug, otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
     logs:
       receivers: [otlp]
       processors: [resourcedetection, memory_limiter, batch]
-      exporters: [debug]
+      exporters: [debug, otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
   telemetry:
     metrics:
       level: detailed

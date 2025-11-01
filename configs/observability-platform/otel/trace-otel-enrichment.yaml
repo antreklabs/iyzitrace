@@ -11,13 +11,93 @@ exporters:
     endpoint: tempo-platform:4317
     tls:
       insecure: true
+  otlp/metric:
+    endpoint: metric-otel-enrichment:4317
+    tls:
+      insecure: true
 
 processors:
-  batch: {}
+  batch:
+    timeout: 10s
+
+  memory_limiter:
+    check_interval: 5s
+    limit_percentage: 80
+    spike_limit_percentage: 25
+
+  transform/type_classifier:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          - set(attributes["type"], "http")
+            where (
+              attributes["http.request.method"] != nil or
+              attributes["http.method"] != nil or
+              attributes["url.full"] != nil or
+              attributes["server.address"] != nil
+            ) and attributes["type"] == nil
+          - set(attributes["type"], "messaging")
+            where (
+              attributes["messaging.system"] != nil or
+              attributes["messaging.destination.name"] != nil
+            ) and attributes["type"] == nil
+          - set(attributes["type"], "cache")
+            where (
+              attributes["db.system"] != nil and attributes["db.system"] == "redis"
+            ) and attributes["type"] == nil
+          - set(attributes["type"], "database")
+            where (
+              attributes["db.system"] != nil or
+              attributes["db.namespace"] != nil or
+              attributes["db.operation.name"] != nil or
+              attributes["db.operation"] != nil
+            ) and attributes["type"] == nil
+          - set(attributes["type"], "rpc")
+            where (
+              attributes["rpc.system"] != nil or
+              attributes["rpc.service"] != nil or
+              attributes["rpc.method"] != nil
+            ) and attributes["type"] == nil
+
+  transform/span:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          - set(span.attributes["operation.name"], span.name)
+
+connectors:
+  spanmetrics:
+    exemplars:
+      enabled: true
+    resource_metrics_cache_size: 1600
+    dimensions:
+      - name: type
+    events:
+      enabled: true
+      dimensions:
+        - name: exception.type
+        - name: exception.message
+    metrics_flush_interval: 10s
+  servicegraph:
+    metrics_flush_interval: 10s
+    dimensions:
+      - db.system
+      - db.name
+      - operation.name
+    virtual_node_peer_attributes:
+      - db.system
+      - peer.service
+    virtual_node_extra_label: true
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
+      processors: [batch, memory_limiter, transform/span, transform/type_classifier]
+      exporters: [otlp, spanmetrics, servicegraph]
+    metrics:
+      receivers: [spanmetrics, servicegraph]
+      processors: [batch, memory_limiter]
+      exporters: [otlp/metric]
