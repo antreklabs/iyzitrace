@@ -6,14 +6,21 @@ import BaseContainerHeader from './basecontainerheader.component';
 
 interface BaseConatinerProps {
   title: string;
-  pageName: string;
   children?: React.ReactNode;
 }
 
-const BaseContainer: React.FC<BaseConatinerProps> = ({ title, pageName, children }) => {
+const BaseContainer: React.FC<BaseConatinerProps> = ({ title, children }) => {
+  const resolvedPageName = (() => {
+    try {
+      const path = (window.location.pathname || '').replace(/\/+$/, '');
+      const last = path.split('/').filter(Boolean).pop() || '';
+      return last;
+    } catch {
+      return undefined;
+    }
+  })();
   return (
-    <Card title={<BaseContainerHeader title={title} pageName={pageName} />} 
-          style={{ height: 'calc(100vh)' }} 
+    <Card title={<BaseContainerHeader title={title} pageName={resolvedPageName ?? undefined} />} 
           className="base-container" 
           styles={{ body: { overflow: 'auto' } }}>
       {children as any}

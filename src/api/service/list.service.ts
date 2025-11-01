@@ -1,5 +1,6 @@
 // List Service - Dropdown data provider for labels and values
 import { getLabels, getLabelValues } from '../provider/prometheus.provider';
+import { getDefinitions } from './query.service';
 
 export class DropdownOption {
   key: string;
@@ -54,33 +55,54 @@ export const getPrometheusLabelValues = async (labelName: string): Promise<Dropd
  * Convenience: Fetch Prometheus services as DropdownOption[]
  */
 export const getPrometheusServices = async (): Promise<DropdownOption[]> => {
-  return getPrometheusLabelValues('service_name');
+  const definitions = await getDefinitions();
+  return getPrometheusLabelValues(definitions.service_label_name);
 };
 
 /**
- * Convenience: Fetch Prometheus services as DropdownOption[]
+ * Convenience: Fetch Prometheus operations as DropdownOption[]
  */
 export const getPrometheusOperations = async (): Promise<DropdownOption[]> => {
-  return getPrometheusLabelValues('span_name');
+  const definitions = await getDefinitions();
+  return getPrometheusLabelValues(definitions.span_label_name);
 };
 
 /**
  * Convenience: Fetch operation types as DropdownOption[]
  */
 export const getPrometheusOperationTypes = async (): Promise<DropdownOption[]> => {
-  return getPrometheusLabelValues('type');
+  const definitions = await getDefinitions();
+  return getPrometheusLabelValues(definitions.type_label_name);
 };
 
 /**
  * Convenience: Fetch trace statuses as DropdownOption[]
  */
 export const getPrometheusTraceStatuses = async (): Promise<DropdownOption[]> => {
-  return getPrometheusLabelValues('status');
+  const definitions = await getDefinitions();
+  return getPrometheusLabelValues(definitions.status_label_name);
 };
 
 /**
- * Convenience: Fetch Loki levels as DropdownOption[]
+ * Convenience: Fetch exception types as DropdownOption[]
  */
 export const getPrometheusLokiLevels = async (): Promise<DropdownOption[]> => {
-  return getPrometheusLabelValues('exception_type');
+  const definitions = await getDefinitions();
+  return getPrometheusLabelValues(definitions.exception_type_label_name);
+};
+
+/**
+ * Convenience: Fetch regions as DropdownOption[]
+ */
+export const getPrometheusRegions = async (): Promise<DropdownOption[]> => {
+  const definitions = await getDefinitions();
+  return getPrometheusLabelValues(definitions.region_label_name);
+};
+
+/**
+ * Convenience: Fetch infrastructures as DropdownOption[]
+ */
+export const getPrometheusInfrastructures = async (): Promise<DropdownOption[]> => {
+  const definitions = await getDefinitions();
+  return getPrometheusLabelValues(definitions.infrastructure_label_name);
 };

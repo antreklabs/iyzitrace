@@ -22,6 +22,7 @@ const ServiceMapContainer: React.FC = () => {
     setColumnInDetail(infrastructures);
 
     console.log('[ServiceMapContainer] data:', data);
+    console.log('[ServiceMapContainer] columns:', columns);
     console.log('[ServiceMapContainer] filterModel:', filterModel);
     return { data: infrastructures, columns: columns };
   };
@@ -53,7 +54,6 @@ const ServiceMapContainer: React.FC = () => {
   return (
     <BaseContainerComponent
       title="Service Map"
-      pageName="service-map"
       initialFilterCollapsed={true}
       onFetchData={fetchModelData}
       filterComponent={
@@ -81,6 +81,9 @@ const ServiceMapContainer: React.FC = () => {
         title="Service Map Overview"
         showSearch={true}
         searchPlaceholder="Search..."
+        l1Key="applications"
+        l2Key="services"
+        l3Key="operations"
         />
       )}
     </BaseContainerComponent>

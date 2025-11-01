@@ -10,7 +10,7 @@ interface ServiceDetailContainerProps {
 }
 const ServiceDetailContainer: React.FC<ServiceDetailContainerProps> = ({ serviceName }) => {
   return (
-    <BaseContainer title={'Detail of ' + serviceName.toUpperCase()} pageName="service-detail">
+    <BaseContainer title={'Detail of ' + serviceName.toUpperCase()}>
     <BasicSummary serviceName={serviceName} start={0} end={0} />
       <Row gutter={[16, 16]}>
         <Tabs

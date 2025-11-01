@@ -18,8 +18,6 @@ const TeamsManagePage = React.lazy(() => import('../pages/teams/teams-manage.pag
 const SettingsPage = React.lazy(() => import('../pages/settings/settings.page'));
 // const ComingSoonPage = React.lazy(() => import('../pages/core/coming-soon.page'));
 
-const ServiceMapV2Page = React.lazy(() => import('../pages/service-map/service-map-v2.page'));
-
 export const appRoutes: AppRoute[] = [
   {
     path: '/',
@@ -49,14 +47,6 @@ export const appRoutes: AppRoute[] = [
     element: <ServiceMapPage />,
     name: 'serviceMap',
     title: 'Service Map',
-    icon: 'search',
-    showInMenu: true,
-  },
-  {
-    path: '/service-map-v2',
-    element: <ServiceMapV2Page />,
-    name: 'serviceMapV2',
-    title: 'Service Map V2',
     icon: 'search',
     showInMenu: true,
   },

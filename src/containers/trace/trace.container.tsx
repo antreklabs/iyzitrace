@@ -279,7 +279,6 @@ const TraceContainer: React.FC = () => {
   return (
     <BaseContainerComponent
       title="Traces"
-      pageName="traces"
       initialFilterCollapsed={false}
       onFetchData={fetchModelData}
       filterComponent={<TraceFilter onChange={fetchModelData} columns={columns.RootColumns} />}

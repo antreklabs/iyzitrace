@@ -11,6 +11,7 @@ interface ViewData {
   description?: string;
   page: string;
   query: string;
+  data: any;
   createdAt: string;
 }
 
@@ -34,6 +35,21 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
     loadViews();
   }, []);
 
+  // Final guard: when views arrive but no selection yet, choose last or first
+  useEffect(() => {
+    if (!selectedView && Array.isArray(views) && views.length > 0) {
+      const last = safeReadLastSelected();
+      const candidate = last && last.pageName === pageName
+        ? views.find(v => v.id === last.viewId) || views[0]
+        : views[0];
+      setSelectedView(candidate);
+      writeLastSelected(candidate.id);
+      if (candidate.query) {
+        navigate(`${location.pathname}${candidate.query}`, { replace: true });
+      }
+    }
+  }, [views]);
+
   const loadViews = async () => {
     try {
       // Önce plugin settings'den yükle
@@ -42,13 +58,39 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
       const currentPageViews = pageViews.filter((view: ViewData) => view.page === pageName);
       
       if (currentPageViews.length > 0) {
-        setViews(currentPageViews);
+        setViews(currentPageViews as ViewData[]);
+        autoSelectView(currentPageViews as ViewData[]);
       } else {
         // Plugin settings'de yoksa localStorage'dan yükle
         const localViews = localStorage.getItem(`iyzitrace-views-${pageName}`);
-        if (localViews) {
+        const parsedViews = JSON.parse(localViews);
+        if (parsedViews && parsedViews.length > 0) {
           const parsedViews = JSON.parse(localViews);
-          setViews(parsedViews);
+          setViews(parsedViews as ViewData[]);
+          autoSelectView(parsedViews as ViewData[]);
+      } else {
+          // hiç kayıt yoksa default view oluştur
+          const created = await ensureDefaultView();
+          if (created) {
+            setViews([created]);
+            setSelectedView(created);
+            writeLastSelected(created.id);
+          } else {
+            // fallback: plugin settings kontrolü
+            const refreshed = await getPluginSettings();
+            const pageViewsAfter = (refreshed.pageViews || []).filter((v: ViewData) => v.page === pageName);
+            if (pageViewsAfter.length > 0) {
+              setViews(pageViewsAfter as ViewData[]);
+              autoSelectView(pageViewsAfter as ViewData[]);
+            } else {
+              // localStorage varsa kullan
+              const local = JSON.parse(localStorage.getItem(`iyzitrace-views-${pageName}`) || '[]');
+              if (Array.isArray(local) && local.length > 0) {
+                setViews(local);
+                autoSelectView(local);
+              }
+            }
+          }
         }
       }
     } catch (error) {
@@ -58,7 +100,75 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
       if (localViews) {
         const parsedViews = JSON.parse(localViews);
         setViews(parsedViews);
+        autoSelectView(parsedViews as ViewData[]);
+      } else {
+        const created = await ensureDefaultView();
+        if (created) {
+          setViews([created]);
+          setSelectedView(created);
+          writeLastSelected(created.id);
+        }
       }
+    }
+  };
+
+  const ensureDefaultView = async (): Promise<ViewData | null> => {
+    const defaultView: ViewData = {
+      id: 'default',
+      title: 'default',
+      description: '',
+      page: pageName,
+      query: '',
+      data: {},
+      createdAt: new Date().toISOString(),
+    };
+    try {
+      const settings = await getPluginSettings();
+      const pageViews = settings.pageViews || [];
+      const exists = pageViews.some((v: ViewData) => v.page === pageName);
+      if (!exists) {
+        await savePluginSettings({ ...settings, pageViews: [...pageViews, defaultView] });
+        writeLastSelected(defaultView.id);
+        return defaultView;
+      }
+    } catch {
+      // fallback to localStorage
+      const localViews = JSON.parse(localStorage.getItem(`iyzitrace-views-${pageName}`) || '[]');
+      if (!Array.isArray(localViews) || localViews.length === 0) {
+        localStorage.setItem(`iyzitrace-views-${pageName}`, JSON.stringify([defaultView]));
+        writeLastSelected(defaultView.id);
+        return defaultView;
+      }
+    }
+    return null;
+  };
+
+  const writeLastSelected = (viewId: string) => {
+    try {
+      localStorage.setItem(`lastSelectedPageView_${pageName}`, JSON.stringify({ pageName, viewId }));
+    } catch {}
+  };
+
+  const autoSelectView = (list: ViewData[]) => {
+    if (!Array.isArray(list) || list.length === 0) return;
+    const last = safeReadLastSelected();
+    const candidate = last && last.pageName === pageName
+      ? list.find(v => v.id === last.viewId) || list[0]
+      : list[0];
+    setSelectedView(candidate);
+    writeLastSelected(candidate.id);
+    if (candidate.query) {
+      navigate(`${location.pathname}${candidate.query}`, { replace: true });
+    }
+  };
+
+  const safeReadLastSelected = (): { pageName: string; viewId: string } | null => {
+    try {
+      const raw = localStorage.getItem(`lastSelectedPageView_${pageName}`);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch {
+      return null;
     }
   };
 
@@ -98,6 +208,7 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
         description: values.description || '',
         page: pageName,
         query: currentQuery,
+        data: {},
         createdAt: editingView?.createdAt || new Date().toISOString()
       };
 
@@ -162,6 +273,7 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
     const view = views.find(v => v.id === viewId);
     if (view) {
       setSelectedView(view);
+      writeLastSelected(view.id);
       // Navigate to the saved query
       navigate(`${location.pathname}${view.query}`, { replace: true });
     }
@@ -185,6 +297,24 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
         localStorage.setItem(`iyzitrace-views-${pageName}`, JSON.stringify(updatedViews));
         message.success('View deleted from local storage');
       }
+
+      // Her iki durumda da, localStorage yedeğini de temizle (çifte kayıt kalmasın)
+      try {
+        const localViewsMirror = JSON.parse(localStorage.getItem(`iyzitrace-views-${pageName}`) || '[]');
+        const localUpdated = localViewsMirror.filter((view: ViewData) => view.id !== viewId);
+        localStorage.setItem(`iyzitrace-views-${pageName}`, JSON.stringify(localUpdated));
+      } catch {}
+      
+      // Eğer son seçilen bu view ise, kaydı temizle
+      try {
+        const lastRaw = localStorage.getItem(`lastSelectedPageView_${pageName}`);
+        if (lastRaw) {
+          const last = JSON.parse(lastRaw);
+          if (last?.pageName === pageName && last?.viewId === viewId) {
+            localStorage.removeItem(`lastSelectedPageView_${pageName}`);
+          }
+        }
+      } catch {}
       
       if (selectedView?.id === viewId) {
         setSelectedView(null);

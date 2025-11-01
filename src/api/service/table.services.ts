@@ -33,14 +33,14 @@ export interface ColumnItem {
  */
 export const getTableColumns = (
   data: any,
-  L1ColumnProperty: string,
-  L2ColumnProperty: string,
-  L3ColumnProperty: string
+  L1ColumnProperty?: string,
+  L2ColumnProperty?: string,
+  L3ColumnProperty?: string
 ): TableColumn => {
   const rootColumns: ColumnItem[] = [];
-  const l1Columns: ColumnItem[] = [];
-  const l2Columns: ColumnItem[] = [];
-  const l3Columns: ColumnItem[] = [];
+  const l1Columns: ColumnItem[] = L1ColumnProperty ? [] : undefined;
+  const l2Columns: ColumnItem[] = L2ColumnProperty ? [] : undefined;
+  const l3Columns: ColumnItem[] = L3ColumnProperty ? [] : undefined;
 
   // Helper function to get nested property value
   const getNestedValue = (obj: any, path: string): any => {
@@ -242,11 +242,13 @@ export const getTableColumns = (
       }
     });
     
+    if(l1Columns) {
     const l1Properties = extractProperties(l1Data, 1);
     l1Properties.forEach(prop => {
-      l1Columns.push(createColumnItem(prop, prop, 220, l1Data));
-    });
-    l1Columns.splice(0, l1Columns.length, ...columns.applyDefaultHidden(l1Columns));
+        l1Columns.push(createColumnItem(prop, prop, 220, l1Data));
+      });
+      l1Columns.splice(0, l1Columns.length, ...columns.applyDefaultHidden(l1Columns));
+    }
   }
 
   // Extract L2 level properties (services)
@@ -262,11 +264,13 @@ export const getTableColumns = (
       }
     });
     
+    if(l2Columns) {
     const l2Properties = extractProperties(l2Data, 2);
     l2Properties.forEach(prop => {
       l2Columns.push(createColumnItem(prop, prop, 220, l2Data));
     });
     l2Columns.splice(0, l2Columns.length, ...columns.applyDefaultHidden(l2Columns));
+    }
   }
 
   // Extract L3 level properties (operations)
@@ -285,12 +289,13 @@ export const getTableColumns = (
         });
       }
     });
-    
+    if(l3Columns) {
     const l3Properties = extractProperties(l3Data, 3);
     l3Properties.forEach(prop => {
       l3Columns.push(createColumnItem(prop, prop, 220, l3Data));
     });
     l3Columns.splice(0, l3Columns.length, ...columns.applyDefaultHidden(l3Columns));
+    }
   }
 
   return {

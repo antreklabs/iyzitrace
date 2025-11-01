@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Input, Typography } from 'antd';
 import { IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -16,6 +16,9 @@ export interface BaseTableProps {
   title?: string;
   showSearch?: boolean;
   searchPlaceholder?: string;
+  l1Key?: string; // first child collection key (default: applications)
+  l2Key?: string; // second child collection key (default: services)
+  l3Key?: string; // third child collection key (default: operations)
 }
 
 const BaseTable: React.FC<BaseTableProps> = ({
@@ -25,29 +28,39 @@ const BaseTable: React.FC<BaseTableProps> = ({
   // onPageSizeChange,
   title = "Data Table",
   showSearch = true,
-  searchPlaceholder = "Search..."
+  searchPlaceholder = "Search...",
+  l1Key = 'applications',
+  l2Key = 'services',
+  l3Key = 'operations'
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
   
   // Get search query and page count from URL
   const filterModel = getFilterParams();
-  const query = filterModel.query;
+  const urlQuery = filterModel.query;
   const pageCount = parseInt(filterModel.options.pageCount, 10);
 
-  // Filter data based on search query
-  const filteredData = query
+  // Local state for search input (prevents re-renders on every keystroke)
+  const [searchValue, setSearchValue] = useState(urlQuery || '');
+
+  // Sync local state with URL when URL changes externally
+  useEffect(() => {
+    setSearchValue(urlQuery || '');
+  }, [urlQuery]);
+
+  // Filter data based on search value (local state for real-time filtering without page refresh)
+  const filteredData = searchValue
     ? data.filter((item: any) =>
         Object.values(item).some(value =>
-          typeof value === 'string' && String(value).toLowerCase().includes(query.toLowerCase())
+          typeof value === 'string' && String(value).toLowerCase().includes(searchValue.toLowerCase())
         )
       )
     : data;
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const newSearch = updateUrlParams({ q: value || null });
-    navigate(`${location.pathname}?${newSearch}`, { replace: true });
+    // Only update local state, don't navigate yet
+    setSearchValue(e.target.value);
   };
 
   const handleSearch = (value: string) => {
@@ -78,9 +91,9 @@ const BaseTable: React.FC<BaseTableProps> = ({
                         level === 'L2' ? columns?.L2Columns : 
                         columns?.L3Columns;
     
-    const levelData = level === 'L1' ? record.applications :
-                     level === 'L2' ? record.services :
-                     record.operations;
+    const levelData = level === 'L1' ? record?.[l1Key] :
+                     level === 'L2' ? record?.[l2Key] :
+                     record?.[l3Key];
 
     if (!levelData || levelData.length === 0 || !levelColumns || levelColumns.length === 0) {
       return null;
@@ -125,8 +138,19 @@ const BaseTable: React.FC<BaseTableProps> = ({
             }
             return null;
           },
-          expandIcon: ({ expanded, onExpand, record }) =>
-            renderExpandIcon(expanded, onExpand, record, '12px'),
+          expandIcon: ({ expanded, onExpand, record }) => {
+            // L1 ise L2 data'sı var mı kontrol et
+            if (level === 'L1') {
+              const hasL2 = Array.isArray(record?.[l2Key]) && record?.[l2Key].length > 0;
+              if (!hasL2) return null;
+            }
+            // L2 ise L3 data'sı var mı kontrol et
+            if (level === 'L2') {
+              const hasL3 = Array.isArray(record?.[l3Key]) && record?.[l3Key].length > 0;
+              if (!hasL3) return null;
+            }
+            return renderExpandIcon(expanded, onExpand, record, '12px');
+          },
         }}
         pagination={false}
         size="small"
@@ -154,7 +178,7 @@ const BaseTable: React.FC<BaseTableProps> = ({
             allowClear
             placeholder={searchPlaceholder}
             style={{ maxWidth: 360 }}
-            value={query}
+            value={searchValue}
             onChange={handleSearchChange}
             onSearch={handleSearch}
           />
@@ -173,14 +197,14 @@ const BaseTable: React.FC<BaseTableProps> = ({
             renderExpandIcon(expanded, onExpand, record),
         } : {
           expandedRowRender: (record: any) => {
-            // Level 1 (Applications) expansion
-            if (record.applications && record.applications.length > 0) {
+            const children = record?.[l1Key];
+            if (Array.isArray(children) && children.length > 0) {
               return renderNestedTable(record, 'L1');
             }
             return null;
           },
           expandIcon: ({ expanded, onExpand, record }) => {
-            const hasChildren = record.applications && record.applications.length > 0;
+            const hasChildren = Array.isArray(record?.[l1Key]) && record?.[l1Key].length > 0;
             if (!hasChildren) return null;
             
             return renderExpandIcon(expanded, onExpand, record);

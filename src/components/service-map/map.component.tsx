@@ -896,8 +896,7 @@ const ServiceMapComponent: React.FC<ServiceMapComponentProps> = ({ data }) => {
             </div>
           </div>
 
-          {/* Legend - Üst Orta */}
-          <div style={{ position: 'fixed', top: 165, right: 120, zIndex: 10, width: '250px' }}>
+          <div style={{ position: 'absolute', top: 12, right: 55, zIndex: 10 }}>
             <div
               style={{
                 padding: 5,

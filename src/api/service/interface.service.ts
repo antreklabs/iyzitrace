@@ -1,15 +1,15 @@
 export type HealthValue = "healthy" | "degraded" | "warning" | "error";
 
 export interface StatusItem {
-  value: HealthValue;
+  value?: HealthValue;
   metrics: {
-    errorCount: number;
-    errorPercentage: number;
-    warningCount: number;
-    warningPercentage: number;
-    degradedCount: number;
-    degradedPercentage: number;
-    totalCount: number;
+    errorCount?: number;
+    errorPercentage?: number;
+    warningCount?: number;
+    warningPercentage?: number;
+    degradedCount?: number;
+    degradedPercentage?: number;
+    totalCount?: number;
   };
 }
 export interface PositionItem {
@@ -74,52 +74,52 @@ export interface Infrastructure {
 
     export interface Service {
     id: string;
-    applicationId: string;
+    applicationId?: string;
     name: string;
-    port: number;
-    type: string;
+    port?: number;
+    type?: string;
     metrics: {
         avgLatencyMs: number
         minLatencyMs: number;
         maxLatencyMs: number;
-        p50DurationMs: number;
-        p75DurationMs: number;
-        p90DurationMs: number;
-        p95DurationMs: number;
-        p99DurationMs: number;
-        avgDurationMs: number;
+        p50DurationMs?: number;
+        p75DurationMs?: number;
+        p90DurationMs?: number;
+        p95DurationMs?: number;
+        p99DurationMs?: number;
+        avgDurationMs?: number;
         requestCount: number;
-        callsPerSecond: number;
-        operationCounts: number;
+        callsPerSecond?: number;
+        operationCounts?: number;
     };
-    status: StatusItem;
-    groupSize: SizeItem;
-    position: PositionItem;
-    groupPosition: PositionItem;
+    status?: StatusItem;
+    groupSize?: SizeItem;
+    position?: PositionItem;
+    groupPosition?: PositionItem;
     operations?: Operation[] | [];
     }
 
     export interface Operation {
     id: string;
-    serviceId: string;
+    serviceId?: string;
     name: string;
     type: string;
-    method: string;
-    path: string;
-    sourceServiceId: string;
-    targetServiceId: string;
+    method?: string;
+    path?: string;
+    sourceServiceId?: string;
+    targetServiceId?: string;
     metrics: {
-        avgLatencyMs: number;
-        p95LatencyMs: number;
-        p50DurationMs: number;
-        p75DurationMs: number;
-        p90DurationMs: number;
-        p95DurationMs: number;
-        p99DurationMs: number;
-        avgDurationMs: number;
-        count: number;
+        avgLatencyMs?: number;
+        p95LatencyMs?: number;
+        p50DurationMs?: number;
+        p75DurationMs?: number;
+        p90DurationMs?: number;
+        p95DurationMs?: number;
+        p99DurationMs?: number;
+        avgDurationMs?: number;
+        count?: number;
     };
-    status: StatusItem;
-    position: PositionItem;
+    status?: StatusItem;
+    position?: PositionItem;
     }
   

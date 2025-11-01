@@ -17,7 +17,6 @@ export interface FetchedModel {
 
 interface BaseContainerProps {
   title?: string;
-  pageName: string;
   id?: string | null;
   onFetchData?: (filterModel: FilterParamsModel) => Promise<FetchedModel>;
   filterComponent?: React.ReactElement;
@@ -27,7 +26,6 @@ interface BaseContainerProps {
 
 const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   title,
-  pageName,
   id,
   onFetchData,
   filterComponent,
@@ -79,7 +77,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   }, []);
 
   return (
-    <BaseContainer title={title} pageName={pageName}>
+    <BaseContainer title={title}>
       <Layout className="base-container-layout">
         {filterComponent && (
           <>  

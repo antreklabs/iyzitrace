@@ -110,7 +110,6 @@ const LogContainer: React.FC = () => {
   return (
     <BaseContainerComponent
       title="Logs"
-      pageName="logs"
       initialFilterCollapsed={false}
       onFetchData={fetchModelData}
       filterComponent={<LogFilter onChange={fetchModelData} collapsed={false} columns={columns.RootColumns} />}

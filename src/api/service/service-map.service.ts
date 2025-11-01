@@ -1,18 +1,41 @@
 // Service Map Service - Infrastructure and service mapping data provider
 import mapData from '../../assets/data/map.json';
 import { Infrastructure, Application, Service, Operation, HealthValue, Region, ServiceMapData } from './interface.service';
+import { getSelectedViewData } from './view.service';
+import { getPrometheusRegions } from './list.service';
+
+// Selected view data helper moved to view.service.ts
+
+const findItem = (selected: any, id: string, type?: string) => {
+  if (!selected) return undefined;
+  const items = selected.items || [];
+  return items.find((it: any) => it.id === id && (!type || it.type === type));
+};
 
 export const getRegions = async (): Promise<Region[]> => {
   
   const regions: Region[] = [];
-  
+  const selected = await getSelectedViewData('service-map');
+
+  const regionsFromPrometheus = await getPrometheusRegions();
+
+  regionsFromPrometheus.forEach(region => {
+    regions.push({
+      id: region.key,
+      name: region.name,
+      position: (findItem(selected, region.key, 'region')?.position) ?? { x: 0, y: 0 },
+      groupPosition: (findItem(selected, region.key, 'region')?.groupPosition) ?? { x: 0, y: 0 },
+      groupSize: (findItem(selected, region.key, 'region')?.groupSize) ?? { width: 100, height: 100 }
+    });
+  });
+
   mapData.regions.forEach(region => {
     regions.push({
       id: region.id,
       name: region.name,
-      position: region.position,
-      groupPosition: region.groupPosition,
-      groupSize: region.groupSize
+      position: (findItem(selected, region.id, 'region')?.position) ?? region.position,
+      groupPosition: (findItem(selected, region.id, 'region')?.groupPosition) ?? region.groupPosition,
+      groupSize: (findItem(selected, region.id, 'region')?.groupSize) ?? region.groupSize
     });
   });
   
@@ -25,6 +48,9 @@ export const getRegions = async (): Promise<Region[]> => {
  */
 export const getInfrastructures = async (regionId?: string): Promise<Infrastructure[]> => {
   const infrastructures: Infrastructure[] = [];
+  const selected = await getSelectedViewData('service-map');
+
+  // const infrastructuresFromPrometheus = await getPrometheusInfrastructures();
 
   const regions = regionId
     ? mapData.regions.filter(r => r.id === regionId)
@@ -32,6 +58,7 @@ export const getInfrastructures = async (regionId?: string): Promise<Infrastruct
 
   regions.forEach(region => {
     (region.infrastructures || []).forEach(infra => {
+      const selInfra = findItem(selected, infra.id, 'infrastructure');
       infrastructures.push({
         id: infra.id,
         regionId: region.id,
@@ -61,9 +88,9 @@ export const getInfrastructures = async (regionId?: string): Promise<Infrastruct
             totalCount: 100,
           },
         },
-        position: infra.position,
-        groupPosition: infra.groupPosition,
-        groupSize: infra.groupSize,
+        position: selInfra?.position ?? infra.position,
+        groupPosition: selInfra?.groupPosition ?? infra.groupPosition,
+        groupSize: selInfra?.groupSize ?? infra.groupSize,
       });
     });
   });
@@ -79,6 +106,7 @@ export const getInfrastructures = async (regionId?: string): Promise<Infrastruct
 export const getApplicationsByInfrastructure = async (regionId?: string, infrastructureId?: string): Promise<Application[]> => {
   
   const applications: Application[] = [];
+  const selected = await getSelectedViewData('service-map');
   
   const regions = regionId
     ? mapData.regions.filter(r => r.id === regionId)
@@ -90,6 +118,7 @@ export const getApplicationsByInfrastructure = async (regionId?: string, infrast
 
   infrastructures.forEach(infra => {
     infra.applications.forEach(app => {
+      const selApp = findItem(selected, app.id, 'application');
       applications.push({
         id: app.id,
         infrastructureId: infra.id,
@@ -109,9 +138,9 @@ export const getApplicationsByInfrastructure = async (regionId?: string, infrast
             totalCount: 100,
           },
         },
-        position: app.position,
-        groupPosition: app.groupPosition,
-        groupSize: app.groupSize,
+        position: selApp?.position ?? app.position,
+        groupPosition: selApp?.groupPosition ?? app.groupPosition,
+        groupSize: selApp?.groupSize ?? app.groupSize,
       });
     });
   });
@@ -128,6 +157,7 @@ export const getApplicationsByInfrastructure = async (regionId?: string, infrast
 export const getServicesByApplication = async (regionId?: string, infrastructureId?: string, applicationId?: string): Promise<Service[]> => {
   
   const services: Service[] = [];
+  const selected = await getSelectedViewData('service-map');
   const regions = regionId
     ? mapData.regions.filter(r => r.id === regionId)
     : mapData.regions;
@@ -140,8 +170,9 @@ export const getServicesByApplication = async (regionId?: string, infrastructure
     ? infrastructures.flatMap(i => i.applications.filter(a => a.id === applicationId))
     : infrastructures.flatMap(a => a.applications);
 
-  applications.forEach(app => {
-    app.services.forEach(service => {
+  applications.forEach((app: any) => {
+    app.services.forEach((service: any) => {
+      const selSvc = findItem(selected, service.id, 'service');
       services.push({
         id: service.id,
         applicationId: app.id,
@@ -174,9 +205,9 @@ export const getServicesByApplication = async (regionId?: string, infrastructure
             totalCount: 100,
           },
         },
-        position: service.position,
-        groupPosition: service.groupPosition,
-        groupSize: service.groupSize,
+        position: selSvc?.position ?? service.position,
+        groupPosition: selSvc?.groupPosition ?? service.groupPosition,
+        groupSize: selSvc?.groupSize ?? service.groupSize,
       });
     });
   });
