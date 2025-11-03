@@ -188,6 +188,9 @@ service:
       processors: [resourcedetection, memory_limiter, batch]
       exporters: [debug, otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
   telemetry:
+    resource:
+      service.name: "central-collector"
+      service.namespace: "opentelemetry-demo"
     metrics:
       level: detailed
       readers:

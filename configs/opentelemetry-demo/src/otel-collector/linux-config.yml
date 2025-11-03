@@ -126,6 +126,9 @@ service:
       processors: [resourcedetection, memory_limiter, batch]
       exporters: [debug, otlp/iyzitrace]
   telemetry:
+    resource:
+      service.name: ${env:OTEL_COLLECTOR_HOST}
+      service.namespace: "opentelemetry-demo"
     metrics:
       level: detailed
       readers:
