@@ -12,45 +12,8 @@ receivers:
           allowed_origins:
             - "http://*"
             - "https://*"
-  httpcheck/frontend-proxy:
-    targets:
-      - endpoint: http://${env:FRONTEND_PROXY_ADDR}
-  nginx:
-    endpoint: http://${env:IMAGE_PROVIDER_HOST}:${env:IMAGE_PROVIDER_PORT}/status
-    collection_interval: 10s
-  docker_stats:
-    endpoint: unix:///var/run/docker.sock
-  postgresql:
-    collection_interval: 10s
-    endpoint: ${POSTGRES_HOST}:${POSTGRES_PORT}
-    username: root
-    password: ${POSTGRES_PASSWORD}
-    metrics:
-      postgresql.blks_hit:
-        enabled: true
-      postgresql.blks_read:
-        enabled: true
-      postgresql.tup_fetched:
-        enabled: true
-      postgresql.tup_returned:
-        enabled: true
-      postgresql.tup_inserted:
-        enabled: true
-      postgresql.tup_updated:
-        enabled: true
-      postgresql.tup_deleted:
-        enabled: true
-      postgresql.deadlocks:
-        enabled: true
-    tls:
-      insecure: true
-  redis:
-    endpoint: "valkey-cart:6379"
-    username: "valkey"
-    collection_interval: 10s
   # Host metrics
   hostmetrics:
-    root_path: /hostfs
     scrapers:
       cpu:
         metrics:
@@ -142,14 +105,6 @@ processors:
           enabled: true
         os.description:
           enabled: true
-  transform/span:
-    error_mode: ignore
-    trace_statements:
-      - context: span
-        statements:
-          # Base'teki 2 kuralı koruyoruz ve 1 kural ekliyoruz
-          - replace_pattern(name, "\\?.*", "")
-          - replace_match(name, "GET /api/products/*", "GET /api/products/{productId}")
 
 exporters:
   debug:
@@ -159,34 +114,17 @@ exporters:
     endpoint: "nginx-platform:4317"
     tls:
       insecure: true
-# OTLP exporter (Signoz)
-  otlp/signoz:
-    endpoint: "https://ingest.us.signoz.cloud:443"
-    tls:
-      insecure: false
-    headers:
-      signoz-ingestion-key: 28da4fd2-539f-4a45-a282-15cecdb5643e
-# OTLP exporter (dash0)
-  otlphttp/dash0:
-    endpoint: https://ingress.europe-west4.gcp.dash0.com
-    headers:
-      Authorization: Bearer auth_T2zx9Nu7ohOMTe6YEoT0yhivKvnzdANJ
-      Dash0-Dataset: default
 
 service:
   pipelines:
-    traces:
-      receivers: [otlp]
-      processors: [resourcedetection, memory_limiter, batch, transform/span]
-      exporters: [debug, otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
     metrics:
-      receivers: [docker_stats, httpcheck/frontend-proxy, hostmetrics, nginx, otlp, postgresql, redis]
+      receivers: [hostmetrics, otlp]
       processors: [resourcedetection, memory_limiter, batch]
-      exporters: [debug, otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
+      exporters: [debug, otlp/iyzitrace]
     logs:
       receivers: [otlp]
       processors: [resourcedetection, memory_limiter, batch]
-      exporters: [debug, otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
+      exporters: [debug, otlp/iyzitrace]
   telemetry:
     metrics:
       level: detailed
