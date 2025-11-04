@@ -394,6 +394,7 @@ services:
       - "${IMAGE_PROVIDER_PORT}"
     environment:
       - IMAGE_PROVIDER_PORT
+      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
       - OTEL_COLLECTOR_HOST
       - OTEL_COLLECTOR_PORT_GRPC
       - OTEL_RESOURCE_ATTRIBUTES
@@ -772,3 +773,61 @@ services:
       - POSTGRES_PORT
       - POSTGRES_PASSWORD
       - GOMEMLIMIT=160MiB
+      - OTEL_RESOURCE_ATTRIBUTES=cloud.region=onprem
+
+  linux-01:
+    image: ${COLLECTOR_CONTRIB_IMAGE}
+    container_name: linux-01
+    hostname: linux-01
+    restart: unless-stopped
+    command: [ "--config=/etc/otelcol-config.yml"]
+    user: 0:0
+    volumes:
+      - ${OTEL_COLLECTOR_CONFIG_LINUX}:/etc/otelcol-config.yml
+    ports:
+      - "${OTEL_COLLECTOR_PORT_GRPC}"
+      - "${OTEL_COLLECTOR_PORT_HTTP}"
+    logging: *logging
+    environment:
+      - OTEL_COLLECTOR_HOST=linux-01
+      - OTEL_COLLECTOR_PORT_GRPC
+      - OTEL_COLLECTOR_PORT_HTTP
+      - OTEL_RESOURCE_ATTRIBUTES=cloud.region=linux-farm
+
+  linux-02:
+    image: ${COLLECTOR_CONTRIB_IMAGE}
+    container_name: linux-02
+    hostname: linux-02
+    restart: unless-stopped
+    command: [ "--config=/etc/otelcol-config.yml"]
+    user: 0:0
+    volumes:
+      - ${OTEL_COLLECTOR_CONFIG_LINUX}:/etc/otelcol-config.yml
+    ports:
+      - "${OTEL_COLLECTOR_PORT_GRPC}"
+      - "${OTEL_COLLECTOR_PORT_HTTP}"
+    logging: *logging
+    environment:
+      - OTEL_COLLECTOR_HOST=linux-02
+      - OTEL_COLLECTOR_PORT_GRPC
+      - OTEL_COLLECTOR_PORT_HTTP
+      - OTEL_RESOURCE_ATTRIBUTES=cloud.region=linux-farm
+
+  linux-03:
+    image: ${COLLECTOR_CONTRIB_IMAGE}
+    container_name: linux-03
+    hostname: linux-03
+    restart: unless-stopped
+    command: [ "--config=/etc/otelcol-config.yml"]
+    user: 0:0
+    volumes:
+      - ${OTEL_COLLECTOR_CONFIG_LINUX}:/etc/otelcol-config.yml
+    ports:
+      - "${OTEL_COLLECTOR_PORT_GRPC}"
+      - "${OTEL_COLLECTOR_PORT_HTTP}"
+    logging: *logging
+    environment:
+      - OTEL_COLLECTOR_HOST=linux-03
+      - OTEL_COLLECTOR_PORT_GRPC
+      - OTEL_COLLECTOR_PORT_HTTP
+      - OTEL_RESOURCE_ATTRIBUTES=cloud.region=linux-farm
