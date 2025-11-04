@@ -16,9 +16,9 @@ export const DEFAULT_DEFINITIONS: Definitions = {
   region_label_name: 'region_name',
   infrastructure_label_name: 'infrastructure_name',
   request_count_metric_name: 'iyzitrace_span_metrics_calls_total',
-  avg_latency_metric_name: 'http_client_duration_milliseconds_sum',
-  min_latency_metric_name: 'http_client_duration_milliseconds_sum',
-  max_latency_metric_name: 'http_client_duration_milliseconds_sum',
+  sum_duration_ms_metric_name: 'iyzitrace_span_metrics_duration_milliseconds_sum',
+  count_duration_ms_metric_name: 'iyzitrace_span_metrics_duration_milliseconds_count',
+  bucket_duration_ms_metric_name: 'iyzitrace_span_metrics_duration_milliseconds_bucket',
   error_percentage_metric_name: 'http_client_duration_milliseconds_sum',
   p50_duration_metric_name: 'http_client_duration_milliseconds_sum',
   p75_duration_metric_name: 'http_client_duration_milliseconds_sum',
@@ -127,24 +127,24 @@ const DefinitionsTable: React.FC<DefinitionsTableProps> = ({ value, onChange }) 
             width={40}
           />
         </InlineField>
-        <InlineField label="avg_latency_metric_name">
+        <InlineField label="sum_duration_ms_metric_name">
           <Input
-            value={definitions.avg_latency_metric_name}
-            onChange={(e) => handleChange('avg_latency_metric_name', e.currentTarget.value)}
+            value={definitions.sum_duration_ms_metric_name}
+            onChange={(e) => handleChange('sum_duration_ms_metric_name', e.currentTarget.value)}
             width={40}
           />
         </InlineField>
-        <InlineField label="min_latency_metric_name">
+        <InlineField label="count_duration_ms_metric_name">
           <Input
-            value={definitions.min_latency_metric_name}
-            onChange={(e) => handleChange('min_latency_metric_name', e.currentTarget.value)}
+            value={definitions.count_duration_ms_metric_name}
+            onChange={(e) => handleChange('count_duration_ms_metric_name', e.currentTarget.value)}
             width={40}
           />
         </InlineField>
-        <InlineField label="max_latency_metric_name">
+        <InlineField label="bucket_duration_ms_metric_name">
           <Input
-            value={definitions.max_latency_metric_name}
-            onChange={(e) => handleChange('max_latency_metric_name', e.currentTarget.value)}
+            value={definitions.bucket_duration_ms_metric_name}
+            onChange={(e) => handleChange('bucket_duration_ms_metric_name', e.currentTarget.value)}
             width={40}
           />
         </InlineField>

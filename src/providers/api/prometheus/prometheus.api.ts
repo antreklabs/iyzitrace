@@ -1,34 +1,13 @@
-import store from '../../../store/store';
-import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
-import { setSelectedPrometheusUid } from '../../../store/slices/prometheus.slice';
-import { applyPrometheusRegistryOverrides } from './prometheus.registry';
+
+import { getBackendSrv } from '@grafana/runtime';
+import { getDefaultPrometheusUid } from '../../../api/service/settings.service';
 
 
 export const prometheusApi = {
-    async resolvePrometheusUid(): Promise<string> {
-        const state = store.getState();
-        const tempoUid = state.datasource.selectedUid;
-        const promUid = state.prometheus.selectedPrometheusUid;
-
-        if (promUid) {
-            // Ensure overrides are applied if present on the datasource jsonData
-            await applyPrometheusRegistryOverrides(promUid);
-            return promUid;
-        }
-        const ds = await getDataSourceSrv().getInstanceSettings(tempoUid);
-        const uid = (ds?.jsonData as any)?.serviceMap?.datasourceUid;
-        if (!uid) {
-            throw new Error('Prometheus UID could not be resolved from Tempo datasource.');
-        }
-        // Apply overrides from the resolved Prometheus datasource if any
-        await applyPrometheusRegistryOverrides(uid);
-        store.dispatch(setSelectedPrometheusUid(uid));
-        return uid;
-    },
 
     async runTraceQLQuery(query: string): Promise<any> {
         try {
-            const uid = await this.resolvePrometheusUid();
+            const uid = await getDefaultPrometheusUid();
             if (!uid) { throw new Error('No Prometheus UID selected'); }
 
             const url = `/api/datasources/proxy/uid/${uid}/api/v1/query`;
@@ -44,7 +23,7 @@ export const prometheusApi = {
     },
     async runTraceQlQueryRange(query: string, start: number, end: number,step: string): Promise<any> {
         try {
-            const uid = await this.resolvePrometheusUid();
+            const uid = await getDefaultPrometheusUid();
             if (!uid) { throw new Error('No Prometheus UID selected'); }
 
             const url = `/api/datasources/proxy/uid/${uid}/api/v1/query_range`;

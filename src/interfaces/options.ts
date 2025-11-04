@@ -17,9 +17,10 @@ export interface Definitions {
   region_label_name: string;
   infrastructure_label_name: string;
   request_count_metric_name: string;
-  avg_latency_metric_name: string;
-  min_latency_metric_name: string;
-  max_latency_metric_name: string;
+  sum_duration_ms_metric_name: string;
+  count_duration_ms_metric_name: string;
+  bucket_duration_ms_metric_name: string;
+  
   error_percentage_metric_name: string;
   p50_duration_metric_name: string;
   p75_duration_metric_name: string;

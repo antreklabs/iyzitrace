@@ -42,6 +42,10 @@ export const getQueryAggregationData = async (query: string, start: number, end:
 
 export const getQueryData = async (query: string, start: number, end: number, step: string): Promise<any> => {
   const prometheusUid = await getDefaultPrometheusUid();
+  console.log('query', query);
+  console.log('start', start, new Date(start).toISOString());
+  console.log('end', end, new Date(end).toISOString());
+  console.log('step', step);
   const response = await getBackendSrv().get(`/api/datasources/proxy/uid/${prometheusUid}/api/v1/query`, {
     query: query,
     start: start,

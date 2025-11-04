@@ -1,11 +1,6 @@
 import { getDataSourceSrv } from '@grafana/runtime';
-import { prometheusApi } from './prometheus.api';
-/*
-  Prometheus configuration registry
-  - Centralizes metric names, label keys, and query builders
-  - Supports per-datasource (UID) overrides
-  - Falls back to sane defaults when no override is present
-*/
+import { getDefaultPrometheusUid } from '../../../api/service/settings.service';
+
 
 export const MetricKeys = {
   traces_spanmetrics_calls_total: 'span_metrics_calls_total	',
@@ -267,7 +262,7 @@ export function buildAllQueries(ctx: PrometheusQueriesContext, uid?: string): Re
 /** Build a single query string by key */
 export async function buildQuery(key: QueryKey, ctx: PrometheusQueriesContext, uid?: string): Promise<string> {
   if (!uid) {
-    uid = await prometheusApi.resolvePrometheusUid();
+    uid = await getDefaultPrometheusUid();
   }
   const cfg = resolvePrometheusConfig(uid);
   const builder = cfg.queries[key];

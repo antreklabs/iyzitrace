@@ -346,44 +346,199 @@ export const getQueryByType = (
   const span_label_name = definitions.span_label_name;
   const type_label_name = definitions.type_label_name;
 
+  const buildStatusCodeFilter = (baseLabelFilters: string, statusCode: string) => {
+    if (baseLabelFilters.includes('status_code=')) {
+      return baseLabelFilters;
+    }
+    if (!baseLabelFilters || baseLabelFilters === '""') {
+      return `{status_code="${statusCode}"}`;
+    }
+    if (baseLabelFilters.startsWith('{') && baseLabelFilters.endsWith('}')) {
+      const inner = baseLabelFilters.slice(1, -1).trim();
+      if (!inner) {
+        return `{status_code="${statusCode}"}`;
+      }
+      return `{${inner},status_code="${statusCode}"}`;
+    }
+
+    return `{${baseLabelFilters},status_code="${statusCode}"}`;
+  };
+
   switch (queryType) {
+    case QueryType.ERROR_PERCENTAGE_BY_SERVICE:
+      return `sum by(${service_label_name}) (rate(${definitions.request_count_metric_name}${buildStatusCodeFilter(labelFilters, 'STATUS_CODE_ERROR')}[${interval}]))`;
+
     case QueryType.CALLS_BY_SERVICE:
       return `sum by(${service_label_name}) (rate(${definitions.request_count_metric_name}${labelFilters}[${interval}]))`;
     
     case QueryType.AVG_LATENCY_BY_SERVICE:
-      return `avg by(${service_label_name}) (rate(${definitions.avg_latency_metric_name}${labelFilters}[${interval}]))`;
+      return `sum by(${service_label_name}) (rate(${definitions.sum_duration_ms_metric_name}${labelFilters}[${interval}])) / sum by(${service_label_name}) (rate(${definitions.count_duration_ms_metric_name}${labelFilters}[${interval}]))`;
     
     case QueryType.MIN_LATENCY_BY_SERVICE:
-      return `min by(${service_label_name}) (rate(${definitions.min_latency_metric_name}${labelFilters}[${interval}]))`;
+      return `histogram_quantile(0.0, sum by(${service_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
     
     case QueryType.MAX_LATENCY_BY_SERVICE:
-      return `max by(${service_label_name}) (rate(${definitions.max_latency_metric_name}${labelFilters}[${interval}]))`;
-    
-    case QueryType.ERROR_PERCENTAGE_BY_SERVICE:
-      return `max by(${service_label_name}) (rate(${definitions.error_percentage_metric_name}${labelFilters}[${interval}]))`;
+      return `histogram_quantile(1.0, sum by(${service_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
     
     case QueryType.P50_BY_SERVICE_AND_SPAN:
-      return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.p50_duration_metric_name}${labelFilters}[${interval}]))`;
+      return `histogram_quantile(0.5, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
     
     case QueryType.P75_BY_SERVICE_AND_SPAN:
-      return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.p75_duration_metric_name}${labelFilters}[${interval}]))`;
+      return `histogram_quantile(0.75, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
     
     case QueryType.P90_BY_SERVICE_AND_SPAN:
-      return `avg by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.p90_duration_metric_name}${labelFilters}[${interval}]))`;
+      return `histogram_quantile(0.9, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
     
     case QueryType.P95_BY_SERVICE_AND_SPAN:
-      return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.p95_duration_metric_name}${labelFilters}[${interval}]))`;
+      return `histogram_quantile(0.95, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
     
     case QueryType.P99_BY_SERVICE_AND_SPAN:
-      return `min by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.p99_duration_metric_name}${labelFilters}[${interval}]))`;
+      return `histogram_quantile(0.99, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
     
     case QueryType.AVG_DURATION_BY_SERVICE_AND_SPAN:
-      return `max by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.avg_duration_metric_name}${labelFilters}[${interval}]))`;
-    
+      return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.sum_duration_ms_metric_name}${labelFilters}[${interval}])) / sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.count_duration_ms_metric_name}${labelFilters}[${interval}]))`;
+      
     case QueryType.ERROR_PERCENTAGE_BY_SERVICE_AND_SPAN:
-      return `max by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.error_percentage_metric_name}${labelFilters}[${interval}]))`;
-    
+      return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.request_count_metric_name}${buildStatusCodeFilter(labelFilters, 'STATUS_CODE_ERROR')}[${interval}]))`;
+
     default:
       throw new Error(`Unknown query type: ${queryType}`);
   }
 };
+/*
+Sample Query
+
+sum(rate(traces_spanmetrics_calls_total{service="frontend-proxy"}[300s])) * 300
+
+count(count by (span_name) (rate(traces_spanmetrics_calls_total{service="frontend-proxy"}[300s])))
+
+histogram_quantile(0.50, sum(rate(traces_spanmetrics_latency_bucket{service="frontend-proxy"}[300s])) by (span_name, type, le))
+
+histogram_quantile(0.90, sum(rate(traces_spanmetrics_latency_bucket{service="frontend-proxy"}[300s])) by (span_name, type, le))
+
+histogram_quantile(0.99, sum(rate(traces_spanmetrics_latency_bucket{service="frontend-proxy"}[300s])) by (span_name, type, le))
+
+histogram_quantile(0.50, sum(rate(traces_spanmetrics_latency_bucket[5m])) by (le, service))
+
+floor(sum by(service) (increase(traces_spanmetrics_calls_total[1m])))
+
+sum(rate(traces_spanmetrics_calls_total{service="frontend-proxy"}[300s])) * 300
+
+{traceId="25ea1224e6454aedfbc105be6f45f944"}
+
+sum(rate(traces_spanmetrics_calls_total{span_name="GET /api/users"}[5m]))
+
+{service="frontend-proxy"} |= "error"
+
+{service="frontend-proxy"} | json | line_format "{{.timestamp}} [{{.level}}] {{.message}}"
+
+histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket[5m])) by (le, service))
+
+{service.name="frontend-proxy" && duration > 100ms}
+
+{service="frontend-proxy"} | json | level="error"
+
+sum(rate(traces_spanmetrics_calls_total[5m])) by (service)
+
+
+
+
+
+
+
+
+
+
+operationCount: ({ serviceName, windowSeconds }, cfg) =>
+    `count(count by (${cfg.labels.span_name}) (rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])))`,
+
+  totalCalls: ({ serviceName, windowSeconds }, cfg) =>
+    `sum(increase(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}, ${cfg.labels.type})`,
+
+  maxLatencySpan: ({ serviceName, windowSeconds }, cfg) =>
+    `topk(1, sum_over_time(${cfg.metrics.traces_spanmetrics_latency_sum}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s]) / sum_over_time(${cfg.metrics.traces_spanmetrics_latency_count}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name})`,
+
+  minLatencySpan: ({ serviceName, windowSeconds }, cfg) =>
+    `bottomk(1, sum_over_time(${cfg.metrics.traces_spanmetrics_latency_sum}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s]) / sum_over_time(${cfg.metrics.traces_spanmetrics_latency_count}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name})`,
+
+  // CallMetrics queries (use fixed 1m rate window as in UI today)
+  p50Latency: ({ serviceName, windowSeconds }, cfg) =>
+    `histogram_quantile(0.50, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}, ${cfg.labels.type}, le))`,
+  
+  p90Latency: ({ serviceName, windowSeconds }, cfg) =>
+    `histogram_quantile(0.90, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}, ${cfg.labels.type}, le))`,
+  
+  p99Latency: ({ serviceName, windowSeconds }, cfg) =>
+    `histogram_quantile(0.99, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}, ${cfg.labels.type}, le))`,
+  
+  callsPerSecond: ({ serviceName, windowSeconds }, cfg) =>
+    `sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name})`,
+  
+  apdex: ({ serviceName, windowSeconds }, cfg) =>
+    `(sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{le="100",${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) + sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{le="400",${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) / 2) / sum(rate(${cfg.metrics.traces_spanmetrics_latency_count}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s]))`,
+  
+  apdexBySpan: ({ serviceName, windowSeconds }, cfg) =>
+    `(sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{le="100",${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}) + sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{le="400",${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}) / 2) / sum(rate(${cfg.metrics.traces_spanmetrics_latency_count}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name})`,
+  
+  topKeyOperations: ({ serviceName, windowSeconds }, cfg) =>
+    `topk(5, sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (${cfg.labels.span_name}))`,
+
+  // ServiceCard queries (use 5m rate window)
+  totalTraceCount: ({ serviceName, windowSeconds }, cfg) =>
+    `sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) * 300`,
+  
+  avgLatency: ({ serviceName, windowSeconds }, cfg) =>
+    `sum(rate(${cfg.metrics.traces_spanmetrics_latency_sum}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) / sum(rate(${cfg.metrics.traces_spanmetrics_latency_count}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s]))`,
+  
+  minLatency: ({ serviceName, windowSeconds }, cfg) =>
+    `min(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s]))`,
+  
+  maxLatency: ({ serviceName, windowSeconds }, cfg) =>
+    `histogram_quantile(0.99, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.service}="${serviceName}"}[${windowSeconds}s])) by (le))`,
+
+  // MiddleStatsCharts queries (global, no service filter)
+  p50LatencyGlobal: ({ rateInterval = '5m', windowSeconds }, cfg) =>
+    `histogram_quantile(0.50, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}[${rateInterval}])) by (le, ${cfg.labels.service}))`,
+  
+  p90LatencyGlobal: ({ rateInterval = '5m' }, cfg) =>
+    `histogram_quantile(0.90, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}[${rateInterval}])) by (le, ${cfg.labels.service}))`,
+  
+  p95LatencyGlobal: ({ rateInterval = '5m' }, cfg) =>
+    `histogram_quantile(0.95, sum(rate(${cfg.metrics.traces_spanmetrics_latency_bucket}[${rateInterval}])) by (le, ${cfg.labels.service}))`,
+
+  // TraceQLBuilder queries (span-specific)
+  errorRate: ({ spanName, rateInterval = '5m' }, cfg) =>
+    `sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}", status_code!="STATUS_CODE_UNSET"}[${rateInterval}])) / sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}"}[${rateInterval}])) by (${cfg.labels.span_name}, ${cfg.labels.type})`,
+  
+  opsPerSec: ({ spanName, rateInterval = '5m' }, cfg) =>
+    `sum(rate(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}"}[${rateInterval}]))`,
+  
+  errorCount: ({ spanName, rateInterval = '5m' }, cfg) =>
+    `sum(increase(${cfg.metrics.traces_spanmetrics_calls_total}{${cfg.labels.span_name}="${spanName}", status_code!="STATUS_CODE_UNSET"}[${rateInterval}]))`,
+  
+  latencyBucket: ({ spanName, le, rateInterval = '5m' }, cfg) =>
+    `rate(${cfg.metrics.traces_spanmetrics_latency_bucket}{${cfg.labels.span_name}="${spanName}", le="${le}"}[${rateInterval}])`,
+  
+  approxAvgLatency: ({ spanName, rateInterval = '5m' }, cfg) =>
+    `sum(rate(${cfg.metrics.traces_spanmetrics_latency_sum}{${cfg.labels.span_name}="${spanName}"}[${rateInterval}])) / sum(rate(${cfg.metrics.traces_spanmetrics_latency_count}{${cfg.labels.span_name}="${spanName}"}[${rateInterval}]))`,
+
+  // ErrorStatsCharts query (global service call count)
+  serviceCallCountGlobal: ({ rateInterval = '1m' }, cfg) =>
+    `floor(sum by(${cfg.labels.service}) (increase(${cfg.metrics.traces_spanmetrics_calls_total}[${rateInterval}])))`,
+
+
+
+
+
+
+
+
+
+
+  histogram_quantile(0.90,sum by(le) (rate(iyzitrace_span_metrics_duration_seconds_bucket{service_name="accounting"}[1m])))
+
+
+  sum(rate(iyzitrace_span_metrics_duration_seconds_sum{service_name="accounting", span_name="order-consumed"}[1m])) 
+/ 
+(sum(rate(iyzitrace_span_metrics_duration_seconds_count{service_name="accounting", span_name="order-consumed"}[1m])))
+*/
