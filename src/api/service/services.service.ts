@@ -36,6 +36,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
   const serviceQueryDataP50ByServiceInTime = await getServicesQueryDataInTime(QueryType.P50_BY_SERVICE_INTIME, filterParamsModel, definitions);
   const serviceQueryDataP90ByServiceInTime = await getServicesQueryDataInTime(QueryType.P90_BY_SERVICE_INTIME, filterParamsModel, definitions);
   const serviceQueryDataP99ByServiceInTime = await getServicesQueryDataInTime(QueryType.P99_BY_SERVICE_INTIME, filterParamsModel, definitions);
+  const serviceQueryDataApdexByServiceInTime = await getServicesQueryDataInTime(QueryType.APDEX_BY_SERVICE_INTIME, filterParamsModel, definitions);
   const serviceQueryDataP50ByServiceAndSpan = await getServicesQueryDataByType(QueryType.P50_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
   const serviceQueryDataP75ByServiceAndSpan = await getServicesQueryDataByType(QueryType.P75_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
   const serviceQueryDataP90ByServiceAndSpan = await getServicesQueryDataByType(QueryType.P90_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
@@ -46,8 +47,13 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
   const serviceQueryDataMinLatencyByServiceAndSpan = await getServicesQueryDataByType(QueryType.MIN_LATENCY_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
   const serviceQueryDataMaxLatencyByServiceAndSpan = await getServicesQueryDataByType(QueryType.MAX_LATENCY_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
   const serviceQueryDataErrorPercentageByServiceAndSpan = await getServicesQueryDataByType(QueryType.ERROR_PERCENTAGE_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
-  // const serviceQueryDataP50ByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.P50_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
-  console.log('serviceQueryDataP50ByServiceInTime', serviceQueryDataP50ByServiceInTime);
+  const serviceQueryDataP50ByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.P50_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
+  const serviceQueryDataP90ByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.P90_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
+  const serviceQueryDataP99ByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.P99_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
+  const serviceQueryDataApdexByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.APDEX_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
+  const serviceQueryDataRateByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.RATE_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
+  const serviceQueryDataTopKeyOperationsByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.TOP_KEY_OPERATIONS_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
+  console.log('serviceQueryDataTopKeyOperationsByServiceAndSpanInTime', serviceQueryDataTopKeyOperationsByServiceAndSpanInTime);
   const servicesWithOperations: Service[] = [];
 
   const serviceSpanMap = new Map<string, Set<string>>();
@@ -62,7 +68,12 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
     serviceQueryDataMinLatencyByServiceAndSpan,
     serviceQueryDataMaxLatencyByServiceAndSpan,
     serviceQueryDataErrorPercentageByServiceAndSpan,
-    // serviceQueryDataP50ByServiceAndSpanInTime
+    serviceQueryDataP50ByServiceAndSpanInTime,
+    serviceQueryDataP90ByServiceAndSpanInTime,
+    serviceQueryDataP99ByServiceAndSpanInTime,
+    serviceQueryDataApdexByServiceAndSpanInTime,
+    serviceQueryDataRateByServiceAndSpanInTime,
+    serviceQueryDataTopKeyOperationsByServiceAndSpanInTime,
   ].forEach(queryData => {
     queryData.forEach((item: ServiceQueryData) => {
       if (!serviceSpanMap.has(item.service_name)) {
@@ -103,9 +114,11 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       },
       rangeMetrics: {
         latency: [],
-        rate: [],
         apdex: [],
-        keyops: [],
+        rateByOperation: [],
+        keyopsByOperation: [],
+        apdexByOperation: [],
+        latencyByOperation: [],
       },
       status: {
         metrics: {
@@ -151,6 +164,17 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
     }
   });
 
+  serviceQueryDataApdexByServiceInTime.forEach((item: ServiceQueryData) => {
+    const service = serviceMap.get(item.service_name);
+    if (service) {
+      service.rangeMetrics.apdex.push({
+        name: 'Apdex',
+        data: item.values ?? [],
+      });
+    }
+  });
+
+
   serviceQueryDataCallsByService.forEach((item: ServiceQueryData) => {
     const service = serviceMap.get(item.service_name);
     if (service) {
@@ -193,7 +217,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       if (operation) {
           operation.metrics.p50DurationMs = item.value;
           if(item.type !== undefined && operation.type !== item.type) {
-            operation.type = item.type;
+            operation.type = item.type.toUpperCase();
           }
       }
     }
@@ -206,7 +230,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       if (operation) {
         operation.metrics.p75DurationMs = item.value;
         if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type;
+          operation.type = item.type.toUpperCase()
         }
       }
     }
@@ -219,7 +243,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       if (operation) {
         operation.metrics.p90DurationMs = item.value;
         if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type;
+          operation.type = item.type.toUpperCase()
         }
       }
     }
@@ -232,7 +256,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       if (operation) {
         operation.metrics.p95DurationMs = item.value;
         if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type;
+          operation.type = item.type.toUpperCase()
         }
       }
     }
@@ -245,7 +269,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       if (operation) {
         operation.metrics.p99DurationMs = item.value;
         if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type;
+          operation.type = item.type.toUpperCase()
         }
       }
     }
@@ -258,7 +282,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       if (operation) {
         operation.metrics.avgDurationMs = item.value;
         if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type;
+          operation.type = item.type.toUpperCase()
         }
       }
     }
@@ -271,7 +295,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       if (operation) {
         operation.metrics.avgLatencyMs = item.value;
         if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type;
+          operation.type = item.type.toUpperCase()
         }
       }
     }
@@ -284,7 +308,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       if (operation) {
         operation.metrics.minLatencyMs = item.value;
         if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type;
+          operation.type = item.type.toUpperCase()
         }
       }
     }
@@ -297,7 +321,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       if (operation) {
         operation.metrics.maxLatencyMs = item.value;
         if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type;
+          operation.type = item.type.toUpperCase()
         }
       }
     }
@@ -310,14 +334,107 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       if (operation) {
         operation.status.metrics.errorPercentage = item.value;
         if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type;
+          operation.type = item.type.toUpperCase()
         }
       }
     }
   });
 
-  console.log('servicesWithOperations', servicesWithOperations);
-  
+  serviceQueryDataRateByServiceAndSpanInTime.forEach((item: ServiceQueryData) => {
+    const service = serviceMap.get(item.service_name);
+    if (service && service.operations) {
+      const operation = service.operations.find((op: any) => op.name === item.span_name);
+      if (operation) {
+        service.rangeMetrics.rateByOperation.push({
+          name: operation.name,
+          data: item.values ?? [],
+        });
+        if(item.type !== undefined && operation.type !== item.type) {
+          operation.type = item.type.toUpperCase()
+        }
+      }
+    }
+  });
+
+  serviceQueryDataTopKeyOperationsByServiceAndSpanInTime.forEach((item: ServiceQueryData) => {
+    const service = serviceMap.get(item.service_name);
+    if (service && service.operations) {
+      const operation = service.operations.find((op: any) => op.name === item.span_name);
+      if (operation) {
+        service.rangeMetrics.keyopsByOperation.push({
+          name: operation.name,
+          data: item.values ?? [],
+        });
+        if(item.type !== undefined && operation.type !== item.type) {
+          operation.type = item.type.toUpperCase()
+        }
+      }
+    }
+  });
+
+  serviceQueryDataApdexByServiceAndSpanInTime.forEach((item: ServiceQueryData) => {
+    const service = serviceMap.get(item.service_name);
+    if (service && service.operations) {
+      const operation = service.operations.find((op: any) => op.name === item.span_name);
+      if (operation) {
+        service.rangeMetrics.apdexByOperation.push({
+          name: operation.name,
+          data: item.values ?? [],
+        });
+        if(item.type !== undefined && operation.type !== item.type) {
+          operation.type = item.type.toUpperCase()
+        }
+      }
+    }
+  });
+
+  serviceQueryDataP50ByServiceAndSpanInTime.forEach((item: ServiceQueryData) => {
+    const service = serviceMap.get(item.service_name);
+    if (service && service.operations) {
+      const operation = service.operations.find((op: any) => op.name === item.span_name);
+      if (operation) {
+        service.rangeMetrics.latencyByOperation.push({
+          name: `${operation.name} P50`,
+          data: item.values ?? [],
+        });
+        if(item.type !== undefined && operation.type !== item.type) {
+          operation.type = item.type.toUpperCase()
+        }
+      }
+    }
+  });
+
+  serviceQueryDataP90ByServiceAndSpanInTime.forEach((item: ServiceQueryData) => {
+    const service = serviceMap.get(item.service_name);
+    if (service && service.operations) {
+      const operation = service.operations.find((op: any) => op.name === item.span_name);
+      if (operation) {
+        service.rangeMetrics.latencyByOperation.push({
+          name: `${operation.name} P90`,
+          data: item.values ?? [],
+        });
+        if(item.type !== undefined && operation.type !== item.type) {
+          operation.type = item.type.toUpperCase()
+        }
+      }
+    }
+  });
+  serviceQueryDataP99ByServiceAndSpanInTime.forEach((item: ServiceQueryData) => {
+    const service = serviceMap.get(item.service_name);
+    if (service && service.operations) {
+      const operation = service.operations.find((op: any) => op.name === item.span_name);
+      if (operation) {
+        service.rangeMetrics.latencyByOperation.push({
+          name: `${operation.name} P99`,
+          data: item.values ?? [],
+        });
+        if(item.type !== undefined && operation.type !== item.type) {
+          operation.type = item.type.toUpperCase()
+        }
+      }
+    }
+  });
+
   return servicesWithOperations;
 };
 
@@ -348,6 +465,7 @@ export const getServicesQueryDataInTime = async (
   const stepString = step + 's';
   console.log('stepString', stepString);
   const query = getQueryByType(queryType, filterParamsModel, definitions);
+  console.log('query', query);
   const data = await getQueryRangeData(query, start, end, stepString);
   console.log('data in time', data);
 
@@ -369,7 +487,7 @@ export const getServicesQueryDataByType = async (
 }
 
 export const getOperationTypeColor = (type: string) => {
-  switch (type) {
+  switch (type.toUpperCase()) {
     case 'HTTP':
       return 'blue';
     case 'DATABASE':
@@ -392,5 +510,5 @@ export const getOperationTypeColor = (type: string) => {
 const mapMetric = (result: any) =>
   (result?.values ?? []).map(([ts, val]: [number, string]) => ({
     x: new Date(ts * 1000),
-    y: val !== undefined && val !== 'NaN' ? parseFloat(val) : 0,
+    y: val !== undefined && val !== 'NaN' ? parseFloat(val) * 1000 : 0,
   }));

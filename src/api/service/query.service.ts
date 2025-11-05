@@ -377,6 +377,23 @@ export const getQueryByType = (
 
     return `{${baseLabelFilters},status_code="${statusCode}"}`;
   };
+  const buildLeFilter = (baseLabelFilters: string, le: string) => {
+    if (baseLabelFilters.includes('le=')) {
+      return baseLabelFilters;
+    }
+    if (!baseLabelFilters || baseLabelFilters === '""') {
+      return `{le="${le}"}`;
+    }
+    if (baseLabelFilters.startsWith('{') && baseLabelFilters.endsWith('}')) {
+      const inner = baseLabelFilters.slice(1, -1).trim();
+      if (!inner) {
+        return `{le="${le}"}`;
+      }
+      return `{${inner},le="${le}"}`;
+    }
+
+    return `{${baseLabelFilters},le="${le}"}`;
+  };
 
   switch (queryType) {
     case QueryType.ERROR_PERCENTAGE_BY_SERVICE:
@@ -404,7 +421,7 @@ export const getQueryByType = (
       return `histogram_quantile(0.99, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, le))`;
 
     case QueryType.APDEX_BY_SERVICE_INTIME:
-      return '';
+      return `(sum by(${service_label_name}) (rate(${definitions.bucket_duration_ms_metric_name}${buildLeFilter(labelFilters, "100")}[${interval}])) + sum by(${service_label_name}) (rate(${definitions.bucket_duration_ms_metric_name}${buildLeFilter(labelFilters, "400")}[${interval}])) / 2) / sum by(${service_label_name}) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}]))`;
     
     case QueryType.P50_BY_SERVICE_AND_SPAN:
       return `histogram_quantile(0.5, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
@@ -446,13 +463,13 @@ export const getQueryByType = (
       return `histogram_quantile(0.99, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, ${span_label_name}, ${type_label_name}, le))`;
 
     case QueryType.APDEX_BY_SERVICE_AND_SPAN_INTIME:
-      return '';
+      return `(sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.bucket_duration_ms_metric_name}${buildLeFilter(labelFilters, "100")}[${interval}])) + sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.bucket_duration_ms_metric_name}${buildLeFilter(labelFilters, "400")}[${interval}])) / 2) / sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}]))`;
 
     case QueryType.RATE_BY_SERVICE_AND_SPAN_INTIME:
-      return '';
+      return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.request_count_metric_name}${labelFilters}[${interval}]))`;
 
     case QueryType.TOP_KEY_OPERATIONS_BY_SERVICE_AND_SPAN_INTIME:
-      return '';
+      return `topk(5, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.request_count_metric_name}${labelFilters}[${interval}])))`;
 
     default:
       throw new Error(`Unknown query type: ${queryType}`);

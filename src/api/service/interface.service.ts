@@ -102,9 +102,11 @@ export interface Infrastructure {
     };
     rangeMetrics?: {
         latency?: RangeMetricItem[];
-        rate?: RangeMetricItem[];
         apdex?: RangeMetricItem[];
-        keyops?: RangeMetricItem[];
+        rateByOperation?: RangeMetricItem[];
+        keyopsByOperation?: RangeMetricItem[];
+        apdexByOperation?: RangeMetricItem[];
+        latencyByOperation?: RangeMetricItem[];
     };
     status?: StatusItem;
     groupSize?: SizeItem;

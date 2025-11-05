@@ -8,9 +8,8 @@ import { columns as columnUtils } from '../../api/service/table.services';
 import { Row, Tabs, Tag } from 'antd';
 import { Service } from '../../api/service/interface.service';
 import { getOperationTypeColor } from '../../api/service/services.service';
-import Operations from '../ServiceDetailContainer/Operations/Operations';
-import CallMetrics from '../ServiceDetailContainer/CallMetrics/CallMetrics';
-import BasicSummary from '../ServiceDetailContainer/BasicSummary';
+import CallMetrics from '../../components/service/service.detail.chart.container.component';
+import BasicSummary from '../../components/service/service.detail.card.container.component';
 import BaseTable from '../base.table';
 
 interface ServiceDetailContainerProps {
@@ -89,12 +88,12 @@ const ServiceDetailContainer: React.FC<ServiceDetailContainerProps> = ({ service
             {
               key: 'callmetric',
               label: 'Call Metrics',
-              children: <CallMetrics data={data} serviceName={serviceName} start={filter.timeRange.from} end={filter.timeRange.to} />
+              children: <CallMetrics data={data} serviceBased={true} />
             },
             {
               key: 'operations',
               label: 'Operations',
-              children: <Operations serviceName={serviceName} start={filter.timeRange.from} end={filter.timeRange.to} />
+              children: <CallMetrics data={data} serviceBased={false} />
             }
             ]}
           />
