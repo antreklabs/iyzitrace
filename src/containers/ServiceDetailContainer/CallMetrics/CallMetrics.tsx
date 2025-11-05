@@ -4,12 +4,15 @@ import { Card, Col, Row, Spin } from 'antd';
 import { prometheusApi } from '../../../providers';
 import { buildQuery, QueryKeys } from '../../../providers/api/prometheus/prometheus.registry';
 import MsCharts from './MsCharts';
+import { Service } from '../../../api/service/interface.service';
+
 interface CallMetricsProps {
+  data?: Service[];
   serviceName: string;
   start: number;
   end: number;
 }
-const CallMetrics: React.FC<CallMetricsProps> = ({ serviceName, start, end }) => {
+const CallMetrics: React.FC<CallMetricsProps> = ({ data, serviceName, start, end }) => {
   const [loading, setLoading] = useState(true);
   const [latencyData, setLatencyData] = useState<any[]>([]);
   const [rateData, setRateData] = useState<any[]>([]);
@@ -33,10 +36,7 @@ const CallMetrics: React.FC<CallMetricsProps> = ({ serviceName, start, end }) =>
       // const queryApdex = await buildQuery(QueryKeys.apdex, ctx);
       // console.log(queryApdex);
       
-      const [p50, p90, p99, rate, apdex, keyops] = await Promise.all([
-        getQueryRange(await buildQuery(QueryKeys.p50Latency, ctx)),
-        getQueryRange(await buildQuery(QueryKeys.p90Latency, ctx)),
-        getQueryRange(await buildQuery(QueryKeys.p99Latency, ctx)),
+      const [rate, apdex, keyops] = await Promise.all([
         getQueryRange(await buildQuery(QueryKeys.callsPerSecond, ctx)),
         getQueryRange(await buildQuery(QueryKeys.apdex, ctx)),
         getQueryRange(await buildQuery(QueryKeys.topKeyOperations, ctx)),
@@ -49,11 +49,7 @@ const CallMetrics: React.FC<CallMetricsProps> = ({ serviceName, start, end }) =>
           name: label,
         })) ?? [];
 
-      setLatencyData([
-        { name: 'P50', data: mapMetric(p50, 'P50') },
-        { name: 'P90', data: mapMetric(p90, 'P90') },
-        { name: 'P99', data: mapMetric(p99, 'P99') },
-      ]);
+      setLatencyData(data[0].rangeMetrics?.latency ?? []);
 
       setRateData([{ name: 'Ops/sec', data: mapMetric(rate, 'ops') }]);
       setApdexData([{ name: 'Apdex', data: mapMetric(apdex, 'Apdex') }]);

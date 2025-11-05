@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Col, Flex, Row, Spin, Typography } from 'antd';
-import { prometheusApi } from '../../providers';
-import { buildQuery } from '../../providers/api/prometheus/prometheus.registry';
+import { Operation, Service } from '@/api/service/interface.service';
+import { FilterParamsModel } from '@/api/service/query.service';
+
 // import {randomBackgroundGradient } from '../../utils';
 
 interface BasicSummaryProps {
-  serviceName: string;
-  start: number;
-  end: number;
+  data: Service[];
+  filterModel: FilterParamsModel;
 }
 const { Text } = Typography;
-const BasicSummary: React.FC<BasicSummaryProps> = ({ serviceName, start, end }) => {
+const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState({
+  const [summaryData, setSummaryData] = useState({
     operationCount: 0,
     totalCalls: 0,
     totalCallsSpan: '',
@@ -21,50 +21,44 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ serviceName, start, end }) 
     maxLatency: 0,
     minLatencySpan: '',
     minLatency: 0,
-    totalMin: 0,
+    totalMin: '',
   });
-  // const cardStyle = () => {
-  //   return {
-  //     background:  randomBackgroundGradient(),
-  //     color: '#fff',
-  //     borderRadius: 10,
-  //     padding: '16px',
-  //     height: '100%',
-  //     display: 'flex',
-  //     flexDirection: 'column' as const,
-  //     justifyContent: 'center',
-  //     alignItems: 'center',
-  //     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-  //   };
-  // };
+  
   const getMetrics = async () => {
     setLoading(true);
 
-    const ctx = { serviceName, windowSeconds: end - start };
-    const operationCountQuery = await buildQuery('operationCount', ctx);
-    const totalCallsQuery = await buildQuery('totalCalls', ctx);
-    const maxLatencySpanQuery = await buildQuery('maxLatencySpan', ctx);
-    const minLatencySpanQuery = await buildQuery('minLatencySpan', ctx);
-
     try {
-      const [operationCountRes, totalCallsRes, maxSpanRes, minSpanRes] = await Promise.all([
-        prometheusApi.runTraceQLQuery(operationCountQuery),
-        prometheusApi.runTraceQLQuery(totalCallsQuery),
-        prometheusApi.runTraceQLQuery(maxLatencySpanQuery),
-        prometheusApi.runTraceQLQuery(minLatencySpanQuery),
-      ]);
-
-      const operationCount = parseInt(operationCountRes[0]?.value?.[1] || '0', 10);
-      const totalCalls = parseInt(totalCallsRes[0]?.value?.[1] || '0', 10);
-      const maxLatencySpan = maxSpanRes[0]?.metric?.span_name || 'N/A';
-      const minLatencySpan = minSpanRes[0]?.metric?.span_name || 'N/A';
-      const maxLatency = parseFloat(maxSpanRes[0]?.value?.[1] || '0');
-      const minLatency = parseFloat(minSpanRes[0]?.value?.[1] || '0');
-      const totalMin = ((start - end)/60)/1000;
-      const totalCallsSpan = totalCallsRes[0]?.metric?.span_name || 'N/A';
-      const operationCountSpan = operationCountRes[0]?.metric?.span_name || 'N/A';
+      const operations = data[0]?.operations || [];
+      const operationCount = operations.length;
+      const totalCalls = data[0].metrics.requestCount;
       
-      setData({
+      // En yüksek maxLatencyMs değerine sahip operation'ı bul
+      const maxLatencyOperation = operations.length > 0 
+        ? operations.reduce((max: Operation, operation: Operation) => {
+            const maxValue = max.metrics.maxLatencyMs || 0;
+            const currentValue = operation.metrics.maxLatencyMs || 0;
+            return currentValue > maxValue ? operation : max;
+          })
+        : null;
+      const maxLatencySpan = maxLatencyOperation?.name || '';
+      
+      // En düşük minLatencyMs değerine sahip operation'ı bul
+      const minLatencyOperation = operations.length > 0
+        ? operations.reduce((min: Operation, operation: Operation) => {
+            const minValue = min.metrics.minLatencyMs ?? Infinity;
+            const currentValue = operation.metrics.minLatencyMs ?? Infinity;
+            return currentValue < minValue ? operation : min;
+          })
+        : null;
+      const minLatencySpan = minLatencyOperation?.name || '';
+      
+      const maxLatency = data[0].metrics.maxLatencyMs;
+      const minLatency = data[0].metrics.minLatencyMs;
+      const totalMin = filterModel?.options.interval;
+      const totalCallsSpan = 'N/A';
+      const operationCountSpan = 'N/A';
+      
+      setSummaryData({
         operationCount,
         totalCalls,
         totalCallsSpan,
@@ -73,7 +67,7 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ serviceName, start, end }) 
         minLatencySpan,
         maxLatency,
         minLatency,
-        totalMin:Math.floor(totalMin),
+        totalMin,
       });
     } catch (err) {
       console.error('Metric fetch error', err);
@@ -84,7 +78,7 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ serviceName, start, end }) 
 
   useEffect(() => {
     getMetrics();
-  }, [serviceName, start, end]);
+  }, [data?.length, filterModel?.options.interval]);
 
   if (loading) {
     return (
@@ -114,13 +108,13 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ serviceName, start, end }) 
           ) : (
             <Flex vertical gap={8}>
               <Text style={{ color: '#8c8c8c', fontSize: '12px', fontWeight: 500 }}>
-                Operation Count in {data.totalMin * -1}m
+                Operation Count in {summaryData.totalMin}m
               </Text>
               <Text style={{ color: '#52c41a', fontSize: '28px', fontWeight: 'bold', lineHeight: 1 }}>
-                {data.operationCount}
+                {summaryData.operationCount}
               </Text>
               <Text style={{ color: '#8c8c8c', fontSize: '14px' }}>
-                {data.operationCountSpan}
+                {summaryData.operationCountSpan}
               </Text>
             </Flex>
           )}
@@ -143,13 +137,13 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ serviceName, start, end }) 
           ) : (
             <Flex vertical gap={8}>
               <Text style={{ color: '#8c8c8c', fontSize: '12px', fontWeight: 500 }}>
-                Total Call Count in {data.totalMin * -1}m
+                Total Call Count in {summaryData.totalMin}m
               </Text>
               <Text style={{ color: '#52c41a', fontSize: '28px', fontWeight: 'bold', lineHeight: 1 }}>
-                {data.totalCalls}
+                {summaryData.totalCalls}
               </Text>
               <Text style={{ color: '#8c8c8c', fontSize: '14px' }}>
-                {data.totalCallsSpan}
+                {summaryData.totalCallsSpan}
               </Text>
             </Flex>
           )}
@@ -172,13 +166,13 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ serviceName, start, end }) 
           ) : (
             <Flex vertical gap={8}>
               <Text style={{ color: '#8c8c8c', fontSize: '12px', fontWeight: 500 }}>
-                Max Latency Span in {data.totalMin * -1}m
+                Max Latency Span in {summaryData.totalMin}m
               </Text>
               <Text style={{ color: '#52c41a', fontSize: '28px', fontWeight: 'bold', lineHeight: 1 }}>
-                {data.maxLatency.toFixed(2)} ms
+                {summaryData.maxLatency.toFixed(2)} ms
               </Text>
               <Text style={{ color: '#8c8c8c', fontSize: '14px' }}>
-                {data.maxLatencySpan}
+                {summaryData.maxLatencySpan}
               </Text>
             </Flex>
           )}
@@ -201,13 +195,13 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ serviceName, start, end }) 
           ) : (
             <Flex vertical gap={8}>
               <Text style={{ color: '#8c8c8c', fontSize: '12px', fontWeight: 500 }}>
-                Min Latency Span in {data.totalMin * -1}m
+                Min Latency Span in {summaryData.totalMin}m
               </Text>
               <Text style={{ color: '#52c41a', fontSize: '28px', fontWeight: 'bold', lineHeight: 1 }}>
-                {data.minLatency.toFixed(2)} ms
+                {summaryData.minLatency.toFixed(2)} ms
               </Text>
               <Text style={{ color: '#8c8c8c', fontSize: '14px' }}>
-                {data.minLatencySpan}
+                {summaryData.minLatencySpan}
               </Text>
             </Flex>
           )}

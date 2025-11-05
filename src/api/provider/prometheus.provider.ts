@@ -42,15 +42,25 @@ export const getQueryAggregationData = async (query: string, start: number, end:
 
 export const getQueryData = async (query: string, start: number, end: number, step: string): Promise<any> => {
   const prometheusUid = await getDefaultPrometheusUid();
-  console.log('query', query);
-  console.log('start', start, new Date(start).toISOString());
-  console.log('end', end, new Date(end).toISOString());
-  console.log('step', step);
+  // console.log('query', query);
+  // console.log('start', start, new Date(start).toISOString());
+  // console.log('end', end, new Date(end).toISOString());
+  // console.log('step', step);
   const response = await getBackendSrv().get(`/api/datasources/proxy/uid/${prometheusUid}/api/v1/query`, {
     query: query,
-    start: start,
-    end: end,
-    step: step,
+  });
+  return response.data;
+};
+
+export const getQueryRangeData = async (query: string, startMs: number, endMs: number, step: string): Promise<any> => {
+  const prometheusUid = await getDefaultPrometheusUid();
+  const start = Math.floor(startMs / 1000);
+  const end = Math.floor(endMs / 1000);
+  const response = await getBackendSrv().get(`/api/datasources/proxy/uid/${prometheusUid}/api/v1/query_range`, {
+    query,
+    start,
+    end,
+    step,
   });
   return response.data;
 };

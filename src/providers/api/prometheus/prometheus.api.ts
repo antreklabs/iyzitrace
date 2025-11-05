@@ -11,7 +11,7 @@ export const prometheusApi = {
             if (!uid) { throw new Error('No Prometheus UID selected'); }
 
             const url = `/api/datasources/proxy/uid/${uid}/api/v1/query`;
-            // console.log('runTraceQLQuery', query);
+            console.log('runTraceQLQuery', query);
             const res = await getBackendSrv().get(url, {
                 query
             });

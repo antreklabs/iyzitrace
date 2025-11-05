@@ -6,18 +6,32 @@ import { DEFAULT_DEFINITIONS } from '../../components/settings/definitions-table
  * Query type enum
  */
 export enum QueryType {
-  CALLS_BY_SERVICE = 'CALLS_BY_SERVICE',
-  AVG_LATENCY_BY_SERVICE = 'AVG_LATENCY_BY_SERVICE',
-  MIN_LATENCY_BY_SERVICE = 'MIN_LATENCY_BY_SERVICE',
-  MAX_LATENCY_BY_SERVICE = 'MAX_LATENCY_BY_SERVICE',
-  ERROR_PERCENTAGE_BY_SERVICE = 'ERROR_PERCENTAGE_BY_SERVICE',
-  P50_BY_SERVICE_AND_SPAN = 'P50_BY_SERVICE_AND_SPAN',
-  P75_BY_SERVICE_AND_SPAN = 'P75_BY_SERVICE_AND_SPAN',
-  P90_BY_SERVICE_AND_SPAN = 'P90_BY_SERVICE_AND_SPAN',
-  P95_BY_SERVICE_AND_SPAN = 'P95_BY_SERVICE_AND_SPAN',
-  P99_BY_SERVICE_AND_SPAN = 'P99_BY_SERVICE_AND_SPAN',
-  AVG_DURATION_BY_SERVICE_AND_SPAN = 'AVG_DURATION_BY_SERVICE_AND_SPAN',
-  ERROR_PERCENTAGE_BY_SERVICE_AND_SPAN = 'ERROR_PERCENTAGE_BY_SERVICE_AND_SPAN'
+  CALLS_BY_SERVICE,
+  AVG_LATENCY_BY_SERVICE,
+  MIN_LATENCY_BY_SERVICE,
+  MAX_LATENCY_BY_SERVICE,
+  ERROR_PERCENTAGE_BY_SERVICE,
+  P50_BY_SERVICE_INTIME,
+  P90_BY_SERVICE_INTIME,
+  P99_BY_SERVICE_INTIME,
+  APDEX_BY_SERVICE_INTIME,
+
+  P50_BY_SERVICE_AND_SPAN,
+  P75_BY_SERVICE_AND_SPAN,
+  P90_BY_SERVICE_AND_SPAN,
+  P95_BY_SERVICE_AND_SPAN,
+  P99_BY_SERVICE_AND_SPAN,
+  AVG_DURATION_BY_SERVICE_AND_SPAN,
+  AVG_LATENCY_BY_SERVICE_AND_SPAN,
+  MIN_LATENCY_BY_SERVICE_AND_SPAN,
+  MAX_LATENCY_BY_SERVICE_AND_SPAN,
+  ERROR_PERCENTAGE_BY_SERVICE_AND_SPAN,
+  P50_BY_SERVICE_AND_SPAN_INTIME,
+  P90_BY_SERVICE_AND_SPAN_INTIME,
+  P99_BY_SERVICE_AND_SPAN_INTIME,
+  APDEX_BY_SERVICE_AND_SPAN_INTIME,
+  RATE_BY_SERVICE_AND_SPAN_INTIME,
+  TOP_KEY_OPERATIONS_BY_SERVICE_AND_SPAN_INTIME,
 }
 
 // Helper function to get definitions from plugin settings
@@ -366,10 +380,10 @@ export const getQueryByType = (
 
   switch (queryType) {
     case QueryType.ERROR_PERCENTAGE_BY_SERVICE:
-      return `sum by(${service_label_name}) (rate(${definitions.request_count_metric_name}${buildStatusCodeFilter(labelFilters, 'STATUS_CODE_ERROR')}[${interval}]))`;
+      return `sum by(${service_label_name}) (increase(${definitions.request_count_metric_name}${buildStatusCodeFilter(labelFilters, 'STATUS_CODE_ERROR')}[${interval}]))`;
 
     case QueryType.CALLS_BY_SERVICE:
-      return `sum by(${service_label_name}) (rate(${definitions.request_count_metric_name}${labelFilters}[${interval}]))`;
+      return `sum by(${service_label_name}) (increase(${definitions.request_count_metric_name}${labelFilters}[${interval}]))`;
     
     case QueryType.AVG_LATENCY_BY_SERVICE:
       return `sum by(${service_label_name}) (rate(${definitions.sum_duration_ms_metric_name}${labelFilters}[${interval}])) / sum by(${service_label_name}) (rate(${definitions.count_duration_ms_metric_name}${labelFilters}[${interval}]))`;
@@ -379,6 +393,18 @@ export const getQueryByType = (
     
     case QueryType.MAX_LATENCY_BY_SERVICE:
       return `histogram_quantile(1.0, sum by(${service_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
+    
+    case QueryType.P50_BY_SERVICE_INTIME:
+      return `histogram_quantile(0.50, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, le))`;
+  
+    case QueryType.P90_BY_SERVICE_INTIME:
+      return `histogram_quantile(0.90, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, le))`;
+
+    case QueryType.P99_BY_SERVICE_INTIME:
+      return `histogram_quantile(0.99, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, le))`;
+
+    case QueryType.APDEX_BY_SERVICE_INTIME:
+      return '';
     
     case QueryType.P50_BY_SERVICE_AND_SPAN:
       return `histogram_quantile(0.5, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
@@ -398,8 +424,35 @@ export const getQueryByType = (
     case QueryType.AVG_DURATION_BY_SERVICE_AND_SPAN:
       return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.sum_duration_ms_metric_name}${labelFilters}[${interval}])) / sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.count_duration_ms_metric_name}${labelFilters}[${interval}]))`;
       
+    case QueryType.AVG_LATENCY_BY_SERVICE_AND_SPAN:
+      return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.sum_duration_ms_metric_name}${labelFilters}[${interval}])) / sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.count_duration_ms_metric_name}${labelFilters}[${interval}]))`;
+    
+    case QueryType.MIN_LATENCY_BY_SERVICE_AND_SPAN:
+      return `histogram_quantile(0.0, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
+    
+    case QueryType.MAX_LATENCY_BY_SERVICE_AND_SPAN:
+      return `histogram_quantile(1.0, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
+    
     case QueryType.ERROR_PERCENTAGE_BY_SERVICE_AND_SPAN:
       return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.request_count_metric_name}${buildStatusCodeFilter(labelFilters, 'STATUS_CODE_ERROR')}[${interval}]))`;
+  
+    case QueryType.P50_BY_SERVICE_AND_SPAN_INTIME:
+      return `histogram_quantile(0.50, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, ${span_label_name}, ${type_label_name}, le))`;
+
+    case QueryType.P90_BY_SERVICE_AND_SPAN_INTIME:
+      return `histogram_quantile(0.90, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, ${span_label_name}, ${type_label_name}, le))`;
+
+    case QueryType.P99_BY_SERVICE_AND_SPAN_INTIME:
+      return `histogram_quantile(0.99, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, ${span_label_name}, ${type_label_name}, le))`;
+
+    case QueryType.APDEX_BY_SERVICE_AND_SPAN_INTIME:
+      return '';
+
+    case QueryType.RATE_BY_SERVICE_AND_SPAN_INTIME:
+      return '';
+
+    case QueryType.TOP_KEY_OPERATIONS_BY_SERVICE_AND_SPAN_INTIME:
+      return '';
 
     default:
       throw new Error(`Unknown query type: ${queryType}`);

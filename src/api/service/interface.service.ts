@@ -21,6 +21,14 @@ export interface SizeItem {
   height: number;
 }
 
+export interface RangeMetricItem {
+  name: string;
+  data: {
+    x: Date;
+    y: number;
+  }[];
+}
+
 export interface ServiceMapData {
   regions?: Region[] | [];
 }
@@ -78,7 +86,7 @@ export interface Infrastructure {
     name: string;
     port?: number;
     type?: string;
-    metrics: {
+    metrics?: {
         avgLatencyMs: number
         minLatencyMs: number;
         maxLatencyMs: number;
@@ -91,6 +99,12 @@ export interface Infrastructure {
         requestCount: number;
         callsPerSecond?: number;
         operationCounts?: number;
+    };
+    rangeMetrics?: {
+        latency?: RangeMetricItem[];
+        rate?: RangeMetricItem[];
+        apdex?: RangeMetricItem[];
+        keyops?: RangeMetricItem[];
     };
     status?: StatusItem;
     groupSize?: SizeItem;
@@ -110,6 +124,8 @@ export interface Infrastructure {
     targetServiceId?: string;
     metrics: {
         avgLatencyMs?: number;
+        minLatencyMs?: number;
+        maxLatencyMs?: number;
         p95LatencyMs?: number;
         p50DurationMs?: number;
         p75DurationMs?: number;
