@@ -11,7 +11,6 @@ const ServiceFilter: React.FC<ServiceFilterProps> = ({ onChange, columns, data }
   
   return (
     <BaseFilter 
-      onChange={onChange} 
       columns={columns}
       hasServiceFilter={true}
       hasTypesFilter={true}
@@ -21,7 +20,6 @@ const ServiceFilter: React.FC<ServiceFilterProps> = ({ onChange, columns, data }
       hasFieldsFilter={false}
       hasOptionsFilter={false}
       data={data}
-      datasourceType="tempo"
     >
       
     </BaseFilter>

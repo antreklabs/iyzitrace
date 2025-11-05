@@ -62,7 +62,7 @@ class PrometheusReadApi extends BaseApi {
 
     try {
       const response = await lastValueFrom(ds.query(req));
-      console.log('response', response);
+      // console.log('response', response);
       return this.mapResponse(response);
     } catch (err: any) {
       // Grafana Observable can complete without emission -> lastValueFrom throws EmptyError

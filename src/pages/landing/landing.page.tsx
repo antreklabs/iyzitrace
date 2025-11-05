@@ -443,7 +443,7 @@ const LandingPage: React.FC = () => {
   
   const handleSkip = (step: Step) => {
     // In a real app, this would call an API to mark the step as skipped
-    console.log('Skipped step:', step.key);
+    // console.log('Skipped step:', step.key);
   };
   
   const handleConnectDataSource = () => {

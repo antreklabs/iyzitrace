@@ -1,0 +1,43 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  otlphttp:
+    endpoint: http://loki-platform:3100/otlp
+    tls:
+      insecure: true
+
+processors:
+  batch:
+    timeout: 10s
+
+  memory_limiter:
+    check_interval: 5s
+    limit_percentage: 80
+    spike_limit_percentage: 25
+
+  transform/log:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          - set(span.attributes["operation.name"], span.name)
+    log_statements:
+      - context: log
+        statements:
+          # Service name'i resource'dan al
+          - set(resource.attributes["service_name"], resource.attributes["service.name"])
+          # Service namespace'i resource'dan al
+          - set(resource.attributes["service_namespace"], resource.attributes["service.namespace"])
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [batch, memory_limiter, transform/log]
+      exporters: [otlphttp]

@@ -1,113 +1,137 @@
-import React, { useState, useEffect } from 'react';
-import { Typography, Form, Card, Button, Space, Empty, Modal, Input, Select, message } from 'antd';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Typography, Form, Card, Button, Space, Empty, Modal, Input, message, Row, Col } from 'antd';
 import { PluginPage } from '@grafana/runtime';
-import { PlusOutlined, DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
+import { getPluginSettings, savePluginSettings, PluginSettings } from '../../api/service/settings.service';
+import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
-const { Option } = Select;
 
-interface DashboardWidget {
+interface PageViewItem {
   id: string;
   title: string;
-  type: 'logs' | 'traces' | 'services' | 'metrics';
+  description?: string;
+  page: string;
   query: string;
-  filters: any[];
-  timeRange: {
-    start: number;
-    end: number;
-  };
   createdAt: string;
 }
 
 function ViewsPage() {
-  const [widgets, setWidgets] = useState<DashboardWidget[]>([]);
+  const [widgets, setWidgets] = useState<PageViewItem[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingWidget, setEditingWidget] = useState<DashboardWidget | null>(null);
+  const [editingWidget, setEditingWidget] = useState<PageViewItem | null>(null);
   const [form] = Form.useForm();
+  const [queryPairs, setQueryPairs] = useState<Array<{ id: string; key: string; value: string; lockedKey: boolean }>>([]);
+  const previewQuery = useMemo(() => new URLSearchParams(queryPairs.filter(p => p.key).map(p => [p.key, p.value] as [string, string])).toString(), [queryPairs]);
 
-  // LocalStorage'dan widget'ları yükle
+  // Plugin settings'den pageViews yükle
   useEffect(() => {
-    const savedWidgets = localStorage.getItem('dashboardWidgets');
-    if (savedWidgets) {
+    const load = async () => {
       try {
-        setWidgets(JSON.parse(savedWidgets));
+        const settings: PluginSettings = await getPluginSettings();
+        setWidgets((settings.pageViews as PageViewItem[]) || []);
       } catch (error) {
-        console.error('Error loading dashboard widgets:', error);
+        console.error('Error loading pageViews:', error);
+        setWidgets([]);
       }
-    }
+    };
+    load();
   }, []);
 
-  // Widget'ları LocalStorage'a kaydet
-  const saveWidgets = (newWidgets: DashboardWidget[]) => {
-    setWidgets(newWidgets);
-    localStorage.setItem('dashboardWidgets', JSON.stringify(newWidgets));
+  const persist = async (items: PageViewItem[]) => {
+    const settings: PluginSettings = await getPluginSettings();
+    await savePluginSettings({ ...settings, pageViews: items });
+    setWidgets(items);
   };
 
-  const handleAddWidget = () => {
-    setEditingWidget(null);
-    form.resetFields();
-    setModalVisible(true);
-  };
-
-  const handleEditWidget = (widget: DashboardWidget) => {
+  const handleEditWidget = (widget: PageViewItem) => {
     setEditingWidget(widget);
-    
-    // Filter'ları string olarak formatla
-    const filtersText = widget.filters && widget.filters.length > 0 
-      ? widget.filters.map(f => `${f.key} ${f.operator} "${f.value}"`).join(', ')
-      : 'No filters';
-    
     form.setFieldsValue({
-      ...widget,
-      filters: filtersText
+      title: widget.title,
+      page: widget.page,
+      query: widget.query?.replace(/^\?/, ''),
+      description: widget.description || ''
     });
+    initializePairsFromQuery(widget.query || '');
     setModalVisible(true);
   };
 
   const handleDeleteWidget = (widgetId: string) => {
     const newWidgets = widgets.filter(w => w.id !== widgetId);
-    saveWidgets(newWidgets);
-    message.success('Widget deleted successfully');
+    persist(newWidgets).then(() => message.success('View deleted'));
   };
 
   const handleModalOk = () => {
     form.validateFields().then(values => {
-      const widgetData: DashboardWidget = {
-        id: editingWidget?.id || `widget-${Date.now()}`,
+      const widgetData: PageViewItem = {
+        id: editingWidget?.id || `view-${Date.now()}`,
         title: values.title,
-        type: values.type,
-        query: values.query || '',
-        filters: editingWidget?.filters || [], // Mevcut filter'ları koru
-        timeRange: values.timeRange || {
-          start: Date.now() - 24 * 60 * 60 * 1000, // 24 hours ago
-          end: Date.now()
-        },
+        description: values.description || '',
+        page: values.page,
+        query: values.query ? (values.query.startsWith('?') ? values.query : `?${values.query}`) : '',
         createdAt: editingWidget?.createdAt || new Date().toISOString()
       };
 
       let newWidgets;
       if (editingWidget) {
         newWidgets = widgets.map(w => w.id === editingWidget.id ? widgetData : w);
-        message.success('Widget updated successfully');
+        message.success('View updated');
       } else {
         newWidgets = [...widgets, widgetData];
-        message.success('Widget added to dashboard');
+        message.success('View added');
       }
-
-      saveWidgets(newWidgets);
+      persist(newWidgets);
       setModalVisible(false);
       form.resetFields();
     }).catch(errorInfo => {
-      console.log('Validation failed:', errorInfo);
+      // console.log('Validation failed:', errorInfo);
     });
   };
 
   const handleModalCancel = () => {
     setModalVisible(false);
     form.resetFields();
+    setQueryPairs([]);
   };
 
-  const renderWidget = (widget: DashboardWidget) => {
+  const initializePairsFromQuery = (search: string) => {
+    const sp = new URLSearchParams(search.startsWith('?') ? search : search ? `?${search}` : '');
+    const pairs: Array<{ id: string; key: string; value: string; lockedKey: boolean }> = [];
+    sp.forEach((value, key) => {
+      pairs.push({ id: `${key}-${Math.random().toString(36).slice(2)}`, key, value, lockedKey: true });
+    });
+    setQueryPairs(pairs);
+    const qs = new URLSearchParams(pairs.map(p => [p.key, p.value] as [string, string])).toString();
+    form.setFieldsValue({ query: qs });
+  };
+
+  const syncFormQueryFromPairs = (pairs: Array<{ key: string; value: string }>) => {
+    const qs = new URLSearchParams(pairs.filter(p => p.key).map(p => [p.key, p.value] as [string, string])).toString();
+    form.setFieldsValue({ query: qs });
+  };
+
+  const addParamRow = () => {
+    const next = [...queryPairs, { id: `new-${Date.now()}`, key: '', value: '', lockedKey: false }];
+    setQueryPairs(next);
+    syncFormQueryFromPairs(next.map(({ key, value }) => ({ key, value })));
+  };
+
+  const removeParamRow = (id: string) => {
+    const next = queryPairs.filter(p => p.id !== id);
+    setQueryPairs(next);
+    syncFormQueryFromPairs(next.map(({ key, value }) => ({ key, value })));
+  };
+
+  const updateParamRow = (id: string, field: 'key' | 'value', v: string) => {
+    const next = queryPairs.map(p => (p.id === id ? { ...p, [field]: v } : p));
+    setQueryPairs(next);
+    syncFormQueryFromPairs(next.map(({ key, value }) => ({ key, value })));
+  };
+
+  const lockKeyIfNeeded = (id: string) => {
+    setQueryPairs(prev => prev.map(p => (p.id === id ? { ...p, lockedKey: true } : p)));
+  };
+
+  const renderWidget = (widget: PageViewItem) => {
     return (
       <Card
         key={widget.id}
@@ -120,23 +144,8 @@ function ViewsPage() {
               icon={<EyeOutlined />}
               size="small"
               onClick={() => {
-                // Widget'a tıklandığında query ve filter'ları URL'ye ekleyerek yönlendir
-                const params = new URLSearchParams();
-                if (widget.query) {
-                  params.set('query', widget.query);
-                }
-                if (widget.filters && widget.filters.length > 0) {
-                  params.set('filters', JSON.stringify(widget.filters));
-                }
-                if (widget.timeRange) {
-                  params.set('start', new Date(widget.timeRange.start).toISOString());
-                  params.set('end', new Date(widget.timeRange.end).toISOString());
-                }
-                
-                const queryString = params.toString();
-                const url = queryString ? `?${queryString}` : '';
-                
-                switch (widget.type) {
+                const url = widget.query || '';
+                switch (widget.page) {
                   case 'logs':
                     window.location.href = `/a/iyzitrace-app/logs${url}`;
                     break;
@@ -145,6 +154,15 @@ function ViewsPage() {
                     break;
                   case 'services':
                     window.location.href = `/a/iyzitrace-app/services${url}`;
+                    break;
+                  case 'service-map':
+                    window.location.href = `/a/iyzitrace-app/service-map${url}`;
+                    break;
+                  case 'alerts':
+                    window.location.href = `/a/iyzitrace-app/alerts${url}`;
+                    break;
+                  case 'exceptions':
+                    window.location.href = `/a/iyzitrace-app/exceptions${url}`;
                     break;
                 }
               }}
@@ -170,19 +188,13 @@ function ViewsPage() {
         }
       >
         <div>
-          <Text strong>Type: </Text>
-          <Text>{widget.type}</Text>
+          <Text strong>Page: </Text>
+          <Text>{widget.page}</Text>
         </div>
-        {widget.query && (
+        {widget.description && (
           <div>
-            <Text strong>Query: </Text>
-            <Text code>{widget.query}</Text>
-          </div>
-        )}
-        {widget.filters.length > 0 && (
-          <div>
-            <Text strong>Filters: </Text>
-            <Text>{widget.filters.length} active</Text>
+            <Text strong>Description: </Text>
+            <Text code>{widget.description}</Text>
           </div>
         )}
         <div>
@@ -203,13 +215,6 @@ function ViewsPage() {
               Manage your views and quick access to different screens
             </Text>
           </div>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={handleAddWidget}
-          >
-            Add View
-          </Button>
         </div>
 
         {widgets.length === 0 ? (
@@ -243,55 +248,21 @@ function ViewsPage() {
             form={form}
             layout="vertical"
             initialValues={{
-              type: 'logs',
+              page: 'logs',
               query: '',
               filters: []
             }}
           >
+            <Form.Item label="Page" name="page">
+              <Input readOnly />
+            </Form.Item>
             <Form.Item
-              label="View Title"
+              label="Title"
               name="title"
               rules={[{ required: true, message: 'Please enter view title' }]}
             >
               <Input placeholder="Enter view title" />
             </Form.Item>
-
-            <Form.Item
-              label="View Type"
-              name="type"
-              rules={[{ required: true, message: 'Please select view type' }]}
-            >
-              <Select placeholder="Select view type">
-                <Option value="serviceMap">Service Map</Option>
-                <Option value="services">Services</Option>
-                <Option value="traces">Traces</Option>
-                <Option value="logs">Logs</Option>
-                <Option value="alerts">Alerts</Option>
-                <Option value="exceptions">Exceptions</Option>
-              </Select>
-            </Form.Item>
-
-            <Form.Item
-              label="Query (Optional)"
-              name="query"
-            >
-              <Input.TextArea 
-                placeholder="Enter query or leave empty for default view"
-                rows={3}
-              />
-            </Form.Item>
-
-            <Form.Item
-              label="Active Filters"
-              name="filters"
-            >
-              <Input.TextArea 
-                placeholder="Active filters will be displayed here"
-                rows={2}
-                readOnly
-              />
-            </Form.Item>
-
             <Form.Item
               label="Description"
               name="description"
@@ -300,6 +271,41 @@ function ViewsPage() {
                 placeholder="Optional description for this view"
                 rows={2}
               />
+            </Form.Item>
+            <Form.Item label="Query (Optional)" name="query">
+              <>
+                <Row gutter={8}>
+                  <Col span={10}><strong>Key</strong></Col>
+                  <Col span={12}><strong>Value</strong></Col>
+                  <Col span={2}></Col>
+                </Row>
+                {queryPairs.map(p => (
+                  <Row key={p.id} gutter={8} style={{ marginTop: 6 }}>
+                    <Col span={10}>
+                      <Input
+                        placeholder="key"
+                        value={p.key}
+                        readOnly={p.lockedKey}
+                        style={{ color: '#ffffff' }}
+                        onChange={e => updateParamRow(p.id, 'key', e.target.value)}
+                        onBlur={() => lockKeyIfNeeded(p.id)}
+                      />
+                    </Col>
+                    <Col span={12}>
+                      <Input
+                        placeholder="value"
+                        value={p.value}
+                        onChange={e => updateParamRow(p.id, 'value', e.target.value)}
+                      />
+                    </Col>
+                    <Col span={2}>
+                      <Button danger onClick={() => removeParamRow(p.id)}>Del</Button>
+                    </Col>
+                  </Row>
+                ))}
+                <Button style={{ marginTop: 8 }} onClick={addParamRow}>Add param</Button>
+                <Input.TextArea style={{ marginTop: 8 }} rows={3} readOnly placeholder="Preview (auto-generated)" value={previewQuery} />
+              </>
             </Form.Item>
           </Form>
         </Modal>

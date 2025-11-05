@@ -1,22 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Typography, Spin, Flex, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { prometheusApi } from '../../providers';
-import { buildQuery, QueryKeys } from '../../providers/api/prometheus/prometheus.registry';
 import pluginJson from '../../plugin.json';
+import { Service } from '../../api/service/interface.service';
 
 const { Text } = Typography;
 export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
 
 interface ServiceMetricsCardProps {
-  name: string;
-  start?: number | undefined;
-  end?: number | undefined;
+  service: Service;
 }
 
 interface LatencyData { avg: number; min: number; max: number; count: number }
 
-const ServiceMetricsCard: React.FC<ServiceMetricsCardProps> = ({ name, start, end }) => {
+const ServiceMetricsCard: React.FC<ServiceMetricsCardProps> = ({ service }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [metrics, setMetrics] = useState<LatencyData | null>(null);
   const navigate = useNavigate();
@@ -25,43 +22,7 @@ const ServiceMetricsCard: React.FC<ServiceMetricsCardProps> = ({ name, start, en
     const fetchData = async () => {
         try {
           setLoading(true);
-
-          const startMs = start;
-          const endMs = end;
-          const fixedStart = Math.floor(startMs / 1000);
-          const fixedEnd = Math.floor(endMs / 1000);
-          const maxPoints = 1;
-          const step = Math.max(Math.ceil((fixedEnd - fixedStart) / maxPoints), 60);
-          
-          const ctx: any = { serviceName: name, windowSeconds: step };
-          const [countRes, avgRes, minRes, maxRes] = await Promise.all([
-            prometheusApi.runTraceQlQueryRange(await buildQuery(QueryKeys.totalTraceCount, ctx), fixedStart, fixedEnd, step + 's'),
-            prometheusApi.runTraceQlQueryRange(await buildQuery(QueryKeys.avgLatency, ctx), fixedStart, fixedEnd, step + 's'),
-            prometheusApi.runTraceQlQueryRange(await buildQuery(QueryKeys.minLatency, ctx), fixedStart, fixedEnd, step + 's'),
-            prometheusApi.runTraceQlQueryRange(await buildQuery(QueryKeys.maxLatency, ctx), fixedStart, fixedEnd, step + 's'),
-          ]);
-
-          if(countRes.length > 0 && avgRes.length > 0 && minRes.length > 0 && maxRes.length > 0
-            && countRes[0].values.length > 0 && avgRes[0].values.length > 0 && minRes[0].values.length > 0 && maxRes[0].values.length > 0
-          ){
-            let countValue = countRes[0].values[0][1];
-            // console.log('countValue', countValue);
-            let avgLatencyValue = avgRes[0].values[0][1];
-            let minLatencyValue = minRes[0].values[0][1];
-            let maxLatencyValue = maxRes[0].values[0][1];
-              
-  
-            const count = parseInt(countValue.toString(), 10);
-            const avgLatency = parseFloat(avgLatencyValue.toString());
-            const minLatency = parseFloat(minLatencyValue.toString());
-            const maxLatency = parseFloat(maxLatencyValue.toString());
-  
-            
-            setMetrics({ avg: avgLatency, min: minLatency, max: maxLatency, count });
-          }
-          else{
-            setMetrics({ avg: 0, min: 0, max: 0, count: 0 });
-          }
+          setMetrics({ avg: service.metrics.avgLatencyMs, min: service.metrics.minLatencyMs, max: service.metrics.maxLatencyMs, count: service.metrics.requestCount });
 
       } finally {
         setLoading(false);
@@ -69,7 +30,7 @@ const ServiceMetricsCard: React.FC<ServiceMetricsCardProps> = ({ name, start, en
     };
 
     fetchData();
-  }, [name, start, end]);
+  }, [service]);
 
   const makeServiceName = (value: string) => {
     const safe = typeof value === 'string' ? value : String(value ?? '');
@@ -96,10 +57,10 @@ const ServiceMetricsCard: React.FC<ServiceMetricsCardProps> = ({ name, start, en
         style={{ borderRadius: 12, marginBottom: 12, background: '#141414', border: '1px solid #2a2a2a', width: '180px' }}
         title={
           <Flex gap={8} align="center">
-            <Text strong>{makeServiceName(name)}</Text>
+            <Text strong>{makeServiceName(service.name)}</Text>
           </Flex>
         }
-        onClick={() => navigate(`${PLUGIN_BASE_URL}/services/${name}`)}
+        onClick={() => navigate(`${PLUGIN_BASE_URL}/services/${service.id}`)}
       >
         {loading ? (
           <Flex justify="center"><Spin size="small" /></Flex>
@@ -127,7 +88,7 @@ const ServiceMetricsCard: React.FC<ServiceMetricsCardProps> = ({ name, start, en
           </Flex>
         )}
 
-        <Button style={{ marginTop: 12, width: '100%' }} onClick={(e) => { e.stopPropagation(); navigate(`${PLUGIN_BASE_URL}/services/${name}`); }}>
+        <Button style={{ marginTop: 12, width: '100%' }} onClick={(e) => { e.stopPropagation(); navigate(`${PLUGIN_BASE_URL}/services/${service.id}`); }}>
           View full details
         </Button>
       </Card>

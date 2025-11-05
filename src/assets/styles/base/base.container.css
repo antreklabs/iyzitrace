@@ -23,3 +23,176 @@
   font-size: 14px;
   margin-right: 8px;
 }
+
+/* Table header spacing improvements */
+.ant-table-thead .ant-table-cell {
+  padding-left: 12px;
+}
+
+/* Add space between title, sorter and filter icons */
+.ant-table-column-sorters {
+  gap: 6px;
+}
+
+.ant-table-filter-trigger {
+  margin-left: 8px;
+  margin-right: 8px;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+.ant-table-column-title {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+/* Right align and bold numeric cells */
+td.numeric-cell {
+  text-align: right !important;
+  font-weight: 600;
+}
+
+/* Hide columns via class without removing from array */
+th.column-hidden,
+td.column-hidden {
+  display: none !important;
+}
+
+/* Prevent wrapping for auto-width text columns */
+td.nowrap-cell,
+th.nowrap-cell {
+  white-space: nowrap;
+}
+
+/* Status tag styles */
+.status-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  border: 1px solid transparent;
+}
+.status-tag.healthy {
+  color: #22d39a;
+  border-color: #22d39a33;
+  background: #0d2d2a;
+}
+.status-tag.warning {
+  color: #f3b03b;
+  border-color: #f3b03b33;
+  background: #2b2513;
+}
+.status-tag.error {
+  color: #ff4d4f;
+  border-color: #ff4d4f33;
+  background: #2a1517;
+}
+
+/* Percentage pill */
+.pct-pill {
+  position: relative;
+  height: 14px;
+  border-radius: 7px;
+  background: #1e2b31;
+  min-width: 72px;
+}
+.pct-pill-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: #12a36a;
+  border-radius: 7px;
+}
+.pct-pill-label {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  font-size: 11px;
+  line-height: 14px;
+  color: #cfe9df;
+  font-weight: 600;
+}
+
+/* Image thumbnail in table */
+img.img-thumb {
+  width: 64px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: #ffffff;
+}
+
+/* Base Table Container Styles */
+.base-table-container {
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #404040;
+}
+
+/* Pagination Styles */
+.ant-pagination {
+  margin-top: 16px !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  /* gap: 12px !important; */
+}
+
+.ant-pagination-total-text {
+  color: #ffffff !important;
+  font-size: 14px;
+}
+
+.ant-pagination-item {
+  background-color: #404040 !important;
+  border: 1px solid #555 !important;
+  color: #ffffff !important;
+  margin: 0 4px !important;
+}
+
+.ant-pagination-item:hover {
+  background-color: #555 !important;
+  border-color: #666 !important;
+}
+
+.ant-pagination-item-active {
+  background-color: #ff6b35 !important;
+  border-color: #ff6b35 !important;
+  color: #ffffff !important;
+}
+
+.ant-pagination-prev,
+.ant-pagination-next {
+  background-color: #404040 !important;
+  border: 1px solid #555 !important;
+  color: #ffffff !important;
+  margin: 0 4px !important;
+}
+
+.ant-pagination-prev:hover,
+.ant-pagination-next:hover {
+  background-color: #555 !important;
+  border-color: #666 !important;
+}
+
+.ant-pagination-options {
+  color: #ffffff !important;
+  margin-left: 8px !important;
+}
+
+.ant-pagination-options .ant-select-selector {
+  background-color: #404040 !important;
+  border: 1px solid #555 !important;
+  color: #ffffff !important;
+}
+
+.ant-pagination-options .ant-select-arrow {
+  color: #ffffff !important;
+}

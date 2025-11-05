@@ -11,7 +11,6 @@ const TraceFilter: React.FC<TraceFilterProps> = ({ onChange, columns, data }) =>
   
   return (
     <BaseFilter 
-      onChange={onChange} 
       columns={columns}
       hasServiceFilter={true}
       hasOperationsFilter={true}
@@ -22,7 +21,6 @@ const TraceFilter: React.FC<TraceFilterProps> = ({ onChange, columns, data }) =>
       hasFieldsFilter={true}
       hasOptionsFilter={true}
       data={data}
-      datasourceType="tempo"
     >
       
     </BaseFilter>

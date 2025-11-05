@@ -34,7 +34,3 @@
     font-weight: 500;
     color: #fff;
   }
-  .base-container{
-    height: calc(100vh - 75px) !important;
-
-  }

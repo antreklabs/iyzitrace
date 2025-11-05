@@ -36,7 +36,7 @@ export const TempoApi = {
     },
 
     async getOperationNames(serviceNames: string[]): Promise<any[]> {
-        console.log('serviceName', serviceNames);
+        // console.log('serviceName', serviceNames);
         const url = await this.getBaseUrl();
         let payload = serviceNames.map((name) => `resource.service.name=${name}`).join('||');
         if(serviceNames.length>1){
@@ -96,7 +96,7 @@ export const TempoApi = {
             end: end * 1_000_000,
             limit: 1000,
         });
-        console.log(response);
+        // console.log(response);
         const traces = response?.traces ?? [];
 
         const durations: number[] = traces

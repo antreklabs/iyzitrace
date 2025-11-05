@@ -3,9 +3,10 @@ import { Button, InlineField, Input, SecretInput, Select } from '@grafana/ui';
 import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
 import type { PluginJsonData, PluginSecureJsonData } from '../../interfaces/options';
 import { ServiceMapTable } from './service-map-table.component';
+import DefinitionsTable, { DEFAULT_DEFINITIONS } from './definitions-table.component';
 import GrafanaLikeRangePicker from '../core/graphanadatepicker';
 import dayjs from 'dayjs';
-import { KeyOutlined, DatabaseOutlined, FieldTimeOutlined, DeploymentUnitOutlined, SaveOutlined } from '@ant-design/icons';
+import { KeyOutlined, DatabaseOutlined, FieldTimeOutlined, DeploymentUnitOutlined, SaveOutlined, FileTextOutlined } from '@ant-design/icons';
 
 // guid helper not needed in paste-only model
 
@@ -15,6 +16,7 @@ const TAB_ITEMS = [
   'General',
   'Defaults',
   'Service Map',
+  'Definitions',
   'Security',
   'Privacy',
   'Account preferences'
@@ -26,6 +28,7 @@ const ConfigForm: React.FC = () => {
   const [secureJsonFields, setSecureJsonFields] = useState<Record<string, boolean>>({});
   const [lokiOpts, setLokiOpts] = useState<Array<{ label: string; value: string }>>([]);
   const [tempoOpts, setTempoOpts] = useState<Array<{ label: string; value: string }>>([]);
+  const [prometheusOpts, setPrometheusOpts] = useState<Array<{ label: string; value: string }>>([]);
   const [absRange, setAbsRange] = useState<[number, number]>([Date.now() - 60 * 60 * 1000, Date.now()]);
   // copyOk removed; paste-only model
   const [activeTab, setActiveTab] = useState<typeof TAB_ITEMS[number]>('General');
@@ -37,11 +40,16 @@ const ConfigForm: React.FC = () => {
         const map = (x: any) => ({ label: x.name, value: x.uid });
         setLokiOpts(list.filter((x: any) => x.type === 'loki').map(map));
         setTempoOpts(list.filter((x: any) => x.type === 'tempo').map(map));
+        setPrometheusOpts(list.filter((x: any) => x.type === 'prometheus').map(map));
         const settings = await getBackendSrv().get(`/api/plugins/${PLUGIN_ID}/settings`);
         // eslint-disable-next-line no-console
-        console.log('plugin_settings(raw):', settings);
+        // console.log('plugin_settings(raw):', settings);
         if (settings) {
           const jd = (settings.jsonData || {}) as PluginJsonData;
+          // If definitions don't exist, use defaults
+          if (!jd.definitions) {
+            jd.definitions = DEFAULT_DEFINITIONS;
+          }
           setJsonData(jd);
           setSecureJsonFields(settings.secureJsonFields || {});
           if (jd.defaultAbsoluteRange && Array.isArray(jd.defaultAbsoluteRange)) {
@@ -234,6 +242,20 @@ const ConfigForm: React.FC = () => {
                   Tempo powers distributed traces and dependencies; the default is used in trace and map views.
                 </div>
               </div>
+              <div>
+                <InlineField label="Default Prometheus">
+                  <Select
+                    options={prometheusOpts}
+                    value={prometheusOpts.find((o) => o.value === jsonData.defaultPrometheusUid) ?? null}
+                    onChange={(v) => setJsonData({ ...jsonData, defaultPrometheusUid: v?.value })}
+                    width={40}
+                    placeholder="Select Prometheus datasource"
+                  />
+                </InlineField>
+                <div style={{ color: '#9CA3AF', marginTop: 6 }}>
+                  Prometheus is used for metrics queries and alerts; the default is used in metrics and alert views.
+                </div>
+              </div>
             </div>
           </div>
 
@@ -292,8 +314,31 @@ const ConfigForm: React.FC = () => {
           </div>
         </>
       )}
+      {activeTab === 'Definitions' && (
+        <>
+          <div style={{
+            marginBottom: 16,
+            padding: 16,
+            borderRadius: 12,
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.06)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <FileTextOutlined style={{ color: '#60a5fa' }} />
+              <h3 className="page-heading" style={{ margin: 0 }}>Metric and Label Definitions</h3>
+            </div>
+            <div style={{ marginBottom: 8, color: '#9CA3AF' }}>
+              Configure label names and metric names used in Prometheus queries. These values are used throughout the application for querying service metrics.
+            </div>
+            <DefinitionsTable 
+              value={jsonData.definitions || DEFAULT_DEFINITIONS} 
+              onChange={(next) => setJsonData((prev) => ({ ...(prev || {}), definitions: next }))} 
+            />
+          </div>
+        </>
+      )}
 
-      {activeTab !== 'Security' && activeTab !== 'Service Map' && activeTab !== 'Defaults' && renderPlaceholder(activeTab)}
+      {activeTab !== 'Security' && activeTab !== 'Service Map' && activeTab !== 'Defaults' && activeTab !== 'Definitions' && renderPlaceholder(activeTab)}
 
       <div style={{ position: 'sticky', bottom: 0, paddingTop: 8, paddingBottom: 8, background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(6px)', display: 'flex', justifyContent: 'flex-end' }}>
         <Button onClick={save} icon={<SaveOutlined />}>Save Settings</Button>

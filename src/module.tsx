@@ -3,7 +3,7 @@ import { AppPlugin, type AppRootProps, type PluginConfigPageProps, type AppPlugi
 import { LoadingPlaceholder } from '@grafana/ui';
 import SettingsPage from './pages/settings/settings.page';
 
-const LazyApp = lazy(() => import('./components/app/app'));
+const LazyApp = lazy(() => import('./components/App/App'));
 // (no app-config page here)
 
 const App = (props: AppRootProps) => (

@@ -1,57 +1,43 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Col, Row, Select } from 'antd';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { setDataSourceUids, setSelectedDataSourceUid } from '../../../store/slices/datasource.slice';
-import { getDataSourceSrv } from '@grafana/runtime';
-import { getPageState, updatePageState } from '../../../utils';
-import tempoLogoSvg from '../../../assets/images/tempo_logo.svg';
+import { Col, Row } from 'antd';
+import { useLocation, useNavigate } from 'react-router-dom';
 import GrafanaLikeRangePicker from '../graphanadatepicker';
+import ViewComponent from '../view.component';
 
 interface BaseContainerHeaderProps {
   title: string;
-  datasourceType?: string;
-  children?: React.ReactNode;
+  pageName: string;
 }
 
-const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, datasourceType, children }) => {
-  const dispatch = useAppDispatch();
-  const { selectedUid } = useAppSelector((state) => state.datasource);
-  const [allList, setAllList] = useState<any[]>([]);
+const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, pageName }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [range, setRange] = useState<[number, number]>([Date.now() - 60 * 15 * 1000, Date.now()]);
+  
+  // URL'den from ve to değerlerini oku
   useEffect(() => {
-    const loadDatasources = async () => {
-      const listFromGrafana = getDataSourceSrv()
-        .getList()
-        .filter((ds) => ds.type === datasourceType);
-
-      setAllList(listFromGrafana);
-      const uidList = listFromGrafana.map((ds) => ds.uid);
+    const searchParams = new URLSearchParams(location.search);
+    const fromParam = searchParams.get('from');
+    const toParam = searchParams.get('to');
+    
+    if (fromParam && toParam) {
+      const fromTimestamp = parseInt(fromParam);
+      const toTimestamp = parseInt(toParam);
       
-      // Datasource slice'ını set et
-      dispatch(setDataSourceUids(uidList));
-
-      // Sayfa state'inden datasource uid'i al
-      const pageState = getPageState(datasourceType);
-      const savedUid = pageState?.selectedDataSourceUid;
-      if (savedUid && uidList.includes(savedUid)) {
-        dispatch(setSelectedDataSourceUid(savedUid));
-      } else if (uidList.length > 0) {
-        dispatch(setSelectedDataSourceUid(uidList[0]));
-        updatePageState(datasourceType, { selectedDataSourceUid: uidList[0] });
+      if (!isNaN(fromTimestamp) && !isNaN(toTimestamp)) {
+        setRange([fromTimestamp, toTimestamp]);
+        // console.log('Loaded time range from URL:', 
+        // {
+        //   from: new Date(fromTimestamp).toISOString(),
+        //   to: new Date(toTimestamp).toISOString(),
+        //   fromTimestamp,
+        //   toTimestamp
+        // });
       }
-    };
-
-    // Her component mount'unda data source'ları yükle
-    // Sayfa geçişlerinde dropdown'ın düzgün doldurulması için
-    loadDatasources();
-  }, [dispatch, datasourceType]);
-
-  const handleChange = (value: string) => {
-    dispatch(setSelectedDataSourceUid(value));
-    updatePageState(datasourceType, { selectedDataSourceUid: value });
-  };
-
+    }
+  }, [location.search]);
+  
   return (
     <motion.div
       initial={{ width: '160px' }}
@@ -65,39 +51,6 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, dataso
         wrap={false}
         style={{width: '100%', height: 50 }}
       >
-        {datasourceType && (
-          <>
-            {/* Left: Data source selector (and optional children) */}
-            <Col style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <Select
-                value={selectedUid ?? undefined}
-                style={{ minWidth: 200 }}
-                onChange={handleChange}
-                placeholder={`Select ${datasourceType === 'loki' ? 'Loki' : 'Tempo'} Instance`}
-                options={allList.map((ds) => ({
-                  value: ds.uid,
-                  label: (
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  {ds.type === 'tempo' && <img src={tempoLogoSvg} width={16} height={16} alt="tempo" />}
-                  {ds.type === 'loki' && <img src="public/app/plugins/datasource/loki/img/loki_icon.svg" width={16} height={16} alt="loki" />}
-                  {ds.type === 'prometheus' && (
-                    <img
-                      src="public/plugins/prometheus/img/prometheus_logo.svg"
-                      width={16}
-                      height={16}
-                      alt="prometheus"
-                    />
-                  )}
-                  <span>{ds.name}</span>
-                </span>
-              ),
-                }))}
-              />
-              {children as any}
-            </Col>
-          </>
-        )}
-
         {/* Center: Title */}
         {title && (
           <Col flex={1} style={{ display: 'flex', justifyContent: 'center' }}>
@@ -106,24 +59,28 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, dataso
         )}
 
         {/* Right: Header actions */}
-        {datasourceType && (
-          <>
         <Col flex="none">
-          <div style={{ display: 'flex', gap: 12 }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <ViewComponent pageName={pageName} />
             <GrafanaLikeRangePicker 
-            title="Date Range" 
-            onChange={(start, end) => {
-              setRange([start, end]);
-            }}
-            onApply={(start, end) => {
-              setRange([start, end]);
-            }}
-            value={range}
-          />
+              onChange={(start, end) => {
+                setRange([start, end]);
+              }}
+              title="Date Range" 
+              onApply={(start, end) => {
+                setRange([start, end]);
+                
+                // URL'i güncelle
+                const searchParams = new URLSearchParams(location.search);
+                searchParams.set('from', start.toString());
+                searchParams.set('to', end.toString());
+                const newURL = `${location.pathname}?${searchParams.toString()}`;
+                navigate(newURL, { replace: true });
+              }}
+              value={range}
+            />
           </div>
         </Col>
-        </>
-      )}
       </Row>
     </motion.div>
   );

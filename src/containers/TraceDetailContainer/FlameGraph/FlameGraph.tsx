@@ -26,10 +26,10 @@ const flattenSpans = (nodes: SpanNode[]): SpanNode[] =>
   nodes.flatMap((node) => [node, ...(node.children ? flattenSpans(node.children) : [])]);
 
 const FlameGraph: React.FC<FlameGraphProps> = ({ data, selectedSpanId, onSpanSelect,gridWidth,serviceMetaMap }) => {
-console.log(gridWidth, "gridWidth")
+// console.log(gridWidth, "gridWidth")
 
   const spans = flattenSpans(data);
-  console.log('spans', spans);
+  // console.log('spans', spans);
 
   if (!spans.length) {
     return (

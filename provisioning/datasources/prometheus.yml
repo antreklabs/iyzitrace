@@ -6,19 +6,7 @@ datasources:
     uid: prometheus-platform
     access: proxy
     orgId: 1
-    url: http://prometheus-platform.observability-platform_otel:9090
-    basicAuth: false
-    isDefault: false
-    version: 1
-    editable: true
-    jsonData:
-      httpMethod: GET
-  - name: Prometheus (OpenTelemetry Demo)
-    type: prometheus
-    uid: prometheus-demo
-    access: proxy
-    orgId: 1
-    url: http://prometheus.opentelemetry-demo:9090
+    url: http://prometheus-platform:9090
     basicAuth: false
     isDefault: false
     version: 1

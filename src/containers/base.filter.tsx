@@ -1,19 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { Select, Input, Button, Divider, Form, Row, Col, InputNumber, Space } from 'antd';
-import { lokiReadApi } from '../providers/api/loki/loki.api.read';
-import { tempoReadApi } from '../providers/api/tempo/tempo.api.read';
-import { useAppSelector } from '../store/hooks';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Select, Input, Button, Divider, Form, Row, Col, Space } from 'antd';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
-import { getPageState, updatePageState, getDefaultPageState } from './base.container';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import '../assets/styles/base/base.filter.css';
+import { DropdownOption, getPrometheusLabels, getPrometheusLabelValues, getPrometheusLokiLevels, getPrometheusOperations, getPrometheusOperationTypes, getPrometheusServices, getPrometheusTraceStatuses } from '../api/service/list.service';
 
 export const { Option } = Select;
 export const OPERATOR_OPTIONS = ['=', '!=', '>', '<', 'contains', 'regex'];
 export const EQUAL_OPERATOR_OPTIONS = ['=', '!='];
 
 interface BaseFilterProps {
-  onChange: (values: any) => void;
   children?: React.ReactNode;
   hasServiceFilter?: boolean;
   hasOperationsFilter?: boolean;
@@ -24,14 +20,12 @@ interface BaseFilterProps {
   hasLabelsFilter?: boolean;
   hasFieldsFilter?: boolean;
   hasTypesFilter?: boolean;
+  hasLevelsFilter?: boolean;
   columns?: any[];
-  data?: any[]; // Grid data to extract fields from
-  datasourceType?: 'tempo' | 'loki';
-  onExpressionUpdate?: (labelExpressionParts: string[], expression: string) => { labelExpressionParts: string[], expression: string } | void; // Callback for expression updates
+  data?: any[];
 }
 
 const BaseFilter: React.FC<BaseFilterProps> = ({ 
-  onChange, 
   children,
   hasServiceFilter = false,
   hasOperationsFilter = false,
@@ -42,172 +36,115 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
   hasOptionsFilter = false,
   hasFieldsFilter = false,
   hasTypesFilter = false,
-  columns = [],
-  data = [],
-  datasourceType = 'tempo',
-  onExpressionUpdate
+  hasLevelsFilter = false,
+  columns,
+  data
 }) => {
-  const [services, setServices] = useState<string[]>([]);
-  const [types, setTypes] = useState<string[]>([]);
-  const [labels, setLabels] = useState<string[]>([]);
-  const [operations, setOperations] = useState<string[]>([]);
-  const [statuses, setStatuses] = useState<string[]>([]);
-  const [fields, setFields] = useState<string[]>([]);
+  const [services, setServices] = useState<DropdownOption[]>([]);
+  const [types, setTypes] = useState<DropdownOption[]>([]);
+  const [labels, setLabels] = useState<DropdownOption[]>([]);
+  const [operations, setOperations] = useState<DropdownOption[]>([]);
+  const [statuses, setStatuses] = useState<DropdownOption[]>([]);
+  const [levels, setLevels] = useState<DropdownOption[]>([]);
+  const [fields, setFields] = useState<DropdownOption[]>([]);
   const [labelFilters, setLabelFilters] = useState<Array<{id: string, label: string, values: string[]}>>([]);
   const [fieldFilters, setFieldFilters] = useState<Array<{id: string, field: string, values: string[]}>>([]);
   const [form] = Form.useForm();
-  const { selectedUid } = useAppSelector((state) => state.datasource);
   const location = useLocation();
-  const pageName = location.pathname.split('/').filter(Boolean).join('_') || 'home';
+  const navigate = useNavigate();
 
-  const fetchServices = async () => {
-    const values = datasourceType === 'loki' ? await lokiReadApi.getLabelValues('service_name') 
-      : await tempoReadApi.getLabelValues('service.name');
-    const serviceNames: string[] = Array.isArray(values) ? values : [];
-    setServices(serviceNames);
-  };
-  
-  const fetchOperations = async () => {
-    const values = await tempoReadApi.getLabelValues('operation.name');
-    const operations: string[] = Array.isArray(values) ? values : [];
-    setOperations(operations);
-  };
-  
-  const fetchStatuses = async () => {
-    const values = await tempoReadApi.getLabelValues('status');
-    const statuses: string[] = Array.isArray(values) ? values : [];
-    setStatuses(statuses);
-  };
-
-  const fetchTypes = async () => {
-    const values = await tempoReadApi.getLabelValues('type');
-    const types: string[] = Array.isArray(values) ? values : [];
-    setTypes(types);
-  };
-
-  const fetchLabels = async () => {
-    try {
-      const labels = datasourceType === 'loki' ? await lokiReadApi.getLabels() 
-        : await tempoReadApi.getLabels();
-      setLabels(Array.isArray(labels) ? labels : []);
-    } catch (error) {
-      console.error('Error fetching labels:', error);
-      setLabels([]);
+  const fetchLists = useCallback(async () => {
+    if (hasServiceFilter) {
+      const services = await getPrometheusServices();
+      setServices(services);
     }
-  };
+    if (hasTypesFilter) {
+      const types = await getPrometheusOperationTypes();
+      setTypes(types);
+    }
+    if (hasLabelsFilter) {
+      const labels = await getPrometheusLabels();
+      setLabels(labels);
+    }
+    if (hasOperationsFilter) {
+      const operations = await getPrometheusOperations();
+      setOperations(operations);
+    }
+    if (hasStatusesFilter) {
+      const statuses = await getPrometheusTraceStatuses();
+      setStatuses(statuses);
+    }
+    if (hasLevelsFilter) {
+      const levels = await getPrometheusLokiLevels();
+      setLevels(levels);
+    }
+  }, [hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter, hasTypesFilter, hasLevelsFilter]);
 
-  // Function to extract fields from grid data
   const extractFieldsFromData = (data: any[]) => {
-    if (!data || data.length === 0) return;
+    if (!data || data.length === 0) {
+      return;
+    }
     
     const fieldNames = new Set<string>();
     data.forEach(item => {
+      // Check both attributes and direct properties
       if (item.attributes) {
         Object.keys(item.attributes).forEach(key => fieldNames.add(key));
+      } else {
+        // Extract from direct properties (for service map data)
+        Object.keys(item).forEach(key => {
+            fieldNames.add(key);
+        });
       }
     });
     
     const extractedFields = Array.from(fieldNames);
     if (extractedFields.length > 0) {
-      setFields(extractedFields);
+      setFields(extractedFields.map(field => new DropdownOption(field)));
     }
   };
 
   // Function to extract field values from grid data
   const extractFieldValuesFromData = (data: any[], fieldName: string) => {
-    if (!data || data.length === 0) return [];
+    if (!data || data.length === 0) {
+      return [];
+    }
     
     const fieldValues = new Set<string>();
     data.forEach(item => {
+      let value = null;
+      
+      // Check both attributes and direct properties
       if (item.attributes && item.attributes[fieldName]) {
-        const value = item.attributes[fieldName];
-        if (typeof value === 'string' || typeof value === 'number') {
+        value = item.attributes[fieldName];
+      } else if (item[fieldName] !== undefined) {
+        value = item[fieldName];
+      }
+      
+      if (value !== null && (typeof value === 'string' || typeof value === 'number')) {
           fieldValues.add(String(value));
-        }
       }
     });
     
     return Array.from(fieldValues);
   };
 
-  // Function to build LogQL expression
-  const buildLogQLExpression = (formValues: any) => {
-    const parts: string[] = [];
-    
-    // Add default service namespace
-    parts.push(`service_namespace="opentelemetry-demo"`);
-    
-    // Add service filter
-    const selectedService = formValues?.filters?.serviceName;
-    const selectedServiceNameOperator = formValues?.filters?.serviceNameOperator || '=';
-    if (selectedService) {
-      parts.push(`service_name${selectedServiceNameOperator}"${selectedService}"`);
-    }
-    const selectedType = formValues?.filters?.type;
-    const selectedTypeOperator = formValues?.filters?.typeOperator || '=';
-    if (selectedType) {
-      parts.push(`type${selectedTypeOperator}"${selectedType}"`);
-    }
-    
-    // Add dynamic label filters
-    const labelFilters = formValues?.labels || {};
-    Object.values(labelFilters).forEach((labelFilter: any) => {
-      if (labelFilter && labelFilter.name && labelFilter.value) {
-        const labelName = labelFilter.name;
-        const labelValues = Array.isArray(labelFilter.value) ? labelFilter.value : [labelFilter.value];
-        
-        if (labelValues.length > 0) {
-          if (labelValues.length === 1) {
-            parts.push(`${labelName}="${labelValues[0]}"`);
-          } else {
-            const regexPattern = labelValues.map((val: string) => val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-            parts.push(`${labelName}=~"${regexPattern}"`);
-          }
-        }
-      }
-    });
-    
-    const baseExpression = `{${parts.join(',')}}`;
-    
-    return {
-      labelExpressionParts: parts,
-      expression: baseExpression
-    };
-  };
-
-  // useEffect(() => {
-  //   if (hasServiceFilter) {
-  //     fetchServices();
-  //   }
-  //   if (hasLabelsFilter) {
-  //     fetchLabels();
-  //   }
-  //   if (hasOperationsFilter) {
-  //     fetchOperations();
-  //   }
-  //   if (hasStatusesFilter) {
-  //     fetchStatuses();
-  //   }
-  // }, [selectedUid, hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter]);
-
   useEffect(() => {
     let alive = true;
     (async () => {
-      if (hasServiceFilter) await fetchServices();
-      if (hasLabelsFilter)  await fetchLabels();
-      if (hasOperationsFilter) await fetchOperations();
-      if (hasTypesFilter) await fetchTypes();
       // timeSrv/DS sync için 1 frame beklet
       await new Promise(r => requestAnimationFrame(() => r(null)));
   
-      if (alive && hasStatusesFilter) await fetchStatuses();
+      if (alive && (hasServiceFilter || hasTypesFilter || hasLabelsFilter || hasOperationsFilter || hasStatusesFilter || hasLevelsFilter)) {
+        await fetchLists();
+      }
     })();
     return () => { alive = false; };
-  }, [selectedUid, hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter]);
+  }, [fetchLists, hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter, hasTypesFilter, hasLevelsFilter]);
 
   // Extract fields from grid data when data changes
   useEffect(() => {
-    if (hasFieldsFilter && data && data.length > 0) {
+    if (hasFieldsFilter && data && Array.isArray(data) && data.length > 0) {
       extractFieldsFromData(data);
       
       // Also update field values for existing field filters
@@ -224,95 +161,246 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     }
   }, [data, hasFieldsFilter, fieldFilters]);
 
-  // Set initial form values from localStorage
+  // Load filters from URL on mount and clear when URL changes
   useEffect(() => {
-    const pageState = getPageState(pageName);
-    if (pageState && pageState.filters) {
-      // Set form values
-      form.setFieldsValue(pageState.filters);
+    const loadFiltersFromURL = () => {
+      const searchParams = new URLSearchParams(location.search);
+      const filters: any = {};
       
-      // Set label filters state if exists
-      if (pageState.filters.labels) {
-        const labelFiltersArray = Object.entries(pageState.filters.labels).map(([id, filter]: [string, any]) => ({
-          id,
-          label: filter.name || '',
-          values: [] as string[]
-        }));
-        setLabelFilters(labelFiltersArray);
+      // Load time range
+      const fromParam = searchParams.get('from');
+      const toParam = searchParams.get('to');
+      if (fromParam && toParam) {
+        // Convert long format (timestamp) to readable format
+        const fromTimestamp = parseInt(fromParam);
+        const toTimestamp = parseInt(toParam);
         
-        // Fetch values for each label that has a name
-        const fetchLabelValues = async () => {
-          for (const filter of labelFiltersArray) {
-            if (filter.label) {
-              try {
-                console.log(`[BaseFilter] Fetching values for initial label: ${filter.label}`);
-                const values = datasourceType === 'loki' ? await lokiReadApi.getLabelValues(filter.label) 
-                  : await tempoReadApi.getLabelValues(filter.label);
-                console.log(`[BaseFilter] Label values received for ${filter.label}:`, values);
-                setLabelFilters(prev => prev.map(f => 
-                  f.id === filter.id 
-                    ? { ...f, values: Array.isArray(values) ? values : [] }
-                    : f
-                ));
-              } catch (error) {
-                console.error(`Error fetching label values for ${filter.label}:`, error);
-              }
-            }
-          }
+        filters.timeRange = {
+          from: fromTimestamp,
+          to: toTimestamp
         };
-        fetchLabelValues();
       }
       
-      // Set field filters state if exists
-      if (pageState.filters.fields) {
-        const fieldFiltersArray = Object.entries(pageState.filters.fields).map(([id, filter]: [string, any]) => ({
-          id,
-          field: filter.name || '',
-          values: [] as string[]
-        }));
-        setFieldFilters(fieldFiltersArray);
+      // Initialize filters object
+      filters.filters = {};
+      
+      // Load basic filters - only if they exist in URL
+      if (searchParams.get('serviceName')) {
+        const serviceName = searchParams.get('serviceName');
+        filters.filters.serviceName = serviceName;
+        filters.filters.serviceNameOperator = searchParams.get('serviceNameOperator') || '=';
         
-        // Field values will be populated from grid data when available
-        // No initial API calls needed
+        // URL'den gelen service name'i services listesine ekle (eğer yoksa)
+        if (serviceName && !services.some(item => item.value === serviceName)) {
+          setServices(prev => [...prev, new DropdownOption(serviceName)]);
+        }
       }
-    }
-  }, [pageName, form]);
+      else {
+        filters.filters.serviceName = undefined;
+      }
+      
+      if (searchParams.get('type')) {
+        const type = searchParams.get('type');
+        filters.filters.type = type;
+        filters.filters.typeOperator = searchParams.get('typeOperator') || '=';
+        
+        // URL'den gelen type'ı types listesine ekle (eğer yoksa)
+        if (type && !types.some(item => item.value === type)) {
+          setTypes(prev => [...prev, new DropdownOption(type)]);
+        }
+      }
+      else {
+        filters.filters.type = undefined;
+      }
+      
+      if (searchParams.get('operationName')) {
+        const operationName = searchParams.get('operationName');
+        filters.filters.operationName = operationName;
+        filters.filters.operationNameOperator = searchParams.get('operationNameOperator') || '=';
+        
+        // URL'den gelen operation name'i operations listesine ekle (eğer yoksa)
+        if (operationName && !operations.some(item => item.value === operationName)) {
+          setOperations(prev => [...prev, new DropdownOption(operationName)]);
+        }
+      }
+      else {
+        filters.filters.operationName = undefined;
+      }
 
-  const addLabelFilter = () => {
+      if (searchParams.get('status')) {
+        const status = searchParams.get('status');
+        filters.filters.status = status;
+        filters.filters.statusOperator = searchParams.get('statusOperator') || '=';
+        
+        // URL'den gelen status'u statuses listesine ekle (eğer yoksa)
+        if (status && !statuses.some(item => item.value === status)) {
+          setStatuses(prev => [...prev, new DropdownOption(status)]);
+        }
+      }
+      else {
+        filters.filters.status = undefined;
+      }
+
+      if (searchParams.get('level')) {
+        const level = searchParams.get('level');
+        filters.filters.level = level;
+        filters.filters.levelOperator = searchParams.get('levelOperator') || '=';
+        
+        // URL'den gelen level'ı levels listesine ekle (eğer yoksa)
+        if (level && !levels.some(item => item.value === level)) {
+          setLevels(prev => [...prev, new DropdownOption(level)]);
+        }
+      }
+      else {
+        filters.filters.level = undefined;
+      }
+
+      if (searchParams.get('durationMin')) {
+        filters.filters.durationMin = searchParams.get('durationMin');
+      }
+      else {
+        filters.filters.durationMin = undefined;
+      }
+      
+      if (searchParams.get('durationMax')) {
+        filters.filters.durationMax = searchParams.get('durationMax');
+      }
+      else {
+        filters.filters.durationMax = undefined;
+      }
+
+      if (searchParams.get('tagKey')) {
+        filters.filters.tagKey = searchParams.get('tagKey');
+        filters.filters.tagOperator = searchParams.get('tagOperator') || '=';
+        filters.filters.tagValue = searchParams.get('tagValue');
+      }
+      else {
+        filters.filters.tagKey = undefined;
+        filters.filters.tagValue = undefined;
+      }
+      
+      // Load label filters
+      const labelFilters: any = {};
+      const labelFiltersArray: Array<{id: string, label: string, values: string[]}> = [];
+      
+      searchParams.forEach((value, key) => {
+        if (key.startsWith('label_') && key.endsWith('_name')) {
+          const id = key.replace('label_', '').replace('_name', '');
+          const valueKey = `label_${id}_value`;
+          const labelValue = searchParams.get(valueKey);
+          
+          labelFilters[id] = {
+            name: value,
+            value: labelValue ? (labelValue.includes(',') ? labelValue.split(',') : labelValue) : undefined
+          };
+          
+          // Add to labelFiltersArray for state
+          labelFiltersArray.push({
+            id,
+            label: value,
+            values: labelValue ? (labelValue.includes(',') ? labelValue.split(',') : [labelValue]) : []
+          });
+        }
+      });
+      
+      if (Object.keys(labelFilters).length > 0) {
+        filters.labels = labelFilters;
+        setLabelFilters(labelFiltersArray);
+      } else {
+        // Clear label filters if no URL params
+        setLabelFilters([]);
+      }
+      
+      // Load field filters
+      const fieldFilters: any = {};
+      const fieldFiltersArray: Array<{id: string, field: string, values: string[]}> = [];
+      
+      searchParams.forEach((value, key) => {
+        if (key.startsWith('field_') && key.endsWith('_name')) {
+          const id = key.replace('field_', '').replace('_name', '');
+          const valueKey = `field_${id}_value`;
+          const fieldValue = searchParams.get(valueKey);
+          
+          fieldFilters[id] = {
+            name: value,
+            value: fieldValue ? (fieldValue.includes(',') ? fieldValue.split(',') : fieldValue) : undefined
+          };
+          
+          // Add to fieldFiltersArray for state
+          fieldFiltersArray.push({
+            id,
+            field: value,
+            values: fieldValue ? (fieldValue.includes(',') ? fieldValue.split(',') : [fieldValue]) : []
+          });
+        }
+      });
+      
+      if (Object.keys(fieldFilters).length > 0) {
+        filters.fields = fieldFilters;
+        setFieldFilters(fieldFiltersArray);
+      } else {
+        // Clear field filters if no URL params
+        setFieldFilters([]);
+      }
+      
+      // Load options - only if they exist in URL
+      const options: any = {};
+      searchParams.forEach((value, key) => {
+        if (key.startsWith('option_')) {
+          const optionKey = key.replace('option_', '');
+          options[optionKey] = value;
+        }
+      });
+      
+      if (Object.keys(options).length > 0) {
+        filters.options = options;
+      }
+      
+      // Always set form values - this will clear fields not in URL
+      form.setFieldsValue(filters);
+    };
+    
+    loadFiltersFromURL();
+  }, [location.search, form]);
+
+  // localStorage kaldırıldı - sadece URL'den okuma
+
+  const addLabelFilter = useCallback(() => {
     const newFilter = {
       id: `label_${Date.now()}`,
       label: '',
       values: [] as string[]
     };
-    setLabelFilters([...labelFilters, newFilter]);
-  };
-  const addFieldFilter = () => {
+    setLabelFilters(prev => [...prev, newFilter]);
+  }, []);
+
+  const addFieldFilter = useCallback(() => {
     const newFilter = {
       id: `field_${Date.now()}`,
       field: '',
       values: [] as string[]
     };
-    setFieldFilters([...fieldFilters, newFilter]);
-  };
+    setFieldFilters(prev => [...prev, newFilter]);
+  }, []);
 
-  const removeLabelFilter = (id: string) => {
-    setLabelFilters(labelFilters.filter(filter => filter.id !== id));
+  const removeLabelFilter = useCallback((id: string) => {
+    setLabelFilters(prev => prev.filter(filter => filter.id !== id));
     // Remove from form values
     const currentLabels = form.getFieldValue('labels') || {};
     delete currentLabels[id];
     form.setFieldsValue({ labels: currentLabels });
-  };
+  }, [form]);
 
-  const removeFieldFilter = (id: string) => {
-    setFieldFilters(fieldFilters.filter(filter => filter.id !== id));
+  const removeFieldFilter = useCallback((id: string) => {
+    setFieldFilters(prev => prev.filter(filter => filter.id !== id));
     // Remove from form values
     const currentFields = form.getFieldValue('fields') || {};
     delete currentFields[id];
     form.setFieldsValue({ fields: currentFields });
-  };
+  }, [form]);
 
-  const handleLabelFilterChange = async (id: string, labelName: string) => {
-    setLabelFilters(labelFilters.map(filter => 
+  const handleLabelFilterChange = useCallback(async (id: string, labelName: string) => {
+    setLabelFilters(prev => prev.map(filter => 
       filter.id === id 
         ? { ...filter, label: labelName, values: [] }
         : filter
@@ -325,20 +413,20 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     // Fetch values for the selected label
     if (labelName) {
       try {
-        const values = datasourceType === 'loki' ? await lokiReadApi.getLabelValues(labelName) 
-          : await tempoReadApi.getLabelValues(labelName);
-        setLabelFilters(labelFilters.map(filter => 
-          filter.id === id 
-            ? { ...filter, label: labelName, values: Array.isArray(values) ? values : [] }
+        const values = await getPrometheusLabelValues(labelName);
+        setLabelFilters(prev => prev.map(filter => 
+          filter.label === labelName 
+            ? { ...filter, label: labelName, values: values.map(item => item.value) }
             : filter
         ));
       } catch (error) {
         console.error(`Error fetching label values for ${labelName}:`, error);
       }
     }
-  };
-  const handleFieldFilterChange = (id: string, fieldName: string) => {
-    setFieldFilters(fieldFilters.map(filter => 
+  }, [form]);
+
+  const handleFieldFilterChange = useCallback((id: string, fieldName: string) => {
+    setFieldFilters(prev => prev.map(filter => 
       filter.id === id 
         ? { ...filter, field: fieldName, values: [] }
         : filter
@@ -349,44 +437,138 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
 
     // Field values will be populated when grid data is available
     // No API call needed here
-  };
+  }, [form]);
 
   const handleApply = () => {
     const values = form.getFieldsValue();
+    updateURLWithFilters(values);
+  };
+
+  const updateURLWithFilters = (filters: any) => {
+    const searchParams = new URLSearchParams();
     
-    // Build LogQL expression
-    const { labelExpressionParts, expression } = buildLogQLExpression(values);
+    // Add timeRange
+    if (filters.timeRange) {
+      // Convert to long format (timestamp)
+      const fromTimestamp = typeof filters.timeRange.from === 'string' 
+        ? new Date(filters.timeRange.from).getTime() 
+        : filters.timeRange.from;
+      const toTimestamp = typeof filters.timeRange.to === 'string' 
+        ? new Date(filters.timeRange.to).getTime() 
+        : filters.timeRange.to;
+      
+      searchParams.set('from', fromTimestamp.toString());
+      searchParams.set('to', toTimestamp.toString());
+      
+      // Console'a normal okunabilir format yazdır
+      // console.log('Time Range:', {
+      //   from: new Date(fromTimestamp).toISOString(),
+      //   to: new Date(toTimestamp).toISOString(),
+      //   fromTimestamp,
+      //   toTimestamp
+      // });
+    }
     
-    // Call callback if provided and get updated values
-    let finalLabelExpressionParts = labelExpressionParts;
-    let finalExpression = expression;
-    
-    if (onExpressionUpdate) {
-      const updated = onExpressionUpdate(labelExpressionParts, expression);
-      if (updated && typeof updated === 'object') {
-        finalLabelExpressionParts = updated.labelExpressionParts;
-        finalExpression = updated.expression;
+    // Add service filter
+    if (filters.filters?.serviceName) {
+      searchParams.set('serviceName', filters.filters.serviceName);
+      if (filters.filters.serviceNameOperator) {
+        searchParams.set('serviceNameOperator', filters.filters.serviceNameOperator);
       }
     }
     
-    // Add expression data to values
-    const valuesWithExpression = {
-      ...values,
-      labelExpressionParts: finalLabelExpressionParts,
-      expression: finalExpression
-    };
-    
-    // Save to pageState
-    const pageState = getPageState(pageName) || getDefaultPageState();
-    updatePageState(pageName, {
-      ...pageState,
-      filters: {
-        ...pageState.filters,
-        ...valuesWithExpression
+    // Add type filter
+    if (filters.filters?.type) {
+      searchParams.set('type', filters.filters.type);
+      if (filters.filters.typeOperator) {
+        searchParams.set('typeOperator', filters.filters.typeOperator);
       }
-    });
+    }
     
-    onChange(valuesWithExpression);
+    // Add operation filter
+    if (filters.filters?.operationName) {
+      searchParams.set('operationName', filters.filters.operationName);
+      if (filters.filters.operationNameOperator) {
+        searchParams.set('operationNameOperator', filters.filters.operationNameOperator);
+      }
+    }
+    
+    // Add status filter
+    if (filters.filters?.status) {
+      searchParams.set('status', filters.filters.status);
+      if (filters.filters.statusOperator) {
+        searchParams.set('statusOperator', filters.filters.statusOperator);
+      }
+    }
+
+    // Add level filter
+    if (filters.filters?.level) {
+      searchParams.set('level', filters.filters.level);
+      if (filters.filters.levelOperator) {
+        searchParams.set('levelOperator', filters.filters.levelOperator);
+      }
+    }
+    
+    // Add duration filters
+    if (filters.filters?.durationMin) {
+      searchParams.set('durationMin', filters.filters.durationMin);
+    }
+    if (filters.filters?.durationMax) {
+      searchParams.set('durationMax', filters.filters.durationMax);
+    }
+    
+    // Add tag filters
+    if (filters.filters?.tagKey) {
+      searchParams.set('tagKey', filters.filters.tagKey);
+      if (filters.filters.tagOperator) {
+        searchParams.set('tagOperator', filters.filters.tagOperator);
+      }
+      if (filters.filters.tagValue) {
+        searchParams.set('tagValue', filters.filters.tagValue);
+      }
+    }
+    
+    // Add label filters
+    if (filters.labels) {
+      Object.entries(filters.labels).forEach(([id, labelFilter]: [string, any]) => {
+        if (labelFilter && labelFilter.name && labelFilter.value) {
+          searchParams.set(`label_${id}_name`, labelFilter.name);
+          if (Array.isArray(labelFilter.value)) {
+            searchParams.set(`label_${id}_value`, labelFilter.value.join(','));
+          } else {
+            searchParams.set(`label_${id}_value`, labelFilter.value);
+          }
+        }
+      });
+    }
+    
+    // Add field filters
+    if (filters.fields) {
+      Object.entries(filters.fields).forEach(([id, fieldFilter]: [string, any]) => {
+        if (fieldFilter && fieldFilter.name && fieldFilter.value) {
+          searchParams.set(`field_${id}_name`, fieldFilter.name);
+          if (Array.isArray(fieldFilter.value)) {
+            searchParams.set(`field_${id}_value`, fieldFilter.value.join(','));
+          } else {
+            searchParams.set(`field_${id}_value`, fieldFilter.value);
+          }
+        }
+      });
+    }
+    
+    // Add options
+    if (filters.options) {
+      Object.entries(filters.options).forEach(([key, value]: [string, any]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.set(`option_${key}`, String(value));
+        }
+      });
+    }
+    
+    // Update URL without page reload
+    const newURL = `${location.pathname}?${searchParams.toString()}`;
+    // console.log('Navigating to new URL:', newURL);
+    navigate(newURL, { replace: true });
   };
 
   return (
@@ -409,13 +591,12 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 allowClear
                 placeholder="Select service"
                 className="filter-value-select"
+                notFoundContent="No services found"
               >
                 {services.map((service) => {
-                  const serviceValue = typeof service === 'string' ? service : (service as any)?.text || (service as any)?.value || String(service);
-                  const serviceKey = typeof service === 'string' ? service : (service as any)?.text || (service as any)?.value || String(service);
                   return (
-                    <Option key={serviceKey} value={serviceValue}>
-                      {serviceValue}
+                    <Option key={service.key} value={service.value}>
+                      {service.name}
                     </Option>
                   );
                 })}
@@ -445,11 +626,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 className="filter-value-select"
               >
                 {types.map((type) => {
-                  const typeValue = typeof type === 'string' ? type : (type as any)?.text || (type as any)?.value || String(type);
-                  const typeKey = typeof type === 'string' ? type : (type as any)?.text || (type as any)?.value || String(type);
                   return (
-                    <Option key={typeKey} value={typeValue}>
-                      {typeValue}
+                    <Option key={type.key} value={type.value}>
+                      {type.name}
                     </Option>
                   );
                 })}
@@ -479,11 +658,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 className="filter-value-select"
               >
                 {operations.map((operation) => {
-                  const operationValue = typeof operation === 'string' ? operation : (operation as any)?.text || (operation as any)?.value || String(operation);
-                  const operationKey = typeof operation === 'string' ? operation : (operation as any)?.text || (operation as any)?.value || String(operation);
                   return (
-                    <Option key={operationKey} value={operationValue}>
-                      {operationValue}
+                    <Option key={operation.key} value={operation.value}>
+                      {operation.name}
                     </Option>
                   );
                 })}
@@ -513,11 +690,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 className="filter-value-select"
               >
                 {statuses.map((status) => {
-                  const statusValue = typeof status === 'string' ? status : (status as any)?.text || (status as any)?.value || String(status);
-                  const statusKey = typeof status === 'string' ? status : (status as any)?.text || (status as any)?.value || String(status);
                   return (
-                    <Option key={statusKey} value={statusValue}>
-                      {statusValue}
+                    <Option key={status.key} value={status.value}>
+                      {status.name}
                     </Option>
                   );
                 })}
@@ -527,7 +702,38 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         
         </Form.Item>
       )}
-
+      {hasLevelsFilter && (
+        <Form.Item label="Level">
+          <Space.Compact className="filter-compact-space">
+            <Form.Item name={['filters', 'levelOperator']} noStyle initialValue="=">
+              <Select className="filter-operator-select">
+                {EQUAL_OPERATOR_OPTIONS.map((op) => (
+                  <Option key={op} value={op}>
+                    {op}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item name={['filters', 'level']} noStyle>
+              <Select
+                showSearch
+                allowClear
+                placeholder="Select level"
+                className="filter-value-select"
+              >
+                {levels.map((level) => {
+                  return (
+                    <Option key={level.key} value={level.value}>
+                      {level.name}
+                    </Option>
+                  );
+                })}
+              </Select>
+            </Form.Item>
+          </Space.Compact>
+        
+        </Form.Item>
+      )}
       {hasDurationFilter && (
         <Form.Item label="Duration (ms)">
           <Row gutter={8}>
@@ -544,7 +750,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
           </Row>
         </Form.Item>
       )}
-
       {hasTagsFilter && (
         <>
           <Divider orientation={'center'}>Tags</Divider>
@@ -597,8 +802,8 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                           loading={labels.length === 0}
                         >
                           {labels.map((label) => (
-                            <Option key={label} value={label}>
-                              {label}
+                            <Option key={label.key} value={label.value}>
+                              {label.name}
                             </Option>
                           ))}
                         </Select>
@@ -665,8 +870,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
 
         </>
       )}
-
-      {hasFieldsFilter && (
+      {hasFieldsFilter && data && Array.isArray(data) && data.length > 0 && (
         <>
           <Divider orientation={'center'}>Fields</Divider>
 
@@ -684,8 +888,8 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                           loading={fields.length === 0}
                         >
                           {fields.map((field) => (
-                            <Option key={field} value={field}>
-                              {field}
+                            <Option key={field.key} value={field.value}>
+                              {field.name}
                             </Option>
                           ))}
                         </Select>
@@ -751,7 +955,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
 
         </>
       )}
-
       {hasOptionsFilter && (
         <>
           <Divider orientation={'center'}>Options</Divider>
@@ -759,25 +962,54 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       <Row gutter={8}>
         {
             <>
-                <Col span={12}>
-                    <Form.Item name={['options', 'limit']} label="Limit" initialValue={100}>
-                    <InputNumber min={0} className="base-filter-input-number" />
+                <Col span={6}>
+                    <Form.Item name={['options', 'limit']} label="Limit" initialValue="100">
+                    <Select className="base-filter-select">
+                      <Select.Option value="100">100</Select.Option>
+                      <Select.Option value="200">200</Select.Option>
+                      <Select.Option value="500">500</Select.Option>
+                      <Select.Option value="1000">1000</Select.Option>
+                    </Select>
                     </Form.Item>
                 </Col>
-                <Col span={12}>
-                    <Form.Item name={['options', 'interval']} label="Interval (ms)" initialValue={1000}>
-                    <InputNumber min={0} className="base-filter-input-number" />
+                <Col span={10}>
+                    <Form.Item name={['options', 'interval']} label="Interval" initialValue="15s">
+                    <Select className="base-filter-select">
+                      <Select.Option value="$__rate_interval">Optimum</Select.Option>
+                      <Select.Option value="15s">15s</Select.Option>
+                      <Select.Option value="30s">30s</Select.Option>
+                      <Select.Option value="1m">1m</Select.Option>
+                      <Select.Option value="5m">5m</Select.Option>
+                      <Select.Option value="15m">15m</Select.Option>
+                      <Select.Option value="30m">30m</Select.Option>
+                      <Select.Option value="1h">1h</Select.Option>
+                      <Select.Option value="2h">2h</Select.Option>
+                      <Select.Option value="4h">4h</Select.Option>
+                      <Select.Option value="8h">8h</Select.Option>
+                      <Select.Option value="12h">12h</Select.Option>
+                    </Select>
+                    </Form.Item>
+                </Col>
+                <Col span={8}>
+                    <Form.Item name={['options', 'pageCount']} label="Page Count" initialValue="20">
+                    <Select className="base-filter-select">
+                      <Select.Option value="10">10</Select.Option>
+                      <Select.Option value="20">20</Select.Option>
+                      <Select.Option value="50">50</Select.Option>
+                      <Select.Option value="100">100</Select.Option>
+                    </Select>
                     </Form.Item>
                 </Col>
                 </>
         }
       </Row>
 
+        {columns && Array.isArray(columns) && columns.length > 0 && (
       <Row gutter={8}>
         {
             <>
                 <Col span={12}>
-                    <Form.Item name={['options', 'orderBy']} label="Order By" initialValue={'timestamp'}>
+                    <Form.Item name={['options', 'orderBy']} label="Order By" initialValue={columns && Array.isArray(columns) ? columns[0].key || columns[0].dataIndex : ''}>
                       <Select className="base-filter-order-select">
                         {columns && Array.isArray(columns) ? columns.map((column) => (
                           <Option key={column.key || column.dataIndex} value={column.key || column.dataIndex}>
@@ -798,6 +1030,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 </>
         }
       </Row>
+        )}
         </>
       )}
 
@@ -805,7 +1038,14 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         <Button type="primary" htmlType="submit" block>
           Apply 
         </Button>
-        <Button block className="base-filter-reset-button" onClick={() => form.resetFields()}>
+        <Button block className="base-filter-reset-button" onClick={() => {
+          form.resetFields();
+          // Clear all filter states
+          setLabelFilters([]);
+          setFieldFilters([]);
+          // Clear URL parameters
+          navigate(location.pathname, { replace: true });
+        }}>
           Reset
         </Button>
       </Form.Item>

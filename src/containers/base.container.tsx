@@ -1,23 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { Layout, Table, Spin, Empty } from 'antd';
-import { IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
-import { useAppSelector } from '../store/hooks';
-import { useParams, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Layout, Spin, Empty } from 'antd';
+import { useLocation, useNavigate } from 'react-router-dom';
 import BaseContainer from '../components/core/basecontainer/basecontainer.component';
 import FiltersSider from '../components/core/layout/filters-sider.component';
-import { getPageState, updatePageState, getDefaultPageState, savePageState, PageState } from '../utils/localstorage.util';
 import '../assets/styles/base/base.container.css';
+import { TableColumn } from '../api/service/table.services';
+import { getFilterParams, FilterParamsModel, getDefaultSearchQuery } from '../api/service/query.service';
 
 const { Content } = Layout;
+
+
+export interface FetchedModel {
+  data: any[];
+  columns: TableColumn;
+}
 
 interface BaseContainerProps {
   title?: string;
   id?: string | null;
-  onFetchData?: (pageState?: PageState | null) => Promise<any[]>;
-  onExpandedRowRender?: (record: any) => React.ReactNode;
-  columns?: any[];
+  onFetchData?: (filterModel: FilterParamsModel) => Promise<FetchedModel>;
   filterComponent?: React.ReactElement;
-  datasourceType?: string;
   initialFilterCollapsed?: boolean;
   children?: React.ReactNode;
 }
@@ -26,55 +28,38 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   title,
   id,
   onFetchData,
-  onExpandedRowRender,
-  columns,
   filterComponent,
-  datasourceType,
   initialFilterCollapsed = true,
   children
 }) => {
   const location = useLocation();
-  const pageName = location.pathname.split('/').filter(Boolean).join('_') || 'home';
-  const defaultState = getDefaultPageState();
-  const savedState = getPageState(pageName);
-
-  // Initialize states with saved values or defaults
-  const [filters, setFilters] = useState<any>(savedState?.filters || defaultState.filters);
+  const navigate = useNavigate();
   const [modelData, setModelData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [collapsed, setCollapsed] = useState(initialFilterCollapsed);
-  const [pageSize, setPageSize] = useState(savedState?.pageSize || defaultState.pageSize);
-  
-  const { selectedUid } = useAppSelector((state) => state.datasource);
-  const routeParams = useParams<{ id?: string }>();
-  const effectiveId = id ?? routeParams?.id ?? null;
 
-  // Save state changes to localStorage
-  const saveState = (updates: Partial<PageState>) => {
-    updatePageState(pageName, updates);
+  const initializeUrlWithDefaults = () => {
+    // Check if URL has any parameters
+    const urlParams = new URLSearchParams(location.search);
+    const hasParams = Array.from(urlParams.keys()).length > 0;
+    
+    if (!hasParams) {
+      // URL is empty, set all default values
+      const newSearch = getDefaultSearchQuery();
+      navigate(`${location.pathname}?${newSearch}`, { replace: true });
+    }
   };
 
-  // Filter handler
-  const handleFilterChange = (filterValues: any) => {
-    // eslint-disable-next-line no-console
-    setFilters(filterValues);
-    saveState({ filters: filterValues });
-    fetchModelData();
-  };
-
-  // Tekleştirilmiş fetch fonksiyonu
   const fetchModelData = async () => {
-    // eslint-disable-next-line no-console
+    if (!onFetchData) {
+      return;
+    }
+    
     setLoading(true);
     try {
-      const currentPageState = {
-        selectedDataSourceUid: selectedUid,
-        filters,
-        pageSize,
-      };
-      const data = await onFetchData(currentPageState);
-      // console.log('data', data);
-      setModelData(data);
+      const filterModel = getFilterParams();
+      const fetchedModel = await onFetchData(filterModel);
+      setModelData(fetchedModel.data);
     } catch (error) {
       console.error('Error fetching data:', error);
       setModelData([]);
@@ -83,50 +68,21 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
     }
   };
 
-  // selectedUid değiştiğinde localStorage'a kaydet
   useEffect(() => {
-    if (selectedUid) {
-      saveState({ selectedDataSourceUid: selectedUid });
-    }
-  }, [selectedUid]);
+    fetchModelData();
+  }, [location.search]);
 
-  // İlk yüklemede default state'i persist et (persist yoksa)
   useEffect(() => {
-    if (!savedState) {
-      savePageState(pageName, {
-        selectedDataSourceUid: selectedUid,
-        filters,
-        pageSize,
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // İlk yükleme ve datasource/filter/range değişikliklerinde veri çek
-  useEffect(() => {
-    if (selectedUid) {
-      fetchModelData();
-    }
-  }, [effectiveId, selectedUid, filters]);
-
-  // İlk mount'ta da veri çek (selectedUid varsa)
-  useEffect(() => {
-    if (selectedUid) {
-      fetchModelData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    initializeUrlWithDefaults();
   }, []);
 
   return (
-    <BaseContainer title={title} datasourceType={datasourceType}>
+    <BaseContainer title={title}>
       <Layout className="base-container-layout">
         {filterComponent && (
           <>  
             <FiltersSider title="Filters" collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)}>
-          {filterComponent && React.cloneElement(filterComponent as React.ReactElement<any>, { 
-                onChange: handleFilterChange,
-                data: modelData 
-              })}
+              {filterComponent && React.cloneElement(filterComponent as React.ReactElement<any>)}
             </FiltersSider>
           </>
         )}
@@ -142,47 +98,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
             <Empty description="No data found for selected range." />
           ) : (
             <>
-              
               {children}
-              
-              {columns && columns.length > 0 && (
-              <Table
-                rowKey={(record: any) => record.id ?? record.key ?? record.text ?? record.name ?? JSON.stringify(record)}
-                dataSource={modelData}
-                columns={columns}
-                expandable={onExpandedRowRender ? {
-                  expandedRowRender: onExpandedRowRender,
-                  expandIcon: ({ expanded, onExpand, record }) =>
-                    expanded ? (
-                      <IoIosArrowDown
-                        onClick={(e: any) => onExpand(record, e)}
-                        className="base-container-icon"
-                      />
-                    ) : (
-                      <IoIosArrowForward
-                        onClick={(e: any) => onExpand(record, e)}
-                        className="base-container-icon"
-                      />
-                    ),
-                } : {
-                  expandedRowRender: onExpandedRowRender,
-                  expandIcon: () => null,
-                }}
-                scroll={{ x: 'max-content', y: 'calc(100vh - 300px)' }}
-                pagination={{
-                  pageSize: pageSize,
-                  showSizeChanger: true,
-                  pageSizeOptions: ['10', '20', '50', '100'],
-                  onShowSizeChange: (current, size) => {
-                    setPageSize(size);
-                    saveState({ pageSize: size });
-                    fetchModelData();
-                  }
-                }}
-                size="middle"
-                bordered
-              />
-              )}
             </>
           )}
         </Content>
@@ -193,6 +109,3 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
 
 export default BaseContainerComponent;
 
-// Export the 4 page state management functions for use in child containers
-export { getPageState, updatePageState, getDefaultPageState, savePageState };
-export type { PageState };

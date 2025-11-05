@@ -31,13 +31,13 @@
               "name": "Go Runtime",
               "platform": "Go",
               "version": "1.22",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "go-orders",
                   "kind": "http",
                   "port": 9000,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 2,
                   "dependencies": [
                     "redis-cache",
@@ -58,7 +58,7 @@
                       "path": "/orders",
                       "avg_latency_ms": 128,
                       "p95_ms": 260,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -73,7 +73,7 @@
                       "path": "/orders/{id}",
                       "avg_latency_ms": 64,
                       "p95_ms": 140,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 224,
                         "y": 24
@@ -96,7 +96,6 @@
                     "y": 0
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:internal:go-runtime:go-orders"
                 }
@@ -120,13 +119,13 @@
               "name": "Nginx Server",
               "platform": "Nginx",
               "version": "1.25",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "edge-proxy",
                   "kind": "http",
                   "port": 80,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 1,
                   "dependencies": [
                     "go-orders",
@@ -147,7 +146,7 @@
                       "path": "/api/*",
                       "avg_latency_ms": 12,
                       "p95_ms": 35,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -170,7 +169,6 @@
                     "y": 0
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:internal:nginx-server:edge-proxy"
                 }
@@ -194,13 +192,13 @@
               "name": "Node.js Runtime",
               "platform": "Node.js",
               "version": "20.11",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "user-management",
                   "kind": "http",
                   "port": 8080,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 2,
                   "dependencies": [
                     "redis-cache",
@@ -221,7 +219,7 @@
                       "path": "/users",
                       "avg_latency_ms": 142,
                       "p95_ms": 265,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -236,7 +234,7 @@
                       "path": "/users/validate",
                       "avg_latency_ms": 89,
                       "p95_ms": 180,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 224,
                         "y": 24
@@ -251,7 +249,7 @@
                       "path": "/users/{id}",
                       "avg_latency_ms": 234,
                       "p95_ms": 420,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 424,
                         "y": 24
@@ -274,7 +272,6 @@
                     "y": 0
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:internal:node-js-runtime:user-management"
                 }
@@ -298,7 +295,7 @@
               "name": "OpenTelemetry",
               "platform": "OTel",
               "version": "0.95",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "id": "svc:us-west-1:internal:opentelemetry:internet",
@@ -321,7 +318,7 @@
                       "path": "/users",
                       "avg_latency_ms": 142,
                       "p95_ms": 265,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -334,7 +331,7 @@
                       "path": "/users/validate",
                       "avg_latency_ms": 89,
                       "p95_ms": 180,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 224,
                         "y": 24
@@ -349,7 +346,7 @@
                       "path": "/users/{id}",
                       "avg_latency_ms": 234,
                       "p95_ms": 420,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 424,
                         "y": 24
@@ -400,7 +397,7 @@
                       "path": "/users",
                       "avg_latency_ms": 142,
                       "p95_ms": 265,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -413,7 +410,7 @@
                       "path": "/users/validate",
                       "avg_latency_ms": 89,
                       "p95_ms": 180,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 224,
                         "y": 24
@@ -428,7 +425,7 @@
                       "path": "/users/{id}",
                       "avg_latency_ms": 234,
                       "p95_ms": 420,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 424,
                         "y": 24
@@ -1252,13 +1249,13 @@
               "name": "JVMs",
               "platform": "Java",
               "version": "OpenJDK 17",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "order-processing",
                   "kind": "http",
                   "port": 8081,
-                  "health": "degraded",
+                  "status": "degraded",
                   "replicas": 2,
                   "dependencies": [
                     "payment-gateway",
@@ -1280,7 +1277,7 @@
                       "path": "/orders",
                       "avg_latency_ms": 126,
                       "p95_ms": 250,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -1310,7 +1307,7 @@
                       "path": "/orders/{id}/ship",
                       "avg_latency_ms": 345,
                       "p95_ms": 640,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 424,
                         "y": 24
@@ -1333,7 +1330,6 @@
                     "y": 0
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:internal:jvms:order-processing"
                 },
@@ -1341,7 +1337,7 @@
                   "name": "spring-boot-apps",
                   "kind": "http",
                   "port": 8090,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 2,
                   "dependencies": [
                     "oracle-db"
@@ -1361,7 +1357,7 @@
                       "path": "/actuator/health",
                       "avg_latency_ms": 10,
                       "p95_ms": 20,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -1384,7 +1380,6 @@
                     "y": 350
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:internal:jvms:spring-boot-apps"
                 }
@@ -1408,13 +1403,13 @@
               "name": "Tomcat",
               "platform": "Tomcat",
               "version": "9.0",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "legacy-ui",
                   "kind": "http",
                   "port": 8088,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 1,
                   "dependencies": [
                     "oracle-db"
@@ -1434,7 +1429,7 @@
                       "path": "/legacy/*",
                       "avg_latency_ms": 95,
                       "p95_ms": 210,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -1457,7 +1452,6 @@
                     "y": 350
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:internal:tomcat:legacy-ui"
                 }
@@ -1481,13 +1475,13 @@
               "name": "Python Runtime",
               "platform": "Python",
               "version": "3.11",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "etl-worker",
                   "kind": "job",
                   "port": 0,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 3,
                   "dependencies": [
                     "oracle-db"
@@ -1507,7 +1501,7 @@
                       "path": "gs://bucket",
                       "avg_latency_ms": 5000,
                       "p95_ms": 9000,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -1530,7 +1524,6 @@
                     "y": 350
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:internal:python-runtime:etl-worker"
                 }
@@ -1554,13 +1547,13 @@
               "name": "PHP Runtime",
               "platform": "PHP-FPM",
               "version": "8.2",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "admin-portal",
                   "kind": "http",
                   "port": 9001,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 1,
                   "dependencies": [
                     "oracle-db"
@@ -1580,7 +1573,7 @@
                       "path": "/admin/users",
                       "avg_latency_ms": 120,
                       "p95_ms": 260,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -1603,7 +1596,6 @@
                     "y": 350
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:internal:php-runtime:admin-portal"
                 }
@@ -1627,13 +1619,13 @@
               "name": "Instana Agent",
               "platform": "Agent",
               "version": "1.0",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "instana-agent",
                   "kind": "daemon",
                   "port": 42699,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 1,
                   "dependencies": [],
                   "metrics": {
@@ -1651,7 +1643,7 @@
                       "path": "/api",
                       "avg_latency_ms": 30,
                       "p95_ms": 60,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -1674,7 +1666,6 @@
                     "y": 350
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:internal:instana-agent:instana-agent"
                 }
@@ -1698,13 +1689,13 @@
               "name": "Processes",
               "platform": "System",
               "version": "n/a",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "systemd",
                   "kind": "daemon",
                   "port": 0,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 1,
                   "dependencies": [],
                   "metrics": {
@@ -1721,7 +1712,7 @@
                       "path": "-",
                       "avg_latency_ms": 1,
                       "p95_ms": 2,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -1744,7 +1735,6 @@
                     "y": 350
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:internal:processes:systemd"
                 }
@@ -1803,13 +1793,13 @@
               "name": "Demo Database",
               "platform": "DB2 for i",
               "version": "11.5",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "db2-catalog",
                   "kind": "tcp",
                   "port": 50000,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 1,
                   "dependencies": [],
                   "metrics": {
@@ -1826,7 +1816,7 @@
                       "method": "SQL",
                       "avg_latency_ms": 22,
                       "p95_ms": 60,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -1850,7 +1840,6 @@
                     "y": 350
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:ibm-i-demo:demo-database:db2-catalog"
                 }
@@ -1874,13 +1863,13 @@
               "name": "IBM i Core",
               "platform": "PASE",
               "version": "7.4",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "mq-on-ibmi",
                   "kind": "tcp",
                   "port": 1414,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 1,
                   "dependencies": [],
                   "metrics": {
@@ -1897,7 +1886,7 @@
                       "method": "MQ",
                       "avg_latency_ms": 5,
                       "p95_ms": 12,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -1912,7 +1901,7 @@
                       "method": "MQ",
                       "avg_latency_ms": 4,
                       "p95_ms": 10,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 224,
                         "y": 24
@@ -1936,7 +1925,6 @@
                     "y": 350
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:ibm-i-demo:ibm-i-core:mq-on-ibmi"
                 }
@@ -1995,13 +1983,13 @@
               "name": "API Gateway",
               "platform": "DataPower",
               "version": "10.0",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "api-proxy",
                   "kind": "http",
                   "port": 9443,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 1,
                   "dependencies": [
                     "user-management",
@@ -2022,7 +2010,7 @@
                       "path": "/v1/*",
                       "avg_latency_ms": 15,
                       "p95_ms": 40,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -2037,7 +2025,7 @@
                       "path": "auth",
                       "avg_latency_ms": 6,
                       "p95_ms": 15,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 224,
                         "y": 24
@@ -2060,7 +2048,6 @@
                     "y": 700
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:datapower:api-gateway:api-proxy"
                 }
@@ -2119,13 +2106,13 @@
               "name": "SAP Connector",
               "platform": "Java",
               "version": "JCo 3.1",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "rfc-poller",
                   "kind": "tcp",
                   "port": 3300,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 1,
                   "dependencies": [],
                   "metrics": {
@@ -2143,7 +2130,7 @@
                       "path": "SAP",
                       "avg_latency_ms": 75,
                       "p95_ms": 150,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -2166,7 +2153,6 @@
                     "y": 700
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:sap-jco-remote-monitoring:sap-connector:rfc-poller"
                 }
@@ -2224,13 +2210,13 @@
               "name": "Real-time Processor",
               "platform": "C++",
               "version": "2.4",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "rtp-core",
                   "kind": "tcp",
                   "port": 7000,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 2,
                   "dependencies": [
                     "oracle-db"
@@ -2250,7 +2236,7 @@
                       "path": "/stream",
                       "avg_latency_ms": 6,
                       "p95_ms": 15,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -2273,7 +2259,6 @@
                     "y": 700
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:rtp:real-time-processor:rtp-core"
                 }
@@ -2331,13 +2316,13 @@
               "name": "App Container",
               "platform": "Container",
               "version": "1.0",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "task-runner",
                   "kind": "http",
                   "port": 7070,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 1,
                   "dependencies": [],
                   "metrics": {
@@ -2355,7 +2340,7 @@
                       "path": "/tasks",
                       "avg_latency_ms": 210,
                       "p95_ms": 420,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -2378,7 +2363,6 @@
                     "y": 700
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:lxc-container:app-container:task-runner"
                 }
@@ -2437,13 +2421,13 @@
               "name": "Liberty & MQ",
               "platform": "IBM Liberty",
               "version": "23.0",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "jms-bridge",
                   "kind": "tcp",
                   "port": 61616,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 2,
                   "dependencies": [
                     "mq-on-ibmi"
@@ -2463,7 +2447,7 @@
                       "path": "topic://events",
                       "avg_latency_ms": 7,
                       "p95_ms": 15,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -2486,7 +2470,6 @@
                     "y": 700
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:ibm-middleware:liberty-mq:jms-bridge"
                 }
@@ -2544,13 +2527,13 @@
               "name": "JBoss Platform",
               "platform": "WildFly",
               "version": "30",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "api-gateway-alt",
                   "kind": "http",
                   "port": 8181,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 1,
                   "dependencies": [
                     "oracle-db"
@@ -2570,7 +2553,7 @@
                       "path": "/alt/*",
                       "avg_latency_ms": 40,
                       "p95_ms": 95,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -2593,7 +2576,6 @@
                     "y": 700
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-west-1:other-middleware:jboss-platform:api-gateway-alt"
                 }
@@ -2670,13 +2652,13 @@
               "name": "Microservices Mesh",
               "platform": "Kubernetes",
               "version": "istio-1.22",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "inventory-svc",
                   "kind": "http",
                   "port": 8082,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 4,
                   "dependencies": [
                     "oracle-db"
@@ -2696,7 +2678,7 @@
                       "path": "/inventory",
                       "avg_latency_ms": 90,
                       "p95_ms": 180,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -2719,7 +2701,6 @@
                     "y": 700
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:us-central1-a:us-central1-a:microservices-mesh:inventory-svc"
                 }
@@ -2796,13 +2777,13 @@
               "name": "AIX Core Services",
               "platform": "LPAR",
               "version": "7.3",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "batch-scheduler",
                   "kind": "daemon",
                   "port": 0,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 1,
                   "dependencies": [],
                   "metrics": {
@@ -2819,7 +2800,7 @@
                       "path": "cron",
                       "avg_latency_ms": 2,
                       "p95_ms": 4,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -2842,7 +2823,6 @@
                     "y": 700
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:datacenter-1:aix:aix-core-services:batch-scheduler"
                 }
@@ -2918,13 +2898,13 @@
               "name": "Facility Services",
               "platform": "Infra",
               "version": "1.0",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "power-monitor",
                   "kind": "snmp",
                   "port": 161,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 1,
                   "dependencies": [],
                   "metrics": {
@@ -2941,7 +2921,7 @@
                       "path": "OID:1.3.6.1.2",
                       "avg_latency_ms": 5,
                       "p95_ms": 15,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -2964,7 +2944,6 @@
                     "y": 1050
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:primary-dc:datacenter:facility-services:power-monitor"
                 }
@@ -3041,13 +3020,13 @@
               "name": "LPAR Stack",
               "platform": "PowerVM",
               "version": "3.1",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "lpar-mgmt",
                   "kind": "https",
                   "port": 443,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 1,
                   "dependencies": [],
                   "metrics": {
@@ -3065,7 +3044,7 @@
                       "path": "/lpars/migrate",
                       "avg_latency_ms": 1200,
                       "p95_ms": 2400,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -3088,7 +3067,6 @@
                     "y": 1050
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:remote-dc:ibm-power-remote-129-40-156-x:lpar-stack:lpar-mgmt"
                 }
@@ -3147,13 +3125,13 @@
               "name": "Mainframe Control",
               "platform": "z/OS",
               "version": "2.5",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "lpar-control",
                   "kind": "https",
                   "port": 443,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 1,
                   "dependencies": [],
                   "metrics": {
@@ -3170,7 +3148,7 @@
                       "path": "/lpar/ipl",
                       "avg_latency_ms": 2500,
                       "p95_ms": 5000,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -3193,7 +3171,6 @@
                     "y": 1050
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:remote-dc:zhmc-wschmc-wsclab-washington-ibm-com:mainframe-control:lpar-control"
                 }
@@ -3269,13 +3246,13 @@
               "name": "Edge Proxy",
               "platform": "Nginx",
               "version": "1.24",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "edge-proxy-apac",
                   "kind": "http",
                   "port": 443,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 1,
                   "dependencies": [
                     "api-gateway-alt"
@@ -3295,7 +3272,7 @@
                       "path": "/*",
                       "avg_latency_ms": 22,
                       "p95_ms": 55,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -3318,7 +3295,6 @@
                     "y": 1050
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:apac-zone26:chin-zone26:edge-proxy:edge-proxy-apac"
                 }
@@ -3394,13 +3370,13 @@
               "name": "Turbo Engine",
               "platform": "C++",
               "version": "1.3",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "turbo-optimizer",
                   "kind": "daemon",
                   "port": 0,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 1,
                   "dependencies": [],
                   "metrics": {
@@ -3417,7 +3393,7 @@
                       "path": "-",
                       "avg_latency_ms": 3,
                       "p95_ms": 8,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -3440,7 +3416,6 @@
                     "y": 1050
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:undefined-zone:turbo:turbo-engine:turbo-optimizer"
                 }
@@ -3500,13 +3475,13 @@
               "name": "IBM Cloud Pak for Integration",
               "platform": "CP4I",
               "version": "2024.3",
-              "status": "running",
+              "status": "healthy",
               "services": [
                 {
                   "name": "event-streams",
                   "kind": "kafka",
                   "port": 9092,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 3,
                   "dependencies": [],
                   "metrics": {
@@ -3524,7 +3499,7 @@
                       "path": "topic://orders",
                       "avg_latency_ms": 4,
                       "p95_ms": 10,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -3539,7 +3514,7 @@
                       "path": "topic://orders",
                       "avg_latency_ms": 6,
                       "p95_ms": 15,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 224,
                         "y": 24
@@ -3562,7 +3537,6 @@
                     "y": 1050
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:undefined-zone:cp4i:ibm-cloud-pak-for-integration:event-streams"
                 },
@@ -3570,7 +3544,7 @@
                   "name": "app-connect",
                   "kind": "http",
                   "port": 7600,
-                  "health": "healthy",
+                  "status": "healthy",
                   "replicas": 2,
                   "dependencies": [
                     "oracle-db"
@@ -3590,7 +3564,7 @@
                       "path": "/flows/*",
                       "avg_latency_ms": 140,
                       "p95_ms": 310,
-                      "status": "ok",
+                      "status": "healthy",
                       "position": {
                         "x": 24,
                         "y": 24
@@ -3613,7 +3587,6 @@
                     "y": 1050
                   },
                   "type": "api",
-                  "status": "healthy",
                   "zone": "default",
                   "id": "svc:undefined-zone:cp4i:ibm-cloud-pak-for-integration:app-connect"
                 }

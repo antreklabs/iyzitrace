@@ -62,19 +62,19 @@ class TempoReadApi extends BaseApi {
     const nodes: ServiceMapNode[] = [];
     const edges: ServiceMapEdge[] = [];
     
-    console.log('[TempoReadApi] mapResponseModel - raw response:', response);
+    // console.log('[TempoReadApi] mapResponseModel - raw response:', response);
     
     if (response.data && Array.isArray(response.data)) {
       response.data.forEach((frame: any, frameIndex: number) => {
-        console.log(`[TempoReadApi] Frame ${frameIndex}:`, frame);
-        console.log(`[TempoReadApi] Frame ${frameIndex} fields:`, frame.fields);
+        // console.log(`[TempoReadApi] Frame ${frameIndex}:`, frame);
+        // console.log(`[TempoReadApi] Frame ${frameIndex} fields:`, frame.fields);
         
         if (frame.fields) {
           // Log all field names to see what's available
           frame.fields.forEach((field: any, fieldIndex: number) => {
-            console.log(`[TempoReadApi] Field ${fieldIndex}: name="${field.name}", values length=${field.values?.length || 0}`);
+            // console.log(`[TempoReadApi] Field ${fieldIndex}: name="${field.name}", values length=${field.values?.length || 0}`);
             if (field.values && field.values.length > 0) {
-              console.log(`[TempoReadApi] Field ${fieldIndex} sample values:`, field.values.slice(0, 3));
+              // console.log(`[TempoReadApi] Field ${fieldIndex} sample values:`, field.values.slice(0, 3));
             }
           });
           
@@ -82,16 +82,16 @@ class TempoReadApi extends BaseApi {
           const nodeField = frame.fields.find((f: any) => f.name === 'nodes' || f.name === 'node');
           const edgeField = frame.fields.find((f: any) => f.name === 'edges' || f.name === 'edge');
           
-          console.log(`[TempoReadApi] Found nodeField:`, nodeField);
-          console.log(`[TempoReadApi] Found edgeField:`, edgeField);
+          // console.log(`[TempoReadApi] Found nodeField:`, nodeField);
+          // console.log(`[TempoReadApi] Found edgeField:`, edgeField);
           
           // If no specific node/edge fields, try to find fields with data
           if (!nodeField || !edgeField || (nodeField.values?.length === 0 && edgeField.values?.length === 0)) {
-            console.log('[TempoReadApi] No node/edge fields found, looking for alternative fields...');
+            // console.log('[TempoReadApi] No node/edge fields found, looking for alternative fields...');
             
             // Look for fields that might contain service data
             const fieldsWithData = frame.fields.filter((f: any) => f.values && f.values.length > 0);
-            console.log('[TempoReadApi] Fields with data:', fieldsWithData.map((f: any) => ({ name: f.name, length: f.values.length })));
+            // console.log('[TempoReadApi] Fields with data:', fieldsWithData.map((f: any) => ({ name: f.name, length: f.values.length })));
             
             // Try to extract service information from available fields
             if (fieldsWithData.length > 0) {
@@ -180,11 +180,11 @@ class TempoReadApi extends BaseApi {
       list.push(item);
     });
     
-    console.log('[TempoReadApi] mapResponseModel - processed data:', { list, nodes, edges });
+    // console.log('[TempoReadApi] mapResponseModel - processed data:', { list, nodes, edges });
     
     // If no data found, create test data for development
     if (list.length === 0 && nodes.length === 0 && edges.length === 0) {
-      console.log('[TempoReadApi] No data found, creating test data...');
+      // console.log('[TempoReadApi] No data found, creating test data...');
       return this.createTestServiceMapData();
     }
     
@@ -198,7 +198,7 @@ class TempoReadApi extends BaseApi {
   }
 
   private extractServiceDataFromFields(fields: any[], nodes: ServiceMapNode[], edges: ServiceMapEdge[]): void {
-    console.log('[TempoReadApi] extractServiceDataFromFields - processing fields:', fields.map(f => f.name));
+    // console.log('[TempoReadApi] extractServiceDataFromFields - processing fields:', fields.map(f => f.name));
     
     // Try to find service-related fields
     const idField = fields.find(f => f.name === 'id' || f.name === 'nodeId');
@@ -208,7 +208,7 @@ class TempoReadApi extends BaseApi {
     const secondaryStatField = fields.find(f => f.name === 'secondarystat' || f.name === 'errorRate');
     
     if (idField && titleField && idField.values.length > 0) {
-      console.log('[TempoReadApi] Creating nodes from available fields...');
+      // console.log('[TempoReadApi] Creating nodes from available fields...');
       
       for (let i = 0; i < idField.values.length; i++) {
         const node: ServiceMapNode = {
@@ -231,7 +231,7 @@ class TempoReadApi extends BaseApi {
     
     // If we have nodes but no edges, create some basic relationships
     if (nodes.length > 0 && edges.length === 0) {
-      console.log('[TempoReadApi] Creating basic edges between services...');
+      // console.log('[TempoReadApi] Creating basic edges between services...');
       for (let i = 0; i < nodes.length - 1; i++) {
         const edge: ServiceMapEdge = {
           id: `edge-${i}`,
@@ -254,7 +254,7 @@ class TempoReadApi extends BaseApi {
   }
 
   private createTestServiceMapData(): ServiceMapResponseModel {
-    console.log('[TempoReadApi] Creating test service map data...');
+    // console.log('[TempoReadApi] Creating test service map data...');
     
     const testNodes: ServiceMapNode[] = [
       {
