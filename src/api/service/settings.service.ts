@@ -128,3 +128,35 @@ export const getDefaultTempoUid = async (): Promise<string> => {
     throw error;
   }
 };
+
+/**
+ * Default Loki datasource UID'ini getirir
+ * @returns Promise<string> - Loki datasource UID
+ */
+export const getDefaultLokiUid = async (): Promise<string> => {
+  try {
+    // Önce Loki datasource'larını listele
+    const datasources = await getBackendSrv().get('/api/datasources');
+    
+    // Loki datasource'unu bul
+    const lokiDs = datasources.find((ds: any) => 
+      ds.type === 'loki' && ds.isDefault
+    );
+    
+    if (lokiDs) {
+      return lokiDs.uid;
+    }
+    
+    // Default bulunamazsa ilk Loki datasource'unu al
+    const firstLokiDs = datasources.find((ds: any) => ds.type === 'loki');
+    if (firstLokiDs) {
+      return firstLokiDs.uid;
+    }
+    
+    // Hiç Loki datasource yoksa hata fırlat
+    throw new Error('No Loki datasource found');
+  } catch (error) {
+    console.error('Error getting default Loki UID:', error);
+    throw error;
+  }
+};

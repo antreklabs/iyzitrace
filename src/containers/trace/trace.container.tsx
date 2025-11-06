@@ -8,6 +8,7 @@ import { getTracesTableData } from '../../api/service/traces.service';
 import { Trace } from '../../api/service/interface.service';
 import { useNavigate } from 'react-router-dom';
 import TraceMetricsCard from '../../components/trace/trace.container.card.component';
+import { columns as columnUtils } from '../../api/service/table.services';
 
 const TraceContainer: React.FC = () => {
   const navigate = useNavigate();
@@ -50,7 +51,11 @@ const TraceContainer: React.FC = () => {
       };
     }
 
-    return cols;
+    const visibleColumns: TableColumn = {
+      RootColumns: columnUtils.hideColumns(cols.RootColumns, ['StartTimeUnixNano', 'SpanCount', 'SpanSet', 'SpanSets', 'ServiceStats'])
+    };
+
+    return visibleColumns;
   };
 
   const makeStats = (data: any) => {
