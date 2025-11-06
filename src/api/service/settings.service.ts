@@ -96,3 +96,35 @@ export const getDefaultPrometheusUid = async (): Promise<string> => {
     throw error;
   }
 };
+
+/**
+ * Default Tempo datasource UID'ini getirir
+ * @returns Promise<string> - Tempo datasource UID
+ */
+export const getDefaultTempoUid = async (): Promise<string> => {
+  try {
+    // Önce Tempo datasource'larını listele
+    const datasources = await getBackendSrv().get('/api/datasources');
+    
+    // Tempo datasource'unu bul
+    const tempoDs = datasources.find((ds: any) => 
+      ds.type === 'tempo' && ds.isDefault
+    );
+    
+    if (tempoDs) {
+      return tempoDs.uid;
+    }
+    
+    // Default bulunamazsa ilk Tempo datasource'unu al
+    const firstTempoDs = datasources.find((ds: any) => ds.type === 'tempo');
+    if (firstTempoDs) {
+      return firstTempoDs.uid;
+    }
+    
+    // Hiç Tempo datasource yoksa hata fırlat
+    throw new Error('No Tempo datasource found');
+  } catch (error) {
+    console.error('Error getting default Tempo UID:', error);
+    throw error;
+  }
+};

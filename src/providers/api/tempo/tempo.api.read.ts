@@ -28,6 +28,7 @@ class TempoReadApi extends BaseApi {
 
   async search(query: string, start: number, end: number, limit: number = 1000): Promise<any> {
     const datasource = await this.getDatasourceInstance();
+    console.log('traceql query', query, start, end, limit);
     const searchParams = {
       q: query,
       start: start,
@@ -39,6 +40,7 @@ class TempoReadApi extends BaseApi {
       // const res = await datasource.metadataRequest('search', searchParams);
       // const res = await lastValueFrom(datasource._request('search', searchParams));
       const res = await getBackendSrv().get(`${datasource.instanceSettings.url}/api/search?${qs.stringify(searchParams)}`);
+      console.log('traceql search res', res);
       return res;
     } catch (error) {
       console.error('Tempo search error:', error);
