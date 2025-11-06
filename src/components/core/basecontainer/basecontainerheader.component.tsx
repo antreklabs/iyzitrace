@@ -8,9 +8,10 @@ import ViewComponent from '../view.component';
 interface BaseContainerHeaderProps {
   title: string;
   pageName: string;
+  showHeaderActions: boolean;
 }
 
-const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, pageName }) => {
+const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, pageName, showHeaderActions = true }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [range, setRange] = useState<[number, number]>([Date.now() - 60 * 15 * 1000, Date.now()]);
@@ -59,6 +60,7 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, pageNa
         )}
 
         {/* Right: Header actions */}
+        {showHeaderActions && (
         <Col flex="none">
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <ViewComponent pageName={pageName} />
@@ -81,6 +83,7 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, pageNa
             />
           </div>
         </Col>
+        )}
       </Row>
     </motion.div>
   );

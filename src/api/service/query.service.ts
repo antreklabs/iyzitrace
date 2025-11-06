@@ -111,6 +111,8 @@ export class FilterParamsModel {
 
   private _labelFiltersValue?: string;
   private _labelFiltersPromise?: Promise<string>;
+  private _traceQueryValue?: string;
+  private _traceQueryPromise?: Promise<string>;
 
   constructor(params: Record<string, string>) {
     // Time range - Default to last 15 minutes
@@ -288,6 +290,101 @@ export class FilterParamsModel {
   async setLabelFiltersAsync(): Promise<string> {
     await this.initializeLabelFilters();
     return this._labelFiltersValue || '';
+  }
+
+  /**
+   * TraceQL query string'ini async olarak hesaplar ve cache'ler
+   */
+  private async initializeTraceQuery(): Promise<void> {
+    if (this._traceQueryValue !== undefined) {
+      return;
+    }
+
+    if (!this._traceQueryPromise) {
+      this._traceQueryPromise = (async (): Promise<string> => {
+        const terms: string[] = [];
+
+        // Service filter -> TraceQL: service.name
+        if (this.service?.name) {
+          const op = this.service.operator || '=';
+          terms.push(`resource.service.name${op}"${this.service.name}"`);
+        }
+
+        // Operation filter -> TraceQL: name
+        // if (this.operation?.name) {
+        //   const op = this.operation.operator || '=';
+        //   terms.push(`name${op}"${this.operation.name}"`);
+        // }
+
+        // // Duration filters (milliseconds)
+        // if (this.duration?.min) {
+        //   const min = parseFloat(this.duration.min);
+        //   if (Number.isFinite(min) && min > 0) {
+        //     terms.push(`duration > ${Math.floor(min)}ms`);
+        //   }
+        // }
+        // if (this.duration?.max) {
+        //   const max = parseFloat(this.duration.max);
+        //   if (Number.isFinite(max) && max > 0) {
+        //     terms.push(`duration < ${Math.floor(max)}ms`);
+        //   }
+        // }
+
+        // // Status (best effort)
+        // if (this.status?.name) {
+        //   const op = this.status.operator || '=';
+        //   terms.push(`status${op}"${this.status.name}"`);
+        // }
+
+        // // Arbitrary labels (best effort)
+        // if (Array.isArray(this.labels)) {
+        //   this.labels.forEach((label) => {
+        //     (label.value || []).forEach((v) => {
+        //       terms.push(`${label.name}="${v}"`);
+        //     });
+        //   });
+        // }
+
+        // Tag single key/value
+        if (this.tag?.key && this.tag?.value) {
+          const op = this.tag.operator || '=';
+          terms.push(`${this.tag.key}${op}"${this.tag.value}"`);
+        }
+
+        // Free-text query if provided already
+        if (this.query && this.query.trim().length > 0) {
+          // If user provided a full selector (starts with {), prefer it
+          const q = this.query.trim();
+          if (q.startsWith('{') && q.endsWith('}')) {
+            this._traceQueryValue = q;
+            return q;
+          }
+          terms.push(q);
+        }
+
+        const selector = terms.length > 0 ? `{${terms.join(' && ')}}` : '';
+        this._traceQueryValue = selector;
+        return selector;
+      })();
+    }
+
+    await this._traceQueryPromise;
+  }
+
+  /**
+   * TraceQL query'yi hazırlar (await ile kullanılmalı) ve cache'e yazar
+   */
+  async setTraceQueryAsync(): Promise<string> {
+    await this.initializeTraceQuery();
+    return this._traceQueryValue || '';
+  }
+
+  /**
+   * TraceQL query'yi döndürür (await ile kullanılmalı)
+   */
+  async getTraceQueryAsync(): Promise<string> {
+    await this.initializeTraceQuery();
+    return this._traceQueryValue || '';
   }
 }
 

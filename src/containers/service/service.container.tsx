@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import BaseContainerComponent, { FetchedModel } from '../base.container';
 import BaseFilter from '../base.filter';
 import { ColumnItem, getTableColumns, TableColumn } from '../../api/service/table.services';
-import { getServicesTableData } from '../../api/service/services.service';
+import { getOperationTypeColor, getServicesTableData } from '../../api/service/services.service';
 import { FilterParamsModel } from '../../api/service/query.service';
 import BaseTable from '../base.table';
 import { columns as columnUtils } from '../../api/service/table.services';
@@ -11,7 +11,6 @@ import { Tag } from 'antd';
 import { Service } from '../../api/service/interface.service';
 import ServiceCardContainer from '../../components/service/service.card.container.component';
 import ServiceChartContainer from '../../components/service/service.chart.container.component';
-
 
 const ServiceContainer: React.FC = () => {
   const navigate = useNavigate();
@@ -66,27 +65,6 @@ const ServiceContainer: React.FC = () => {
     return visibleColumns;
   };
 
-  const getOperationTypeColor = (type: string) => {
-    switch (type) {
-      case 'HTTP':
-        return 'blue';
-      case 'DATABASE':
-        return 'green';
-      case 'MESSAGING':
-        return 'orange';
-      case 'CACHE':
-        return 'purple';
-      case 'RPC':
-        return 'red';
-      case 'DATABASE':
-        return 'yellow';
-      case 'GENERAL':
-        return 'gray';
-      default:
-        return 'gray';
-    }
-  };
-
   return (
     <BaseContainerComponent
       title="Services"
@@ -124,6 +102,5 @@ const ServiceContainer: React.FC = () => {
     </BaseContainerComponent>
   );
 };
-
 
 export default ServiceContainer;

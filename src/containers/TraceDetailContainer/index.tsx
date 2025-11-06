@@ -281,7 +281,7 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId }) 
   };
 
   return (
-    <BaseContainer title="Trace Detail">
+    <BaseContainer title="Trace Detail" showHeaderActions={false}>
       <TraceMetaHeader
         traceId={traceId}
         serviceName={allSpans[0]?.serviceName || 'Unknown'}

@@ -8,8 +8,9 @@ export class BaseApi {
   protected async getDatasourceInstance(uidOrName?: string): Promise<any> {
     // If uid is provided, use it; otherwise get from store
     let uid = uidOrName;
+    uid = 'loki-platform';
     if (!uid) {
-      uid = 'tempo-demo';
+      uid = 'loki-platform';
       if (!uid) {
         throw new Error('No Datasource UID selected.');
       }

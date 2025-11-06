@@ -96,3 +96,67 @@ export const getDefaultPrometheusUid = async (): Promise<string> => {
     throw error;
   }
 };
+
+/**
+ * Default Tempo datasource UID'ini getirir
+ * @returns Promise<string> - Tempo datasource UID
+ */
+export const getDefaultTempoUid = async (): Promise<string> => {
+  try {
+    // Önce Tempo datasource'larını listele
+    const datasources = await getBackendSrv().get('/api/datasources');
+    
+    // Tempo datasource'unu bul
+    const tempoDs = datasources.find((ds: any) => 
+      ds.type === 'tempo' && ds.isDefault
+    );
+    
+    if (tempoDs) {
+      return tempoDs.uid;
+    }
+    
+    // Default bulunamazsa ilk Tempo datasource'unu al
+    const firstTempoDs = datasources.find((ds: any) => ds.type === 'tempo');
+    if (firstTempoDs) {
+      return firstTempoDs.uid;
+    }
+    
+    // Hiç Tempo datasource yoksa hata fırlat
+    throw new Error('No Tempo datasource found');
+  } catch (error) {
+    console.error('Error getting default Tempo UID:', error);
+    throw error;
+  }
+};
+
+/**
+ * Default Loki datasource UID'ini getirir
+ * @returns Promise<string> - Loki datasource UID
+ */
+export const getDefaultLokiUid = async (): Promise<string> => {
+  try {
+    // Önce Loki datasource'larını listele
+    const datasources = await getBackendSrv().get('/api/datasources');
+    
+    // Loki datasource'unu bul
+    const lokiDs = datasources.find((ds: any) => 
+      ds.type === 'loki' && ds.isDefault
+    );
+    
+    if (lokiDs) {
+      return lokiDs.uid;
+    }
+    
+    // Default bulunamazsa ilk Loki datasource'unu al
+    const firstLokiDs = datasources.find((ds: any) => ds.type === 'loki');
+    if (firstLokiDs) {
+      return firstLokiDs.uid;
+    }
+    
+    // Hiç Loki datasource yoksa hata fırlat
+    throw new Error('No Loki datasource found');
+  } catch (error) {
+    console.error('Error getting default Loki UID:', error);
+    throw error;
+  }
+};

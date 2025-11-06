@@ -3,6 +3,7 @@
 import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
 import store from '../../../store/store';
 import qs from 'qs';
+import { getDefaultTempoUid } from '../../../api/service/settings.service';
 
 type TraceQLSearchParams = {
     query: string;
@@ -12,16 +13,9 @@ type TraceQLSearchParams = {
 };
 
 export const TempoApi = {
-    getSelectedUid(): string {
-        const uid = store.getState().datasource.selectedUid;
-        if (!uid) {
-            throw new Error('No Datasource UID selected.');
-        }
-        return uid;
-    },
 
     async getBaseUrl(): Promise<string> {
-        const uid = this.getSelectedUid();
+        const uid = await getDefaultTempoUid();
         const ds = await getDataSourceSrv().getInstanceSettings(uid);
         if (!ds) {
             throw new Error(`Data source with uid ${uid} not found`);

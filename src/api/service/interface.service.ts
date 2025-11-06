@@ -141,3 +141,38 @@ export interface Infrastructure {
     position?: PositionItem;
     }
   
+
+export interface Trace {
+  traceId: string;
+  serviceName: string;
+  traceName: string;
+  durationMs: number;
+  startTime: string;
+  endTime: string;
+  startTimeUnixNano?: string;
+  spanCount?: number;
+  spanSet?: {
+    spans: Array<{
+      spanID: string;
+      startTimeUnixNano: string;
+      durationNanos: string;
+    }>;
+    matched: number;
+  };
+  spanSets?: Array<{
+    spans: Array<{
+      spanID: string;
+      startTimeUnixNano: string;
+      durationNanos: string;
+      name?: string;
+      serviceName?: string;
+    }>;
+    matched: number;
+  }>;
+  serviceStats?: {
+    [serviceName: string]: {
+      spanCount: number;
+      sumDurationNanos: number;
+    };
+  };
+}
