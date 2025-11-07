@@ -1,4 +1,8 @@
 receivers:
+  otlp/trace:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:14317
   otlp:
     protocols:
       grpc:
@@ -11,6 +15,10 @@ exporters:
     endpoint: "http://prometheus-platform:9090/api/v1/otlp"
     tls:
       insecure: true
+  prometheusremotewrite:
+    endpoint: http://prometheus-platform:9090/api/v1/write
+    resource_to_telemetry_conversion:
+      enabled: true
 
 processors:
   batch:
@@ -23,30 +31,8 @@ processors:
       - set(datapoint.attributes["service.name"], resource.attributes["service.name"]) where resource.attributes["service.name"] != nil
       - set(datapoint.attributes["service.namespace"], resource.attributes["service.namespace"]) where resource.attributes["service.namespace"] != nil
       - set(datapoint.attributes["service.version"], resource.attributes["service.version"]) where resource.attributes["service.version"] != nil
-      - set(datapoint.attributes["deployment.environment.name"], resource.attributes["deployment.environment.name"])where resource.attributes["deployment.environment.name"] != nil
-      - set(datapoint.attributes["k8s.cluster.name"], resource.attributes["k8s.cluster.name"]) where resource.attributes["k8s.cluster.name"] != nil
-      - set(datapoint.attributes["k8s.container.name"], resource.attributes["k8s.container.name"]) where resource.attributes["k8s.container.name"] != nil
-      - set(datapoint.attributes["k8s.cronjob.name"], resource.attributes["k8s.cronjob.name"]) where resource.attributes["k8s.cronjob.name"] != nil
-      - set(datapoint.attributes["k8s.daemonset.name"], resource.attributes["k8s.daemonset.name"]) where resource.attributes["k8s.daemonset.name"] != nil
-      - set(datapoint.attributes["k8s.deployment.name"], resource.attributes["k8s.deployment.name"]) where resource.attributes["k8s.deployment.name"] != nil
-      - set(datapoint.attributes["k8s.job.name"], resource.attributes["k8s.job.name"]) where resource.attributes["k8s.job.name"] != nil
-      - set(datapoint.attributes["k8s.namespace.name"],resource.attributes["k8s.namespace.name"]) where resource.attributes["k8s.namespace.name"] != nil
-      - set(datapoint.attributes["k8s.node.name"], resource.attributes["k8s.node.name"]) where resource.attributes["k8s.node.name"] != nil
-      - set(datapoint.attributes["k8s.pod.name"], resource.attributes["k8s.pod.name"]) where resource.attributes["k8s.pod.name"] != nil
-      - set(datapoint.attributes["k8s.replicaset.name"], resource.attributes["k8s.replicaset.name"]) where resource.attributes["k8s.replicaset.name"] != nil
-      - set(datapoint.attributes["k8s.statefulset.name"], resource.attributes["k8s.statefulset.name"]) where resource.attributes["k8s.statefulset.name"] != nil
-      - set(datapoint.attributes["container.name"], resource.attributes["container.name"]) where resource.attributes["container.name"] != nil
-      - set(datapoint.attributes["postgresql.database.name"], resource.attributes["postgresql.database.name"]) where resource.attributes["postgresql.database.name"] != nil
-      - set(datapoint.attributes["postgresql.schema.name"], resource.attributes["postgresql.schema.name"]) where resource.attributes["postgresql.schema.name"] != nil
-      - set(datapoint.attributes["postgresql.table.name"], resource.attributes["postgresql.table.name"]) where resource.attributes["postgresql.table.name"] != nil
-      - set(datapoint.attributes["postgresql.index.name"], resource.attributes["postgresql.index.name"]) where resource.attributes["postgresql.index.name"] != nil
-      - set(datapoint.attributes["cloud.region"], resource.attributes["cloud.region"]) where resource.attributes["cloud.region"] != nil
       - set(datapoint.attributes["host.name"], resource.attributes["host.name"]) where resource.attributes["host.name"] != nil
-      - set(datapoint.attributes["host.arch"], resource.attributes["host.arch"]) where resource.attributes["host.arch"] != nil
       - set(datapoint.attributes["host.id"], resource.attributes["host.id"]) where resource.attributes["host.id"] != nil
-      - set(datapoint.attributes["os.name"], resource.attributes["os.name"]) where resource.attributes["os.name"] != nil
-      - set(datapoint.attributes["os.description"], resource.attributes["os.description"]) where resource.attributes["os.description"] != nil
-      - set(datapoint.attributes["os.type"], resource.attributes["os.type"]) where resource.attributes["os.type"] != nil
 
 
   memory_limiter:
@@ -67,7 +53,11 @@ processors:
   
 service:
   pipelines:
-    metrics:
-      receivers: [otlp]
+    metrics/otlp:
+      receivers: [otlp/trace]
       processors: [batch, memory_limiter, metricstransform, transform/promote_resource_attrs]
       exporters: [otlphttp]
+    metrics/prometheus:
+      receivers: [otlp]
+      processors: [batch, memory_limiter]
+      exporters: [prometheusremotewrite]

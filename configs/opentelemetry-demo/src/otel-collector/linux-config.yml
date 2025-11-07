@@ -19,11 +19,12 @@ receivers:
         metrics:
           system.cpu.utilization:
             enabled: true
-          system.cpu.logical.count:
-            enabled: true
       disk:
       load:
       filesystem:
+        metrics:
+          system.filesystem.usage:
+            enabled: true
         exclude_mount_points:
           mount_points:
             - /dev/*
@@ -71,16 +72,19 @@ receivers:
         metrics:
           system.paging.usage:
             enabled: true
-
       processes:
       process:
         mute_process_exe_error: true
         mute_process_io_error: true
         mute_process_user_error: true
-      system:
         metrics:
-          system.uptime:
+          process.cpu.utilization:
             enabled: true
+          process.memory.utilization:
+            enabled: true
+          process.uptime:
+            enabled: true
+      system:
 processors:
   batch:
     timeout: 10s
@@ -99,12 +103,20 @@ processors:
           enabled: true
         host.id:
           enabled: true
+        host.ip:
+          enabled: true
+        host.mac:
+          enabled: true
         os.name:
           enabled: true
         os.type:
           enabled: true
         os.description:
           enabled: true
+        os.version:
+          enabled: true
+        os.build.id:
+          enabled: false
 
 exporters:
   debug:

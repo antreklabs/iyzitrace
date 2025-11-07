@@ -12,7 +12,7 @@ exporters:
     tls:
       insecure: true
   otlp/metric:
-    endpoint: metric-otel-enrichment:4317
+    endpoint: metric-otel-enrichment:14317
     tls:
       insecure: true
 

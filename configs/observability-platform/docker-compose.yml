@@ -38,9 +38,11 @@ services:
       - --web.enable-lifecycle
       - --web.route-prefix=/
       - --web.enable-otlp-receiver
+      - --web.enable-remote-write-receiver
       - --enable-feature=exemplar-storage
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus-config.yaml
+      - ./prometheus/rules:/etc/prometheus/rules
     ports:
       - "9090" # Changed from 9090 to avoid conflict
 
@@ -68,6 +70,7 @@ services:
     ports:
       - "4317"
       - "4318"
+      - "14317"
     depends_on: [ prometheus ]
 
   log-otel-enrichment: # logs -> Loki
