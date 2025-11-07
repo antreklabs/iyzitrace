@@ -49,31 +49,31 @@ export interface Infrastructure {
     ip: string;
     type: string;
     regionId: string;
-    cpu: {
+    cpu?: {
         usage: number;
         capacity: number;
         percentage: number;
     };
-    memory: {
+    memory?: {
         usage: number;
         capacity: number;
         percentage: number;
     };
-    status: StatusItem;
+    status?: StatusItem;
     position: PositionItem;
     groupPosition: PositionItem;
     groupSize: SizeItem;
     applications?: Application[] | [];
     }
 
-    export interface Application {
+  export interface Application {
     id: string;
     infrastructureId: string;
     name: string;
     platform: string;
     version: string;
-    imageUrl: string;
-    status: StatusItem;
+    imageUrl?: string;
+    status?: StatusItem;
     groupSize: SizeItem;
     position: PositionItem;
     groupPosition: PositionItem;

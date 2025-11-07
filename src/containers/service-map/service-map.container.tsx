@@ -21,9 +21,9 @@ const ServiceMapContainer: React.FC = () => {
     setInfraLevelData(infrastructures);
     setColumnInDetail(infrastructures);
 
-    console.log('[ServiceMapContainer] data:', data);
-    console.log('[ServiceMapContainer] columns:', columns);
-    console.log('[ServiceMapContainer] filterModel:', filterModel);
+    // console.log('[ServiceMapContainer] data:', data);
+    // console.log('[ServiceMapContainer] columns:', columns);
+    // console.log('[ServiceMapContainer] filterModel:', filterModel);
     return { data: infrastructures, columns: columns };
   };
 

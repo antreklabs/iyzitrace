@@ -1,5 +1,5 @@
 import { Service } from "./interface.service";
-import { getQueryAggregationData, getQueryRangeData } from "../provider/prometheus.provider";
+import { getQueryData, getQueryRangeData } from "../provider/prometheus.provider";
 import { FilterParamsModel, QueryType, getQueryByType, getDefinitions } from "./query.service";
 import { Definitions } from "../../interfaces/options";
 
@@ -439,9 +439,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
 };
 
 export const getServicesQueryData = async (filterParamsModel: FilterParamsModel, query: string): Promise<ServiceQueryData[]> => {
-  const start = filterParamsModel.timeRange.from;
-  const end = filterParamsModel.timeRange.to;
-  const data = await getQueryAggregationData(query, start, end);
+  const data = await getQueryData(query);
   const serviceQueryData: ServiceQueryData[] = data.result.map((result: ResultItem) => ({
     service_name: result.metric.service_name,
     span_name: result.metric.span_name,
