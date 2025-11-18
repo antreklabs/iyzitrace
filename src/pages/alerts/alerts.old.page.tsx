@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
+  Card,
   Button,
   Input,
+  Table,
+  Modal,
+  Checkbox,
   message,
   Badge,
   Tabs,
+  Tooltip,
 } from 'antd';
 import {
   SearchOutlined,
@@ -13,11 +18,7 @@ import {
   InfoCircleOutlined,
 } from '@ant-design/icons';
 import { css } from '@emotion/css';
-import { type TimeRange, type FailedCheck, type TimelineData } from '../../api/service/alert.service';
-
-import AlertsTimeline from '../../components/alerts/alerts.timeline.component';
-import AlertsFailedChecksTable from '../../components/alerts/alerts.failed-checks-table.component';
-import AlertsManageRulesModal from '../../components/alerts/alerts.manage-rules-modal.component';
+import { type AlertRule, type FailedCheck, type TimeRange } from '../../api/service/alert.service';
 
 const { Search } = Input;
 const { TabPane } = Tabs;
@@ -72,8 +73,86 @@ const getStyles = () => ({
       border-color: #7c3aed;
     }
   `,
+  timelineContainer: css`
+    background: #1a1a1a;
+    border: 1px solid #404040;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 24px;
+  `,
+  timelineTitle: css`
+    font-size: 16px;
+    font-weight: 500;
+    color: #fff;
+    margin-bottom: 12px;
+  `,
+  timeline: css`
+    display: flex;
+    gap: 2px;
+    margin-bottom: 8px;
+  `,
+  timeBox: css`
+    height: 32px;
+    min-width: 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: scale(1.1);
+      z-index: 1;
+    }
+    
+    &.critical {
+      background: #dc2626;
+    }
+    
+    &.warning {
+      background: #d97706;
+    }
+    
+    &.degraded {
+      background: #ca8a04;
+    }
+    
+    &.healthy {
+      background: #16a34a;
+    }
+    
+    &.no-data {
+      background: #404040;
+    }
+  `,
+  timeLabels: css`
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #8c8c8c;
+    margin-top: 4px;
+  `,
   filterContainer: css`
     margin-bottom: 16px;
+  `,
+  table: css`
+    .ant-table {
+      background: #1a1a1a;
+      color: #fff;
+    }
+    
+    .ant-table-thead > tr > th {
+      background: #2a2a2a;
+      border-bottom: 1px solid #404040;
+      color: #fff;
+    }
+    
+    .ant-table-tbody > tr > td {
+      border-bottom: 1px solid #404040;
+      color: #fff;
+    }
+    
+    .ant-table-tbody > tr:hover > td {
+      background: #2a2a2a;
+    }
   `,
   detailPanel: css`
     position: fixed;
@@ -122,16 +201,40 @@ const getStyles = () => ({
     border-radius: 8px;
     padding: 16px;
   `,
+  modal: css`
+    .ant-modal-content {
+      background: #1a1a1a;
+      color: #fff;
+    }
+    
+    .ant-modal-header {
+      background: #2a2a2a;
+      border-bottom: 1px solid #404040;
+    }
+    
+    .ant-modal-title {
+      color: #fff;
+    }
+    
+    .ant-modal-body {
+      background: #1a1a1a;
+    }
+  `,
 });
 
-const AlertsPage: React.FC = () => {
+const AlertsOldPage: React.FC = () => {
   const styles = getStyles();
   const [timeRange, setTimeRange] = useState<TimeRange>('1h');
   const [filterText, setFilterText] = useState('');
   const [selectedAlert, setSelectedAlert] = useState<FailedCheck | null>(null);
   const [manageRulesModalVisible, setManageRulesModalVisible] = useState(false);
+  const [alertRules, setAlertRules] = useState<AlertRule[]>([]);
   const [failedChecks, setFailedChecks] = useState<FailedCheck[]>([]);
-  const [timelineData, setTimelineData] = useState<TimelineData[]>([]);
+  const [timelineData, setTimelineData] = useState<Array<{
+    time: string;
+    status: 'critical' | 'warning' | 'degraded' | 'healthy' | 'no-data';
+    count: number;
+  }>>([]);
 
   useEffect(() => {
     fetchData();
@@ -139,6 +242,13 @@ const AlertsPage: React.FC = () => {
 
   const fetchData = async () => {
     try {
+      // const [rules, checks, timeline] = await Promise.all([
+      //   api.getAlertRules(),
+      //   api.getFailedChecks(timeRange),
+      //   api.getTimelineData(timeRange),
+      // ]);
+      
+      setAlertRules([]);
       setFailedChecks([]);
       setTimelineData([]);
     } catch (error) {
@@ -163,6 +273,17 @@ const AlertsPage: React.FC = () => {
     setManageRulesModalVisible(true);
   };
 
+  const handleRuleToggle = async (ruleId: string, enabled: boolean) => {
+    try {
+      // await api.updateAlertRule(ruleId, { enabled });
+      await fetchData();
+      message.success(`Alert rule ${enabled ? 'enabled' : 'disabled'}`);
+    } catch (error) {
+      console.error('Error updating alert rule:', error);
+      message.error('Failed to update alert rule');
+    }
+  };
+
   const getStatusColor = (status: string) => {
     if (!status) return '#16a34a';
     switch (status.toLowerCase()) {
@@ -176,6 +297,71 @@ const AlertsPage: React.FC = () => {
         return '#16a34a';
     }
   };
+
+  const getTimelineBoxClass = (status: string) => {
+    switch (status) {
+      case 'critical':
+        return 'critical';
+      case 'warning':
+        return 'warning';
+      case 'degraded':
+        return 'degraded';
+      case 'healthy':
+        return 'healthy';
+      default:
+        return 'no-data';
+    }
+  };
+
+  const columns = [
+    {
+      title: 'Last status',
+      dataIndex: 'status',
+      key: 'status',
+      width: 120,
+      render: (status: string) => (
+        <Badge 
+          color={getStatusColor(status || '')} 
+          text={(status || '').toUpperCase()}
+          style={{ color: '#fff' }}
+        />
+      ),
+    },
+    {
+      title: 'Affected resource',
+      dataIndex: 'resource',
+      key: 'resource',
+      render: (resource: string) => (
+        <span style={{ color: '#fff' }}>{resource || '-'}</span>
+      ),
+    },
+    {
+      title: 'Summary',
+      dataIndex: 'summary',
+      key: 'summary',
+      render: (summary: string) => (
+        <span style={{ color: '#fff' }}>{summary || '-'}</span>
+      ),
+    },
+    {
+      title: 'Attributes',
+      key: 'attributes',
+      width: 100,
+      render: (text: any, record: FailedCheck) => (
+        <Checkbox defaultChecked />
+      ),
+    },
+    {
+      title: 'Check Rule',
+      dataIndex: 'ruleName',
+      key: 'ruleName',
+      render: (ruleName: string) => (
+        <Button type="link" style={{ color: '#7c3aed', padding: 0 }}>
+          {ruleName || '-'}
+        </Button>
+      ),
+    },
+  ];
 
   const timeRanges = [
     { key: '1h', label: 'Last 1 hour' },
@@ -213,7 +399,33 @@ const AlertsPage: React.FC = () => {
       </div>
 
       {/* Timeline */}
-      <AlertsTimeline timelineData={timelineData} />
+      <div className={styles.timelineContainer}>
+        <div className={styles.timelineTitle}>
+          Aggregated failed checks
+        </div>
+        <div className={styles.timeline}>
+          {timelineData.map((item, index) => (
+            <Tooltip
+              key={index}
+              title={`${item.time}: ${item.count} alerts (${item.status})`}
+            >
+              <div
+                className={`${styles.timeBox} ${getTimelineBoxClass(item.status)}`}
+                style={{ flex: 1 }}
+              />
+            </Tooltip>
+          ))}
+        </div>
+        <div className={styles.timeLabels}>
+          {timelineData.length > 0 && (
+            <>
+              <span>{timelineData[0].time}</span>
+              <span>{timelineData[Math.floor(timelineData.length / 2)].time}</span>
+              <span>{timelineData[timelineData.length - 1].time}</span>
+            </>
+          )}
+        </div>
+      </div>
 
       {/* Filter */}
       <div className={styles.filterContainer}>
@@ -229,11 +441,32 @@ const AlertsPage: React.FC = () => {
       </div>
 
       {/* Failed Checks Table */}
-      <AlertsFailedChecksTable
-        failedChecks={failedChecks}
-        filterText={filterText}
-        onAlertClick={handleAlertClick}
-      />
+      <Card style={{ background: '#1a1a1a', border: '1px solid #404040' }}>
+        <div style={{ marginBottom: 16, color: '#fff' }}>
+          <strong>Failed checks</strong> Showing {failedChecks.length} failed checks {failedChecks.filter(c => c.status === 'CRITICAL').length} critical
+        </div>
+        
+        <Table
+          className={styles.table}
+          columns={columns}
+          dataSource={failedChecks.filter(check =>
+            (check.resource || '').toLowerCase().includes(filterText.toLowerCase()) ||
+            (check.summary || '').toLowerCase().includes(filterText.toLowerCase())
+          )}
+          pagination={false}
+          rowKey="id"
+          onRow={(record) => ({
+            onClick: () => handleAlertClick(record),
+            style: { cursor: 'pointer' },
+          })}
+        />
+        
+        {failedChecks.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#8c8c8c' }}>
+            No more failed checks found within time range.
+          </div>
+        )}
+      </Card>
 
       {/* Detail Panel */}
       {selectedAlert && (
@@ -356,12 +589,49 @@ const AlertsPage: React.FC = () => {
       )}
 
       {/* Manage Alert Rules Modal */}
-      <AlertsManageRulesModal
-        visible={manageRulesModalVisible}
-        onClose={() => setManageRulesModalVisible(false)}
-      />
+      <Modal
+        title="Manage Alert Rules"
+        open={manageRulesModalVisible}
+        onCancel={() => setManageRulesModalVisible(false)}
+        footer={null}
+        className={styles.modal}
+        width={800}
+      >
+        <div style={{ maxHeight: 600, overflowY: 'auto' }}>
+          {alertRules.map(rule => (
+            <div key={rule.id} style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              padding: '12px 0',
+              borderBottom: '1px solid #404040'
+            }}>
+              <Checkbox
+                checked={rule.enabled}
+                onChange={(e) => handleRuleToggle(rule.id, e.target.checked)}
+              />
+              <div style={{ marginLeft: 12, flex: 1 }}>
+                <div style={{ color: '#fff', fontWeight: 500 }}>{rule.name}</div>
+                <div style={{ color: '#8c8c8c', fontSize: 12 }}>{rule.description}</div>
+                <div style={{ color: '#8c8c8c', fontSize: 11, fontFamily: 'monospace' }}>
+                  {rule.expression}
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <Badge 
+                  color={rule.thresholds.critical ? '#dc2626' : '#8c8c8c'} 
+                  text={`Critical: ${rule.thresholds.critical || 'N/A'}`}
+                />
+                <Badge 
+                  color={rule.thresholds.warning ? '#d97706' : '#8c8c8c'} 
+                  text={`Warning: ${rule.thresholds.warning || 'N/A'}`}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </Modal>
     </div>
   );
 };
 
-export default AlertsPage;
+export default AlertsOldPage;
