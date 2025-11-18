@@ -35,17 +35,9 @@ export const getLabelValues = async (labelName: string): Promise<string[]> => {
   }
 };
 
-export const getQueryAggregationData = async (query: string, start: number, end: number): Promise<any> => {
-  const step = end - start + 's';
-  return getQueryData(query, start, end, step);
-};
-
-export const getQueryData = async (query: string, start: number, end: number, step: string): Promise<any> => {
+export const getQueryData = async (query: string): Promise<any> => {
   const prometheusUid = await getDefaultPrometheusUid();
-  // console.log('query', query);
-  // console.log('start', start, new Date(start).toISOString());
-  // console.log('end', end, new Date(end).toISOString());
-  // console.log('step', step);
+  console.log('getQueryData', query);
   const response = await getBackendSrv().get(`/api/datasources/proxy/uid/${prometheusUid}/api/v1/query`, {
     query: query,
   });
@@ -56,6 +48,7 @@ export const getQueryRangeData = async (query: string, startMs: number, endMs: n
   const prometheusUid = await getDefaultPrometheusUid();
   const start = Math.floor(startMs / 1000);
   const end = Math.floor(endMs / 1000);
+  console.log('getQueryRangeData', query, start, end, step);
   const response = await getBackendSrv().get(`/api/datasources/proxy/uid/${prometheusUid}/api/v1/query_range`, {
     query,
     start,

@@ -2,7 +2,7 @@
 import mapData from '../../assets/data/map.json';
 import { Infrastructure, Application, Service, Operation, HealthValue, Region, ServiceMapData } from './interface.service';
 import { getSelectedViewData } from './view.service';
-import { getPrometheusRegions } from './list.service';
+import { getQueryData } from '../provider/prometheus.provider';
 
 // Selected view data helper moved to view.service.ts
 
@@ -16,26 +16,127 @@ export const getRegions = async (): Promise<Region[]> => {
   
   const regions: Region[] = [];
   const selected = await getSelectedViewData('service-map');
+  // console.log('[getRegions] selected:', selected);
+  const data = await getQueryData("inventory_process_status * on(cloud_region, host_name) group_left(host_arch, host_ip, host_mac, infrastructureType, os_description, os_type) __inv_info");
 
-  const regionsFromPrometheus = await getPrometheusRegions();
+  // console.log('[getDimensions] data:', data);
 
-  regionsFromPrometheus.forEach(region => {
-    regions.push({
-      id: region.key,
-      name: region.name,
-      position: (findItem(selected, region.key, 'region')?.position) ?? { x: 0, y: 0 },
-      groupPosition: (findItem(selected, region.key, 'region')?.groupPosition) ?? { x: 0, y: 0 },
-      groupSize: (findItem(selected, region.key, 'region')?.groupSize) ?? { width: 100, height: 100 }
+  // Step 1: Group by cloud_region
+  const regionMap = new Map<string, any[]>();
+  
+  if (data?.result && Array.isArray(data.result)) {
+    data.result.forEach((item: any) => {
+      const cloudRegion = item.metric?.cloud_region || 'unknown';
+      if (!regionMap.has(cloudRegion)) {
+        regionMap.set(cloudRegion, []);
+      }
+      regionMap.get(cloudRegion)!.push(item);
     });
-  });
+  }
 
-  mapData.regions.forEach(region => {
+  // Step 2: For each region, group by host_name (infrastructure)
+  // Step 3: For each infrastructure, group by process_executable_name (application)
+  regionMap.forEach((items, cloudRegion) => {
+    const regionId = `region|${cloudRegion}`.toLowerCase();
+    const regionName = cloudRegion.charAt(0).toUpperCase() + cloudRegion.slice(1);
+    
+    // Group by host_name (infrastructure level)
+    const infraMap = new Map<string, any[]>();
+    items.forEach((item: any) => {
+      const hostName = item.metric?.host_name || 'unknown';
+      if (!infraMap.has(hostName)) {
+        infraMap.set(hostName, []);
+      }
+      infraMap.get(hostName)!.push(item);
+    });
+
+    const infrastructures: Infrastructure[] = [];
+    
+    infraMap.forEach((infraItems, hostName) => {
+      const infraId = `infra|${regionName}|${hostName}`.toLowerCase();
+      
+      // Get first item for infrastructure metadata (all items in same infra have same host info)
+      const firstItem = infraItems[0];
+      const metric = firstItem.metric || {};
+      
+      // Parse host_ip (it comes as JSON string)
+      let hostIp = '';
+      try {
+        const ipArray = JSON.parse(metric.host_ip || '[]');
+        hostIp = Array.isArray(ipArray) && ipArray.length > 0 ? ipArray[0] : metric.host_ip || '';
+      } catch {
+        hostIp = metric.host_ip || '';
+      }
+
+      // Group by process_executable_name (application level)
+      // Each unique process_executable_name becomes one application
+      const appMap = new Map<string, any[]>();
+      infraItems.forEach((item: any) => {
+        const processName = item.metric?.process_executable_name || 'unknown';
+        
+        if (!appMap.has(processName)) {
+          appMap.set(processName, []);
+        }
+        appMap.get(processName)!.push(item);
+      });
+
+      const applications: Application[] = [];
+      
+      appMap.forEach((appItems, processName) => {
+        const firstAppItem = appItems[0];
+        const appMetric = firstAppItem.metric || {};
+        const processPid = appMetric.process_pid;
+        
+        // Create app ID using only process_executable_name
+        const appId = `app|${regionName}|${hostName}|${processName}`.toLowerCase();
+        
+        const selApp = findItem(selected, appId, 'application');
+        
+        applications.push({
+          id: appId,
+          infrastructureId: infraId,
+          name: processName,
+          platform: processName, // platform = name (process_executable_name)
+          version: processPid || 'unknown',
+          status: {
+            value: 'healthy',
+          },
+          position: selApp?.position ?? { x: 0, y: 0 },
+          groupPosition: selApp?.groupPosition ?? { x: 0, y: 0 },
+          groupSize: selApp?.groupSize ?? { width: 100, height: 100 },
+        });
+      });
+
+      const selInfra = findItem(selected, infraId, 'infrastructure');
+      
+      infrastructures.push({
+        id: infraId,
+        regionId: regionId,
+        name: hostName || hostIp,
+        osVersion: metric.host_arch || 'unknown', // osVersion -> host_arch
+        ip: hostIp, // ip -> host_ip (parsed)
+        type: metric.os_type || 'unknown', // type -> os_type
+        status: {
+          value: 'healthy',
+          metrics: {
+            errorPercentage: 10,
+          },
+        },
+        position: selInfra?.position ?? { x: 0, y: 0 },
+        groupPosition: selInfra?.groupPosition ?? { x: 0, y: 0 },
+        groupSize: selInfra?.groupSize ?? { width: 100, height: 100 },
+        applications: applications,
+      });
+    });
+
+    const selRegion = findItem(selected, regionId, 'region');
     regions.push({
-      id: region.id,
-      name: region.name,
-      position: (findItem(selected, region.id, 'region')?.position) ?? region.position,
-      groupPosition: (findItem(selected, region.id, 'region')?.groupPosition) ?? region.groupPosition,
-      groupSize: (findItem(selected, region.id, 'region')?.groupSize) ?? region.groupSize
+      id: regionId,
+      name: regionName,
+      position: selRegion?.position ?? { x: 0, y: 0 },
+      groupPosition: selRegion?.groupPosition ?? { x: 0, y: 0 },
+      groupSize: selRegion?.groupSize ?? { width: 200, height: 200 },
+      infrastructures: infrastructures,
     });
   });
   
@@ -287,31 +388,54 @@ export const getOperationsByService = async (regionId?: string, infrastructureId
 export const getServiceMapData = async (regionId?: string, infrastructureId?: string, applicationId?: string, serviceId?: string): Promise<ServiceMapData> => {
   
   const regions = await getRegions();
-  console.log('[getServiceMapData] regions:', regions);
-  const infrastructures = await getInfrastructures(regionId);
-  console.log('[getServiceMapData] infrastructures:', infrastructures);
-  const applications = await getApplicationsByInfrastructure(regionId, infrastructureId);
-  console.log('[getServiceMapData] applications:', applications);
-  const services = await getServicesByApplication(regionId, infrastructureId, applicationId);
-  console.log('[getServiceMapData] services:', services);
-  const operations = await getOperationsByService(regionId, infrastructureId, applicationId, serviceId);
-  console.log('[getServiceMapData] operations:', operations);
-
-
-  regions.forEach(region => {
-    region.infrastructures = infrastructures.filter(infrastructure => infrastructure.regionId === region.id);
-  });
-
-  infrastructures.forEach(infrastructure => {
-    infrastructure.applications = applications.filter(application => application.infrastructureId === infrastructure.id);
-  });
   
+  // Extract infrastructures and applications from regions (they are already populated in getRegions)
+  const infrastructures = regions.flatMap(region => region.infrastructures || []);
+  const applications = infrastructures.flatMap(infra => infra.applications || []);
+  
+  // Get services and operations (these still come from other sources)
+  const services = await getServicesByApplication(regionId, infrastructureId, applicationId);
+  const operations = await getOperationsByService(regionId, infrastructureId, applicationId, serviceId);
+
+  // Filter regions if regionId is provided
+  if (regionId) {
+    regions.forEach(region => {
+      if (region.id !== regionId) {
+        region.infrastructures = [] as Infrastructure[];
+      }
+    });
+  }
+  
+  // Filter infrastructures if infrastructureId is provided
+  if (infrastructureId) {
+    regions.forEach(region => {
+      if (region.infrastructures && Array.isArray(region.infrastructures)) {
+        region.infrastructures = region.infrastructures.filter((infra: Infrastructure) => infra.id === infrastructureId);
+      }
+    });
+  }
+
+  // Filter applications if applicationId is provided
+  if (applicationId) {
+    regions.forEach(region => {
+      if (region.infrastructures && Array.isArray(region.infrastructures)) {
+        region.infrastructures.forEach((infra: Infrastructure) => {
+          if (infra.applications && Array.isArray(infra.applications)) {
+            infra.applications = infra.applications.filter((app: Application) => app.id === applicationId);
+          }
+        });
+      }
+    });
+  }
+
+  // Add services to applications
   applications.forEach(application => {
-    application.services = services.filter(service => service.applicationId === application.id);
+    application.services = services.filter(service => service.applicationId === application.id) as Service[];
   });
 
+  // Add operations to services
   services.forEach(service => {
-    service.operations = operations.filter(operation => operation.serviceId === service.id);
+    service.operations = operations.filter(operation => operation.serviceId === service.id) as Operation[];
   });
 
   return { regions: regions };

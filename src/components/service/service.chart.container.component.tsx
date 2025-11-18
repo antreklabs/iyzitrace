@@ -10,7 +10,7 @@ interface ServiceChartContainerProps {
 }
 
 const ServiceChartContainer: React.FC<ServiceChartContainerProps> = ({ services }) => {
-  const [durationMetric, setDurationMetric] = useState<string>('Avg');
+  const [durationMetric, setDurationMetric] = useState<string>('p50');
 
   return (
     <div style={{ position: 'relative', marginBottom: '24px' }}>
@@ -63,7 +63,6 @@ const ServiceChartContainer: React.FC<ServiceChartContainerProps> = ({ services 
                       { value: 'p90', label: 'p90' },
                       { value: 'p75', label: 'p75' },
                       { value: 'p50', label: 'p50' },
-                      { value: 'Avg', label: 'Avg' },
                     ]}
                   />
                 </div>

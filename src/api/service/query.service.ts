@@ -12,7 +12,9 @@ export enum QueryType {
   MAX_LATENCY_BY_SERVICE,
   ERROR_PERCENTAGE_BY_SERVICE,
   P50_BY_SERVICE_INTIME,
+  P75_BY_SERVICE_INTIME,
   P90_BY_SERVICE_INTIME,
+  P95_BY_SERVICE_INTIME,
   P99_BY_SERVICE_INTIME,
   APDEX_BY_SERVICE_INTIME,
 
@@ -511,8 +513,14 @@ export const getQueryByType = (
     case QueryType.P50_BY_SERVICE_INTIME:
       return `histogram_quantile(0.50, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, le))`;
   
+    case QueryType.P75_BY_SERVICE_INTIME:
+      return `histogram_quantile(0.75, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, le))`;
+
     case QueryType.P90_BY_SERVICE_INTIME:
       return `histogram_quantile(0.90, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, le))`;
+
+    case QueryType.P95_BY_SERVICE_INTIME:
+      return `histogram_quantile(0.95, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, le))`;
 
     case QueryType.P99_BY_SERVICE_INTIME:
       return `histogram_quantile(0.99, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, le))`;
