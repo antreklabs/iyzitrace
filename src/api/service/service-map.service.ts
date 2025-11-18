@@ -116,6 +116,16 @@ export const getRegions = async (): Promise<Region[]> => {
         osVersion: metric.host_arch || 'unknown', // osVersion -> host_arch
         ip: hostIp, // ip -> host_ip (parsed)
         type: metric.os_type || 'unknown', // type -> os_type
+        cpu: {
+          usage: 8,
+          capacity: 16,
+          percentage: 50,
+        },
+        memory: {
+          usage: 12,
+          capacity: 32,
+          percentage: 37.5,
+        },
         status: {
           value: 'healthy',
           metrics: {
