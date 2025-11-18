@@ -3,6 +3,7 @@
 
 export interface Team {
   id: string;
+  uid: string;
   name: string;
   icon: string;
   members: number | TeamMember[];
@@ -336,21 +337,6 @@ export const mockTeamsData = {
   ] as Team[],
 
   availableMembers: [
-    {
-      id: '2',
-      name: 'John Doe',
-      email: 'john@example.com',
-    },
-    {
-      id: '3',
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-    },
-    {
-      id: '4',
-      name: 'Bob Johnson',
-      email: 'bob@example.com',
-    },
   ] as AvailableMember[],
 
   teamMembers: [
@@ -452,6 +438,7 @@ export const mockApi = {
       setTimeout(() => {
         const newTeam: Team = {
           id: Date.now().toString(),
+          uid: Date.now().toString(),
           name: data.name,
           icon: data.icon,
           members: 0,

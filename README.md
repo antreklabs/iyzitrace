@@ -257,10 +257,10 @@ git checkout dev
 git pull origin dev
 
 # Create and switch to new branch from dev
-git checkout -b feature/your-feature-name
+git checkout -b feature/overview
 
 # Push the new branch to GitHub and set up tracking
-git push -u origin feature/your-feature-name
+git push -u origin feature/overview
 ```
 
 #### 2. Creating Pull Request with GitHub CLI

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { AppRootProps } from '@grafana/data';
 import { themetoken } from '../../utils/index';
 import MainLayout from 'components/core/layout/layout.component';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, App as AntdApp } from 'antd';
 import AppRoutes from '../../routes/app-routes';
 import '../../assets/styles/global.css';
 import { Provider } from 'react-redux';
@@ -23,11 +23,13 @@ function App(props: AppRootProps) {
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <ConfigProvider theme={themetoken}>
-            <AliveScope>
-              <MainLayout>
-                <AppRoutes />
-              </MainLayout>
-            </AliveScope>
+            <AntdApp>
+              <AliveScope>
+                <MainLayout>
+                  <AppRoutes />
+                </MainLayout>
+              </AliveScope>
+            </AntdApp>
           </ConfigProvider>
         </PersistGate>
       </Provider>

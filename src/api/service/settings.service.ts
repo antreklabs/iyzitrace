@@ -21,7 +21,7 @@ export interface PluginSettings {
 export const getPluginSettings = async (): Promise<PluginSettings> => {
   try {
     const response = await getBackendSrv().get(`/api/plugins/${PLUGIN_ID}/settings`);
-    // console.log('[getPluginSettings] response:', response.jsonData);
+    console.log('[getPluginSettings] response:', response);
     return response.jsonData || {};
   } catch (error) {
     console.error('Error getting plugin settings:', error);
