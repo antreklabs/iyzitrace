@@ -12,7 +12,7 @@ import {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { Position as CustomPosition, CustomSize } from '../../interfaces/service-map/service-map.interface';
-import { InfraIsoBlockNode, ApplicationIsoBlockNode, ServiceIsoBlockNode, GroupNode, statusColor } from './map.component';
+import { InfraIsoBlockNode, ServiceIsoBlockNode, GroupNode, statusColor } from './map.component';
 import { Application, Operation, Service } from '../../api/service/interface.service';
 import { getPluginSettings, savePluginSettings } from '../../api/service/settings.service';
 
@@ -25,7 +25,7 @@ const InfrastructureDetailPanel: React.FC<{
   onButtonClick?: (id: string, targetLayer?: string, isItem?: boolean) => void;
 }> = ({ data, onButtonClick }) => {
   if (!data) return null;
-
+console.log('data', data);
   return (
     <>
     <div
@@ -1447,7 +1447,7 @@ const MapInner = forwardRef<any, MapLayerProps>(({ selectedNodeId, onNodeClick, 
   // nodeTypes'i memoize et
   const nodeTypes = useMemo(() => ({
     isoInfra: InfraIsoBlockNode,
-    isoApp: ApplicationIsoBlockNode,
+    isoApp: InfraIsoBlockNode,
     isoSvc: ServiceIsoBlockNode,
     group: GroupNode
   }), []);

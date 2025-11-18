@@ -34,7 +34,9 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
   const serviceQueryDataMaxLatencyByService = await getServicesQueryDataByType(QueryType.MAX_LATENCY_BY_SERVICE, filterParamsModel, definitions);
   const serviceQueryDataErrorPercentageByService = await getServicesQueryDataByType(QueryType.ERROR_PERCENTAGE_BY_SERVICE, filterParamsModel, definitions);
   const serviceQueryDataP50ByServiceInTime = await getServicesQueryDataInTime(QueryType.P50_BY_SERVICE_INTIME, filterParamsModel, definitions);
+  const serviceQueryDataP75ByServiceInTime = await getServicesQueryDataInTime(QueryType.P75_BY_SERVICE_INTIME, filterParamsModel, definitions);
   const serviceQueryDataP90ByServiceInTime = await getServicesQueryDataInTime(QueryType.P90_BY_SERVICE_INTIME, filterParamsModel, definitions);
+  const serviceQueryDataP95ByServiceInTime = await getServicesQueryDataInTime(QueryType.P95_BY_SERVICE_INTIME, filterParamsModel, definitions);
   const serviceQueryDataP99ByServiceInTime = await getServicesQueryDataInTime(QueryType.P99_BY_SERVICE_INTIME, filterParamsModel, definitions);
   const serviceQueryDataApdexByServiceInTime = await getServicesQueryDataInTime(QueryType.APDEX_BY_SERVICE_INTIME, filterParamsModel, definitions);
   const serviceQueryDataP50ByServiceAndSpan = await getServicesQueryDataByType(QueryType.P50_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
@@ -143,6 +145,24 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       });
     }
   });
+  serviceQueryDataP75ByServiceInTime.forEach((item: ServiceQueryData) => {
+    const service = serviceMap.get(item.service_name);
+    if (service) {
+      service.rangeMetrics.latency.push({
+        name: 'P75',
+        data: item.values ?? [],
+      });
+    }
+  });
+  serviceQueryDataP95ByServiceInTime.forEach((item: ServiceQueryData) => {
+    const service = serviceMap.get(item.service_name);
+    if (service) {
+      service.rangeMetrics.latency.push({
+        name: 'P95',
+        data: item.values ?? [],
+      });
+    }
+  });
 
   serviceQueryDataP90ByServiceInTime.forEach((item: ServiceQueryData) => {
     const service = serviceMap.get(item.service_name);
@@ -206,7 +226,9 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
   serviceQueryDataErrorPercentageByService.forEach((item: ServiceQueryData) => {
     const service = serviceMap.get(item.service_name);
     if (service) {
-      service.status.metrics.errorPercentage = item.value;
+      service.status.metrics.errorCount = parseInt(item.value.toString())
+      service.status.metrics.totalCount = service.metrics.requestCount
+      service.status.metrics.errorPercentage = (service.status.metrics.errorCount / service.status.metrics.totalCount) * 100;
     }
   });
 
@@ -461,11 +483,11 @@ export const getServicesQueryDataInTime = async (
   const maxPoints = 60;
   const step = Math.max(Math.ceil((fixedEnd - fixedStart) / maxPoints), 60);
   const stepString = step + 's';
-  console.log('stepString', stepString);
+  // console.log('stepString', stepString);
   const query = getQueryByType(queryType, filterParamsModel, definitions);
-  console.log('query', query);
+  // console.log('query', query);
   const data = await getQueryRangeData(query, start, end, stepString);
-  console.log('data in time', data);
+  // console.log('data in time', data);
 
   return data.result.map((result: ResultItem) => ({
     service_name: result.metric.service_name,

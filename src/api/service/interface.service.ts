@@ -2,7 +2,7 @@ export type HealthValue = "healthy" | "degraded" | "warning" | "error";
 
 export interface StatusItem {
   value?: HealthValue;
-  metrics: {
+  metrics?: {
     errorCount?: number;
     errorPercentage?: number;
     warningCount?: number;

@@ -19,6 +19,7 @@ const ServiceContainer: React.FC = () => {
 
   const fetchModelData = async (filterModel: FilterParamsModel): Promise<FetchedModel> => {
     const data = await getServicesTableData(filterModel);
+    console.log('data', data);
     setData(data);
     const builtColumns = buildColumns(data);
     setTableColumns(builtColumns);

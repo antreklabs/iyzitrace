@@ -11,26 +11,35 @@ const ServiceDurationChart: React.FC<ServiceDurationChartProps> = ({ services, m
   const chartData = useMemo(() => {
     const colors = ['#8B5CF6', '#3B82F6', '#F59E0B', '#6B7280', '#EC4899', '#10B981'];
     
-    return services.slice(0, 6).map((service, index) => ({
-      name: service.name,
-      data: Array.from({ length: 20 }, (_, i) => {
-          const yValue = (() => {
-            if(metric === 'p99') return service.metrics.p99DurationMs;
-            if(metric === 'p95') return service.metrics.p95DurationMs;
-            if(metric === 'p90') return service.metrics.p90DurationMs;
-            if(metric === 'p75') return service.metrics.p75DurationMs;
-            if(metric === 'p50') return service.metrics.p50DurationMs;
-            if(metric === 'Avg') return service.metrics.avgDurationMs;
-            return 0;
-          })();
-          
-          return {
-            x: new Date(Date.now() - (19 - i) * 60000),
-            y: yValue
-          };
-      }),
-      color: colors[index % colors.length],
-    }));
+    const metricNameMap: Record<string, string> = {
+      p99: 'P99',
+      p95: 'P95',
+      p90: 'P90',
+      p75: 'P75',
+      p50: 'P50',
+    };
+    
+    const series = services.slice(0, 6).map((service, index) => {
+      const metricName = metricNameMap[metric] ?? 'P99';
+    
+      const latencyItem = service.rangeMetrics.latency
+        ?.find(l => l.name === metricName);
+    
+      const data = latencyItem
+        ? latencyItem.data.map(p => ({
+            x: new Date(p.x),  // backend’den gelen zamanı kullan
+            y: p.y,
+          }))
+        : [];
+    
+      return {
+        name: service.name,
+        data,
+        color: colors[index % colors.length],
+      };
+    });
+
+    return series;
   }, [services, metric]);
 
   const options = {

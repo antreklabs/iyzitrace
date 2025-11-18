@@ -152,7 +152,7 @@ const TraceContainer: React.FC = () => {
       filterComponent={
         <BaseFilter 
           hasServiceFilter={true}
-          hasOperationsFilter={true}
+          hasOperationsFilter={false}
           hasStatusesFilter={false}
           hasDurationFilter={false}
           hasTagsFilter={true}
