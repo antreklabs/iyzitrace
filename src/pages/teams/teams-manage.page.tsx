@@ -10,14 +10,12 @@ import {
   Checkbox,
   message,
   Space,
-  Avatar,
   Tabs,
   Alert,
 } from 'antd';
 import {
   PlusOutlined,
   SearchOutlined,
-  UserOutlined,
   EditOutlined,
   DeleteOutlined,
   ArrowLeftOutlined,
@@ -27,6 +25,7 @@ import { css } from '@emotion/css';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api, type Team, type TeamMember, type TeamSettings, type AvailableMember, type TeamPage, type AvailablePage } from '../../api/teams';
 import pluginJson from '../../plugin.json';
+import { getTeams } from '../../api/service/team.service';
 
 const { Search } = Input;
 const { TabPane } = Tabs;
@@ -328,11 +327,14 @@ const TeamsManagePage: React.FC = () => {
   const fetchTeam = async () => {
     setLoading(true);
     try {
-      const data = await api.getTeamDetails(teamId!);
+      const teams = await getTeams();
+      console.log('teams', teams);
+      console.log('teamId', teamId);
+      const data = teams.find((team: Team) => team.id == teamId);
       const settings = await api.getTeamSettings(teamId!);
       const pages = await api.getTeamPages(teamId!);
       setTeam({
-        ...data.team,
+        ...data,
         members: data.members,
         settings: settings,
         pages: pages,
@@ -457,19 +459,13 @@ const TeamsManagePage: React.FC = () => {
       key: 'name',
       render: (text: string, record: TeamMember) => (
         <div className={styles.memberInfo}>
-          <Avatar src={record.avatar} icon={<UserOutlined />} />
+          <img src={record.avatar} width={32} height={32} />
           <div>
             <div className={styles.memberName}>{text}</div>
             <div className={styles.memberEmail}>{record.email}</div>
           </div>
         </div>
       ),
-    },
-    {
-      title: 'Joined at',
-      dataIndex: 'joinedAt',
-      key: 'joinedAt',
-      render: (date: string) => <span style={{ color: '#8c8c8c' }}>{date}</span>,
     },
     {
       title: 'Action',
@@ -566,7 +562,7 @@ const TeamsManagePage: React.FC = () => {
             <span>›</span>
             <div className={styles.teamInfo}>
               <div className={styles.teamIcon} style={{ background: `linear-gradient(135deg, #7c3aed, #a855f7)` }}>
-                {team.icon}
+                <img src={team.icon} width={16} height={16} />
               </div>
               <span className={styles.teamName}>{team.name}</span>
             </div>
@@ -784,7 +780,7 @@ const TeamsManagePage: React.FC = () => {
                   }
                 }}
               />
-              <Avatar src={member.avatar} icon={<UserOutlined />} style={{ marginLeft: 12, marginRight: 12 }} />
+              <img src={member.avatar} width={32} height={32} />
               <div>
                 <div style={{ color: '#fff', fontWeight: 500 }}>{member.name}</div>
                 <div style={{ color: '#8c8c8c', fontSize: 12 }}>{member.email}</div>

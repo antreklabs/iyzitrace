@@ -24,7 +24,6 @@ import { css } from '@emotion/css';
 import { useNavigate } from 'react-router-dom';
 import { api, type Team, type CreateTeamData } from '../../api/teams';
 import pluginJson from '../../plugin.json';
-import { getTeams } from '../../api/service/team.service';
 
 const { Search } = Input;
 const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
@@ -190,7 +189,7 @@ const getStyles = () => ({
   `,
 });
 
-const TeamsPage: React.FC = () => {
+const TeamsOldPage: React.FC = () => {
   const navigate = useNavigate();
   const styles = getStyles();
   const [teams, setTeams] = useState<Team[]>([]);
@@ -211,15 +210,15 @@ const TeamsPage: React.FC = () => {
   const fetchTeams = async () => {
     setLoading(true);
     try {
-
-      const data = await getTeams();
-      const filteredTeams = data.filter((team: Team) =>
+      const data = await api.getTeams();
+      const filteredTeams = data.filter(team =>
         team.name.toLowerCase().includes(searchText.toLowerCase())
       );
       setTeams(filteredTeams);
       setTotal(filteredTeams.length);
     } catch (error) {
       console.error('Error fetching teams:', error);
+      message.error('Failed to fetch teams');
     } finally {
       setLoading(false);
     }
@@ -256,8 +255,7 @@ const TeamsPage: React.FC = () => {
       render: (text: string, record: Team) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div className={styles.teamIcon} style={{ background: `linear-gradient(135deg, #${Math.random().toString(16).substr(-6)}, #${Math.random().toString(16).substr(-6)})` }}>
-            
-            <img src={record.icon} width={32} height={32} />
+            {record.icon}
           </div>
           <span className={styles.teamName}>{text}</span>
         </div>
@@ -387,7 +385,7 @@ const TeamsPage: React.FC = () => {
           <Form.Item label="Icon">
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <div className={styles.iconPreview}>
-                {'🔧'}
+                {form.getFieldValue('icon') || '🔧'}
               </div>
               <Button
                 className={styles.randomizeButton}
@@ -427,4 +425,4 @@ const TeamsPage: React.FC = () => {
   );
 };
 
-export default TeamsPage;
+export default TeamsOldPage;
