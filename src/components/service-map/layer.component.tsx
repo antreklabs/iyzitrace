@@ -81,7 +81,7 @@ console.log('data', data);
         <h4 style={{ color: '#ffffff', margin: '0 0 8px 0', fontSize: '14px' }}>Infrastructure</h4>
         <div style={{ color: '#94a3b8', fontSize: '12px', lineHeight: '1.4' }}>
           <div><strong>IP:</strong> {data.ip || 'N/A'}</div>
-          <div><strong>OS:</strong> {data.os || 'N/A'}</div>
+          <div><strong>OS:</strong> {data.osVersion || 'N/A'}</div>
           <div><strong>Type:</strong> {data.type || 'server'}</div>
         </div>
       </div>
@@ -90,9 +90,9 @@ console.log('data', data);
       <div style={{ marginBottom: '16px' }}>
         <h4 style={{ color: '#ffffff', margin: '0 0 8px 0', fontSize: '14px' }}>System Resources</h4>
         <div style={{ color: '#94a3b8', fontSize: '12px', lineHeight: '1.4' }}>
-          <div><strong>CPU Usage:</strong> {data.cpu?.usage_pct ?? 0}%</div>
-          <div><strong>Memory:</strong> {data.memory?.used_gb ?? 0}/{data.memory?.total_gb ?? 0} GB</div>
-          <div><strong>Memory Usage:</strong> {data.memory?.total_gb ? Math.round(((data.memory?.used_gb ?? 0) / data.memory.total_gb) * 100) : 0}%</div>
+          <div><strong>CPU Usage:</strong> {data.cpu?.percentage ?? 0}%</div>
+          <div><strong>Memory:</strong> {data.memory?.usage ?? 0}/{data.memory?.capacity ?? 0} GB</div>
+          <div><strong>Memory Usage:</strong> {data.memory?.percentage}%</div>
         </div>
       </div>
 

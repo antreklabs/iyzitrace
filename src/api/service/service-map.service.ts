@@ -153,112 +153,112 @@ export const getRegions = async (): Promise<Region[]> => {
   return regions;
 };
 
-/**
- * KAN-24 Query - Get all infrastructures
- * @returns Promise<Infrastructure[]> - List of all infrastructures
- */
-export const getInfrastructures = async (regionId?: string): Promise<Infrastructure[]> => {
-  const infrastructures: Infrastructure[] = [];
-  const selected = await getSelectedViewData('service-map');
+// /**
+//  * KAN-24 Query - Get all infrastructures
+//  * @returns Promise<Infrastructure[]> - List of all infrastructures
+//  */
+// export const getInfrastructures = async (regionId?: string): Promise<Infrastructure[]> => {
+//   const infrastructures: Infrastructure[] = [];
+//   const selected = await getSelectedViewData('service-map');
 
-  // const infrastructuresFromPrometheus = await getPrometheusInfrastructures();
+//   // const infrastructuresFromPrometheus = await getPrometheusInfrastructures();
 
-  const regions = regionId
-    ? mapData.regions.filter(r => r.id === regionId)
-    : mapData.regions;
+//   const regions = regionId
+//     ? mapData.regions.filter(r => r.id === regionId)
+//     : mapData.regions;
 
-  regions.forEach(region => {
-    (region.infrastructures || []).forEach(infra => {
-      const selInfra = findItem(selected, infra.id, 'infrastructure');
-      infrastructures.push({
-        id: infra.id,
-        regionId: region.id,
-        name: infra.name,
-        osVersion: infra.os,
-        ip: infra.ip,
-        type: infra.type,
-        cpu: {
-          usage: infra.cpu.usage_pct,
-          capacity: infra.cpu.cores,
-          percentage: infra.cpu.usage_pct,
-        },
-        memory: {
-          usage: infra.memory.used_gb,
-          capacity: infra.memory.total_gb,
-          percentage: infra.memory.used_gb / infra.memory.total_gb,
-        },
-        status: {
-          value: infra.status as HealthValue,
-          metrics: {
-            errorCount: 10,
-            errorPercentage: 0.1,
-            warningCount: 20,
-            warningPercentage: 0.2,
-            degradedCount: 30,
-            degradedPercentage: 0.3,
-            totalCount: 100,
-          },
-        },
-        position: selInfra?.position ?? infra.position,
-        groupPosition: selInfra?.groupPosition ?? infra.groupPosition,
-        groupSize: selInfra?.groupSize ?? infra.groupSize,
-      });
-    });
-  });
+//   regions.forEach(region => {
+//     (region.infrastructures || []).forEach(infra => {
+//       const selInfra = findItem(selected, infra.id, 'infrastructure');
+//       infrastructures.push({
+//         id: infra.id,
+//         regionId: region.id,
+//         name: infra.name,
+//         osVersion: infra.os,
+//         ip: infra.ip,
+//         type: infra.type,
+//         cpu: {
+//           usage: infra.cpu.usage_pct,
+//           capacity: infra.cpu.cores,
+//           percentage: infra.cpu.usage_pct,
+//         },
+//         memory: {
+//           usage: infra.memory.used_gb,
+//           capacity: infra.memory.total_gb,
+//           percentage: infra.memory.used_gb / infra.memory.total_gb,
+//         },
+//         status: {
+//           value: infra.status as HealthValue,
+//           metrics: {
+//             errorCount: 10,
+//             errorPercentage: 0.1,
+//             warningCount: 20,
+//             warningPercentage: 0.2,
+//             degradedCount: 30,
+//             degradedPercentage: 0.3,
+//             totalCount: 100,
+//           },
+//         },
+//         position: selInfra?.position ?? infra.position,
+//         groupPosition: selInfra?.groupPosition ?? infra.groupPosition,
+//         groupSize: selInfra?.groupSize ?? infra.groupSize,
+//       });
+//     });
+//   });
 
-  return infrastructures;
-};
+//   return infrastructures;
+// };
 
-/**
- * KAN-25 Query - Get applications by infrastructure
- * @param infrastructureId - The infrastructure ID to get applications for
- * @returns Promise<Application[]> - List of applications for the infrastructure
- */
-export const getApplicationsByInfrastructure = async (regionId?: string, infrastructureId?: string): Promise<Application[]> => {
+// /**
+//  * KAN-25 Query - Get applications by infrastructure
+//  * @param infrastructureId - The infrastructure ID to get applications for
+//  * @returns Promise<Application[]> - List of applications for the infrastructure
+//  */
+// export const getApplicationsByInfrastructure = async (regionId?: string, infrastructureId?: string): Promise<Application[]> => {
   
-  const applications: Application[] = [];
-  const selected = await getSelectedViewData('service-map');
+//   const applications: Application[] = [];
+//   const selected = await getSelectedViewData('service-map');
   
-  const regions = regionId
-    ? mapData.regions.filter(r => r.id === regionId)
-    : mapData.regions;
+//   const regions = regionId
+//     ? mapData.regions.filter(r => r.id === regionId)
+//     : mapData.regions;
 
-  const infrastructures = infrastructureId
-    ? regions.flatMap(r => r.infrastructures.filter(i => i.id === infrastructureId))
-    : regions.flatMap(r => r.infrastructures);
+//   const infrastructures = infrastructureId
+//     ? regions.flatMap(r => r.infrastructures.filter(i => i.id === infrastructureId))
+//     : regions.flatMap(r => r.infrastructures);
 
-  infrastructures.forEach(infra => {
-    infra.applications.forEach(app => {
-      const selApp = findItem(selected, app.id, 'application');
-      applications.push({
-        id: app.id,
-        infrastructureId: infra.id,
-        name: app.name,
-        platform: app.platform,
-        version: app.version,
-        imageUrl: app.imageUrl,
-        status: {
-          value: app.status as HealthValue,
-          metrics: {
-            errorCount: 10,
-            errorPercentage: 0.1,
-            warningCount: 20,
-            warningPercentage: 0.2,
-            degradedCount: 30,
-            degradedPercentage: 0.3,
-            totalCount: 100,
-          },
-        },
-        position: selApp?.position ?? app.position,
-        groupPosition: selApp?.groupPosition ?? app.groupPosition,
-        groupSize: selApp?.groupSize ?? app.groupSize,
-      });
-    });
-  });
+//   infrastructures.forEach(infra => {
+//     infra.applications.forEach(app => {
+//       const selApp = findItem(selected, app.id, 'application');
+//       applications.push({
+//         id: app.id,
+//         infrastructureId: infra.id,
+//         name: app.name,
+//         platform: app.platform,
+//         version: app.version,
+//         imageUrl: app.imageUrl,
+//         status: {
+//           value: app.status as HealthValue,
+//           metrics: {
+//             errorCount: 10,
+//             errorPercentage: 0.1,
+//             warningCount: 20,
+//             warningPercentage: 0.2,
+//             degradedCount: 30,
+//             degradedPercentage: 0.3,
+//             totalCount: 100,
+//           },
+//         },
+//         position: selApp?.position ?? app.position,
+//         groupPosition: selApp?.groupPosition ?? app.groupPosition,
+//         groupSize: selApp?.groupSize ?? app.groupSize,
+//       });
+//     });
+//   });
   
-  return applications;
+//   return applications;
   
-};
+// };
 
 /**
  * KAN-26 Query - Get services by application
@@ -302,7 +302,6 @@ export const getServicesByApplication = async (regionId?: string, infrastructure
           avgDurationMs: parseFloat(service.metrics.avg.replace(' ms', '')),
           requestCount: service.metrics.count,
           callsPerSecond: parseFloat(service.metrics.avg.replace(' ms', '')),
-          operationCounts: parseFloat(service.metrics.avg.replace(' ms', '')),
         },
         status: {
           value: service.status as HealthValue,
@@ -438,15 +437,24 @@ export const getServiceMapData = async (regionId?: string, infrastructureId?: st
     });
   }
 
-  // Add services to applications
-  applications.forEach(application => {
-    application.services = services.filter(service => service.applicationId === application.id) as Service[];
-  });
 
   // Add operations to services
   services.forEach(service => {
     service.operations = operations.filter(operation => operation.serviceId === service.id) as Operation[];
+    service.metrics.operationCounts = service.operations?.length ?? 0;
   });
+
+  // butun servisleri infrastructure i docker-desktop olan application i otelcol-contrib olan application a ekle
+  applications.filter((application: Application) => application.infrastructureId === 'infra|onprem|docker-desktop' && application.id === 'app|onprem|docker-desktop|otelcol-contrib')
+    .forEach((application: Application) => {
+      application.services = services;
+  });
+
+  // Add services to applications
+  // applications.forEach(application => {
+  //   application.services = services.filter(service => service.applicationId === application.id) as Service[];
+  // });
+
 
   return { regions: regions };
 

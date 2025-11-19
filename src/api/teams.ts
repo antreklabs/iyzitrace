@@ -1,3 +1,5 @@
+import { getPluginSettings, savePluginSettings } from './service/settings.service';
+
 // Teams API Service
 // Bu dosya gerçek API endpoint'leri ile entegrasyon için hazırlanmıştır
 
@@ -52,6 +54,176 @@ export interface AvailablePage {
   description: string;
   icon: string;
 }
+
+interface TeamPagesSettingsEntry extends TeamPage {
+  teamId: string;
+}
+
+const PLUGIN_PAGE_CATALOG: AvailablePage[] = [
+  {
+    id: 'landing',
+    name: 'Home',
+    route: '/landing',
+    description: 'Landing dashboard for quick insights',
+    icon: '🏠',
+  },
+  {
+    id: 'overview',
+    name: 'Overview',
+    route: '/overview',
+    description: 'High-level health overview',
+    icon: '🧱',
+  },
+  {
+    id: 'service-map',
+    name: 'Service Map',
+    route: '/service-map',
+    description: 'Visualize service dependencies',
+    icon: '🗺️',
+  },
+  {
+    id: 'services',
+    name: 'Services',
+    route: '/services',
+    description: 'Service performance metrics',
+    icon: '📊',
+  },
+  {
+    id: 'traces',
+    name: 'Traces',
+    route: '/traces',
+    description: 'Distributed tracing explorer',
+    icon: '🔍',
+  },
+  {
+    id: 'logs',
+    name: 'Logs',
+    route: '/logs',
+    description: 'Centralized log analysis',
+    icon: '📄',
+  },
+  {
+    id: 'views',
+    name: 'Views',
+    route: '/views',
+    description: 'Custom visualizations',
+    icon: '🧩',
+  },
+  {
+    id: 'alerts',
+    name: 'Alerts',
+    route: '/alerts',
+    description: 'Alert rules and incidents',
+    icon: '⏰',
+  },
+  {
+    id: 'exceptions',
+    name: 'Exceptions',
+    route: '/exceptions',
+    description: 'Error tracking & triage',
+    icon: '🧨',
+  },
+  {
+    id: 'teams',
+    name: 'Teams',
+    route: '/teams',
+    description: 'Team management',
+    icon: '👥',
+  },
+  {
+    id: 'settings',
+    name: 'Settings',
+    route: '/settings',
+    description: 'Plugin & workspace settings',
+    icon: '⚙️',
+  },
+];
+
+const normaliseTeamPagesSetting = (data: any): TeamPagesSettingsEntry[] => {
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data
+    .map((entry) => ({
+      teamId: String(entry?.teamId ?? ''),
+      id: String(entry?.id ?? entry?.pageId ?? ''),
+      name: entry?.name ?? '',
+      route: entry?.route ?? '',
+      description: entry?.description ?? '',
+      icon: entry?.icon ?? '',
+      addedAt: entry?.addedAt ?? new Date().toISOString().split('T')[0],
+    }))
+    .filter((entry) => entry.teamId && entry.id);
+};
+
+const getStoredTeamPages = async (): Promise<TeamPagesSettingsEntry[]> => {
+  try {
+    const settings = await getPluginSettings();
+    return normaliseTeamPagesSetting(settings?.teamPages);
+  } catch (error) {
+    console.error('Error reading team pages from plugin settings:', error);
+    return [];
+  }
+};
+
+const saveTeamPagesToSettings = async (pages: TeamPagesSettingsEntry[]) => {
+  try {
+    await savePluginSettings({ teamPages: pages });
+  } catch (error) {
+    console.error('Error saving team pages to plugin settings:', error);
+    throw error;
+  }
+};
+
+export const getTeamPagesByTeamId = async (teamId: string): Promise<TeamPage[]> => {
+  const pages = await getStoredTeamPages();
+  return pages
+    .filter((page) => page.teamId === teamId)
+    .map(({ teamId: _team, ...page }) => page);
+};
+
+const addPagesToTeam = async (teamId: string, pageIds: string[]) => {
+  if (!teamId || pageIds.length === 0) {
+    return;
+  }
+
+  const storedPages = await getStoredTeamPages();
+  const existingIds = new Set(
+    storedPages.filter((page) => page.teamId === teamId).map((page) => page.id)
+  );
+
+  const today = new Date().toISOString().split('T')[0];
+  const pagesToInsert = PLUGIN_PAGE_CATALOG
+    .filter((page) => pageIds.includes(page.id) && !existingIds.has(page.id))
+    .map((page) => ({
+      teamId,
+      id: page.id,
+      name: page.name,
+      route: page.route,
+      description: page.description,
+      icon: page.icon,
+      addedAt: today,
+    }));
+
+  if (pagesToInsert.length === 0) {
+    return;
+  }
+
+  await saveTeamPagesToSettings([...storedPages, ...pagesToInsert]);
+};
+
+const removePageFromTeam = async (teamId: string, pageId: string) => {
+  if (!teamId || !pageId) {
+    return;
+  }
+
+  const storedPages = await getStoredTeamPages();
+  const updated = storedPages.filter(
+    (page) => !(page.teamId === teamId && page.id === pageId)
+  );
+  await saveTeamPagesToSettings(updated);
+};
 
 export interface CreateTeamData {
   name: string;
@@ -235,63 +407,19 @@ export const teamsApi = {
 
   // Team pages API
   async getTeamPages(teamId: string): Promise<TeamPage[]> {
-    try {
-      const response = await fetch(`http://localhost:3000/org/teams/edit/${teamId}/pages`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching team pages:', error);
-      throw error;
-    }
+    return await getTeamPagesByTeamId(teamId);
   },
 
   async getAvailablePages(): Promise<AvailablePage[]> {
-    try {
-      const response = await fetch('http://localhost:3000/org/pages');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching available pages:', error);
-      throw error;
-    }
+    return PLUGIN_PAGE_CATALOG;
   },
 
   async addTeamPages(teamId: string, pageIds: string[]): Promise<void> {
-    try {
-      const response = await fetch(`http://localhost:3000/org/teams/edit/${teamId}/pages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ pageIds }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-    } catch (error) {
-      console.error('Error adding team pages:', error);
-      throw error;
-    }
+    await addPagesToTeam(teamId, pageIds);
   },
 
   async removeTeamPage(teamId: string, pageId: string): Promise<void> {
-    try {
-      const response = await fetch(`http://localhost:3000/org/teams/edit/${teamId}/pages/${pageId}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-    } catch (error) {
-      console.error('Error removing team page:', error);
-      throw error;
-    }
+    await removePageFromTeam(teamId, pageId);
   },
 };
 
@@ -357,7 +485,7 @@ export const mockTeamsData = {
     {
       id: '1',
       name: 'Services',
-      route: '/services-v2',
+      route: '/services',
       description: 'Monitor service performance metrics',
       icon: '📊',
       addedAt: '2024-01-15',
@@ -365,64 +493,14 @@ export const mockTeamsData = {
     {
       id: '2',
       name: 'Traces',
-      route: '/traces-v2',
+      route: '/traces',
       description: 'Explore distributed traces',
       icon: '🔍',
       addedAt: '2024-01-16',
     },
   ] as TeamPage[],
 
-  availablePages: [
-    {
-      id: '1',
-      name: 'Services',
-      route: '/services-v2',
-      description: 'Monitor service performance metrics',
-      icon: '📊',
-    },
-    {
-      id: '2',
-      name: 'Traces',
-      route: '/traces-v2',
-      description: 'Explore distributed traces',
-      icon: '🔍',
-    },
-    {
-      id: '3',
-      name: 'Logs',
-      route: '/logs-v2',
-      description: 'Search and correlate logs',
-      icon: '📝',
-    },
-    {
-      id: '4',
-      name: 'Service Map',
-      route: '/service-map-v4',
-      description: 'Visualize service dependencies',
-      icon: '🗺️',
-    },
-    {
-      id: '5',
-      name: 'Overview',
-      route: '/landing',
-      description: 'High-level infrastructure health',
-      icon: '🏠',
-    },
-    {
-      id: '6',
-      name: 'Alerts',
-      route: '/alerts',
-      description: 'Set up alerting rules',
-      icon: '🔔',
-    },
-    {
-      id: '7',
-      name: 'Exceptions',
-      route: '/exceptions',
-      description: 'Track error patterns',
-      icon: '🐛',
-    },
-  ] as AvailablePage[],
+  availablePages: [...PLUGIN_PAGE_CATALOG] as AvailablePage[],
 };
 
 // Development mode için mock API wrapper
@@ -507,27 +585,19 @@ export const mockApi = {
   },
 
   async getTeamPages(teamId: string): Promise<TeamPage[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(mockTeamsData.teamPages), 500);
-    });
+    return getTeamPagesByTeamId(teamId);
   },
 
   async getAvailablePages(): Promise<AvailablePage[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(mockTeamsData.availablePages), 500);
-    });
+    return PLUGIN_PAGE_CATALOG;
   },
 
   async addTeamPages(teamId: string, pageIds: string[]): Promise<void> {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(), 500);
-    });
+    await addPagesToTeam(teamId, pageIds);
   },
 
   async removeTeamPage(teamId: string, pageId: string): Promise<void> {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(), 500);
-    });
+    await removePageFromTeam(teamId, pageId);
   },
 };
 

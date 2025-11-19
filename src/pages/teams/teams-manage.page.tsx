@@ -16,7 +16,6 @@ import {
 import {
   PlusOutlined,
   SearchOutlined,
-  EditOutlined,
   DeleteOutlined,
   ArrowLeftOutlined,
   UserDeleteOutlined,
@@ -446,12 +445,6 @@ const TeamsManagePage: React.FC = () => {
     }
   };
 
-  const generateRandomIcon = () => {
-    const icons = ['🔧', '🎨', '📊', '🚀', '💡', '⚡', '🌟', '🎯', '🔥', '💎'];
-    const randomIcon = icons[Math.floor(Math.random() * icons.length)];
-    form.setFieldsValue({ icon: randomIcon });
-  };
-
   const membersColumns = [
     {
       title: 'Member',
@@ -688,21 +681,6 @@ const TeamsManagePage: React.FC = () => {
             >
               <Form.Item label="Display settings">
                 <div style={{ marginBottom: 24 }}>
-                  <Form.Item label="Icon" style={{ marginBottom: 16 }}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <div className={styles.iconPreview}>
-                        {form.getFieldValue('icon') || team.icon}
-                      </div>
-                      <Button
-                        className={styles.randomizeButton}
-                        icon={<EditOutlined />}
-                        onClick={generateRandomIcon}
-                      >
-                        Randomize
-                      </Button>
-                    </div>
-                  </Form.Item>
-                  
                   <Form.Item
                     name="name"
                     label="Name"

@@ -27,10 +27,10 @@ import {
 
 const NAV_ITEMS = [
   { key: 'infra', title: 'Overview', icon: BuildOutlined, route: '/landing', description: 'High-level health & topology overview of your entire infrastructure and service ecosystem.' },
-  { key: 'map', title: 'Service Map', icon: DeploymentUnitOutlined, route: '/service-map-v4', description: 'Visualize service dependencies and data flow from infrastructure to applications and services.' },
-  { key: 'services', title: 'Services', icon: BarChartOutlined, route: '/services-v2', description: 'Monitor service performance metrics including P99 latency, error rates, and throughput.' },
-  { key: 'traces', title: 'Traces', icon: FileSearchOutlined, route: '/traces-v2', description: 'Explore distributed traces to find slow spans, bottlenecks, and analyze request flows.' },
-  { key: 'logs', title: 'Logs', icon: ProfileOutlined, route: '/logs-v2', description: 'Search and correlate application logs with traces for comprehensive debugging and analysis.' },
+  { key: 'map', title: 'Service Map', icon: DeploymentUnitOutlined, route: '/service-map', description: 'Visualize service dependencies and data flow from infrastructure to applications and services.' },
+  { key: 'services', title: 'Services', icon: BarChartOutlined, route: '/services', description: 'Monitor service performance metrics including P99 latency, error rates, and throughput.' },
+  { key: 'traces', title: 'Traces', icon: FileSearchOutlined, route: '/traces', description: 'Explore distributed traces to find slow spans, bottlenecks, and analyze request flows.' },
+  { key: 'logs', title: 'Logs', icon: ProfileOutlined, route: '/logs', description: 'Search and correlate application logs with traces for comprehensive debugging and analysis.' },
   { key: 'views', title: 'Views', icon: ClusterOutlined, route: '/dashboards', description: 'Create and manage saved queries, custom dashboards, and curated views for your team.' },
   { key: 'alerts', title: 'Alerts', icon: AlertOutlined, route: '/alerts', description: 'Set up intelligent alerting rules and notifications for proactive monitoring and incident response.' },
   { key: 'errors', title: 'Exceptions', icon: RadarChartOutlined, route: '/exceptions', description: 'Track and analyze error patterns, exception groups, and failure trends across your services.' },

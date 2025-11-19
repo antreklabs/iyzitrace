@@ -13,10 +13,10 @@ interface ComingSoonProps {
 }
 
 const defaultLinks: QuickLink[] = [
-  { label: 'Services', to: '/services-v2' },
-  { label: 'Traces', to: '/traces-v2' },
-  { label: 'Logs', to: '/logs-v2' },
-  { label: 'Service Map', to: '/service-map-v4' },
+  { label: 'Services', to: '/services' },
+  { label: 'Traces', to: '/traces' },
+  { label: 'Logs', to: '/logs' },
+  { label: 'Service Map', to: '/service-map' },
   { label: 'Overview', to: '/landing' },
 ];
 
