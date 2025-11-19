@@ -20,6 +20,7 @@ receivers:
     collection_interval: 10s
   docker_stats:
     endpoint: unix:///var/run/docker.sock
+    api_version: "1.51"
   postgresql:
     collection_interval: 10s
     endpoint: ${POSTGRES_HOST}:${POSTGRES_PORT}
@@ -190,16 +191,16 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [resourcedetection, memory_limiter, batch, transform/span]
-      exporters: [debug, otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
+      processors: [memory_limiter, batch, transform/span]
+      exporters: [otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
     metrics:
-      receivers: [docker_stats, httpcheck/frontend-proxy, hostmetrics, nginx, otlp, postgresql, redis]
+      receivers: [otlp, docker_stats, httpcheck/frontend-proxy, hostmetrics, nginx, postgresql, redis]
       processors: [resourcedetection, memory_limiter, batch]
-      exporters: [debug, otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
+      exporters: [otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
     logs:
       receivers: [otlp]
-      processors: [resourcedetection, memory_limiter, batch]
-      exporters: [debug, otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
+      processors: [memory_limiter, batch]
+      exporters: [otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
   telemetry:
     resource:
       service.name: "central-collector"

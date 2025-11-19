@@ -5,7 +5,7 @@ FROM nginxinc/nginx-unprivileged:1.29.0-alpine3.22
 
 USER 0
 
-RUN printf "%s%s%s%s\n" \
+RUN printf "%s%s%s%s%s\n" \
     "@nginx " \
     "http://nginx.org/packages/mainline/alpine/v" \
     `egrep -o '^[0-9]+\.[0-9]+' /etc/alpine-release` \
@@ -25,4 +25,4 @@ EXPOSE ${IMAGE_PROVIDER_PORT}
 STOPSIGNAL SIGQUIT
 
 # Start nginx
-CMD ["/bin/sh" , "-c" , "envsubst '$OTEL_COLLECTOR_HOST $IMAGE_PROVIDER_PORT $OTEL_COLLECTOR_PORT_GRPC $OTEL_SERVICE_NAME $OTEL_RESOURCE_ATTRIBUTES' < /nginx.conf.template > /etc/nginx/nginx.conf && cat  /etc/nginx/nginx.conf && exec nginx -g 'daemon off;'"]
+CMD ["/bin/sh" , "-c" , "envsubst '$OTEL_COLLECTOR_HOST $IMAGE_PROVIDER_PORT $OTEL_COLLECTOR_PORT_GRPC $OTEL_SERVICE_NAME $HOSTNAME' < /nginx.conf.template > /etc/nginx/nginx.conf && cat  /etc/nginx/nginx.conf && exec nginx -g 'daemon off;'"]

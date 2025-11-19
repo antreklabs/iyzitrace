@@ -41,6 +41,7 @@ services:
       - OTEL_DOTNET_AUTO_TRACES_ENTITYFRAMEWORKCORE_INSTRUMENTATION_ENABLED=false
       - OTEL_LOGS_EXPORTER=otlp
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:${OTEL_COLLECTOR_PORT_HTTP}
+      - OTEL_RESOURCE_DETECTORS
     depends_on:
       otel-collector:
         condition: service_started
@@ -77,6 +78,7 @@ services:
       - OTEL_SERVICE_NAME=ad
       # Workaround on OSX for https://bugs.openjdk.org/browse/JDK-8345296
       - _JAVA_OPTIONS
+      - OTEL_RESOURCE_DETECTORS
     depends_on:
       otel-collector:
         condition: service_started
@@ -110,6 +112,7 @@ services:
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=cart
       - ASPNETCORE_URLS=http://*:${CART_PORT}
+      - OTEL_RESOURCE_DETECTORS
     depends_on:
       valkey-cart:
         condition: service_started
@@ -151,6 +154,7 @@ services:
       - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=checkout
+      - OTEL_RESOURCE_DETECTORS
     depends_on:
       cart:
         condition: service_started
@@ -197,6 +201,7 @@ services:
       - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=currency
+      - OTEL_RESOURCE_DETECTORS
     depends_on:
       otel-collector:
         condition: service_started
@@ -227,6 +232,7 @@ services:
       - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=email
+      - OTEL_RESOURCE_DETECTORS
     depends_on:
       otel-collector:
         condition: service_started
@@ -258,6 +264,7 @@ services:
       - OTEL_INSTRUMENTATION_MESSAGING_EXPERIMENTAL_RECEIVE_TELEMETRY_ENABLED=true
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=fraud-detection
+      - OTEL_RESOURCE_DETECTORS
     depends_on:
       otel-collector:
         condition: service_started
@@ -301,6 +308,7 @@ services:
       - OTEL_COLLECTOR_HOST
       - FLAGD_HOST
       - FLAGD_PORT
+      - OTEL_RESOURCE_DETECTORS
     depends_on:
       ad:
         condition: service_started
@@ -366,6 +374,7 @@ services:
       - FLAGD_PORT
       - FLAGD_UI_HOST
       - FLAGD_UI_PORT
+      - OTEL_RESOURCE_DETECTORS
     depends_on:
       frontend:
         condition: service_started
@@ -399,6 +408,7 @@ services:
       - OTEL_COLLECTOR_PORT_GRPC
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=image-provider
+      - OTEL_RESOURCE_DETECTORS
     depends_on:
       otel-collector:
         condition: service_started
@@ -436,6 +446,7 @@ services:
       - FLAGD_HOST
       - FLAGD_PORT
       - FLAGD_OFREP_PORT
+      - OTEL_RESOURCE_DETECTORS
     depends_on:
       frontend:
         condition: service_started
@@ -467,6 +478,7 @@ services:
       - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=payment
+      - OTEL_RESOURCE_DETECTORS
     depends_on:
       otel-collector:
         condition: service_started
@@ -500,6 +512,7 @@ services:
       - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=product-catalog
+      - OTEL_RESOURCE_DETECTORS
     volumes:
       - ./src/product-catalog/products:/usr/src/app/products
     depends_on:
@@ -533,6 +546,7 @@ services:
       - OTEL_PHP_INTERNAL_METRICS_ENABLED=true
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=quote
+      - OTEL_RESOURCE_DETECTORS
     depends_on:
       otel-collector:
         condition: service_started
@@ -565,6 +579,7 @@ services:
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=recommendation
       - PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
+      - OTEL_RESOURCE_DETECTORS
     depends_on:
       product-catalog:
         condition: service_started
@@ -597,6 +612,7 @@ services:
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=shipping
       - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+      - OTEL_RESOURCE_DETECTORS
     depends_on:
       otel-collector:
         condition: service_started
@@ -620,6 +636,7 @@ services:
       - GOMEMLIMIT=60MiB
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=flagd
+      - OTEL_RESOURCE_DETECTORS
     command: [
       "start",
       "--uri",
@@ -655,6 +672,7 @@ services:
       - OTEL_SERVICE_NAME=flagd-ui
       - SECRET_KEY_BASE=yYrECL4qbNwleYInGJYvVnSkwJuSQJ4ijPTx5tirGUXrbznFIBFVJdPl5t6O9ASw
       - PHX_HOST=localhost
+      - OTEL_RESOURCE_DETECTORS
     ports:
       - "${FLAGD_UI_PORT}"
     depends_on:

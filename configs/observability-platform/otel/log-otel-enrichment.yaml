@@ -11,6 +11,8 @@ exporters:
     endpoint: http://loki-platform:3100/otlp
     tls:
       insecure: true
+  debug:
+    verbosity: detailed
 
 processors:
   batch:
