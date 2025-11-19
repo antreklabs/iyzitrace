@@ -1,8 +1,9 @@
 // Service Map Service - Infrastructure and service mapping data provider
-import mapData from '../../assets/data/map.json';
-import { Infrastructure, Application, Service, Operation, HealthValue, Region, ServiceMapData } from './interface.service';
+import { Infrastructure, Application, Service, Region } from './interface.service';
 import { getSelectedViewData } from './view.service';
 import { getQueryData } from '../provider/prometheus.provider';
+import { getServicesTableData } from './services.service';
+import { FilterParamsModel } from './query.service';
 
 // Selected view data helper moved to view.service.ts
 
@@ -12,7 +13,7 @@ const findItem = (selected: any, id: string, type?: string) => {
   return items.find((it: any) => it.id === id && (!type || it.type === type));
 };
 
-export const getRegions = async (): Promise<Region[]> => {
+export const getRegions = async (filterModel: FilterParamsModel): Promise<Region[]> => {
   
   const regions: Region[] = [];
   const selected = await getSelectedViewData('service-map');
@@ -36,7 +37,7 @@ export const getRegions = async (): Promise<Region[]> => {
 
   // Step 2: For each region, group by host_name (infrastructure)
   // Step 3: For each infrastructure, group by process_executable_name (application)
-  regionMap.forEach((items, cloudRegion) => {
+  for (const [cloudRegion, items] of regionMap.entries()) {
     const regionId = `region|${cloudRegion}`.toLowerCase();
     const regionName = cloudRegion.charAt(0).toUpperCase() + cloudRegion.slice(1);
     
@@ -52,7 +53,7 @@ export const getRegions = async (): Promise<Region[]> => {
 
     const infrastructures: Infrastructure[] = [];
     
-    infraMap.forEach((infraItems, hostName) => {
+    for (const [hostName, infraItems] of infraMap.entries()) {
       const infraId = `infra|${regionName}|${hostName}`.toLowerCase();
       
       // Get first item for infrastructure metadata (all items in same infra have same host info)
@@ -82,13 +83,22 @@ export const getRegions = async (): Promise<Region[]> => {
 
       const applications: Application[] = [];
       
-      appMap.forEach((appItems, processName) => {
+      for (const [processName, appItems] of appMap.entries()) {
         const firstAppItem = appItems[0];
         const appMetric = firstAppItem.metric || {};
         const processPid = appMetric.process_pid;
         
         // Create app ID using only process_executable_name
         const appId = `app|${regionName}|${hostName}|${processName}`.toLowerCase();
+        let services: Service[] = [];
+        if (infraId === 'infra|onprem|docker-desktop' && appId === 'app|onprem|docker-desktop|otelcol-contrib') {
+          try {
+            services = await getServicesTableData(filterModel);
+          } catch (error) {
+            console.error('Error fetching services table data:', error);
+            services = [];
+          }
+        }
         
         const selApp = findItem(selected, appId, 'application');
         
@@ -101,11 +111,12 @@ export const getRegions = async (): Promise<Region[]> => {
           status: {
             value: 'healthy',
           },
+          services: services,
           position: selApp?.position ?? { x: 0, y: 0 },
           groupPosition: selApp?.groupPosition ?? { x: 0, y: 0 },
           groupSize: selApp?.groupSize ?? { width: 100, height: 100 },
         });
-      });
+      }
 
       const selInfra = findItem(selected, infraId, 'infrastructure');
       
@@ -137,7 +148,7 @@ export const getRegions = async (): Promise<Region[]> => {
         groupSize: selInfra?.groupSize ?? { width: 100, height: 100 },
         applications: applications,
       });
-    });
+    }
 
     const selRegion = findItem(selected, regionId, 'region');
     regions.push({
@@ -148,7 +159,7 @@ export const getRegions = async (): Promise<Region[]> => {
       groupSize: selRegion?.groupSize ?? { width: 200, height: 200 },
       infrastructures: infrastructures,
     });
-  });
+  }
   
   return regions;
 };
@@ -260,202 +271,166 @@ export const getRegions = async (): Promise<Region[]> => {
   
 // };
 
-/**
- * KAN-26 Query - Get services by application
- * @param applicationId - The application ID to get services for
- * @returns Promise<Service[]> - List of services for the application
- */
-export const getServicesByApplication = async (regionId?: string, infrastructureId?: string, applicationId?: string): Promise<Service[]> => {
+// /**
+//  * KAN-26 Query - Get services by application
+//  * @param applicationId - The application ID to get services for
+//  * @returns Promise<Service[]> - List of services for the application
+//  */
+// export const getServicesByApplication = async (regionId?: string, infrastructureId?: string, applicationId?: string): Promise<Service[]> => {
   
-  const services: Service[] = [];
-  const selected = await getSelectedViewData('service-map');
-  const regions = regionId
-    ? mapData.regions.filter(r => r.id === regionId)
-    : mapData.regions;
+//   const services: Service[] = [];
+//   const selected = await getSelectedViewData('service-map');
+//   const regions = regionId
+//     ? mapData.regions.filter(r => r.id === regionId)
+//     : mapData.regions;
 
-  const infrastructures = infrastructureId
-    ? regions.flatMap(r => r.infrastructures.filter(i => i.id === infrastructureId))
-    : regions.flatMap(r => r.infrastructures);
+//   const infrastructures = infrastructureId
+//     ? regions.flatMap(r => r.infrastructures.filter(i => i.id === infrastructureId))
+//     : regions.flatMap(r => r.infrastructures);
 
-  const applications = applicationId
-    ? infrastructures.flatMap(i => i.applications.filter(a => a.id === applicationId))
-    : infrastructures.flatMap(a => a.applications);
+//   const applications = applicationId
+//     ? infrastructures.flatMap(i => i.applications.filter(a => a.id === applicationId))
+//     : infrastructures.flatMap(a => a.applications);
 
-  applications.forEach((app: any) => {
-    app.services.forEach((service: any) => {
-      const selSvc = findItem(selected, service.id, 'service');
-      services.push({
-        id: service.id,
-        applicationId: app.id,
-        name: service.name,
-        port: (service as any).port || 3030,
-        type: (service as any).kind || 'http',
-        metrics: {
-          avgLatencyMs: parseFloat(service.metrics.avg.replace(' ms', '')),
-          minLatencyMs: parseFloat(service.metrics.min.replace(' ms', '')),
-          maxLatencyMs: parseFloat(service.metrics.max.replace(' ms', '')),
-          p50DurationMs: parseFloat(service.metrics.avg.replace(' ms', '')),
-          p75DurationMs: parseFloat(service.metrics.avg.replace(' ms', '')),
-          p90DurationMs: parseFloat(service.metrics.avg.replace(' ms', '')),
-          p95DurationMs: parseFloat(service.metrics.avg.replace(' ms', '')),
-          p99DurationMs: parseFloat(service.metrics.avg.replace(' ms', '')),
-          avgDurationMs: parseFloat(service.metrics.avg.replace(' ms', '')),
-          requestCount: service.metrics.count,
-          callsPerSecond: parseFloat(service.metrics.avg.replace(' ms', '')),
-        },
-        status: {
-          value: service.status as HealthValue,
-          metrics: {
-            errorCount: 10,
-            errorPercentage: 0.1,
-            warningCount: 20,
-            warningPercentage: 0.2,
-            degradedCount: 30,
-            degradedPercentage: 0.3,
-            totalCount: 100,
-          },
-        },
-        position: selSvc?.position ?? service.position,
-        groupPosition: selSvc?.groupPosition ?? service.groupPosition,
-        groupSize: selSvc?.groupSize ?? service.groupSize,
-      });
-    });
-  });
+//   applications.forEach((app: any) => {
+//     app.services.forEach((service: any) => {
+//       const selSvc = findItem(selected, service.id, 'service');
+//       services.push({
+//         id: service.id,
+//         applicationId: app.id,
+//         name: service.name,
+//         port: (service as any).port || 3030,
+//         type: (service as any).kind || 'http',
+//         metrics: {
+//           avgLatencyMs: parseFloat(service.metrics.avg.replace(' ms', '')),
+//           minLatencyMs: parseFloat(service.metrics.min.replace(' ms', '')),
+//           maxLatencyMs: parseFloat(service.metrics.max.replace(' ms', '')),
+//           p50DurationMs: parseFloat(service.metrics.avg.replace(' ms', '')),
+//           p75DurationMs: parseFloat(service.metrics.avg.replace(' ms', '')),
+//           p90DurationMs: parseFloat(service.metrics.avg.replace(' ms', '')),
+//           p95DurationMs: parseFloat(service.metrics.avg.replace(' ms', '')),
+//           p99DurationMs: parseFloat(service.metrics.avg.replace(' ms', '')),
+//           avgDurationMs: parseFloat(service.metrics.avg.replace(' ms', '')),
+//           requestCount: service.metrics.count,
+//           callsPerSecond: parseFloat(service.metrics.avg.replace(' ms', '')),
+//         },
+//         status: {
+//           value: service.status as HealthValue,
+//           metrics: {
+//             errorCount: 10,
+//             errorPercentage: 0.1,
+//             warningCount: 20,
+//             warningPercentage: 0.2,
+//             degradedCount: 30,
+//             degradedPercentage: 0.3,
+//             totalCount: 100,
+//           },
+//         },
+//         position: selSvc?.position ?? service.position,
+//         groupPosition: selSvc?.groupPosition ?? service.groupPosition,
+//         groupSize: selSvc?.groupSize ?? service.groupSize,
+//       });
+//     });
+//   });
   
-  return services;
+//   return services;
 
-};
+// };
 
-/**
- * KAN-27 Query - Get operations by service
- * @param serviceId - The service ID to get operations for
- * @returns Promise<Operation[]> - List of operations for the service
- */
-export const getOperationsByService = async (regionId?: string, infrastructureId?: string, applicationId?: string, serviceId?: string): Promise<Operation[]> => {
+// /**
+//  * KAN-27 Query - Get operations by service
+//  * @param serviceId - The service ID to get operations for
+//  * @returns Promise<Operation[]> - List of operations for the service
+//  */
+// export const getOperationsByService = async (regionId?: string, infrastructureId?: string, applicationId?: string, serviceId?: string): Promise<Operation[]> => {
   
-  const operations: Operation[] = [];
+//   const operations: Operation[] = [];
  
-  const regions = regionId
-    ? mapData.regions.filter(r => r.id === regionId)
-    : mapData.regions;
+//   const regions = regionId
+//     ? mapData.regions.filter(r => r.id === regionId)
+//     : mapData.regions;
 
-  const infrastructures = infrastructureId
-    ? regions.flatMap(r => (r.infrastructures || []).filter(i => i.id === infrastructureId))
-    : regions.flatMap(r => r.infrastructures || []);
+//   const infrastructures = infrastructureId
+//     ? regions.flatMap(r => (r.infrastructures || []).filter(i => i.id === infrastructureId))
+//     : regions.flatMap(r => r.infrastructures || []);
 
-  const applications: any[] = applicationId
-    ? infrastructures.flatMap((i: any) => (i.applications || []).filter((a: any) => a.id === applicationId))
-    : infrastructures.flatMap((i: any) => i.applications || []);
+//   const applications: any[] = applicationId
+//     ? infrastructures.flatMap((i: any) => (i.applications || []).filter((a: any) => a.id === applicationId))
+//     : infrastructures.flatMap((i: any) => i.applications || []);
 
-  const services: any[] = serviceId
-    ? applications.flatMap((a: any) => (a.services || []).filter((s: any) => s.id === serviceId))
-    : applications.flatMap((a: any) => a.services || []);
+//   const services: any[] = serviceId
+//     ? applications.flatMap((a: any) => (a.services || []).filter((s: any) => s.id === serviceId))
+//     : applications.flatMap((a: any) => a.services || []);
 
-  services.forEach((svc: any) => {
-    (svc.operations || []).forEach((operation: any) => {
-      operations.push({
-        id: operation.id,
-        serviceId: svc.id,
-        name: operation.name,
-        type: operation.type,
-        method: operation.method,
-        path: operation.path,
-        sourceServiceId: svc.id,
-        targetServiceId: operation.targetServiceId,
-        metrics: {
-          avgLatencyMs: operation.avg_latency_ms,
-          p95LatencyMs: operation.p95_ms,
-          p50DurationMs: operation.avg_latency_ms,
-          p75DurationMs: operation.avg_latency_ms,
-          p90DurationMs: operation.avg_latency_ms,
-          p95DurationMs: operation.avg_latency_ms,
-          p99DurationMs: operation.avg_latency_ms,
-          avgDurationMs: operation.avg_latency_ms,
-          count: 10,
-        },
-        status: {
-          value: operation.status as HealthValue,
-          metrics: {
-            errorCount: 10,
-            errorPercentage: 0.1,
-            warningCount: 20,
-            warningPercentage: 0.2,
-            degradedCount: 30,
-            degradedPercentage: 0.3,
-            totalCount: 100,
-          },
-        },
-        position: operation.position,
-      });
-    });
-  });
+//   services.forEach((svc: any) => {
+//     (svc.operations || []).forEach((operation: any) => {
+//       operations.push({
+//         id: operation.id,
+//         serviceId: svc.id,
+//         name: operation.name,
+//         type: operation.type,
+//         method: operation.method,
+//         path: operation.path,
+//         sourceServiceId: svc.id,
+//         targetServiceId: operation.targetServiceId,
+//         metrics: {
+//           avgLatencyMs: operation.avg_latency_ms,
+//           p95LatencyMs: operation.p95_ms,
+//           p50DurationMs: operation.avg_latency_ms,
+//           p75DurationMs: operation.avg_latency_ms,
+//           p90DurationMs: operation.avg_latency_ms,
+//           p95DurationMs: operation.avg_latency_ms,
+//           p99DurationMs: operation.avg_latency_ms,
+//           avgDurationMs: operation.avg_latency_ms,
+//           count: 10,
+//         },
+//         status: {
+//           value: operation.status as HealthValue,
+//           metrics: {
+//             errorCount: 10,
+//             errorPercentage: 0.1,
+//             warningCount: 20,
+//             warningPercentage: 0.2,
+//             degradedCount: 30,
+//             degradedPercentage: 0.3,
+//             totalCount: 100,
+//           },
+//         },
+//         position: operation.position,
+//       });
+//     });
+//   });
   
-  return operations;
+//   return operations;
 
-};
+// };
 
-export const getServiceMapData = async (regionId?: string, infrastructureId?: string, applicationId?: string, serviceId?: string): Promise<ServiceMapData> => {
+// export const getServiceMapData = async (filterModel: FilterParamsModel): Promise<ServiceMapData> => {
   
-  const regions = await getRegions();
+//   const regions = await getRegions(filterModel);
   
-  // Extract infrastructures and applications from regions (they are already populated in getRegions)
-  const infrastructures = regions.flatMap(region => region.infrastructures || []);
-  const applications = infrastructures.flatMap(infra => infra.applications || []);
+//   // // Extract infrastructures and applications from regions (they are already populated in getRegions)
+//   const infrastructures = regions.flatMap(region => region.infrastructures || []);
+//   const applications = infrastructures.flatMap(infra => infra.applications || []);
   
-  // Get services and operations (these still come from other sources)
-  const services = await getServicesByApplication(regionId, infrastructureId, applicationId);
-  const operations = await getOperationsByService(regionId, infrastructureId, applicationId, serviceId);
-
-  // Filter regions if regionId is provided
-  if (regionId) {
-    regions.forEach(region => {
-      if (region.id !== regionId) {
-        region.infrastructures = [] as Infrastructure[];
-      }
-    });
-  }
-  
-  // Filter infrastructures if infrastructureId is provided
-  if (infrastructureId) {
-    regions.forEach(region => {
-      if (region.infrastructures && Array.isArray(region.infrastructures)) {
-        region.infrastructures = region.infrastructures.filter((infra: Infrastructure) => infra.id === infrastructureId);
-      }
-    });
-  }
-
-  // Filter applications if applicationId is provided
-  if (applicationId) {
-    regions.forEach(region => {
-      if (region.infrastructures && Array.isArray(region.infrastructures)) {
-        region.infrastructures.forEach((infra: Infrastructure) => {
-          if (infra.applications && Array.isArray(infra.applications)) {
-            infra.applications = infra.applications.filter((app: Application) => app.id === applicationId);
-          }
-        });
-      }
-    });
-  }
+//   // // Get services and operations (these still come from other sources)
+//   // const services = await getServicesByApplication();
+//   // const operations = await getOperationsByService();
 
 
-  // Add operations to services
-  services.forEach(service => {
-    service.operations = operations.filter(operation => operation.serviceId === service.id) as Operation[];
-    service.metrics.operationCounts = service.operations?.length ?? 0;
-  });
+//   // // Add operations to services
+//   // services.forEach(service => {
+//   //   service.operations = operations.filter(operation => operation.serviceId === service.id) as Operation[];
+//   //   service.metrics.operationCounts = service.operations?.length ?? 0;
+//   // });
 
-  // butun servisleri infrastructure i docker-desktop olan application i otelcol-contrib olan application a ekle
-  applications.filter((application: Application) => application.infrastructureId === 'infra|onprem|docker-desktop' && application.id === 'app|onprem|docker-desktop|otelcol-contrib')
-    .forEach((application: Application) => {
-      application.services = services;
-  });
-
-  // Add services to applications
-  // applications.forEach(application => {
-  //   application.services = services.filter(service => service.applicationId === application.id) as Service[];
-  // });
+//   // // butun servisleri infrastructure i docker-desktop olan application i otelcol-contrib olan application a ekle
+//   // applications.filter((application: Application) => application.infrastructureId === 'infra|onprem|docker-desktop' && application.id === 'app|onprem|docker-desktop|otelcol-contrib')
+//   //   .forEach((application: Application) => {
+//   //     application.services = services;
+//   // });
 
 
-  return { regions: regions };
+//   return { regions: regions };
 
-};
+// };

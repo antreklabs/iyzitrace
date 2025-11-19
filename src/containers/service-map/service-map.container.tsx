@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import BaseContainerComponent, { FetchedModel } from '../base.container';
 import { FilterParamsModel } from '../../api/service/query.service';
 import BaseFilter from '../base.filter';
-import { getServiceMapData } from '../../api/service/service-map.service';
+import { getRegions } from '../../api/service/service-map.service';
 import { Infrastructure, Region, ServiceMapData } from '../../api/service/interface.service';
 import { TableColumn, getTableColumns, columns as columnUtils } from '../../api/service/table.services';
 import BaseTable from '../base.table';
@@ -15,9 +15,9 @@ const ServiceMapContainer: React.FC = () => {
   const [columns, setColumns] = useState<TableColumn>();
 
   const fetchModelData = async (filterModel: FilterParamsModel): Promise<FetchedModel> => {
-    const data = await getServiceMapData();
-    const infrastructures = (data.regions || []).flatMap((r: Region) => r.infrastructures || []);
-    setMapLevelData(data);
+    const regions = await getRegions(filterModel);
+    const infrastructures = (regions || []).flatMap((r: Region) => r.infrastructures || []);
+    setMapLevelData({ regions: regions });
     setInfraLevelData(infrastructures);
     setColumnInDetail(infrastructures);
 

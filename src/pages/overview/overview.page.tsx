@@ -8,12 +8,13 @@ import {
   CoffeeOutlined,
   WindowsOutlined
 } from '@ant-design/icons';
-import { getServiceMapData } from '../../api/service/service-map.service';
+import { getRegions } from '../../api/service/service-map.service';
 import { Infrastructure, Application, Service, Operation, Region } from '../../api/service/interface.service';
 import InfrastructureCard from '../../components/overview/overview.card.Infrastructure';
 import ApplicationCard from '../../components/overview/overview.card.Application';
 import ServiceCard from '../../components/overview/overview.card.Service';
 import OperationCard from '../../components/overview/overview.card.Operation';
+import { FilterParamsModel } from '../../api/service/query.service';
 
 const { Title } = Typography;
 
@@ -29,9 +30,13 @@ const OverviewPage: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await getServiceMapData();
+        const data = await getRegions(new FilterParamsModel({
+          from: String(new Date().getTime() - 1000 * 60 * 60 * 24),
+          to: String(new Date().getTime()),
+          option_interval: '5h',
+        }));
         console.log(data);
-        setRegions(data.regions || []);
+        setRegions(data || []);
       } catch (error) {
         console.error('Error fetching service map data:', error);
       } finally {
