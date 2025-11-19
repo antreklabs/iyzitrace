@@ -1,11 +1,105 @@
 // Service Map Service - Infrastructure and service mapping data provider
-import { Infrastructure, Application, Service, Region } from './interface.service';
+import { Infrastructure, Application, Service, Region, Operation } from './interface.service';
 import { getSelectedViewData } from './view.service';
 import { getQueryData } from '../provider/prometheus.provider';
 import { getServicesTableData } from './services.service';
 import { FilterParamsModel } from './query.service';
+import { HealthValue } from './interface.service';
 
-// Selected view data helper moved to view.service.ts
+type PromVectorSample = {
+  metric: Record<string, string>;
+  value: [number, string]; // [timestamp, value]
+};
+
+type PromQueryResponse = {
+  resultType: 'vector' | 'matrix';
+  result: PromVectorSample[];
+};
+
+const makeKey = (m: Record<string, string>) =>
+  `${m.cloud_region}::${m.host_name}`;
+
+const buildMap = (data: PromQueryResponse) => {
+  const map = new Map<string, PromVectorSample>();
+  data.result.forEach((s) => {
+    const key = makeKey(s.metric);
+    map.set(key, s);
+  });
+  return map;
+};
+
+const parseValue = (s?: PromVectorSample) =>
+  s ? Number(s.value[1]) : undefined;
+
+export const getInventoryHosts = async () => {
+  // 1) Status + metadata (inv_info join'li)
+  const statusPromise = getQueryData(`
+    inventory_process_status
+      * on (cloud_region, host_name)
+        group_left(host_arch, host_ip, host_mac, infrastructureType, os_description, os_type)
+          __inv_info
+  `);
+
+  // 2) CPU %
+  const cpuPromise = getQueryData(`
+    inventory_machine_cpu_usage_percent
+  `);
+
+  // 3) Memory used GB
+  const memUsedPromise = getQueryData(`
+    inventory_machine_memory_used_gb
+  `);
+
+  // 4) Memory total GB
+  const memTotalPromise = getQueryData(`
+    inventory_machine_memory_total_gb
+  `);
+
+  const [statusData, cpuData, memUsedData, memTotalData] = await Promise.all([
+    statusPromise,
+    cpuPromise,
+    memUsedPromise,
+    memTotalPromise,
+  ]);
+
+  const cpuMap = buildMap(cpuData);
+  const memUsedMap = buildMap(memUsedData);
+  const memTotalMap = buildMap(memTotalData);
+
+  // Base olarak status + metadata'yı kullanıyoruz
+  const rows = (statusData.result as PromVectorSample[]).map((s) => {
+    const key = makeKey(s.metric);
+
+    const cpuSample = cpuMap.get(key);
+    const memUsedSample = memUsedMap.get(key);
+    const memTotalSample = memTotalMap.get(key);
+
+    return {
+      // labels
+      cloud_region: s.metric.cloud_region,
+      host_name: s.metric.host_name,
+      host_arch: s.metric.host_arch,
+      host_ip: s.metric.host_ip,
+      host_mac: s.metric.host_mac,
+      infrastructureType: s.metric.infrastructureType,
+      os_description: s.metric.os_description,
+      os_type: s.metric.os_type,
+      process_executable_name: s.metric.process_executable_name,
+      process_pid: s.metric.process_pid,
+      status: s.metric.status,
+
+      // values
+      cpuUsagePercent: parseValue(cpuSample),
+      memoryUsedGB: parseValue(memUsedSample),
+      memoryTotalGB: parseValue(memTotalSample),
+
+      // istersen status metric value'sini de ekleyebilirsin
+      statusMetricValue: Number(s.value[1]),
+    };
+  });
+
+  return rows;
+};
 
 const findItem = (selected: any, id: string, type?: string) => {
   if (!selected) return undefined;
@@ -18,16 +112,15 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
   const regions: Region[] = [];
   const selected = await getSelectedViewData('service-map');
   // console.log('[getRegions] selected:', selected);
-  const data = await getQueryData("inventory_process_status * on(cloud_region, host_name) group_left(host_arch, host_ip, host_mac, infrastructureType, os_description, os_type) __inv_info");
-
-  // console.log('[getDimensions] data:', data);
+  const data = await getInventoryHosts();
+  console.log('[getRegions] data:', data);
 
   // Step 1: Group by cloud_region
   const regionMap = new Map<string, any[]>();
   
-  if (data?.result && Array.isArray(data.result)) {
-    data.result.forEach((item: any) => {
-      const cloudRegion = item.metric?.cloud_region || 'unknown';
+  if (data && Array.isArray(data)) {
+    data.forEach((item: any) => {
+      const cloudRegion = item?.cloud_region || 'unknown';
       if (!regionMap.has(cloudRegion)) {
         regionMap.set(cloudRegion, []);
       }
@@ -44,7 +137,7 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
     // Group by host_name (infrastructure level)
     const infraMap = new Map<string, any[]>();
     items.forEach((item: any) => {
-      const hostName = item.metric?.host_name || 'unknown';
+      const hostName = item.host_name || 'unknown';
       if (!infraMap.has(hostName)) {
         infraMap.set(hostName, []);
       }
@@ -58,22 +151,21 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
       
       // Get first item for infrastructure metadata (all items in same infra have same host info)
       const firstItem = infraItems[0];
-      const metric = firstItem.metric || {};
       
       // Parse host_ip (it comes as JSON string)
       let hostIp = '';
       try {
-        const ipArray = JSON.parse(metric.host_ip || '[]');
-        hostIp = Array.isArray(ipArray) && ipArray.length > 0 ? ipArray[0] : metric.host_ip || '';
+        const ipArray = JSON.parse(firstItem.host_ip || '[]');
+        hostIp = Array.isArray(ipArray) && ipArray.length > 0 ? ipArray[0] : firstItem.host_ip || '';
       } catch {
-        hostIp = metric.host_ip || '';
+        hostIp = firstItem.host_ip || '';
       }
 
       // Group by process_executable_name (application level)
       // Each unique process_executable_name becomes one application
       const appMap = new Map<string, any[]>();
       infraItems.forEach((item: any) => {
-        const processName = item.metric?.process_executable_name || 'unknown';
+        const processName = item.process_executable_name || 'unknown';
         
         if (!appMap.has(processName)) {
           appMap.set(processName, []);
@@ -85,8 +177,7 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
       
       for (const [processName, appItems] of appMap.entries()) {
         const firstAppItem = appItems[0];
-        const appMetric = firstAppItem.metric || {};
-        const processPid = appMetric.process_pid;
+        const processPid = firstAppItem.process_pid;
         
         // Create app ID using only process_executable_name
         const appId = `app|${regionName}|${hostName}|${processName}`.toLowerCase();
@@ -94,6 +185,27 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
         if (infraId === 'infra|onprem|docker-desktop' && appId === 'app|onprem|docker-desktop|otelcol-contrib') {
           try {
             services = await getServicesTableData(filterModel);
+            let lastServiceId = '';
+            services.forEach((srv: Service) => {
+
+              const selSrv = findItem(selected, srv.id, 'service');
+              if(selSrv) {
+                srv.position = selSrv.position;
+                srv.groupPosition = selSrv.groupPosition;
+                srv.groupSize = selSrv.groupSize;
+              }
+              srv.applicationId = appId;
+              srv.port = 3030;
+              if(lastServiceId !== '' && srv.operations && srv.operations.length > 0) {
+                const methods: ('GET' | 'POST' | 'PUT')[] = ['GET', 'POST', 'PUT'];
+                srv.operations.forEach((op: Operation) => {
+                  op.targetServiceId = lastServiceId;
+                  op.method = methods[Math.floor(Math.random() * methods.length)];
+                  op.path = `/${srv.name}`;
+                });
+              }
+              lastServiceId = srv.id;
+            });
           } catch (error) {
             console.error('Error fetching services table data:', error);
             services = [];
@@ -109,7 +221,16 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
           platform: processName, // platform = name (process_executable_name)
           version: processPid || 'unknown',
           status: {
-            value: 'healthy',
+            value: firstAppItem.status as HealthValue,
+            metrics: {
+              errorCount: services.filter((srv: Service) => srv.status?.value === 'error').length,
+              errorPercentage: services.filter((srv: Service) => srv.status?.value === 'error').length / services.length * 100,
+              warningCount: services.filter((srv: Service) => srv.status?.value === 'warning').length,
+              warningPercentage: services.filter((srv: Service) => srv.status?.value === 'warning').length / services.length * 100,
+              degradedCount: services.filter((srv: Service) => srv.status?.value === 'degraded').length,
+              degradedPercentage: services.filter((srv: Service) => srv.status?.value === 'degraded').length / services.length * 100,
+              totalCount: services.length,
+            },
           },
           services: services,
           position: selApp?.position ?? { x: 0, y: 0 },
@@ -124,24 +245,31 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
         id: infraId,
         regionId: regionId,
         name: hostName || hostIp,
-        osVersion: metric.host_arch || 'unknown', // osVersion -> host_arch
+        osVersion: firstItem.host_arch || 'unknown', // osVersion -> host_arch
         ip: hostIp, // ip -> host_ip (parsed)
-        type: metric.os_type || 'unknown', // type -> os_type
+        type: firstItem.os_type || 'unknown', // type -> os_type
         cpu: {
-          usage: 8,
-          capacity: 16,
-          percentage: 50,
+          percentage: firstItem.cpuUsagePercent
         },
         memory: {
-          usage: 12,
-          capacity: 32,
-          percentage: 37.5,
+          usage: firstItem.memoryUsedGB,
+          capacity: firstItem.memoryTotalGB,
+          percentage: firstItem.memoryUsedGB / firstItem.memoryTotalGB,
         },
         status: {
-          value: 'healthy',
           metrics: {
-            errorPercentage: 10,
+            errorCount: applications.filter((app: Application) => app.status?.value === 'error').length,
+            errorPercentage: applications.filter((app: Application) => app.status?.value === 'error').length / applications.length * 100,
+            warningCount: applications.filter((app: Application) => app.status?.value === 'warning').length,
+            warningPercentage: applications.filter((app: Application) => app.status?.value === 'warning').length / applications.length * 100,
+            degradedCount: applications.filter((app: Application) => app.status?.value === 'degraded').length,
+            degradedPercentage: applications.filter((app: Application) => app.status?.value === 'degraded').length / applications.length * 100,
+            totalCount: applications.length,
           },
+          value: applications.filter((app: Application) => app.status?.value === 'error').length > 0 ? 'error' : 
+                applications.filter((app: Application) => app.status?.value === 'warning').length > 0 ? 'warning' :
+                applications.filter((app: Application) => app.status?.value === 'degraded').length > 0 ? 'degraded' :
+                'healthy',
         },
         position: selInfra?.position ?? { x: 0, y: 0 },
         groupPosition: selInfra?.groupPosition ?? { x: 0, y: 0 },

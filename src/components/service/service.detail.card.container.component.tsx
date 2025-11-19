@@ -18,9 +18,9 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
     totalCallsSpan: '',
     operationCountSpan: '',
     maxLatencySpan: '',
-    maxLatency: 0,
+    maxDuration: 0,
     minLatencySpan: '',
-    minLatency: 0,
+    minDuration: 0,
     totalMin: '',
   });
   
@@ -30,13 +30,13 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
     try {
       const operations = data[0]?.operations || [];
       const operationCount = operations.length;
-      const totalCalls = data[0].metrics.requestCount;
+      const totalCalls = data[0].metrics.callsCount;
       
       // En yüksek maxLatencyMs değerine sahip operation'ı bul
       const maxLatencyOperation = operations.length > 0 
         ? operations.reduce((max: Operation, operation: Operation) => {
-            const maxValue = max.metrics.maxLatencyMs || 0;
-            const currentValue = operation.metrics.maxLatencyMs || 0;
+            const maxValue = max.metrics.maxDurationMs || 0;
+            const currentValue = operation.metrics.maxDurationMs || 0;
             return currentValue > maxValue ? operation : max;
           })
         : null;
@@ -45,15 +45,15 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
       // En düşük minLatencyMs değerine sahip operation'ı bul
       const minLatencyOperation = operations.length > 0
         ? operations.reduce((min: Operation, operation: Operation) => {
-            const minValue = min.metrics.minLatencyMs ?? Infinity;
-            const currentValue = operation.metrics.minLatencyMs ?? Infinity;
+            const minValue = min.metrics.minDurationMs ?? Infinity;
+            const currentValue = operation.metrics.minDurationMs ?? Infinity;
             return currentValue < minValue ? operation : min;
           })
         : null;
       const minLatencySpan = minLatencyOperation?.name || '';
       
-      const maxLatency = data[0].metrics.maxLatencyMs;
-      const minLatency = data[0].metrics.minLatencyMs;
+      const maxDuration = data[0].metrics.maxDurationMs;
+      const minDuration = data[0].metrics.minDurationMs;
       const totalMin = filterModel?.options.interval;
       const totalCallsSpan = 'N/A';
       const operationCountSpan = 'N/A';
@@ -65,8 +65,8 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
         operationCountSpan,
         maxLatencySpan,
         minLatencySpan,
-        maxLatency,
-        minLatency,
+        maxDuration,
+        minDuration,
         totalMin,
       });
     } catch (err) {
@@ -169,7 +169,7 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
                 Max Latency Span in {summaryData.totalMin}m
               </Text>
               <Text style={{ color: '#52c41a', fontSize: '28px', fontWeight: 'bold', lineHeight: 1 }}>
-                {summaryData.maxLatency.toFixed(2)} ms
+                {summaryData.maxDuration.toFixed(2)} ms
               </Text>
               <Text style={{ color: '#8c8c8c', fontSize: '14px' }}>
                 {summaryData.maxLatencySpan}
@@ -198,7 +198,7 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
                 Min Latency Span in {summaryData.totalMin}m
               </Text>
               <Text style={{ color: '#52c41a', fontSize: '28px', fontWeight: 'bold', lineHeight: 1 }}>
-                {summaryData.minLatency.toFixed(2)} ms
+                {summaryData.minDuration.toFixed(2)} ms
               </Text>
               <Text style={{ color: '#8c8c8c', fontSize: '14px' }}>
                 {summaryData.minLatencySpan}

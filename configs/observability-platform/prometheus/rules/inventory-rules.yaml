@@ -52,9 +52,9 @@ groups:
     # 2) inherit wanted labels from target_info (use * with group_left)
     - record: __inv_join
       expr: |
-        __inv_base
+        __inv_base{cloud_region=~"linux-farm|onprem"}
         * on(cloud_region,host_name) group_left(host_arch, host_ip, host_mac, os_description, os_type)
-        max by(cloud_region, host_name, host_arch, host_ip, host_mac, os_description, os_type) (target_info)
+        max by(cloud_region, host_name, host_arch, host_ip, host_mac, os_description, os_type) (target_info{cloud_region=~"linux-farm|onprem"})
 
     # 3) infrastructureType classification (pod > node > container > vm > host)
     - record: __inv_info

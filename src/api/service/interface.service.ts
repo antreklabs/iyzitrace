@@ -50,8 +50,6 @@ export interface Infrastructure {
     type: string;
     regionId: string;
     cpu?: {
-        usage: number;
-        capacity: number;
         percentage: number;
     };
     memory?: {
@@ -78,25 +76,25 @@ export interface Infrastructure {
     position: PositionItem;
     groupPosition: PositionItem;
     services?: Service[] | [];
-    }
+  }
 
-    export interface Service {
+  export interface Service {
     id: string;
     applicationId?: string;
     name: string;
     port?: number;
     type?: string;
     metrics?: {
-        avgLatencyMs: number
-        minLatencyMs: number;
-        maxLatencyMs: number;
+        sumDurationMs?: number;
+        avgDurationMs?: number;
+        minDurationMs?: number;
+        maxDurationMs?: number;
         p50DurationMs?: number;
         p75DurationMs?: number;
         p90DurationMs?: number;
         p95DurationMs?: number;
         p99DurationMs?: number;
-        avgDurationMs?: number;
-        requestCount: number;
+        callsCount?: number;
         callsPerSecond?: number;
         operationCounts?: number;
     };
@@ -113,33 +111,30 @@ export interface Infrastructure {
     position?: PositionItem;
     groupPosition?: PositionItem;
     operations?: Operation[] | [];
-    }
+  }
 
-    export interface Operation {
+  export interface Operation {
     id: string;
     serviceId?: string;
     name: string;
     type: string;
     method?: string;
     path?: string;
-    sourceServiceId?: string;
     targetServiceId?: string;
     metrics: {
-        avgLatencyMs?: number;
-        minLatencyMs?: number;
-        maxLatencyMs?: number;
-        p95LatencyMs?: number;
+        avgDurationMs?: number;
+        minDurationMs?: number;
+        maxDurationMs?: number;
         p50DurationMs?: number;
         p75DurationMs?: number;
         p90DurationMs?: number;
         p95DurationMs?: number;
         p99DurationMs?: number;
-        avgDurationMs?: number;
-        count?: number;
+        callsCount?: number;
     };
     status?: StatusItem;
     position?: PositionItem;
-    }
+  }
   
 
 export interface Trace {

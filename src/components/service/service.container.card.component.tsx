@@ -22,7 +22,7 @@ const ServiceMetricsCard: React.FC<ServiceMetricsCardProps> = ({ service }) => {
     const fetchData = async () => {
         try {
           setLoading(true);
-          setMetrics({ avg: service.metrics.avgLatencyMs, min: service.metrics.minLatencyMs, max: service.metrics.maxLatencyMs, count: service.metrics.requestCount });
+          setMetrics({ avg: service.metrics.avgDurationMs, min: service.metrics.minDurationMs, max: service.metrics.maxDurationMs, count: service.metrics.callsCount });
 
       } finally {
         setLoading(false);

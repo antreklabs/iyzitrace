@@ -10,7 +10,7 @@ const ServiceRequestChart: React.FC<{ services: Service[] }> = ({ services }) =>
       name: service.name,
       data: Array.from({ length: 20 }, (_, i) => ({
         x: new Date(Date.now() - (19 - i) * 60000), // Last 20 minutes
-        y: service.metrics.requestCount,
+        y: service.metrics.callsCount,
       })),
       color: colors[index % colors.length],
     }));

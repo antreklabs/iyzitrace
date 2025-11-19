@@ -12,7 +12,7 @@ import {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { Position as CustomPosition, CustomSize } from '../../interfaces/service-map/service-map.interface';
-import { InfraIsoBlockNode, ServiceIsoBlockNode, GroupNode, statusColor } from './map.component';
+import { InfraIsoBlockNode, ServiceIsoBlockNode, GroupNode, statusColor, statusPercentage } from './map.component';
 import { Application, Operation, Service } from '../../api/service/interface.service';
 import { getPluginSettings, savePluginSettings } from '../../api/service/settings.service';
 
@@ -90,9 +90,9 @@ console.log('data', data);
       <div style={{ marginBottom: '16px' }}>
         <h4 style={{ color: '#ffffff', margin: '0 0 8px 0', fontSize: '14px' }}>System Resources</h4>
         <div style={{ color: '#94a3b8', fontSize: '12px', lineHeight: '1.4' }}>
-          <div><strong>CPU Usage:</strong> {data.cpu?.percentage ?? 0}%</div>
-          <div><strong>Memory:</strong> {data.memory?.usage ?? 0}/{data.memory?.capacity ?? 0} GB</div>
-          <div><strong>Memory Usage:</strong> {data.memory?.percentage}%</div>
+          <div><strong>CPU Usage:</strong> {data.cpu?.percentage.toFixed(1) ?? 0}%</div>
+          <div><strong>Memory:</strong> {data.memory?.usage.toFixed(1) ?? 0}/{data.memory?.capacity.toFixed(1) ?? 0} GB</div>
+          <div><strong>Memory Usage:</strong> {data.memory?.percentage.toFixed(1) ?? 0}%</div>
         </div>
       </div>
 
@@ -100,16 +100,12 @@ console.log('data', data);
       <div style={{ 
         marginBottom: '20px',
         padding: '12px',
-        background: data.status.value.toLowerCase() === 'healthy' ? 'rgba(16, 185, 129, 0.1)' : 
-                   data.status.value.toLowerCase() === 'warning' ? 'rgba(245, 158, 11, 0.1)' : 
-                   'rgba(239, 68, 68, 0.1)',
-        border: `1px solid ${data.status.value.toLowerCase() === 'healthy' ? '#10b981' : 
-                           data.status.value.toLowerCase() === 'warning' ? '#f59e0b' : '#ef4444'}`,
+        background: statusColor(data.status.value),
+        border: `1px solid ${statusColor(data.status.value)}`,
         borderRadius: '8px'
       }}>
         <div style={{ 
-          color: data.status.value.toLowerCase() === 'healthy' ? '#10b981' : 
-                 data.status.value.toLowerCase() === 'warning' ? '#f59e0b' : '#ef4444',
+          color: '#ffffff',
           fontWeight: 'bold',
           fontSize: '14px',
           marginBottom: '4px'
@@ -387,16 +383,12 @@ const ApplicationDetailPanel: React.FC<{
       <div style={{ 
         marginBottom: '20px',
         padding: '12px',
-        background: data.status.value.toLowerCase() === 'healthy' || data.status.value.toLowerCase() === 'ok' ? 'rgba(16, 185, 129, 0.1)' : 
-                   data.status.value.toLowerCase() === 'warning' || data.status.value.toLowerCase() === 'degraded' ? 'rgba(245, 158, 11, 0.1)' : 
-                   'rgba(239, 68, 68, 0.1)',
-        border: `1px solid ${data.status?.value?.toLowerCase() === 'healthy' || data.status?.value?.toLowerCase() === 'ok' ? '#10b981' : 
-                           data.status?.value?.toLowerCase() === 'warning' || data.status?.value?.toLowerCase() === 'degraded' ? '#f59e0b' : '#ef4444'}`,
+        background: statusColor(data.status.value),
+        border: `1px solid ${statusColor(data.status.value)}`,
         borderRadius: '8px'
       }}>
         <div style={{ 
-          color: data.status.value.toLowerCase() === 'healthy' || data.status.value.toLowerCase() === 'ok' ? '#10b981' : 
-                 data.status.value.toLowerCase() === 'warning' || data.status.value.toLowerCase() === 'degraded' ? '#f59e0b' : '#ef4444',
+          color: '#ffffff',
           fontWeight: 'bold',
           fontSize: '14px',
           marginBottom: '4px'
@@ -483,18 +475,18 @@ const ApplicationDetailPanel: React.FC<{
                 >
                   <div style={{ color: '#e5e7eb', fontWeight: 600 }}>{svc.name}</div>
                   <div style={{
-                    background: svc.status.value.toLowerCase() === 'healthy' ? 'rgba(16,185,129,0.15)' : svc.status.value.toLowerCase() === 'warning' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
-                    border: `1px solid ${svc.status.value.toLowerCase() === 'healthy' ? '#10b981' : svc.status.value.toLowerCase() === 'warning' ? '#f59e0b' : '#ef4444'}`,
-                    color: svc.status.value.toLowerCase() === 'healthy' ? '#10b981' : svc.status.value.toLowerCase() === 'warning' ? '#f59e0b' : '#ef4444',
+                    background: statusColor(svc.status.value),
+                    border: `1px solid ${statusColor(svc.status.value)}`,
+                    color: '#ffffff',
                     padding: '2px 8px',
                     borderRadius: 6,
                     fontSize: 10
                   }}>{(svc.status.value || 'unknown').toUpperCase()}</div>
                 </div>
                 <div style={{ color: '#94a3b8', fontSize: 12, marginTop: 6 }}>
-                  <div><strong>Average Latency:</strong> {svc.metrics?.avgLatencyMs ?? 'n/a'}</div>
-                  <div><strong>Min Latency:</strong> {svc.metrics?.minLatencyMs ?? 'n/a'}</div>
-                  <div><strong>Max Latency:</strong> {svc.metrics?.maxLatencyMs ?? 'n/a'}</div>
+                  <div><strong>Average Latency:</strong> {svc.metrics?.avgDurationMs.toFixed(2) ?? 'n/a'}</div>
+                  <div><strong>Min Latency:</strong> {svc.metrics?.minDurationMs.toFixed(2) ?? 'n/a'}</div>
+                  <div><strong>Max Latency:</strong> {svc.metrics?.maxDurationMs.toFixed(2) ?? 'n/a'}</div>
                   {/* {svc.dependencies && Array.isArray(svc.dependencies) && svc.dependencies.length > 0 && (
                     <div style={{ marginTop: 6 }}>
                       <strong>Dependencies:</strong>
@@ -648,9 +640,9 @@ const ServiceDetailPanel: React.FC<{
         <div style={{ flex: 1 }}>
           <h4 style={{ color: '#ffffff', margin: '0 0 8px 0', fontSize: '14px' }}>Metrics</h4>
           <div style={{ color: '#94a3b8', fontSize: '12px', lineHeight: '1.4' }}>
-            <div><strong>Avg Lat:</strong> {data.metrics.avgLatencyMs || 'N/A'}</div>
-            <div><strong>Min Lat:</strong> {data.metrics.minLatencyMs || 'N/A'}</div>
-            <div><strong>Max Lat:</strong> {data.metrics.maxLatencyMs || 'N/A'}</div>
+            <div><strong>Avg Lat:</strong> {data.metrics.avgDurationMs.toFixed(2) || 'N/A'}</div>
+            <div><strong>Min Lat:</strong> {data.metrics.minDurationMs.toFixed(2) || 'N/A'}</div>
+            <div><strong>Max Lat:</strong> {data.metrics.maxDurationMs.toFixed(2) || 'N/A'}</div>
           </div>
         </div>
       </div>
@@ -659,16 +651,12 @@ const ServiceDetailPanel: React.FC<{
       <div style={{ 
         marginBottom: '20px',
         padding: '12px',
-        background: data.status.value.toLowerCase() === 'healthy' ? 'rgba(16, 185, 129, 0.1)' : 
-                   data.status.value.toLowerCase() === 'warning' ? 'rgba(245, 158, 11, 0.1)' : 
-                   'rgba(239, 68, 68, 0.1)',
-        border: `1px solid ${data.status.value.toLowerCase() === 'healthy' ? '#10b981' : 
-                           data.status.value.toLowerCase() === 'warning' ? '#f59e0b' : '#ef4444'}`,
+        background: statusColor(data.status.value),
+        border: `1px solid ${statusColor(data.status.value)}`,
         borderRadius: '8px'
       }}>
         <div style={{ 
-          color: data.status.value.toLowerCase() === 'healthy' ? '#10b981' : 
-                 data.status.value.toLowerCase() === 'warning' ? '#f59e0b' : '#ef4444',
+          color: '#ffffff', 
           fontWeight: 'bold',
           fontSize: '14px',
           marginBottom: '4px'
@@ -747,8 +735,8 @@ const ServiceDetailPanel: React.FC<{
                   </span>
                 </div>
                 <div style={{ color: '#94a3b8', fontSize: '12px', lineHeight: '1.4', display: 'flex', gap: '12px' }}>
-                  <div><strong>Avg Lat:</strong> {op.metrics.avgLatencyMs || 'N/A'}ms</div>
-                  <div><strong>P95 Lat:</strong> {op.metrics.p95LatencyMs || 'N/A'}ms</div>
+                  <div><strong>Avg Lat:</strong> {op.metrics.avgDurationMs.toFixed(2) || 'N/A'}ms</div>
+                  <div><strong>P95 Lat:</strong> {op.metrics.p95DurationMs.toFixed(2) || 'N/A'}ms</div>
                 </div>
               </div>
             ))}
@@ -909,8 +897,8 @@ const OperationDetailPanel: React.FC<{
         <div style={{ flex: 1 }}>
           <h4 style={{ color: '#ffffff', margin: '0 0 8px 0', fontSize: '14px' }}>Metrics</h4>
           <div style={{ color: '#94a3b8', fontSize: '12px', lineHeight: '1.4' }}>
-            <div><strong>Avg Lat:</strong> {data.metrics.avgLatencyMs || 'N/A'}</div>
-            <div><strong>p95:</strong> {data.metrics.p95LatencyMs || 'N/A'}</div>
+            <div><strong>Avg Lat:</strong> {data.metrics.avgDurationMs.toFixed(2) || 'N/A'}</div>
+            <div><strong>p95:</strong> {data.metrics.p95DurationMs.toFixed(2) || 'N/A'}</div>
           </div>
         </div>
       </div>
@@ -919,12 +907,12 @@ const OperationDetailPanel: React.FC<{
       <div style={{ 
         marginBottom: '20px',
         padding: '12px',
-        background: data.status.value.toLowerCase() === 'healthy' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-        border: `1px solid ${data.status.value.toLowerCase() === 'healthy' ? '#10b981' : '#ef4444'}`,
+        background: statusColor(data.status.value),
+        border: `1px solid ${statusColor(data.status.value)}`,
         borderRadius: '8px'
       }}>
         <div style={{ 
-          color: data.status.value.toLowerCase() === 'healthy' ? '#10b981' : '#ef4444',
+          color: '#ffffff',
           fontWeight: 'bold',
           fontSize: '14px',
           marginBottom: '4px'
@@ -1255,7 +1243,7 @@ const MapInner = forwardRef<any, MapLayerProps>(({ selectedNodeId, onNodeClick, 
             nodeData = {
               id: item.id,
               label: item.name,
-              sub: `${item.status?.value} ${Math.round(item.status?.metrics?.errorPercentage)}%`,
+              sub: `${item.status?.value} ${statusPercentage(item.status?.value, item.status?.metrics?.errorPercentage, item.status?.metrics?.warningPercentage, item.status?.metrics?.degradedPercentage).toFixed(2)}%`,
               accent: statusColor(item.status?.value),
               w: 120,
               h: 160

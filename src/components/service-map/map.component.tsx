@@ -46,6 +46,13 @@ export const statusColor = (s?: string) =>
     : s === 'error'
     ? '#ef4444'
     : '#6b7280';
+export const statusPercentage = (s?: string, errorPercentage?: number, warningPercentage?: number, degradedPercentage?: number) =>
+  s === 'degraded' ? degradedPercentage
+    : s === 'warning'
+    ? warningPercentage
+    : s === 'error'
+    ? errorPercentage
+    : 0;
 
 
 // ---------- İzometrik blok node ----------
@@ -306,23 +313,6 @@ export const ServiceIsoBlockNode: React.FC<{ data: Service; selected?: boolean }
           </div>
         </div>
         
-        <div style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '4px' }}>
-          {safeType.toUpperCase()}
-        </div>
-        
-        {/* Details */}
-        <div style={{ marginTop: '8px', fontSize: '10px', color: '#94a3b8' }}>
-          {(data as any)?.details?.containers && (
-            <div>{(data as any).details.containers} Containers</div>
-          )}
-          {(data as any)?.details?.processes && (
-            <div>{(data as any).details.processes} Processes</div>
-          )}
-          {(data as any)?.details?.jvms && (
-            <div>{(data as any).details.jvms} JVMs</div>
-          )}
-        </div>
-
       {/* Metrics */}
       {data?.metrics && (
         <div
@@ -335,19 +325,19 @@ export const ServiceIsoBlockNode: React.FC<{ data: Service; selected?: boolean }
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
             <div>
               <div style={{ color: '#94a3b8', fontSize: '10px' }}>Avg. Lat</div>
-              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.avgLatencyMs} ms</div>
+              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.avgDurationMs.toFixed(2)} ms</div>
             </div>
             <div>
               <div style={{ color: '#94a3b8', fontSize: '10px' }}>Min. Lat</div>
-              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.minLatencyMs} ms</div>
+              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.minDurationMs.toFixed(2)} ms</div>
             </div>
             <div>
               <div style={{ color: '#94a3b8', fontSize: '10px' }}>Max. Lat</div>
-              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.maxLatencyMs} ms</div>
+              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.maxDurationMs.toFixed(2)} ms</div>
             </div>
             <div>
-              <div style={{ color: '#94a3b8', fontSize: '10px' }}>Count</div>
-              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.requestCount}</div>
+              <div style={{ color: '#94a3b8', fontSize: '10px' }}>Calls</div>
+              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '12px' }}>{data.metrics.callsCount}</div>
             </div>
           </div>
         </div>

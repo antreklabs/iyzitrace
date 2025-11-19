@@ -973,10 +973,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                     </Form.Item>
                 </Col>
                 <Col span={10}>
-                    <Form.Item name={['options', 'interval']} label="Interval" initialValue="15s">
+                    <Form.Item name={['options', 'interval']} label="Interval" initialValue="5m">
                     <Select className="base-filter-select">
                       <Select.Option value="$__rate_interval">Optimum</Select.Option>
-                      <Select.Option value="15s">15s</Select.Option>
                       <Select.Option value="30s">30s</Select.Option>
                       <Select.Option value="1m">1m</Select.Option>
                       <Select.Option value="5m">5m</Select.Option>

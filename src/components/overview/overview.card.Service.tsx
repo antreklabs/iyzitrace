@@ -100,7 +100,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                 avatar={<Avatar icon={getServiceIcon(service.name)} style={{ background: 'rgba(255,255,255,0.2)' }} />}
                 title={<Text style={{ color: 'white' }}>{service.name}</Text>}
                 description={<Text style={{ color: 'rgba(255,255,255,0.8)' }}>
-                  {service.port ? `Port: ${service.port}` : service.type || ''}
+                  {service.type || ''}
                 </Text>}
               />
               <Badge color={getStatusColor(status)} />

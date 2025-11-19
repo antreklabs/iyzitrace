@@ -89,7 +89,7 @@ const OperationCard: React.FC<OperationCardProps> = ({
         dataSource={operations}
         renderItem={(operation) => {
           const status = operation.status?.value || 'unknown';
-          const avgLatency = operation.metrics?.avgLatencyMs || operation.metrics?.avgDurationMs;
+          const avgLatency = operation.metrics?.avgDurationMs;
           const isSelected = operation.id === selectedOperationId;
           
           return (

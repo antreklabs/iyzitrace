@@ -14,6 +14,6 @@ export const getQueryData = async (query: string, start: number, end: number, li
       limit: limit,
   };
   const res = await getBackendSrv().get(`/api/datasources/proxy/uid/${tempoUid}/api/search?${qs.stringify(payload)}`);
-  console.log('getQueryData res', res);
+  // console.log('getQueryData res', res);
   return res;
 }
