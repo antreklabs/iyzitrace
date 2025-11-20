@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Typography, Form, Card, Button, Space, Empty, Modal, Input, message, Row, Col } from 'antd';
+import { Typography, Form, Card, Button, Space, Empty, Modal, Input, message, Row, Col, Tag, Skeleton } from 'antd';
 import { PluginPage } from '@grafana/runtime';
 import { getPluginSettings, savePluginSettings, PluginSettings } from '../../api/service/settings.service';
 import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
+import { getRegions } from '../../api/service/service-map.service';
+import { getServicesTableData } from '../../api/service/services.service';
+import { FilterParamsModel } from '../../api/service/query.service';
 
 const { Title, Text } = Typography;
 
@@ -131,7 +134,206 @@ function ViewsPage() {
     setQueryPairs(prev => prev.map(p => (p.id === id ? { ...p, lockedKey: true } : p)));
   };
 
+  const buildWidgetUrl = (widget: PageViewItem) => {
+    const url = widget.query || '';
+    switch (widget.page) {
+      case 'logs':
+        return `/a/iyzitrace-app/logs${url}`;
+      case 'traces':
+        return `/a/iyzitrace-app/traces${url}`;
+      case 'services':
+        return `/a/iyzitrace-app/services${url}`;
+      case 'service-map':
+        return `/a/iyzitrace-app/service-map${url}`;
+      case 'alerts':
+        return `/a/iyzitrace-app/alerts${url}`;
+      case 'exceptions':
+        return `/a/iyzitrace-app/exceptions${url}`;
+      default:
+        return `/a/iyzitrace-app/${widget.page || ''}${url}`;
+    }
+  };
+
+  const ViewPreview: React.FC<{ widget: PageViewItem }> = ({ widget }) => {
+    const [loadingPreview, setLoadingPreview] = useState(true);
+    const [previewData, setPreviewData] = useState<{
+      title: string;
+      accent: string;
+      highlights: Array<{ label: string; value: string }>;
+      chips?: string[];
+      footer?: string;
+    } | null>(null);
+    const [previewError, setPreviewError] = useState<string | null>(null);
+
+    const parseQueryEntries = (query: string): [string, string][] => {
+      const sp = new URLSearchParams(query?.startsWith('?') ? query.slice(1) : query || '');
+      const entries: [string, string][] = [];
+      sp.forEach((value, key) => entries.push([key, value]));
+      return entries;
+    };
+
+    const buildFilterModel = (query: string) => {
+      const params: Record<string, string> = {};
+      parseQueryEntries(query).forEach(([key, value]) => {
+        params[key] = value;
+      });
+      return new FilterParamsModel(params);
+    };
+
+    useEffect(() => {
+      let isMounted = true;
+      const loadPreview = async () => {
+        setLoadingPreview(true);
+        setPreviewError(null);
+        try {
+          const queryEntries = parseQueryEntries(widget.query || '');
+          const filterModel = buildFilterModel(widget.query || '');
+
+          let preview;
+          switch (widget.page) {
+            case 'service-map': {
+              const data = await getRegions(filterModel);
+              const regions = data ?? [];
+              const infrastructures = regions.flatMap((region: any) => region.infrastructures || []);
+              const applications = infrastructures.flatMap((infra: any) => infra.applications || []);
+              const services = applications.flatMap((app: any) => app.services || []);
+              const operations = services.flatMap((service: any) => service.operations || []);
+              preview = {
+                title: 'Topology Snapshot',
+                accent: '#7c3aed',
+                highlights: [
+                  { label: 'Regions', value: regions.length.toString() },
+                  { label: 'Infrastructures', value: infrastructures.length.toString() },
+                  { label: 'Applications', value: applications.length.toString() },
+                  { label: 'Services', value: services.length.toString() },
+                  { label: 'Operations', value: operations.length.toString() }
+                ],
+                chips: queryEntries.map(([key, value]) => `${key}=${value}`),
+                footer: 'Live data pulled from the service graph'
+              };
+              break;
+            }
+            case 'services': {
+              const servicesData = await getServicesTableData(filterModel);
+              const top = servicesData.slice(0, 3).map(service => ({
+                label: service.name,
+                value: `${(service.metrics?.callsPerSecond ?? 0).toFixed(1)} ms`
+              }));
+              preview = {
+                title: 'Top Services',
+                accent: '#10b981',
+                highlights: top.length
+                  ? top
+                  : [{ label: 'Status', value: 'No service data for this time window' }],
+                chips: queryEntries.map(([key, value]) => `${key}=${value}`),
+                footer: 'Metrics refreshed in real-time'
+              };
+              break;
+            }
+            default: {
+              preview = {
+                title: 'Stored Filters',
+                accent: '#3b82f6',
+                highlights: [{ label: 'Target Page', value: widget.page }],
+                chips: queryEntries.length
+                  ? queryEntries.map(([key, value]) => `${key}=${value}`)
+                  : ['No query parameters'],
+                footer: 'Click View for the full experience'
+              };
+            }
+          }
+
+          if (isMounted) {
+            setPreviewData(preview);
+          }
+        } catch (error) {
+          console.error('Error building view preview:', error);
+          if (isMounted) {
+            setPreviewError('Preview unavailable');
+          }
+        } finally {
+          if (isMounted) {
+            setLoadingPreview(false);
+          }
+        }
+      };
+
+      loadPreview();
+      return () => {
+        isMounted = false;
+      };
+    }, [widget.page, widget.query, widget.id]);
+
+    return (
+      <div
+        style={{
+          marginTop: 12,
+          border: '1px solid #303030',
+          borderRadius: 12,
+          background: 'radial-gradient(circle at top, rgba(255,255,255,0.08), rgba(0,0,0,0.2))',
+          height: 200,
+          padding: 12,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        {loadingPreview ? (
+          <Skeleton active title={false} paragraph={{ rows: 4 }} />
+        ) : previewError ? (
+          <div style={{ color: '#8c8c8c', fontSize: 12, textAlign: 'center', margin: 'auto 0' }}>
+            {previewError}
+          </div>
+        ) : (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+              <Text style={{ color: previewData?.accent, fontWeight: 600 }}>
+                {previewData?.title}
+              </Text>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                {new Date().toLocaleTimeString()}
+              </Text>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8 }}>
+              {previewData?.highlights.map((item) => (
+                <div
+                  key={`${item.label}-${item.value}`}
+                  style={{
+                    background: 'rgba(255,255,255,0.04)',
+                    borderRadius: 8,
+                    padding: '8px 10px',
+                  }}
+                >
+                  <Text style={{ fontSize: 11, color: '#8c8c8c' }}>{item.label}</Text>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>{item.value}</div>
+                </div>
+              ))}
+            </div>
+            {previewData?.chips?.length ? (
+              <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {previewData.chips.map((chip) => (
+                  <Tag
+                    key={chip}
+                    style={{ borderRadius: 999, background: 'rgba(255,255,255,0.08)', color: '#fff' }}
+                  >
+                    {chip}
+                  </Tag>
+                ))}
+              </div>
+            ) : null}
+            {previewData?.footer && (
+              <Text type="secondary" style={{ marginTop: 'auto', fontSize: 11 }}>
+                {previewData.footer}
+              </Text>
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
+
   const renderWidget = (widget: PageViewItem) => {
+    const iframeUrl = buildWidgetUrl(widget);
     return (
       <Card
         key={widget.id}
@@ -144,27 +346,7 @@ function ViewsPage() {
               icon={<EyeOutlined />}
               size="small"
               onClick={() => {
-                const url = widget.query || '';
-                switch (widget.page) {
-                  case 'logs':
-                    window.location.href = `/a/iyzitrace-app/logs${url}`;
-                    break;
-                  case 'traces':
-                    window.location.href = `/a/iyzitrace-app/traces${url}`;
-                    break;
-                  case 'services':
-                    window.location.href = `/a/iyzitrace-app/services${url}`;
-                    break;
-                  case 'service-map':
-                    window.location.href = `/a/iyzitrace-app/service-map${url}`;
-                    break;
-                  case 'alerts':
-                    window.location.href = `/a/iyzitrace-app/alerts${url}`;
-                    break;
-                  case 'exceptions':
-                    window.location.href = `/a/iyzitrace-app/exceptions${url}`;
-                    break;
-                }
+                window.location.href = iframeUrl;
               }}
             >
               View
@@ -201,6 +383,7 @@ function ViewsPage() {
           <Text strong>Created: </Text>
           <Text>{new Date(widget.createdAt).toLocaleDateString()}</Text>
         </div>
+        <ViewPreview widget={widget} />
       </Card>
     );
   };

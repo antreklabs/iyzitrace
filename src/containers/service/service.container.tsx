@@ -29,24 +29,46 @@ const ServiceContainer: React.FC = () => {
 
   const buildColumns = (data: any): TableColumn => {
     const cols = getTableColumns(data, 'operations');
+
+    let root = columnUtils.renameColumns(cols.RootColumns, {
+      type: 'Type',
+      metricsavgdurationms: 'Avg Latency',
+      metricsmindurationms: 'Min Latency',
+      metricsmaxdurationms: 'Max Latency',
+      metricscallscount: 'Requests',
+      metricscallspersecond: 'Calls Per Second',
+      metricsoperationcounts: 'Operations'
+    });
+    root = columnUtils.reorderColumns(root, ['name', 'type', 'metricsavgdurationms', 'metricsmindurationms', 'metricsmaxdurationms', 'metricscallscount', 'metricscallspersecond']);
+
+    let l1 = columnUtils.renameColumns(cols.L1Columns ?? [], {
+      metricsp50durationms: 'P50',
+      metricsp75durationms: 'P75',
+      metricsp90durationms: 'P90',
+      metricsp95durationms: 'P95',
+      metricsp99durationms: 'P99',
+      metricsavgdurationms: 'Avg',
+      metricsmindurationms: 'Min',
+      metricsmaxdurationms: 'Max',
+      metricscallscount: 'Requests'
+    })
+    l1 = columnUtils.reorderColumns(l1, ['name', 'type', 'metricsavgdurationms', 'metricsmindurationms', 'metricsmaxdurationms', 'metricscallscount', 'metricsp50durationms', 'metricsp75durationms', 'metricsp90durationms', 'metricsp95durationms', 'metricsp99durationms']);
+
     const visibleColumns: TableColumn = {
-      RootColumns: columnUtils.hideColumns(columnUtils.renameColumns(cols.RootColumns, {
-        metricsavglatencyms: 'Avg Latency',
-        metricsminlatencyms: 'Min Latency',
-        metricsmaxlatencyms: 'Max Latency',
-        metricsrequestcount: 'Request Count'
-      }), ['id']),
-      L1Columns: columnUtils.hideColumns(columnUtils.renameColumns(cols.L1Columns ?? [], {
-        metricsp50durationms: 'P50 Duration',
-        metricsp90durationms: 'P90 Duration',
-        metricsp99durationms: 'P99 Duration',
-        metricsavgdurationms: 'Avg Duration'
-      }), ['id','serviceId'])
+      RootColumns: columnUtils.hideColumns(root, ['id', 'metricssumdurationms', 'metricsp50durationms', 'metricsp75durationms', 'metricsp90durationms', 'metricsp95durationms', 'metricsp99durationms']),
+      L1Columns: columnUtils.hideColumns(l1, ['id','serviceId'])
     };
 
     const typeColumn = visibleColumns.L1Columns.find((col: ColumnItem) => col.key === 'type');
     if (typeColumn) {
       typeColumn.render = (value: string) => {
+        return <Tag color={getOperationTypeColor(value)}>{value}</Tag>;
+      };
+    }
+
+    const serviceTypeColumn = visibleColumns.RootColumns.find((col: ColumnItem) => col.key === 'type');
+    if (serviceTypeColumn) {
+      serviceTypeColumn.render = (value: string) => {
         return <Tag color={getOperationTypeColor(value)}>{value}</Tag>;
       };
     }
