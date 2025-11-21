@@ -25,4 +25,5 @@ COPY ./src/email/Gemfile.lock Gemfile.lock
 COPY ./src/email/email_server.rb email_server.rb
 
 EXPOSE ${EMAIL_PORT}
-ENTRYPOINT ["bundle", "exec", "ruby", "email_server.rb"]
+
+ENTRYPOINT ["/bin/sh", "-c", "export OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES},host.name=${HOSTNAME} && bundle exec ruby email_server.rb"]

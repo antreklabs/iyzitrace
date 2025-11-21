@@ -112,6 +112,31 @@ receivers:
             enabled: true
       processes:
       process:
+        include:
+          match_type: regexp
+          names:
+            # runtimes
+            - "(?i).*java.*"
+            - "(?i).*dotnet.*"
+            - "(?i).*python.*"
+            - "(?i).*node.*"
+            - "(?i).*ruby.*"
+            - "(?i).*php.*"
+            - "(?i).*go.*"
+
+            # databases
+            - "(?i).*postgres.*"
+            - "(?i).*mysql.*"
+            - "(?i).*mariadb.*"
+            - "(?i).*oracle.*"
+            - "(?i).*sqlserver.*"
+
+            # messaging
+            - "(?i).*kafka.*"
+            - "(?i).*rabbitmq.*"
+
+            # cache
+            - "(?i).*redis.*"
         mute_process_exe_error: true
         mute_process_io_error: true
         mute_process_user_error: true
