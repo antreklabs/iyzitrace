@@ -1,5 +1,5 @@
 // Service Map Service - Infrastructure and service mapping data provider
-import { Infrastructure, Application, Service, Region, Operation } from './interface.service';
+import { Infrastructure, Application, Service, Region } from './interface.service';
 import { getSelectedViewData } from './view.service';
 import { getQueryData } from '../provider/prometheus.provider';
 import { getServicesTableData } from './services.service';
@@ -182,10 +182,9 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
         // Create app ID using only process_executable_name
         const appId = `app|${regionName}|${hostName}|${processName}`.toLowerCase();
         let services: Service[] = [];
-        if (infraId === 'infra|onprem|docker-desktop' && appId === 'app|onprem|docker-desktop|otelcol-contrib') {
+        if (infraId === 'infra|onprem|docker-desktop' && appId === 'app|onprem|docker-desktop|java') {
           try {
             services = await getServicesTableData(filterModel);
-            let lastServiceId = '';
             services.forEach((srv: Service) => {
 
               const selSrv = findItem(selected, srv.id, 'service');
@@ -195,16 +194,6 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
                 srv.groupSize = selSrv.groupSize;
               }
               srv.applicationId = appId;
-              srv.port = 3030;
-              if(lastServiceId !== '' && srv.operations && srv.operations.length > 0) {
-                const methods: ('GET' | 'POST' | 'PUT')[] = ['GET', 'POST', 'PUT'];
-                srv.operations.forEach((op: Operation) => {
-                  op.targetServiceId = lastServiceId;
-                  op.method = methods[Math.floor(Math.random() * methods.length)];
-                  op.path = `/${srv.name}`;
-                });
-              }
-              lastServiceId = srv.id;
             });
           } catch (error) {
             console.error('Error fetching services table data:', error);

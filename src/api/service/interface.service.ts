@@ -82,7 +82,7 @@ export interface Infrastructure {
     id: string;
     applicationId?: string;
     name: string;
-    port?: number;
+    port?: string;
     type?: string;
     metrics?: {
         sumDurationMs?: number;

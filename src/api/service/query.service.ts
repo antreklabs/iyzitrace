@@ -557,58 +557,58 @@ export const getQueryByType = (
       return `(sum by(${service_label_name}) (rate(${definitions.bucket_duration_ms_metric_name}${buildLeFilter(labelFilters, "100")}[${interval}])) + sum by(${service_label_name}) (rate(${definitions.bucket_duration_ms_metric_name}${buildLeFilter(labelFilters, "400")}[${interval}])) / 2) / sum by(${service_label_name}) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}]))`;
     
     case QueryType.CALLS_BY_SERVICE_AND_SPAN:
-      return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (increase(${definitions.request_count_metric_name}${labelFilters}[${interval}]))`;
+      return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port) (increase(${definitions.request_count_metric_name}${labelFilters}[${interval}]))`;
     
     case QueryType.P50_BY_SERVICE_AND_SPAN:
-      return `histogram_quantile(0.5, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
+      return `histogram_quantile(0.5, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
     
     case QueryType.P75_BY_SERVICE_AND_SPAN:
-      return `histogram_quantile(0.75, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
+      return `histogram_quantile(0.75, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
     
     case QueryType.P90_BY_SERVICE_AND_SPAN:
-      return `histogram_quantile(0.9, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
+      return `histogram_quantile(0.9, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
     
     case QueryType.P95_BY_SERVICE_AND_SPAN:
-      return `histogram_quantile(0.95, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
+      return `histogram_quantile(0.95, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
     
     case QueryType.P99_BY_SERVICE_AND_SPAN:
-      return `histogram_quantile(0.99, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
+      return `histogram_quantile(0.99, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
     
     case QueryType.AVG_DURATION_BY_SERVICE_AND_SPAN:
-      return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.sum_duration_ms_metric_name}${labelFilters}[${interval}])) / sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.count_duration_ms_metric_name}${labelFilters}[${interval}]))`;
+      return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port) (rate(${definitions.sum_duration_ms_metric_name}${labelFilters}[${interval}])) / sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port) (rate(${definitions.count_duration_ms_metric_name}${labelFilters}[${interval}]))`;
       
     case QueryType.MIN_DURATION_BY_SERVICE_AND_SPAN:
-      return `histogram_quantile(0.0, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
+      return `histogram_quantile(0.0, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
     
     case QueryType.MAX_DURATION_BY_SERVICE_AND_SPAN:
-      return `histogram_quantile(1.0, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
+      return `histogram_quantile(1.0, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
     
     case QueryType.ERROR_PERCENTAGE_BY_SERVICE_AND_SPAN:
-      return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.request_count_metric_name}${buildStatusCodeFilter(labelFilters, 'STATUS_CODE_ERROR')}[${interval}]))`;
+      return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port) (rate(${definitions.request_count_metric_name}${buildStatusCodeFilter(labelFilters, 'STATUS_CODE_ERROR')}[${interval}]))`;
   
     case QueryType.P50_BY_SERVICE_AND_SPAN_INTIME:
-      return `histogram_quantile(0.50, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, ${span_label_name}, ${type_label_name}, le))`;
+      return `histogram_quantile(0.50, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port, le))`;
 
     case QueryType.P75_BY_SERVICE_AND_SPAN_INTIME:
-      return `histogram_quantile(0.75, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, ${span_label_name}, ${type_label_name}, le))`;
+      return `histogram_quantile(0.75, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port, le))`;
 
     case QueryType.P90_BY_SERVICE_AND_SPAN_INTIME:
-      return `histogram_quantile(0.90, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, ${span_label_name}, ${type_label_name}, le))`;
+      return `histogram_quantile(0.90, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port, le))`;
 
     case QueryType.P95_BY_SERVICE_AND_SPAN_INTIME:
-      return `histogram_quantile(0.95, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, ${span_label_name}, ${type_label_name}, le))`;
+      return `histogram_quantile(0.95, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port, le))`;
 
     case QueryType.P99_BY_SERVICE_AND_SPAN_INTIME:
-      return `histogram_quantile(0.99, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, ${span_label_name}, ${type_label_name}, le))`;
+      return `histogram_quantile(0.99, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port, le))`;
 
     case QueryType.APDEX_BY_SERVICE_AND_SPAN_INTIME:
-      return `(sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.bucket_duration_ms_metric_name}${buildLeFilter(labelFilters, "100")}[${interval}])) + sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.bucket_duration_ms_metric_name}${buildLeFilter(labelFilters, "400")}[${interval}])) / 2) / sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}]))`;
+      return `(sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port) (rate(${definitions.bucket_duration_ms_metric_name}${buildLeFilter(labelFilters, "100")}[${interval}])) + sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port) (rate(${definitions.bucket_duration_ms_metric_name}${buildLeFilter(labelFilters, "400")}[${interval}])) / 2) / sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}]))`;
 
     case QueryType.RATE_BY_SERVICE_AND_SPAN_INTIME:
-      return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.request_count_metric_name}${labelFilters}[${interval}]))`;
+      return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port) (rate(${definitions.request_count_metric_name}${labelFilters}[${interval}]))`;
 
     case QueryType.TOP_KEY_OPERATIONS_BY_SERVICE_AND_SPAN_INTIME:
-      return `topk(5, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.request_count_metric_name}${labelFilters}[${interval}])))`;
+      return `topk(5, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, http_method, http_url, net_host_port) (rate(${definitions.request_count_metric_name}${labelFilters}[${interval}])))`;
 
     case QueryType.SERVICE_SPAN_RELATION:
       return `sum by(client_operation_name, server_operation_name) (iyzitrace_service_graph_request_total{client_operation_name=~".+", server_operation_name=~".+"})`;

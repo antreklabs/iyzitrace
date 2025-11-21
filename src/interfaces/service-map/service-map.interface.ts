@@ -11,7 +11,7 @@ export type Operation = {
 export type Service = {
   name: string;
   kind: string;
-  port: number;
+  port: string;
   health: 'healthy' | 'degraded' | 'warning';
   replicas?: number;
   dependencies?: string[];

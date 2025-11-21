@@ -8,6 +8,11 @@ interface ResultItem {
     service_name: string;
     span_name?: string;
     type?: string;
+    http_method?: string;
+    http_url?: string;
+    net_host_port?: string;
+    server_operation_name?: string;
+    client_operation_name?: string;
   };
   value: [number, string];
 }
@@ -16,12 +21,42 @@ interface ServiceQueryData {
   service_name: string;
   span_name?: string;
   type?: string;
+  http_method?: string;
+  http_url?: string;
+  net_host_port?: string;
   datetime?: string;
   value: number;
   values?: {
     x: Date;
     y: number;
   }[];
+}
+
+interface ServiceMapQueryData {
+  server_operation_name?: string;
+  client_operation_name?: string;
+}
+
+const setSpanAdditionalDimensions = (item: ServiceQueryData, operation: Operation, service: Service) => {
+  if(item.type !== undefined && operation.type !== item.type) {
+    operation.type = item.type.toUpperCase()
+  }
+
+  if(item.type !== undefined && service.type !== item.type) {
+    service.type = item.type.toUpperCase();
+  }
+
+  if(item.http_method !== undefined && operation.method !== item.http_method) {
+    operation.method = item.http_method.toUpperCase();
+  }
+
+  if(item.http_url !== undefined && operation.path !== item.http_url) {
+    operation.path = item.http_url;
+  }
+  
+  if(item.net_host_port !== undefined && service.port !== item.net_host_port) {
+    service.port = item.net_host_port;
+  }
 }
 
 export const getServicesTableData = async (filterParamsModel: FilterParamsModel): Promise<Service[]> => {
@@ -66,7 +101,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
   const serviceQueryDataRateByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.RATE_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
   const serviceQueryDataTopKeyOperationsByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.TOP_KEY_OPERATIONS_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
 
-  const serviceSpanRelation = await getServicesQueryDataByType(QueryType.SERVICE_SPAN_RELATION, filterParamsModel, definitions);
+  const serviceSpanRelation = await getServiceMapQueryDataByServiceSpanRelation(QueryType.SERVICE_SPAN_RELATION, filterParamsModel, definitions);
   console.log('serviceSpanRelation', serviceSpanRelation);
   let servicesWithOperations: Service[] = [];
 
@@ -173,11 +208,25 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
     return servicesWithOperations;
   });
 
+  servicesWithOperations.forEach((service: Service) => {
+    service.operations.forEach((operation: Operation) => {
+      const serviceSpanRelationItem = serviceSpanRelation.find((item: any) => item.client_operation_name === operation.name);
+      if (serviceSpanRelationItem) {
+
+        const targetService = servicesWithOperations.find((s: Service) => 
+          s.operations.find((o: Operation) => o.name === serviceSpanRelationItem.server_operation_name));
+        if (targetService) {
+          operation.targetServiceId = targetService.id;
+        }
+      }
+    });
+  });
+
   const serviceMap = new Map<string, Service>();
   servicesWithOperations.forEach(service => {
     serviceMap.set(service.id, service);
   });
-
+  
 
   serviceQueryDataSumDurationByService.forEach((item: ServiceQueryData) => {
     const service = serviceMap.get(item.service_name);
@@ -319,10 +368,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
           name: operation.name,
           data: item.values ?? [],
         });
-        if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type.toUpperCase()
-          service.type = item.type.toUpperCase();
-        }
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -336,10 +382,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
           name: operation.name,
           data: item.values ?? [],
         });
-        if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type.toUpperCase()
-          service.type = item.type.toUpperCase();
-        }
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -353,10 +396,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
           name: operation.name,
           data: item.values ?? [],
         });
-        if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type.toUpperCase()
-          service.type = item.type.toUpperCase();
-        }
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -370,10 +410,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
           name: `${operation.name} P50`,
           data: item.values ?? [],
         });
-        if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type.toUpperCase()
-          service.type = item.type.toUpperCase();
-        }
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -387,10 +424,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
           name: `${operation.name} P75`,
           data: item.values ?? [],
         });
-        if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type.toUpperCase()
-          service.type = item.type.toUpperCase();
-        }
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -404,10 +438,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
           name: `${operation.name} P90`,
           data: item.values ?? [],
         });
-        if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type.toUpperCase()
-          service.type = item.type.toUpperCase();
-        }
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -421,10 +452,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
           name: `${operation.name} P95`,
           data: item.values ?? [],
         });
-        if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type.toUpperCase()
-          service.type = item.type.toUpperCase();
-        }
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -438,10 +466,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
           name: `${operation.name} P99`,
           data: item.values ?? [],
         });
-        if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type.toUpperCase()
-          service.type = item.type.toUpperCase();
-        }
+          setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -467,10 +492,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       const operation = service.operations.find((op: any) => op.name === item.span_name);
       if (operation) {
         operation.metrics.avgDurationMs = item.value;
-        if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type.toUpperCase()
-          service.type = item.type.toUpperCase();
-        }
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -481,10 +503,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       const operation = service.operations.find((op: any) => op.name === item.span_name);
       if (operation) {
         operation.metrics.minDurationMs = item.value;
-        if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type.toUpperCase()
-          service.type = item.type.toUpperCase();
-        }
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -495,10 +514,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       const operation = service.operations.find((op: any) => op.name === item.span_name);
       if (operation) {
         operation.metrics.maxDurationMs = item.value;
-        if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type.toUpperCase()
-          service.type = item.type.toUpperCase();
-        }
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -509,10 +525,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       const operation = service.operations.find((op: any) => op.name === item.span_name);
       if (operation) {
           operation.metrics.p50DurationMs = item.value;
-          if(item.type !== undefined && operation.type !== item.type) {
-            operation.type = item.type.toUpperCase();
-            service.type = item.type.toUpperCase();
-          }
+          setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -523,10 +536,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       const operation = service.operations.find((op: any) => op.name === item.span_name);
       if (operation) {
         operation.metrics.p75DurationMs = item.value;
-        if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type.toUpperCase()
-          service.type = item.type.toUpperCase();
-        }
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -537,10 +547,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       const operation = service.operations.find((op: any) => op.name === item.span_name);
       if (operation) {
         operation.metrics.p90DurationMs = item.value;
-        if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type.toUpperCase()
-          service.type = item.type.toUpperCase();
-        }
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -551,10 +558,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       const operation = service.operations.find((op: any) => op.name === item.span_name);
       if (operation) {
         operation.metrics.p95DurationMs = item.value;
-        if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type.toUpperCase()
-          service.type = item.type.toUpperCase();
-        }
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -565,10 +569,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       const operation = service.operations.find((op: any) => op.name === item.span_name);
       if (operation) {
         operation.metrics.p99DurationMs = item.value;
-        if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type.toUpperCase()
-          service.type = item.type.toUpperCase();
-        }
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -579,10 +580,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       const operation = service.operations.find((op: any) => op.name === item.span_name);
       if (operation) {
         operation.metrics.callsCount = item.value;
-        if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type.toUpperCase()
-          service.type = item.type.toUpperCase();
-        }
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -596,16 +594,42 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
         operation.status.metrics.totalCount = operation.metrics.callsCount
         operation.status.metrics.errorPercentage = (operation.status.metrics.errorCount / operation.status.metrics.totalCount) * 100;
         operation.status.value = operation.status.metrics.errorPercentage > 0 ? 'error' : 'healthy';
-        if(item.type !== undefined && operation.type !== item.type) {
-          operation.type = item.type.toUpperCase()
-          service.type = item.type.toUpperCase();
-        }
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
 
+  servicesWithOperations.forEach((service: Service) => {
+    if(service.type === undefined) {
+      service.type = 'GENERAL';
+    }
+    if(service.port === undefined) {
+      service.port = 'N/A';
+    }
+    service.operations.forEach((operation: Operation) => {
+      if(operation.type === undefined) {
+        operation.type = 'GENERAL';
+      }
+      if(operation.method === undefined) {
+        operation.method = 'N/A';
+      }
+      if(operation.path === undefined) {
+        operation.path = 'N/A';
+      }
+    });
+  });
+
   return servicesWithOperations;
 };
+
+export const getServiceMapQueryData = async (filterParamsModel: FilterParamsModel, query: string): Promise<ServiceMapQueryData[]> => {
+  const data = await getQueryData(query);
+  const serviceMapQueryData: ServiceMapQueryData[] = data.result.map((result: ResultItem) => ({
+    server_operation_name: result.metric.server_operation_name,
+    client_operation_name: result.metric.client_operation_name,
+  }));
+  return serviceMapQueryData;
+}
 
 export const getServicesQueryData = async (filterParamsModel: FilterParamsModel, query: string): Promise<ServiceQueryData[]> => {
   const data = await getQueryData(query);
@@ -613,6 +637,9 @@ export const getServicesQueryData = async (filterParamsModel: FilterParamsModel,
     service_name: result.metric.service_name,
     span_name: result.metric.span_name,
     type: result.metric.type,
+    http_method: result.metric.http_method,
+    http_url: result.metric.http_url,
+    net_host_port: result.metric.net_host_port,
     value: parseFloat(result.value[1]),
   }));
   return serviceQueryData;
@@ -651,6 +678,15 @@ export const getServicesQueryDataByType = async (
 ): Promise<ServiceQueryData[]> => {
   const query = getQueryByType(queryType, filterParamsModel, definitions);
   return await getServicesQueryData(filterParamsModel, query);
+}
+
+export const getServiceMapQueryDataByServiceSpanRelation = async (
+  queryType: QueryType,
+  filterParamsModel: FilterParamsModel,
+  definitions: Definitions
+): Promise<ServiceMapQueryData[]> => {
+  const query = getQueryByType(queryType, filterParamsModel, definitions);
+  return await getServiceMapQueryData(filterParamsModel, query);
 }
 
 export const getOperationTypeColor = (type: string) => {

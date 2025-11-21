@@ -78,6 +78,9 @@ connectors:
     dimensions:
       - name: type
       - name: host.name
+      - name: http.method
+      - name: http.url
+      - name: net.host.port
     events:
       enabled: true
       dimensions:

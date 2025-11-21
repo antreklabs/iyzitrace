@@ -10,7 +10,7 @@ import ServiceMapComponent from '../../components/service-map/map.component';
 import { getPluginSettings, savePluginSettings } from '../../api/service/settings.service';
 
 const NODE_WIDTH = 140;
-const NODE_HEIGHT = 180;
+const NODE_HEIGHT = 1800;
 const SERVICE_NODE_WIDTH = 180; // Services layer için daha geniş ISO
 const ITEM_GAP_X = 32;
 const SERVICE_ITEM_GAP_X = 48;
