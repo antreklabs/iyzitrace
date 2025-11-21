@@ -34,7 +34,7 @@ RUN if [ "${TARGETPLATFORM}" = "linux/arm64" ] && [ "${BUILDPLATFORM}" != "linux
     fi
 
 
-FROM gcr.io/distroless/cc-debian12:nonroot
+FROM docker.io/library/rust:1.88-slim
 
 WORKDIR /app
 
@@ -42,4 +42,5 @@ COPY --from=builder /app/target/release/shipping shipping
 
 EXPOSE ${SHIPPING_PORT}
 
-CMD ["./shipping"]
+CMD ["/bin/sh", "-c", "export OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES},host.name=${HOSTNAME} && exec ./shipping"]
+
