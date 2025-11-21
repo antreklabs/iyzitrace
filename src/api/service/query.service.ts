@@ -42,6 +42,8 @@ export enum QueryType {
   APDEX_BY_SERVICE_AND_SPAN_INTIME,
   RATE_BY_SERVICE_AND_SPAN_INTIME,
   TOP_KEY_OPERATIONS_BY_SERVICE_AND_SPAN_INTIME,
+
+  SERVICE_SPAN_RELATION,
 }
 
 // Helper function to get definitions from plugin settings
@@ -607,6 +609,9 @@ export const getQueryByType = (
 
     case QueryType.TOP_KEY_OPERATIONS_BY_SERVICE_AND_SPAN_INTIME:
       return `topk(5, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}) (rate(${definitions.request_count_metric_name}${labelFilters}[${interval}])))`;
+
+    case QueryType.SERVICE_SPAN_RELATION:
+      return `sum by(client_operation_name, server_operation_name) (iyzitrace_service_graph_request_total{client_operation_name=~".+", server_operation_name=~".+"})`;
 
     default:
       throw new Error(`Unknown query type: ${queryType}`);

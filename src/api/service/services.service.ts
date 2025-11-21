@@ -65,7 +65,9 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
   const serviceQueryDataApdexByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.APDEX_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
   const serviceQueryDataRateByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.RATE_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
   const serviceQueryDataTopKeyOperationsByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.TOP_KEY_OPERATIONS_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
-  // console.log('serviceQueryDataAvgDurationByServiceAndSpan', serviceQueryDataAvgDurationByServiceAndSpan);
+
+  const serviceSpanRelation = await getServicesQueryDataByType(QueryType.SERVICE_SPAN_RELATION, filterParamsModel, definitions);
+  console.log('serviceSpanRelation', serviceSpanRelation);
   let servicesWithOperations: Service[] = [];
 
   const serviceSpanMap = new Map<string, Set<string>>();
