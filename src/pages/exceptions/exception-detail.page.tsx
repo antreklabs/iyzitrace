@@ -13,8 +13,10 @@ import {
 } from '@ant-design/icons';
 import { css } from '@emotion/css';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api, type ExceptionDetail, type ExceptionNavigation } from '../../api/exceptions';
+import { type ExceptionDetail, type ExceptionNavigation } from '../../api/exceptions';
 import pluginJson from '../../plugin.json';
+import { getExceptionsByType } from '../../api/service/exception.service';
+import { FilterParamsModel } from '../../api/service/query.service';
 
 const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
 
@@ -230,6 +232,7 @@ const ExceptionDetailPage: React.FC = () => {
   const [exception, setException] = useState<ExceptionDetail | null>(null);
   const [navigation, setNavigation] = useState<ExceptionNavigation | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [allExceptions, setAllExceptions] = useState<any[]>([]);
 
   useEffect(() => {
     if (groupId) {
@@ -237,14 +240,140 @@ const ExceptionDetailPage: React.FC = () => {
     }
   }, [groupId]);
 
+  const base64ToHex = (base64: string): string => {
+    try {
+      const raw = atob(base64);
+      let hex = '';
+      for (let i = 0; i < raw.length; i++) {
+        const hexByte = raw.charCodeAt(i).toString(16).padStart(2, '0');
+        hex += hexByte;
+      }
+      return hex;
+    } catch (e) {
+      return base64;
+    }
+  };
+
   const fetchExceptionDetail = async (index: number) => {
     if (!groupId) return;
     
     setLoading(true);
     try {
-      const data = await api.getExceptionDetails(groupId, index);
-      setException(data.exception);
-      setNavigation(data.navigation);
+      // If we already have exceptions loaded, just navigate
+      if (allExceptions.length > 0) {
+        const currentException = allExceptions[index];
+        setException(currentException);
+        setNavigation({
+          hasOlder: index > 0,
+          hasNewer: index < allExceptions.length - 1,
+          currentIndex: index,
+          totalCount: allExceptions.length,
+        });
+        setCurrentIndex(index);
+        setLoading(false);
+        return;
+      }
+
+      // Load exceptions from API
+      const traceData = await getExceptionsByType(groupId, new FilterParamsModel({
+        from: String(new Date().getTime() - 1000 * 60 * 60 * 24),
+        to: String(new Date().getTime()),
+        option_interval: '5h',
+      }));
+
+      console.log('Trace data:', traceData);
+
+      // Parse trace data to find exceptions
+      const exceptions: any[] = [];
+      
+      traceData.forEach((trace: any) => {
+        trace.batches?.forEach((batch: any) => {
+          const resourceAttrs = batch.resource?.attributes || [];
+          const serviceName = resourceAttrs.find((attr: any) => attr.key === 'service.name')?.value?.stringValue || 'Unknown';
+          const hostName = resourceAttrs.find((attr: any) => attr.key === 'host.name')?.value?.stringValue || 'Unknown';
+          
+          batch.scopeSpans?.forEach((scopeSpan: any) => {
+            scopeSpan.spans?.forEach((span: any) => {
+              const spanAttrs = span.attributes || [];
+              
+              // Find exception events
+              span.events?.forEach((event: any, eventIdx: number) => {
+                if (event.name === 'exception') {
+                  const eventAttrs = event.attributes || [];
+                  const exceptionType = eventAttrs.find((attr: any) => attr.key === 'exception.type')?.value?.stringValue || 'Unknown';
+                  const exceptionMessage = eventAttrs.find((attr: any) => attr.key === 'exception.message')?.value?.stringValue || '';
+                  const exceptionStacktrace = eventAttrs.find((attr: any) => attr.key === 'exception.stacktrace')?.value?.stringValue || '';
+                  const exceptionEscaped = eventAttrs.find((attr: any) => attr.key === 'exception.escaped')?.value?.stringValue || 'false';
+                  
+                  const traceIdHex = base64ToHex(span.traceId || '');
+                  const spanIdBase64 = span.spanId || '';
+                  
+                  // Build key-value pairs from span attributes and resource attributes
+                  const keyValuePairs: any = {
+                    serviceName,
+                    'host.name': hostName,
+                    traceID: traceIdHex,
+                    spanID: spanIdBase64,
+                    exceptionEscaped,
+                  };
+                  
+                  // Add span attributes
+                  spanAttrs.forEach((attr: any) => {
+                    const value = attr.value?.stringValue || attr.value?.intValue || attr.value?.boolValue || '';
+                    keyValuePairs[attr.key] = String(value);
+                  });
+                  
+                  // Add resource attributes
+                  resourceAttrs.forEach((attr: any) => {
+                    const value = attr.value?.stringValue || attr.value?.intValue || attr.value?.boolValue || '';
+                    keyValuePairs[`resource.${attr.key}`] = String(value);
+                  });
+                  
+                  // Convert timestamp from nanos to readable format
+                  const timestampNanos = event.timeUnixNano || span.startTimeUnixNano;
+                  const timestamp = new Date(Number(timestampNanos) / 1000000).toLocaleString();
+                  
+                  exceptions.push({
+                    exceptionType,
+                    errorMessage: exceptionMessage,
+                    stacktrace: exceptionStacktrace,
+                    timestamp,
+                    eventId: `${traceIdHex.substring(0, 16)}${eventIdx}`,
+                    serviceName,
+                    application: serviceName,
+                    traceId: traceIdHex,
+                    spanId: spanIdBase64,
+                    keyValuePairs,
+                  });
+                }
+              });
+            });
+          });
+        });
+      });
+
+      console.log('Parsed exceptions:', exceptions);
+
+      if (exceptions.length === 0) {
+        message.error('No exceptions found');
+        return;
+      }
+
+      // Store all exceptions
+      setAllExceptions(exceptions);
+
+      // Get the exception at the current index
+      const currentException = exceptions[Math.min(index, exceptions.length - 1)];
+      setException(currentException);
+      
+      // Set navigation state
+      setNavigation({
+        hasOlder: index > 0,
+        hasNewer: index < exceptions.length - 1,
+        currentIndex: index,
+        totalCount: exceptions.length,
+      });
+      
       setCurrentIndex(index);
     } catch (error) {
       console.error('Error fetching exception detail:', error);
@@ -300,7 +429,7 @@ const ExceptionDetailPage: React.FC = () => {
         const key = record.key.toLowerCase();
         
         // Service link
-        if (key.includes('service') && typeof value === 'string') {
+        if (key.includes('servicename') && typeof value === 'string') {
           return (
             <Button
               type="link"
@@ -333,7 +462,7 @@ const ExceptionDetailPage: React.FC = () => {
             <Button
               type="link"
               className={styles.linkButton}
-              onClick={() => handleLinkClick('trace', value)}
+              onClick={() => handleLinkClick('span', value)}
               icon={<LinkOutlined />}
             >
               <span className={styles.monospaceValue}>{value}</span>

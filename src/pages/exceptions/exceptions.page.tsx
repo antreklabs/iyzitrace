@@ -5,14 +5,17 @@ import {
   Table,
   message,
   Badge,
+  Tag,
 } from 'antd';
 import {
   SearchOutlined,
 } from '@ant-design/icons';
 import { css } from '@emotion/css';
 import { useNavigate } from 'react-router-dom';
-import { api, type ExceptionGroup } from '../../api/exceptions';
+import { ExceptionGroup, getExceptions } from '../../api/service/exception.service';
 import pluginJson from '../../plugin.json';
+import { getOperationTypeColor } from '../../api/service/services.service';
+import { FilterParamsModel } from '../../api/service/query.service';
 
 const { Search } = Input;
 const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
@@ -132,7 +135,6 @@ const ExceptionsPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [filterText, setFilterText] = useState('');
   const [exceptionGroups, setExceptionGroups] = useState<ExceptionGroup[]>([]);
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
   useEffect(() => {
     fetchExceptionGroups();
@@ -141,9 +143,12 @@ const ExceptionsPage: React.FC = () => {
   const fetchExceptionGroups = async () => {
     setLoading(true);
     try {
-      const data = await api.getExceptionGroups();
+      const data = await await getExceptions(new FilterParamsModel({
+        from: String(new Date().getTime() - 1000 * 60 * 60 * 24),
+        to: String(new Date().getTime()),
+        option_interval: '5h',
+      }));
       setExceptionGroups(data);
-      setLastRefresh(new Date());
     } catch (error) {
       console.error('Error fetching exception groups:', error);
       message.error('Failed to fetch exception groups');
@@ -152,23 +157,8 @@ const ExceptionsPage: React.FC = () => {
     }
   };
 
-  const handleExceptionClick = (groupId: string) => {
-    navigate(`${PLUGIN_BASE_URL}/exceptions/${groupId}`);
-  };
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical':
-        return '#dc2626';
-      case 'high':
-        return '#ea580c';
-      case 'medium':
-        return '#d97706';
-      case 'low':
-        return '#16a34a';
-      default:
-        return '#8c8c8c';
-    }
+  const handleExceptionClick = (exceptionType: string) => {
+    navigate(`${PLUGIN_BASE_URL}/exceptions/${exceptionType}`);
   };
 
   const columns = [
@@ -180,19 +170,50 @@ const ExceptionsPage: React.FC = () => {
       render: (text: string, record: ExceptionGroup) => (
         <span
           className={styles.exceptionTypeLink}
-          onClick={() => handleExceptionClick(record.id)}
+          onClick={() => handleExceptionClick(record.exceptionType)}
         >
           {text}
         </span>
       ),
     },
     {
-      title: 'Error Message',
-      dataIndex: 'errorMessage',
-      key: 'errorMessage',
-      sorter: (a: ExceptionGroup, b: ExceptionGroup) => a.errorMessage.localeCompare(b.errorMessage),
+      title: 'Exception Message',
+      dataIndex: 'exceptionMessage',
+      key: 'exceptionMessage',
+      sorter: (a: ExceptionGroup, b: ExceptionGroup) => a.exceptionMessage.localeCompare(b.exceptionMessage),
       render: (text: string) => (
         <span style={{ color: '#fff' }}>{text}</span>
+      ),
+    },
+    {
+      title: 'Service',
+      dataIndex: 'service',
+      key: 'service',
+      sorter: (a: ExceptionGroup, b: ExceptionGroup) => a.service.localeCompare(b.service),
+      render: (app: string, record: ExceptionGroup) => (
+        <span 
+          style={{ color: '#1890ff', cursor: 'pointer' }} 
+          onClick={() => navigate(`/a/iyzitrace-app/services/${record.service}`)}>
+          {record.service}
+        </span>
+      ),
+    },
+    {
+      title: 'Operation',
+      dataIndex: 'operation',
+      key: 'operation',
+      sorter: (a: ExceptionGroup, b: ExceptionGroup) => a.operation.localeCompare(b.operation),
+      render: (text: string) => (
+        <span style={{ color: '#fff' }}>{text}</span>
+      ),
+    },
+    {
+      title: 'Type',
+      dataIndex: 'type',
+      key: 'type',
+      sorter: (a: ExceptionGroup, b: ExceptionGroup) => a.type.localeCompare(b.type),
+      render: (text: string) => (
+        <Tag color={getOperationTypeColor(text.toUpperCase())}>{text.toUpperCase()}</Tag>
       ),
     },
     {
@@ -203,59 +224,17 @@ const ExceptionsPage: React.FC = () => {
       render: (count: number) => (
         <Badge count={count} style={{ backgroundColor: '#7c3aed' }} />
       ),
-    },
-    {
-      title: 'Last Seen',
-      dataIndex: 'lastSeen',
-      key: 'lastSeen',
-      sorter: (a: ExceptionGroup, b: ExceptionGroup) => new Date(a.lastSeen).getTime() - new Date(b.lastSeen).getTime(),
-      render: (date: string) => (
-        <span style={{ color: '#8c8c8c' }}>{date}</span>
-      ),
-    },
-    {
-      title: 'First Seen',
-      dataIndex: 'firstSeen',
-      key: 'firstSeen',
-      sorter: (a: ExceptionGroup, b: ExceptionGroup) => new Date(a.firstSeen).getTime() - new Date(b.firstSeen).getTime(),
-      render: (date: string) => (
-        <span style={{ color: '#8c8c8c' }}>{date}</span>
-      ),
-    },
-    {
-      title: 'Application',
-      dataIndex: 'application',
-      key: 'application',
-      sorter: (a: ExceptionGroup, b: ExceptionGroup) => a.application.localeCompare(b.application),
-      render: (app: string, record: ExceptionGroup) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ color: '#fff' }}>{app}</span>
-        </div>
-      ),
-    },
-    {
-      title: 'Severity',
-      dataIndex: 'severity',
-      key: 'severity',
-      render: (severity: string) => (
-        <Badge text={severity.toUpperCase()} style={{ backgroundColor: getSeverityColor(severity), color: '#fff', fontSize: 10, padding: '2px 6px', borderRadius: 4 }} />
-      ),
-    },
+    }
   ];
 
   const filteredGroups = exceptionGroups.filter(group =>
     group.exceptionType.toLowerCase().includes(filterText.toLowerCase()) ||
-    group.errorMessage.toLowerCase().includes(filterText.toLowerCase()) ||
-    group.application.toLowerCase().includes(filterText.toLowerCase())
+    group.exceptionMessage.toLowerCase().includes(filterText.toLowerCase()) ||
+    group.service.toLowerCase().includes(filterText.toLowerCase())
   );
 
   return (
     <div className={styles.container}>
-
-      {/* Last refresh info */}
-      <div style={{ marginBottom: 16, color: '#8c8c8c', fontSize: 12 }}>
-        Last refresh - {Math.floor((new Date().getTime() - lastRefresh.getTime()) / 1000)} sec ago
-      </div>
 
       {/* Filter */}
       <div className={styles.filterContainer}>
@@ -283,7 +262,7 @@ const ExceptionsPage: React.FC = () => {
             showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
             style: { color: '#fff' },
           }}
-          rowKey="id"
+          rowKey="exceptionType"
           loading={loading}
           scroll={{ x: 1200 }}
         />

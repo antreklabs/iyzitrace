@@ -49,9 +49,10 @@ interface SpanNode {
 
 interface TraceDetailContainerProps {
   traceId: string;
+  initialSpanId?: string;
 }
 
-const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId }) => {
+const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, initialSpanId }) => {
   const [traceData, setTraceData] = useState<SpanNode[]>([]);
   const [filteredTraceData, setFilteredTraceData] = useState<SpanNode[]>([]);
   const [selectedSpanId, setSelectedSpanId] = useState<string | null>(null);
@@ -211,6 +212,17 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId }) 
 
     fetchTrace();
   }, [traceId, selectedUid]);
+
+  // Set initial span selection from URL parameter
+  useEffect(() => {
+    if (initialSpanId && traceData.length > 0 && !selectedSpanId) {
+      const allSpansFlat = flattenSpans(traceData);
+      const spanExists = allSpansFlat.some((span) => span.id === initialSpanId);
+      if (spanExists) {
+        setSelectedSpanId(initialSpanId);
+      }
+    }
+  }, [initialSpanId, traceData, selectedSpanId]);
 
   // Filter trace data based on selected operation types
   useEffect(() => {
