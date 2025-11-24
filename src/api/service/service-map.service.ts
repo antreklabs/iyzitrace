@@ -271,6 +271,22 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
     regions.push({
       id: regionId,
       name: regionName,
+
+      status: {
+        value: infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'error').length > 0 ? 'error' :
+                infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'warning').length > 0 ? 'warning' :
+                infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'degraded').length > 0 ? 'degraded' :
+                'healthy',
+        metrics: {
+          errorCount: infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'error').length,
+          errorPercentage: infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'error').length / infrastructures.length * 100,
+          warningCount: infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'warning').length,
+          warningPercentage: infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'warning').length / infrastructures.length * 100,
+          degradedCount: infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'degraded').length,
+          degradedPercentage: infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'degraded').length / infrastructures.length * 100,
+          totalCount: infrastructures.length,
+        },
+      },
       position: selRegion?.position ?? { x: 0, y: 0 },
       groupPosition: selRegion?.groupPosition ?? { x: 0, y: 0 },
       groupSize: selRegion?.groupSize ?? { width: 200, height: 200 },

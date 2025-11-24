@@ -57,6 +57,7 @@ export const TempoApi = {
     async getTrace(traceId: string): Promise<any> {
         const url = await this.getBaseUrl();
         const res = await getBackendSrv().get(`${url}/api/traces/${traceId}`);
+        console.log('res', res);
         return res;
     },
 

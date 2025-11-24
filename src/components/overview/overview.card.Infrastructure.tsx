@@ -1,5 +1,6 @@
 import React from 'react';
-import { Card, Progress, Badge, Typography } from 'antd';
+import { Card, Progress, Badge, Typography, Button } from 'antd';
+import { AppstoreOutlined } from '@ant-design/icons';
 import { Infrastructure } from '../../api/service/interface.service';
 
 const { Title, Text } = Typography;
@@ -7,12 +8,14 @@ const { Title, Text } = Typography;
 interface InfrastructureCardProps {
   infrastructure: Infrastructure;
   onClick: (infrastructure: Infrastructure) => void;
+  onApplicationsClick: (infrastructure: Infrastructure, e: React.MouseEvent) => void;
   isSelected: boolean;
 }
 
 const InfrastructureCard: React.FC<InfrastructureCardProps> = ({ 
   infrastructure, 
   onClick, 
+  onApplicationsClick,
   isSelected 
 }) => {
   const getStatusColor = (status?: string) => {
@@ -88,7 +91,7 @@ const InfrastructureCard: React.FC<InfrastructureCardProps> = ({
         </div>
       )}
       {infrastructure.memory && (
-        <div>
+        <div style={{ marginBottom: '16px' }}>
           <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: '14px' }}>Memory</Text>
           <Progress
             percent={memoryPercentage}
@@ -102,6 +105,20 @@ const InfrastructureCard: React.FC<InfrastructureCardProps> = ({
           </Text>
         </div>
       )}
+      <Button
+        type="primary"
+        icon={<AppstoreOutlined />}
+        onClick={(e) => onApplicationsClick(infrastructure, e)}
+        style={{
+          width: '100%',
+          background: 'rgba(255,255,255,0.2)',
+          border: '1px solid rgba(255,255,255,0.3)',
+          color: 'white',
+          fontWeight: 600,
+        }}
+      >
+        Applications
+      </Button>
     </Card>
   );
 };

@@ -1,66 +1,71 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Row, Col, Typography, Spin } from 'antd';
-import { 
-  CloudServerOutlined, 
-  SettingOutlined, 
-  UnorderedListOutlined,
-  CloudOutlined
-} from '@ant-design/icons';
+import React, { useMemo, useState } from 'react';
+import BaseContainerComponent, { FetchedModel } from '../base.container';
+import BaseFilter from '../base.filter';
+import { getTableColumns, TableColumn } from '../../api/service/table.services';
+import { FilterParamsModel } from '../../api/service/query.service';
+import { columns as columnUtils } from '../../api/service/table.services';
+import { Col, Row } from 'antd';
 import { getRegions } from '../../api/service/service-map.service';
-import { Infrastructure, Application, Service, Operation, Region } from '../../api/service/interface.service';
-import RegionCard from '../../components/overview/overview.card.Region';
-import InfrastructureCard from '../../components/overview/overview.card.Infrastructure';
-import ApplicationsSidebar from '../../components/overview/overview.applications-sidebar.component';
+import { Application, Infrastructure, Operation, Region, Service } from '../../api/service/interface.service';
+import { UnorderedListOutlined } from '@ant-design/icons';
+import Title from 'antd/es/typography/Title';
 import ServiceCard from '../../components/overview/overview.card.Service';
 import OperationCard from '../../components/overview/overview.card.Operation';
-import { FilterParamsModel } from '../../api/service/query.service';
+import ApplicationCard from '../../components/overview/overview.card.Application';
+import InfrastructureCard from '../../components/overview/overview.card.Infrastructure';
+import { CloudServerOutlined, AppstoreOutlined, SettingOutlined } from '@ant-design/icons';
+import BaseTable from '../base.table';
 
-const { Title } = Typography;
-
-const OverviewPage: React.FC = () => {
-  const [loading, setLoading] = useState(true);
+const OverviewContainer: React.FC = () => {
+  
   const [regions, setRegions] = useState<Region[]>([]);
-  const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null);
+  const [infraLevelData, setInfraLevelData] = useState<Infrastructure[]>([]);
+  const [columns, setColumns] = useState<TableColumn>();
   const [selectedInfrastructureId, setSelectedInfrastructureId] = useState<string | null>(null);
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [selectedOperationId, setSelectedOperationId] = useState<string | null>(null);
-  const [sidebarVisible, setSidebarVisible] = useState(false);
-  const [sidebarInfrastructure, setSidebarInfrastructure] = useState<Infrastructure | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const data = await getRegions(new FilterParamsModel({
-          from: String(new Date().getTime() - 1000 * 60 * 60 * 24),
-          to: String(new Date().getTime()),
-          option_interval: '5h',
-        }));
-        console.log(data);
-        setRegions(data || []);
-      } catch (error) {
-        console.error('Error fetching service map data:', error);
-      } finally {
-        setLoading(false);
-      }
+
+  const fetchModelData = async (filterModel: FilterParamsModel): Promise<FetchedModel> => {
+    const regions = await getRegions(filterModel);
+    setRegions(regions);
+    const infrastructures = (regions || []).flatMap((r: Region) => r.infrastructures || []);
+    setInfraLevelData(infrastructures);
+    setInfraLevelData(infrastructures);
+    setColumnInDetail(infrastructures);
+
+    return { data: regions, columns: columns };
+  };
+
+
+  const setColumnInDetail = (data: Infrastructure[]) => {
+    if(columns) {
+      return;
+    }
+    const cols = getTableColumns(data, 'applications', 'services', 'operations')
+    // Example: rename and reorder Root columns before hiding
+    let root = columnUtils.renameColumns(cols.RootColumns, {
+      osversion: 'OS Version',
+      ip: 'IP Address',
+      cpupercentage: 'CPU Usage',
+      memorypercentage: 'Memory Usage'
+    });
+    root = columnUtils.reorderColumns(root, ['region','name', 'osversion', 'ip', 'type']);
+
+    const hiddenCols: TableColumn = {
+      RootColumns: columnUtils.hideColumns(root, ['id', 'cpu.usage', 'cpu.capacity', 'memory.usage', 'memory.capacity']),
+      L1Columns: columnUtils.hideColumns(cols.L1Columns ?? [], ['id', 'infrastructureId']),
+      L2Columns: columnUtils.hideColumns(cols.L2Columns ?? [], ['id', 'applicationId']),
+      L3Columns: columnUtils.hideColumns(cols.L3Columns ?? [], ['id', 'serviceId'])
     };
 
-    fetchData();
-  }, []);
-
-  // Filter regions based on selection
-  const filteredRegions = useMemo(() => {
-    if (selectedRegionId) {
-      return regions.filter(region => region.id === selectedRegionId);
-    }
-    return regions;
-  }, [regions, selectedRegionId]);
-
-  // Get all infrastructures from filtered regions
+    setColumns(hiddenCols);
+  };
+  // Flatten all infrastructures from all regions
   const allInfrastructures = useMemo(() => {
-    return filteredRegions.flatMap(region => region.infrastructures || []);
-  }, [filteredRegions]);
+    return regions.flatMap(region => region.infrastructures || []);
+  }, [regions]);
 
   // Filter infrastructures based on selection
   const filteredInfrastructures = useMemo(() => {
@@ -70,36 +75,21 @@ const OverviewPage: React.FC = () => {
     return allInfrastructures;
   }, [allInfrastructures, selectedInfrastructureId]);
 
-  // Get all applications from all regions (no filter)
+  // Get all applications from filtered infrastructures
   const allApplications = useMemo(() => {
-    return regions.flatMap(region => 
-      region.infrastructures?.flatMap(infra => infra.applications || []) || []
-    );
-  }, [regions]);
-
-  // Get applications from filtered infrastructures
-  const filteredAllApplications = useMemo(() => {
     return filteredInfrastructures.flatMap(infra => infra.applications || []);
   }, [filteredInfrastructures]);
-
-  // Sidebar shows all applications (no filter)
-  const sidebarApplications = useMemo(() => {
-    if (sidebarInfrastructure) {
-      return sidebarInfrastructure.applications || [];
-    }
-    return allApplications;
-  }, [sidebarInfrastructure, allApplications]);
 
   // Filter applications based on selection
   const filteredApplications = useMemo(() => {
     if (selectedApplicationId) {
-      return filteredAllApplications.filter(app => app.id === selectedApplicationId);
+      return allApplications.filter(app => app.id === selectedApplicationId);
     }
     if (selectedInfrastructureId) {
-      return filteredAllApplications;
+      return allApplications;
     }
-    return filteredAllApplications;
-  }, [filteredAllApplications, selectedApplicationId, selectedInfrastructureId]);
+    return allApplications;
+  }, [allApplications, selectedApplicationId, selectedInfrastructureId]);
 
   // Get all services from filtered applications
   const allServices = useMemo(() => {
@@ -145,7 +135,6 @@ const OverviewPage: React.FC = () => {
     return groups;
   }, [filteredInfrastructures, filteredServices]);
 
-
   // Get all operations from filtered services
   const allOperations = useMemo(() => {
     return filteredServices.flatMap(service => service.operations || []);
@@ -180,22 +169,6 @@ const OverviewPage: React.FC = () => {
     return groups;
   }, [filteredOperations, filteredServices]);
 
-  const handleRegionClick = (region: Region) => {
-    if (selectedRegionId === region.id) {
-      setSelectedRegionId(null);
-      setSelectedInfrastructureId(null);
-      setSelectedApplicationId(null);
-      setSelectedServiceId(null);
-      setSelectedOperationId(null);
-    } else {
-      setSelectedRegionId(region.id);
-      setSelectedInfrastructureId(null);
-      setSelectedApplicationId(null);
-      setSelectedServiceId(null);
-      setSelectedOperationId(null);
-    }
-  };
-
   const handleInfrastructureClick = (infrastructure: Infrastructure) => {
     if (selectedInfrastructureId === infrastructure.id) {
       setSelectedInfrastructureId(null);
@@ -208,12 +181,6 @@ const OverviewPage: React.FC = () => {
       setSelectedServiceId(null);
       setSelectedOperationId(null);
     }
-  };
-
-  const handleApplicationsClick = (infrastructure: Infrastructure, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setSidebarInfrastructure(infrastructure);
-    setSidebarVisible(true);
   };
 
   const handleApplicationClick = (application: Application) => {
@@ -246,48 +213,45 @@ const OverviewPage: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div style={{ padding: '24px', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <Spin size="large" />
-      </div>
-    );
-  }
-
   return (
+    <BaseContainerComponent
+      title="Overview"
+      initialFilterCollapsed={true}
+      onFetchData={fetchModelData}
+      filterComponent={
+        <BaseFilter 
+          hasServiceFilter={true}
+          hasOperationsFilter={true}
+          hasStatusesFilter={true}
+          hasDurationFilter={true}
+          hasTagsFilter={true}
+          hasOptionsFilter={true}
+          hasLabelsFilter={true}
+          hasFieldsFilter={true}
+          hasTypesFilter={true}
+          hasLevelsFilter={true}
+          columns={columns?.RootColumns ?? []}
+          data={regions}
+        />
+      }
+    >
     <div style={{ padding: '24px', minHeight: '100vh' }}>
-      {/* Regions Section */}
-      <div style={{ marginBottom: '32px' }}>
-        <Title level={2} style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <CloudOutlined style={{ color: '#1890ff' }} />
-          Regions
-        </Title>
-        <Row gutter={[16, 16]}>
-          {regions.map((region) => (
-            <Col xs={12} sm={8} md={6} lg={4} key={region.id}>
-              <RegionCard
-                region={region}
-                onClick={handleRegionClick}
-                isSelected={selectedRegionId === region.id}
-              />
-            </Col>
-          ))}
-        </Row>
-      </div>
-
       {/* Servers & Infrastructure Section */}
       <div style={{ marginBottom: '32px' }}>
         <Title level={2} style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <CloudServerOutlined style={{ color: '#1890ff' }} />
-          Infrastructures
+          Infrastructure
         </Title>
         <Row gutter={[16, 16]}>
           {filteredInfrastructures.map((infrastructure) => (
-            <Col xs={12} sm={8} md={6} lg={4} key={infrastructure.id}>
+            <Col xs={24} sm={12} lg={6} key={infrastructure.id}>
               <InfrastructureCard
                 infrastructure={infrastructure}
                 onClick={handleInfrastructureClick}
-                onApplicationsClick={handleApplicationsClick}
+                onApplicationsClick={(infra, e) => {
+                  e.stopPropagation();
+                  // TODO: Implement applications sidebar
+                }}
                 isSelected={selectedInfrastructureId === infrastructure.id}
               />
             </Col>
@@ -295,28 +259,40 @@ const OverviewPage: React.FC = () => {
         </Row>
       </div>
 
-      {/* Applications Sidebar */}
-      <ApplicationsSidebar
-        visible={sidebarVisible}
-        onClose={() => setSidebarVisible(false)}
-        applications={sidebarApplications}
-        selectedApplicationId={selectedApplicationId}
-        onApplicationClick={handleApplicationClick}
-      />
+      {/* Applications Layer Section */}
+      {filteredApplications.length > 0 && (
+      <div style={{ marginBottom: '32px' }}>
+        <Title level={2} style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <AppstoreOutlined style={{ color: '#1890ff' }} />
+          Applications
+        </Title>
+        <Row gutter={[16, 16]}>
+            {filteredApplications.map((application) => (
+              <Col xs={24} sm={12} lg={4} key={application.id}>
+                <ApplicationCard
+                  application={application}
+                  onClick={handleApplicationClick}
+                  isSelected={selectedApplicationId === application.id}
+                />
+            </Col>
+          ))}
+        </Row>
+      </div>
+      )}
 
       {/* Services Layer Section */}
       {Object.keys(servicesByInfrastructure).length > 0 && (
       <div style={{ marginBottom: '32px' }}>
         <Title level={2} style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <SettingOutlined style={{ color: '#1890ff' }} />
-          Services
+          Services Layer
         </Title>
         <Row gutter={[16, 16]}>
           {Object.entries(servicesByInfrastructure).map(([infraId, { infrastructure, services }]) => (
-            <Col xs={12} sm={8} md={6} lg={4} key={infraId}>
+            <Col xs={24} lg={12} key={infraId}>
               <ServiceCard
                 services={services}
-                title={`${infrastructure.name}`}
+                title={`${infrastructure.name} Services`}
                 icon={<SettingOutlined style={{ color: 'white' }} />}
                 gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
                 onClick={handleServiceClick}
@@ -333,11 +309,11 @@ const OverviewPage: React.FC = () => {
       <div>
         <Title level={2} style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <UnorderedListOutlined style={{ color: '#1890ff' }} />
-          Operations Layer
+          Operations
         </Title>
         <Row gutter={[16, 16]}>
             {Object.entries(operationsByService).map(([serviceName, operations]) => (
-              <Col xs={12} sm={8} md={6} lg={4} key={serviceName}>
+              <Col xs={24} lg={12} key={serviceName}>
                 <OperationCard
                   operations={operations}
                   title={`${serviceName}`}
@@ -350,7 +326,20 @@ const OverviewPage: React.FC = () => {
       </div>
       )}
     </div>
+    {columns && columns.RootColumns && columns.RootColumns.length > 0 && (
+        <BaseTable
+        data={infraLevelData}
+        columns={columns}
+        title="Overview"
+        showSearch={true}
+        searchPlaceholder="Search..."
+        l1Key="applications"
+        l2Key="services"
+        l3Key="operations"
+        />
+      )}
+    </BaseContainerComponent>
   );
 };
 
-export default OverviewPage;
+export default OverviewContainer;

@@ -36,6 +36,7 @@ export interface ServiceMapData {
 export interface Region {
   id: string;
   name: string;
+  status?: StatusItem;
   position: PositionItem;
   groupPosition: PositionItem;
   groupSize: SizeItem;
@@ -131,6 +132,7 @@ export interface Infrastructure {
         p95DurationMs?: number;
         p99DurationMs?: number;
         callsCount?: number;
+        callsPerSecond?: number;
     };
     status?: StatusItem;
     position?: PositionItem;

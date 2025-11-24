@@ -1,12 +1,14 @@
-import React from 'react';
-import { Card, List, Badge, Typography, Avatar } from 'antd';
+import React, { useState, useMemo } from 'react';
+import { Card, List, Badge, Typography, Avatar, Button } from 'antd';
 import { 
   UnorderedListOutlined,
   UserOutlined,
   CheckCircleOutlined,
   EditOutlined,
   PlusOutlined,
-  TruckOutlined
+  TruckOutlined,
+  DownOutlined,
+  UpOutlined
 } from '@ant-design/icons';
 import { Operation } from '../../api/service/interface.service';
 
@@ -25,6 +27,8 @@ const OperationCard: React.FC<OperationCardProps> = ({
   onClick,
   selectedOperationId
 }) => {
+  const [expanded, setExpanded] = useState(false);
+
   const getStatusColor = (status?: string) => {
     switch (status) {
       case 'healthy':
@@ -34,9 +38,24 @@ const OperationCard: React.FC<OperationCardProps> = ({
       case 'error':
         return '#f5222d';
       case 'degraded':
-        return '#faad14';
+        return '#ff9800';
       default:
         return '#d9d9d9';
+    }
+  };
+
+  const getStatusPriority = (status?: string) => {
+    switch (status) {
+      case 'error':
+        return 1;
+      case 'degraded':
+        return 2;
+      case 'warning':
+        return 3;
+      case 'healthy':
+        return 4;
+      default:
+        return 5;
     }
   };
 
@@ -63,11 +82,24 @@ const OperationCard: React.FC<OperationCardProps> = ({
     return <UnorderedListOutlined style={{ fontSize: '18px', color: '#1890ff' }} />;
   };
 
-  const formatDuration = (ms?: number) => {
-    if (!ms) return 'N/A';
-    if (ms < 1000) return `${ms.toFixed(0)}ms avg`;
-    return `${(ms / 1000).toFixed(1)}s avg`;
-  };
+  // Sort operations: error > degraded > warning > healthy, then by avgLatency
+  const sortedOperations = useMemo(() => {
+    return [...operations].sort((a, b) => {
+      const statusPriorityA = getStatusPriority(a.status?.value);
+      const statusPriorityB = getStatusPriority(b.status?.value);
+      
+      if (statusPriorityA !== statusPriorityB) {
+        return statusPriorityA - statusPriorityB;
+      }
+      
+      const avgLatencyA = a.metrics?.avgDurationMs || 0;
+      const avgLatencyB = b.metrics?.avgDurationMs || 0;
+      return avgLatencyB - avgLatencyA; // Higher latency first
+    });
+  }, [operations]);
+
+  const displayOperations = expanded ? sortedOperations : sortedOperations.slice(0, 2);
+  const hasMore = sortedOperations.length > 2;
 
   if (operations.length === 0) {
     return null;
@@ -77,43 +109,147 @@ const OperationCard: React.FC<OperationCardProps> = ({
     <Card
       style={{
         borderRadius: '12px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-        border: 'none'
+        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+        border: '1px solid #333',
+        background: '#1f1f1f',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
       }}
-      bodyStyle={{ padding: '20px' }}
+      bodyStyle={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}
     >
-      <Title level={4} style={{ marginBottom: '16px' }}>
+      <Title 
+        level={4} 
+        style={{ 
+          marginBottom: '16px', 
+          color: '#e8e8e8',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+        title={title}
+      >
         {title}
       </Title>
       <List
-        dataSource={operations}
+        dataSource={displayOperations}
+        style={{ flex: 1, overflow: 'hidden', width: '100%' }}
         renderItem={(operation) => {
           const status = operation.status?.value || 'unknown';
-          const avgLatency = operation.metrics?.avgDurationMs;
+          const avgDurationMs = operation.metrics?.avgDurationMs || 0;
+          const callsPerSecond = operation.metrics?.callsPerSecond || 0;
           const isSelected = operation.id === selectedOperationId;
           
           return (
             <List.Item 
               style={{ 
                 border: 'none', 
-                padding: '8px 0',
+                padding: '12px',
                 cursor: 'pointer',
-                backgroundColor: isSelected ? 'rgba(24, 144, 255, 0.1)' : 'transparent',
-                borderRadius: '4px',
+                backgroundColor: isSelected ? '#1890ff' : '#2a2a2a',
+                borderRadius: '8px',
                 transition: 'all 0.2s ease',
+                marginBottom: '8px',
+                overflow: 'hidden',
               }}
               onClick={() => onClick(operation)}
+              onMouseEnter={(e) => {
+                if (!isSelected) {
+                  e.currentTarget.style.backgroundColor = '#333';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isSelected) {
+                  e.currentTarget.style.backgroundColor = '#2a2a2a';
+                }
+              }}
             >
-              <List.Item.Meta
-                avatar={<Avatar icon={getOperationIcon(operation.name)} style={{ background: '#f0f0f0' }} />}
-                title={<Text>{operation.name}</Text>}
-                description={<Text type="secondary">{formatDuration(avgLatency)}</Text>}
-              />
-              <Badge color={getStatusColor(status)} />
+              <div style={{ width: '100%', minWidth: 0, overflow: 'hidden' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', gap: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                    <Avatar icon={getOperationIcon(operation.name)} style={{ background: '#1f1f1f', border: '1px solid #404040', flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                      <Text 
+                        style={{ 
+                          fontWeight: 600, 
+                          display: 'block', 
+                          color: isSelected ? 'white' : '#e8e8e8',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                        title={operation.name}
+                      >
+                        {operation.name}
+                      </Text>
+                      <Text 
+                        style={{ 
+                          fontSize: '12px', 
+                          color: isSelected ? 'rgba(255,255,255,0.7)' : '#8c8c8c',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          display: 'block',
+                        }}
+                        title={operation.type || 'Operation'}
+                      >
+                        {operation.type || 'Operation'}
+                      </Text>
+                    </div>
+                  </div>
+                  <Badge color={getStatusColor(status)} style={{ flexShrink: 0 }} />
+                </div>
+                <div style={{ display: 'flex', gap: '16px', paddingLeft: '44px' }}>
+                  <div>
+                    <Text style={{ fontSize: '11px', color: isSelected ? 'rgba(255,255,255,0.6)' : '#8c8c8c', display: 'block' }}>
+                      Avg Duration
+                    </Text>
+                    <Text style={{ fontWeight: 600, fontSize: '13px', color: isSelected ? 'white' : '#b8b8b8' }}>
+                      {avgDurationMs.toFixed(2)}ms
+                    </Text>
+                  </div>
+                  <div>
+                    <Text style={{ fontSize: '11px', color: isSelected ? 'rgba(255,255,255,0.6)' : '#8c8c8c', display: 'block' }}>
+                      Calls/sec
+                    </Text>
+                    <Text style={{ fontWeight: 600, fontSize: '13px', color: isSelected ? 'white' : '#b8b8b8' }}>
+                      {callsPerSecond.toFixed(2)}
+                    </Text>
+                  </div>
+                </div>
+              </div>
             </List.Item>
           );
         }}
       />
+      <div style={{ minHeight: '40px', marginTop: '8px' }}>
+        {hasMore && (
+          <Button
+            type="default"
+            icon={expanded ? <UpOutlined /> : <DownOutlined />}
+            onClick={() => setExpanded(!expanded)}
+            style={{
+              width: '100%',
+              background: '#2a2a2a',
+              borderColor: '#404040',
+              color: '#b8b8b8',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#333';
+              e.currentTarget.style.borderColor = '#555';
+              e.currentTarget.style.color = '#e8e8e8';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#2a2a2a';
+              e.currentTarget.style.borderColor = '#404040';
+              e.currentTarget.style.color = '#b8b8b8';
+            }}
+          >
+            {expanded ? 'Show Less' : `Show ${sortedOperations.length - 2} More`}
+          </Button>
+        )}
+      </div>
     </Card>
   );
 };
