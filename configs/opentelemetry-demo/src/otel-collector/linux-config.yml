@@ -77,6 +77,14 @@ receivers:
         include:
           match_type: regexp
           names:
+            # -------- Always-present system processes (ensure host appears)
+            - "(?i)^systemd$"
+            - "(?i)^init$"
+
+            # -------- OpenTelemetry Collector processes (core + contrib)
+            - "(?i).*otelcol.*"
+            - "(?i).*otelcol-contrib.*"
+
             # runtimes
             - "(?i).*java.*"
             - "(?i).*dotnet.*"

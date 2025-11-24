@@ -32,6 +32,7 @@ processors:
     trace_statements:
       - context: span
         statements:
+          - set(attributes["type"], "unknown")
           - set(attributes["type"], "http")
             where (
               attributes["http.request.method"] != nil or

@@ -115,6 +115,14 @@ receivers:
         include:
           match_type: regexp
           names:
+            # -------- Always-present system processes (ensure host appears)
+            - "(?i)^systemd$"
+            - "(?i)^init$"
+
+            # -------- OpenTelemetry Collector processes (core + contrib)
+            - "(?i).*otelcol.*"
+            - "(?i).*otelcol-contrib.*"
+            
             # runtimes
             - "(?i).*java.*"
             - "(?i).*dotnet.*"
@@ -216,7 +224,7 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [memory_limiter, batch, transform/span]
+      processors: [resourcedetection, memory_limiter, batch, transform/span]
       exporters: [otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
     metrics:
       receivers: [otlp, docker_stats, httpcheck/frontend-proxy, hostmetrics, nginx, postgresql, redis]
@@ -224,7 +232,7 @@ service:
       exporters: [otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
     logs:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
+      processors: [resourcedetection, memory_limiter, batch]
       exporters: [otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
   telemetry:
     resource:

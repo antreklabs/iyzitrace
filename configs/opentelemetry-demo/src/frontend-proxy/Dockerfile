@@ -16,4 +16,4 @@ COPY ./src/frontend-proxy/envoy.tmpl.yaml envoy.tmpl.yaml
 
 EXPOSE ${ENVOY_PORT}
 EXPOSE ${ENVOY_ADMIN_PORT}
-ENTRYPOINT ["/bin/sh", "-c", "envsubst < envoy.tmpl.yaml > envoy.yaml && export OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES},host.name=${HOSTNAME} && envoy -c envoy.yaml;"]
+ENTRYPOINT ["/bin/sh", "-c", "envsubst < envoy.tmpl.yaml > envoy.yaml && envoy -c envoy.yaml;"]
