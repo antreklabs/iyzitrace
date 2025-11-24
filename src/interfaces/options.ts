@@ -38,6 +38,12 @@ export interface PluginJsonData {
   defaultAbsoluteRange?: [number, number];
   serviceMap?: ServiceMapItem[];
   definitions?: Definitions;
+  aiConfig?: {
+    apiKey?: string;
+    model?: string;
+    temperature?: number;
+    maxTokens?: number;
+  };
 }
 
 export interface PluginSecureJsonData {

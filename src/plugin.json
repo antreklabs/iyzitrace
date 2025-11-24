@@ -62,8 +62,8 @@
     },
     {
       "type": "page",
-      "name": "Alerts",
-      "path": "/a/iyzitrace-app/alerts",
+      "name": "AI",
+      "path": "/a/iyzitrace-app/ai",
       "addToNav": true
     },
     {

@@ -6,7 +6,6 @@ import {
   BarChartOutlined,
   FileSearchOutlined,
   ProfileOutlined,
-  AlertOutlined,
   ClusterOutlined,
   RadarChartOutlined,
   SettingOutlined,
@@ -15,6 +14,7 @@ import {
   HomeOutlined,
   BuildOutlined,
   MenuOutlined,
+  RobotOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import pluginJson from '../../../plugin.json';
@@ -90,7 +90,7 @@ const Sidebar: React.FC = () => {
           { key: 'traces', icon: <FileSearchOutlined style={{ fontSize: 16 }} />, label: 'Traces' },
           { key: 'logs', icon: <ProfileOutlined style={{ fontSize: 16 }} />, label: 'Logs' },
           { key: 'views', icon: <ClusterOutlined style={{ fontSize: 16 }} />, label: 'Views' },
-          { key: 'alerts', icon: <AlertOutlined style={{ fontSize: 16 }} />, label: 'Alerts' },
+          { key: 'ai', icon: <RobotOutlined style={{ fontSize: 16 }} />, label: 'AI Assistant' },
           { key: 'exceptions', icon: <RadarChartOutlined style={{ fontSize: 16 }} />, label: 'Exceptions' },
           { key: 'teams', icon: <TeamOutlined style={{ fontSize: 16 }} />, label: 'Teams' },
           { key: 'settings', icon: <SettingOutlined style={{ fontSize: 16 }} />, label: 'Settings' },

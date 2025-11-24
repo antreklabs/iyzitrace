@@ -10,7 +10,7 @@ const TracesPage = React.lazy(() => import('../pages/traces/traces.page'));
 const TraceDetailPage = React.lazy(() => import('../pages/traces/trace-detail.page')); 
 const LogsPage = React.lazy(() => import('../pages/logs/logs.page'));
 const ViewsPage = React.lazy(() => import('../pages/views/view.page'));
-const AlertsPage = React.lazy(() => import('../pages/alerts/alerts.page'));
+const AiPage = React.lazy(() => import('../pages/ai/ai.page'));
 const ExceptionsPage = React.lazy(() => import('../pages/exceptions/exceptions.page'));
 const ExceptionDetailPage = React.lazy(() => import('../pages/exceptions/exception-detail.page'));
 const TeamsPage = React.lazy(() => import('../pages/teams/teams.page'));
@@ -97,10 +97,11 @@ export const appRoutes: AppRoute[] = [
     showInMenu: true,
   },
   {
-    path: '/alerts',
-    element: <AlertsPage />,
-    name: 'alerts',
-    title: 'Alerts',
+    path: '/ai',
+    element: <AiPage />,
+    name: 'ai',
+    title: 'AI Assistant',
+    icon: 'robot',
     showInMenu: true,
   },
   {

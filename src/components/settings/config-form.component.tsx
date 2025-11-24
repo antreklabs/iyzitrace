@@ -5,7 +5,7 @@ import type { PluginJsonData, PluginSecureJsonData } from '../../interfaces/opti
 import DefinitionsTable, { DEFAULT_DEFINITIONS } from './definitions-table.component';
 import GrafanaLikeRangePicker from '../core/graphanadatepicker';
 import dayjs from 'dayjs';
-import { KeyOutlined, DatabaseOutlined, FieldTimeOutlined, DeploymentUnitOutlined, SaveOutlined, FileTextOutlined, EditOutlined, CheckOutlined, CloseOutlined, AlignLeftOutlined } from '@ant-design/icons';
+import { KeyOutlined, DatabaseOutlined, FieldTimeOutlined, DeploymentUnitOutlined, SaveOutlined, FileTextOutlined, EditOutlined, CheckOutlined, CloseOutlined, AlignLeftOutlined, RobotOutlined } from '@ant-design/icons';
 import { Table, Input as AntInput, Button as AntButton } from 'antd';
 import { getPluginSettings, savePluginSettings } from '../../api/service/settings.service';
 
@@ -16,6 +16,7 @@ const PLUGIN_ID = 'iyzitrace-app';
 const TAB_ITEMS = [
   'General',
   'Defaults',
+  'AI',
   'Service Map',
   'Definitions',
   'Security',
@@ -294,6 +295,117 @@ const ConfigForm: React.FC = () => {
 
         </>
       )}
+      {activeTab === 'AI' && (
+        <>
+          <div style={{
+            marginBottom: 16,
+            padding: 16,
+            borderRadius: 12,
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.06)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <RobotOutlined style={{ color: '#a78bfa' }} />
+              <h3 className="page-heading" style={{ margin: 0 }}>AI Assistant Configuration</h3>
+            </div>
+            <div style={{ marginBottom: 8, color: '#9CA3AF' }}>
+              Configure the AI assistant settings. The API key will be stored securely and used for AI-powered insights.
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <InlineField label="API Key" tooltip="OpenRouter API key for AI services">
+                  <Input
+                    width={40}
+                    value={jsonData.aiConfig?.apiKey ?? ''}
+                    onChange={(e) => setJsonData({ 
+                      ...jsonData, 
+                      aiConfig: { 
+                        ...jsonData.aiConfig, 
+                        apiKey: e.currentTarget.value 
+                      } 
+                    })}
+                    placeholder="sk-or-v1-..."
+                  />
+                </InlineField>
+                <div style={{ color: '#9CA3AF', marginTop: 6 }}>
+                  Your OpenRouter API key. Get one from https://openrouter.ai/keys
+                </div>
+              </div>
+              <div>
+                <InlineField label="Model" tooltip="AI model to use for responses">
+                  <Select
+                    width={40}
+                    options={[
+                      { label: 'DeepSeek Chat (Recommended)', value: 'deepseek/deepseek-chat' },
+                      { label: 'GPT-4o', value: 'openai/gpt-4o' },
+                      { label: 'GPT-4o Mini', value: 'openai/gpt-4o-mini' },
+                      { label: 'Claude 3.5 Sonnet', value: 'anthropic/claude-3.5-sonnet' },
+                      { label: 'Claude 3 Haiku', value: 'anthropic/claude-3-haiku' },
+                      { label: 'Gemini Pro 1.5', value: 'google/gemini-pro-1.5' },
+                      { label: 'Llama 3.1 405B', value: 'meta-llama/llama-3.1-405b-instruct' },
+                    ]}
+                    value={jsonData.aiConfig?.model || 'deepseek/deepseek-chat'}
+                    onChange={(v) => setJsonData({ 
+                      ...jsonData, 
+                      aiConfig: { 
+                        ...jsonData.aiConfig, 
+                        model: v?.value 
+                      } 
+                    })}
+                  />
+                </InlineField>
+                <div style={{ color: '#9CA3AF', marginTop: 6 }}>
+                  Choose the AI model. DeepSeek Chat offers the best balance of quality and cost.
+                </div>
+              </div>
+              <div>
+                <InlineField label="Temperature" tooltip="Controls randomness (0.0-2.0). Lower is more focused, higher is more creative.">
+                  <Input
+                    width={20}
+                    type="number"
+                    min={0}
+                    max={2}
+                    step={0.1}
+                    value={jsonData.aiConfig?.temperature ?? 0.7}
+                    onChange={(e) => setJsonData({ 
+                      ...jsonData, 
+                      aiConfig: { 
+                        ...jsonData.aiConfig, 
+                        temperature: parseFloat(e.currentTarget.value) 
+                      } 
+                    })}
+                  />
+                </InlineField>
+                <div style={{ color: '#9CA3AF', marginTop: 6 }}>
+                  Controls response creativity. 0.0 = focused and deterministic, 2.0 = creative and varied. Recommended: 0.7
+                </div>
+              </div>
+              <div>
+                <InlineField label="Max Tokens" tooltip="Maximum number of tokens in AI responses">
+                  <Input
+                    width={20}
+                    type="number"
+                    min={50}
+                    max={4000}
+                    step={50}
+                    value={jsonData.aiConfig?.maxTokens ?? 150}
+                    onChange={(e) => setJsonData({ 
+                      ...jsonData, 
+                      aiConfig: { 
+                        ...jsonData.aiConfig, 
+                        maxTokens: parseInt(e.currentTarget.value) 
+                      } 
+                    })}
+                  />
+                </InlineField>
+                <div style={{ color: '#9CA3AF', marginTop: 6 }}>
+                  Maximum length of AI responses. Higher values allow longer answers but cost more. Recommended: 150-500
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
       {activeTab === 'Service Map' && (
         <>
           <ServiceMapPageViewsSection />
@@ -323,7 +435,7 @@ const ConfigForm: React.FC = () => {
         </>
       )}
 
-      {activeTab !== 'Security' && activeTab !== 'Service Map' && activeTab !== 'Defaults' && activeTab !== 'Definitions' && renderPlaceholder(activeTab)}
+      {activeTab !== 'Security' && activeTab !== 'AI' && activeTab !== 'Service Map' && activeTab !== 'Defaults' && activeTab !== 'Definitions' && renderPlaceholder(activeTab)}
 
       <div style={{ position: 'sticky', bottom: 0, paddingTop: 8, paddingBottom: 8, background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(6px)', display: 'flex', justifyContent: 'flex-end' }}>
         <Button onClick={save} icon={<SaveOutlined />}>Save Settings</Button>
