@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-FROM docker.io/library/ruby:3.4.4-alpine3.22 AS builder
+FROM docker.io/library/ruby:3.4.7-alpine3.22 AS builder
 
 COPY ./src/email/Gemfile Gemfile
 COPY ./src/email/Gemfile.lock Gemfile.lock
@@ -11,7 +11,7 @@ RUN apk update && \
     apk add make gcc musl-dev gcompat && \
     bundle install
 
-FROM docker.io/library/ruby:3.4.4-alpine3.22
+FROM docker.io/library/ruby:3.4.7-alpine3.22
 
 COPY --from=builder /usr/local/bundle/ /usr/local/bundle/
 
@@ -25,5 +25,4 @@ COPY ./src/email/Gemfile.lock Gemfile.lock
 COPY ./src/email/email_server.rb email_server.rb
 
 EXPOSE ${EMAIL_PORT}
-
-ENTRYPOINT ["/bin/sh", "-c", "export OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES},host.name=${HOSTNAME} && bundle exec ruby email_server.rb"]
+ENTRYPOINT ["bundle", "exec", "ruby", "email_server.rb"]
