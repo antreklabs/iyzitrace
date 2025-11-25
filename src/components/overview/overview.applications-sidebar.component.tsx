@@ -10,7 +10,6 @@ interface ApplicationsSidebarProps {
   onClose: () => void;
   applications: Application[];
   selectedApplicationId: string | null;
-  onApplicationClick: (application: Application) => void;
 }
 
 const ApplicationsSidebar: React.FC<ApplicationsSidebarProps> = ({
@@ -18,7 +17,6 @@ const ApplicationsSidebar: React.FC<ApplicationsSidebarProps> = ({
   onClose,
   applications,
   selectedApplicationId,
-  onApplicationClick,
 }) => {
   const getStatusText = (status?: string) => {
     return status?.charAt(0).toUpperCase() + status?.slice(1).toLowerCase() || 'Unknown';
@@ -74,7 +72,6 @@ const ApplicationsSidebar: React.FC<ApplicationsSidebarProps> = ({
           const statusValue = application.status?.value || 'unknown';
           return (
             <List.Item
-              onClick={() => onApplicationClick(application)}
               style={{
                 cursor: 'pointer',
                 padding: '16px 24px',

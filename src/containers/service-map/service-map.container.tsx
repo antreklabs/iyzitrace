@@ -83,13 +83,13 @@ const ServiceMapContainer: React.FC = () => {
           hasServiceFilter={true}
           hasOperationsFilter={true}
           hasStatusesFilter={true}
-          hasDurationFilter={true}
-          hasTagsFilter={true}
+          hasDurationFilter={false}
+          hasTagsFilter={false}
           hasOptionsFilter={true}
           hasLabelsFilter={true}
           hasFieldsFilter={true}
           hasTypesFilter={true}
-          hasLevelsFilter={true}
+          hasExceptionTypesFilter={true}
           columns={columns?.RootColumns ?? []}
           data={infraLevelData}
         />

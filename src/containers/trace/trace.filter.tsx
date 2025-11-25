@@ -15,7 +15,7 @@ const TraceFilter: React.FC<TraceFilterProps> = ({ onChange, columns, data }) =>
       hasServiceFilter={true}
       hasOperationsFilter={true}
       hasStatusesFilter={true}
-      hasDurationFilter={true}
+      hasDurationFilter={false}
       hasTagsFilter={true}
       hasLabelsFilter={true}
       hasFieldsFilter={true}

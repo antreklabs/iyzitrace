@@ -3,7 +3,7 @@ import { Select, Input, Button, Divider, Form, Row, Col, Space } from 'antd';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../assets/styles/base/base.filter.css';
-import { DropdownOption, getPrometheusLabels, getPrometheusLabelValues, getPrometheusLokiLevels, getPrometheusOperations, getPrometheusOperationTypes, getPrometheusServices, getPrometheusTraceStatuses } from '../api/service/list.service';
+import { DropdownOption, getPrometheusLabels, getPrometheusLabelValues, getPrometheusOperations, getPrometheusOperationTypes, getPrometheusServices, getPrometheusTraceStatuses, getPrometheusExceptionTypes } from '../api/service/list.service';
 
 export const { Option } = Select;
 export const OPERATOR_OPTIONS = ['=', '!=', '>', '<', 'contains', 'regex'];
@@ -20,7 +20,7 @@ interface BaseFilterProps {
   hasLabelsFilter?: boolean;
   hasFieldsFilter?: boolean;
   hasTypesFilter?: boolean;
-  hasLevelsFilter?: boolean;
+  hasExceptionTypesFilter?: boolean;
   columns?: any[];
   data?: any[];
 }
@@ -36,7 +36,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
   hasOptionsFilter = false,
   hasFieldsFilter = false,
   hasTypesFilter = false,
-  hasLevelsFilter = false,
+  hasExceptionTypesFilter = false,
   columns,
   data
 }) => {
@@ -45,7 +45,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
   const [labels, setLabels] = useState<DropdownOption[]>([]);
   const [operations, setOperations] = useState<DropdownOption[]>([]);
   const [statuses, setStatuses] = useState<DropdownOption[]>([]);
-  const [levels, setLevels] = useState<DropdownOption[]>([]);
+  const [exceptionTypes, setExceptionTypes] = useState<DropdownOption[]>([]);
   const [fields, setFields] = useState<DropdownOption[]>([]);
   const [labelFilters, setLabelFilters] = useState<Array<{id: string, label: string, values: string[]}>>([]);
   const [fieldFilters, setFieldFilters] = useState<Array<{id: string, field: string, values: string[]}>>([]);
@@ -74,27 +74,22 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       const statuses = await getPrometheusTraceStatuses();
       setStatuses(statuses);
     }
-    if (hasLevelsFilter) {
-      const levels = await getPrometheusLokiLevels();
-      setLevels(levels);
+    if (hasExceptionTypesFilter) {
+      const exceptionTypes = await getPrometheusExceptionTypes();
+      setExceptionTypes(exceptionTypes);
     }
-  }, [hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter, hasTypesFilter, hasLevelsFilter]);
+  }, [hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter, hasTypesFilter, hasExceptionTypesFilter]);
 
-  const extractFieldsFromData = (data: any[]) => {
-    if (!data || data.length === 0) {
+  const extractFieldsFromColumns = (columns: any[]) => {
+    if (!columns || columns.length === 0) {
       return;
     }
     
     const fieldNames = new Set<string>();
-    data.forEach(item => {
-      // Check both attributes and direct properties
-      if (item.attributes) {
-        Object.keys(item.attributes).forEach(key => fieldNames.add(key));
-      } else {
-        // Extract from direct properties (for service map data)
-        Object.keys(item).forEach(key => {
-            fieldNames.add(key);
-        });
+    columns.forEach(column => {
+      // Extract key from column
+      if (column.title) {
+        fieldNames.add(column.title);
       }
     });
     
@@ -135,19 +130,24 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       // timeSrv/DS sync için 1 frame beklet
       await new Promise(r => requestAnimationFrame(() => r(null)));
   
-      if (alive && (hasServiceFilter || hasTypesFilter || hasLabelsFilter || hasOperationsFilter || hasStatusesFilter || hasLevelsFilter)) {
+      if (alive && (hasServiceFilter || hasTypesFilter || hasLabelsFilter || hasOperationsFilter || hasStatusesFilter || hasExceptionTypesFilter)) {
         await fetchLists();
       }
     })();
     return () => { alive = false; };
-  }, [fetchLists, hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter, hasTypesFilter, hasLevelsFilter]);
+  }, [fetchLists, hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter, hasTypesFilter, hasExceptionTypesFilter]);
 
-  // Extract fields from grid data when data changes
+  // Extract fields from columns when columns change
+  useEffect(() => {
+    if (hasFieldsFilter && columns && Array.isArray(columns) && columns.length > 0) {
+      extractFieldsFromColumns(columns);
+    }
+  }, [columns, hasFieldsFilter]);
+
+  // Update field values for existing field filters when data changes
   useEffect(() => {
     if (hasFieldsFilter && data && Array.isArray(data) && data.length > 0) {
-      extractFieldsFromData(data);
-      
-      // Also update field values for existing field filters
+      // Update field values for existing field filters
       fieldFilters.forEach(filter => {
         if (filter.field) {
           const values = extractFieldValuesFromData(data, filter.field);
@@ -241,18 +241,18 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         filters.filters.status = undefined;
       }
 
-      if (searchParams.get('level')) {
-        const level = searchParams.get('level');
-        filters.filters.level = level;
-        filters.filters.levelOperator = searchParams.get('levelOperator') || '=';
+      if (searchParams.get('exceptionType')) {
+        const exceptionType = searchParams.get('exceptionType');
+        filters.filters.exceptionType = exceptionType;
+        filters.filters.exceptionTypeOperator = searchParams.get('exceptionTypeOperator') || '=';
         
-        // URL'den gelen level'ı levels listesine ekle (eğer yoksa)
-        if (level && !levels.some(item => item.value === level)) {
-          setLevels(prev => [...prev, new DropdownOption(level)]);
+        // URL'den gelen exception type'ı exceptionTypes listesine ekle (eğer yoksa)
+        if (exceptionType && !exceptionTypes.some(item => item.value === exceptionType)) {
+          setExceptionTypes(prev => [...prev, new DropdownOption(exceptionType)]);
         }
       }
       else {
-        filters.filters.level = undefined;
+        filters.filters.exceptionType = undefined;
       }
 
       if (searchParams.get('durationMin')) {
@@ -501,11 +501,11 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       }
     }
 
-    // Add level filter
+    // Add exception type filter
     if (filters.filters?.level) {
-      searchParams.set('level', filters.filters.level);
-      if (filters.filters.levelOperator) {
-        searchParams.set('levelOperator', filters.filters.levelOperator);
+      searchParams.set('exceptionType', filters.filters.exceptionType);
+      if (filters.filters.exceptionTypeOperator) {
+        searchParams.set('exceptionTypeOperator', filters.filters.exceptionTypeOperator);
       }
     }
     
@@ -534,7 +534,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         if (labelFilter && labelFilter.name && labelFilter.value) {
           searchParams.set(`label_${id}_name`, labelFilter.name);
           if (Array.isArray(labelFilter.value)) {
-            searchParams.set(`label_${id}_value`, labelFilter.value.join(','));
+            searchParams.set(`label_${id}_value`, labelFilter.value.join('|'));
           } else {
             searchParams.set(`label_${id}_value`, labelFilter.value);
           }
@@ -702,10 +702,10 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         
         </Form.Item>
       )}
-      {hasLevelsFilter && (
-        <Form.Item label="Level">
+      {hasExceptionTypesFilter && (
+        <Form.Item label="Exception Type">
           <Space.Compact className="filter-compact-space">
-            <Form.Item name={['filters', 'levelOperator']} noStyle initialValue="=">
+            <Form.Item name={['filters', 'exceptionTypeOperator']} noStyle initialValue="=">
               <Select className="filter-operator-select">
                 {EQUAL_OPERATOR_OPTIONS.map((op) => (
                   <Option key={op} value={op}>
@@ -714,17 +714,17 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item name={['filters', 'level']} noStyle>
+            <Form.Item name={['filters', 'exceptionType']} noStyle>
               <Select
                 showSearch
                 allowClear
-                placeholder="Select level"
+                placeholder="Select exception type"
                 className="filter-value-select"
               >
-                {levels.map((level) => {
+                {exceptionTypes.map((exceptionType) => {
                   return (
-                    <Option key={level.key} value={level.value}>
-                      {level.name}
+                    <Option key={exceptionType.key} value={exceptionType.value}>
+                      {exceptionType.value}
                     </Option>
                   );
                 })}

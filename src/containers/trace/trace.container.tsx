@@ -160,7 +160,7 @@ const TraceContainer: React.FC = () => {
           hasLabelsFilter={false}
           hasFieldsFilter={true}
           hasTypesFilter={false}
-          hasLevelsFilter={false}
+          hasExceptionTypesFilter={false}
           columns={tableColumns?.RootColumns ?? []}
           data={data}
         />

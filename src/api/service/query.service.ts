@@ -168,11 +168,30 @@ export class FilterParamsModel {
 
     // Labels
     this.labels = [];
+    const labelMap: { [key: string]: { name?: string; value?: string[] } } = {};
+    
     Object.keys(params).forEach(key => {
       if (key.startsWith('label_')) {
-        const labelName = key.replace('label_', '');
-        const labelValue = params[key] ? params[key].split(',') : [];
-        this.labels.push({ name: labelName, value: labelValue });
+        // Parse label parameters: label_label_1764108930474_name and label_label_1764108930474_value
+        const match = key.match(/^label_(.+)_(name|value)$/);
+        if (match) {
+          const [, labelId, suffix] = match;
+          if (!labelMap[labelId]) {
+            labelMap[labelId] = {};
+          }
+          if (suffix === 'name') {
+            labelMap[labelId].name = params[key];
+          } else if (suffix === 'value') {
+            labelMap[labelId].value = params[key] ? params[key].split('|') : [];
+          }
+        }
+      }
+    });
+    
+    // Convert map to array
+    Object.values(labelMap).forEach((label) => {
+      if (label.name && label.value && label.value.length > 0) {
+        this.labels.push({ name: label.name, value: label.value });
       }
     });
 
@@ -254,9 +273,13 @@ export class FilterParamsModel {
         }
         
         this.labels.forEach((label: { name: string; value: string[] }) => {
-          label.value.forEach((value: string) => {
-            labelFilters.push(`${label.name}="${value}"`);
-          });
+          if (label.value.length === 1) {
+            // Single value: use exact match
+            labelFilters.push(`${label.name}="${label.value[0]}"`);
+          } else if (label.value.length > 1) {
+            // Multiple values: use regex match with pipe separator
+            labelFilters.push(`${label.name}=~"${label.value.join('|')}"`);
+          }
         });
         
         if (this.duration.min) {

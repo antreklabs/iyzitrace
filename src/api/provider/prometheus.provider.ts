@@ -27,6 +27,7 @@ export const getLabelValues = async (labelName: string): Promise<string[]> => {
   try {
     const prometheusUid = await getDefaultPrometheusUid();
     const response = await getBackendSrv().get(`/api/datasources/proxy/uid/${prometheusUid}/api/v1/label/${labelName}/values`);
+    // console.log('getLabelValues', labelName, response.data);
     return response.data;
   } catch (error) {
     console.error(`Error fetching label values for ${labelName} from Prometheus:`, error);
@@ -37,7 +38,7 @@ export const getLabelValues = async (labelName: string): Promise<string[]> => {
 
 export const getQueryData = async (query: string): Promise<any> => {
   const prometheusUid = await getDefaultPrometheusUid();
-  // console.log('getQueryData', query);
+  console.log('getQueryData', query);
   const response = await getBackendSrv().get(`/api/datasources/proxy/uid/${prometheusUid}/api/v1/query`, {
     query: query,
   });

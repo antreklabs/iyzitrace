@@ -86,7 +86,7 @@ export const getPrometheusTraceStatuses = async (): Promise<DropdownOption[]> =>
 /**
  * Convenience: Fetch exception types as DropdownOption[]
  */
-export const getPrometheusLokiLevels = async (): Promise<DropdownOption[]> => {
+export const getPrometheusExceptionTypes = async (): Promise<DropdownOption[]> => {
   const definitions = await getDefinitions();
   return getPrometheusLabelValues(definitions.exception_type_label_name);
 };

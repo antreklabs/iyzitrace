@@ -677,6 +677,7 @@ export const getServicesQueryDataByType = async (
   definitions: Definitions
 ): Promise<ServiceQueryData[]> => {
   const query = getQueryByType(queryType, filterParamsModel, definitions);
+  
   return await getServicesQueryData(filterParamsModel, query);
 }
 
