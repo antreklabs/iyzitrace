@@ -4,6 +4,7 @@ import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../assets/styles/base/base.filter.css';
 import { DropdownOption, getPrometheusLabels, getPrometheusLabelValues, getPrometheusOperations, getPrometheusOperationTypes, getPrometheusServices, getPrometheusTraceStatuses, getPrometheusExceptionTypes } from '../api/service/list.service';
+import { TempoApi as TempoApiProvider } from '../providers/api/tempo/tempo.api';
 
 export const { Option } = Select;
 export const OPERATOR_OPTIONS = ['=', '!=', '>', '<', 'contains', 'regex'];
@@ -14,6 +15,7 @@ interface BaseFilterProps {
   hasServiceFilter?: boolean;
   hasOperationsFilter?: boolean;
   hasStatusesFilter?: boolean;
+  hasTempoStatusesFilter?: boolean;
   hasDurationFilter?: boolean;
   hasTagsFilter?: boolean;
   hasOptionsFilter?: boolean;
@@ -30,6 +32,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
   hasServiceFilter = false,
   hasOperationsFilter = false,
   hasStatusesFilter = false,
+  hasTempoStatusesFilter = false,
   hasDurationFilter = false,
   hasTagsFilter = false,
   hasLabelsFilter = false,
@@ -45,10 +48,16 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
   const [labels, setLabels] = useState<DropdownOption[]>([]);
   const [operations, setOperations] = useState<DropdownOption[]>([]);
   const [statuses, setStatuses] = useState<DropdownOption[]>([]);
+  const [tempoStatuses, setTempoStatuses] = useState<DropdownOption[]>([]);
   const [exceptionTypes, setExceptionTypes] = useState<DropdownOption[]>([]);
   const [fields, setFields] = useState<DropdownOption[]>([]);
   const [labelFilters, setLabelFilters] = useState<Array<{id: string, label: string, values: string[]}>>([]);
   const [fieldFilters, setFieldFilters] = useState<Array<{id: string, field: string, values: string[]}>>([]);
+  const [tagScopes, setTagScopes] = useState<string[]>([]);
+  const [tagNames, setTagNames] = useState<string[]>([]);
+  const [tagValues, setTagValues] = useState<string[]>([]);
+  const [loadingTagNames, setLoadingTagNames] = useState(false);
+  const [loadingTagValues, setLoadingTagValues] = useState(false);
   const [form] = Form.useForm();
   const location = useLocation();
   const navigate = useNavigate();
@@ -74,11 +83,23 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       const statuses = await getPrometheusTraceStatuses();
       setStatuses(statuses);
     }
+    if (hasTempoStatusesFilter) {
+      const response = await TempoApiProvider.getStatus();
+      const statusValues = response?.tagValues || [];
+      const tempoStatusOptions = statusValues.map((status: any) => 
+        new DropdownOption(status.value, status.value, status.value)
+      );
+      setTempoStatuses(tempoStatusOptions);
+    }
     if (hasExceptionTypesFilter) {
       const exceptionTypes = await getPrometheusExceptionTypes();
       setExceptionTypes(exceptionTypes);
     }
-  }, [hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter, hasTypesFilter, hasExceptionTypesFilter]);
+    if (hasTagsFilter) {
+      const scopes = await TempoApiProvider.getTagScopes();
+      setTagScopes(scopes);
+    }
+  }, [hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter, hasTempoStatusesFilter, hasTypesFilter, hasExceptionTypesFilter, hasTagsFilter]);
 
   const extractFieldsFromColumns = (columns: any[]) => {
     if (!columns || columns.length === 0) {
@@ -130,12 +151,12 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       // timeSrv/DS sync için 1 frame beklet
       await new Promise(r => requestAnimationFrame(() => r(null)));
   
-      if (alive && (hasServiceFilter || hasTypesFilter || hasLabelsFilter || hasOperationsFilter || hasStatusesFilter || hasExceptionTypesFilter)) {
+      if (alive && (hasServiceFilter || hasTypesFilter || hasLabelsFilter || hasOperationsFilter || hasStatusesFilter || hasTempoStatusesFilter || hasExceptionTypesFilter || hasTagsFilter)) {
         await fetchLists();
       }
     })();
     return () => { alive = false; };
-  }, [fetchLists, hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter, hasTypesFilter, hasExceptionTypesFilter]);
+  }, [fetchLists, hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter, hasTypesFilter, hasExceptionTypesFilter, hasTagsFilter]);
 
   // Extract fields from columns when columns change
   useEffect(() => {
@@ -241,6 +262,20 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         filters.filters.status = undefined;
       }
 
+      if (searchParams.get('tempoStatus')) {
+        const tempoStatus = searchParams.get('tempoStatus');
+        filters.filters.tempoStatus = tempoStatus;
+        filters.filters.tempoStatusOperator = searchParams.get('tempoStatusOperator') || '=';
+        
+        // URL'den gelen status'u statuses listesine ekle (eğer yoksa)
+        if (tempoStatus && !tempoStatuses.some(item => item.value === tempoStatus)) {
+          setTempoStatuses(prev => [...prev, new DropdownOption(tempoStatus)]);
+        }
+      }
+      else {
+        filters.filters.tempoStatus = undefined;
+      }
+
       if (searchParams.get('exceptionType')) {
         const exceptionType = searchParams.get('exceptionType');
         filters.filters.exceptionType = exceptionType;
@@ -255,6 +290,13 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         filters.filters.exceptionType = undefined;
       }
 
+      if (searchParams.get('durationScope')) {
+        filters.filters.durationScope = searchParams.get('durationScope');
+      }
+      else {
+        filters.filters.durationScope = undefined;
+      }
+
       if (searchParams.get('durationMin')) {
         filters.filters.durationMin = searchParams.get('durationMin');
       }
@@ -267,6 +309,13 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       }
       else {
         filters.filters.durationMax = undefined;
+      }
+
+      if (searchParams.get('tagScope')) {
+        filters.filters.tagScope = searchParams.get('tagScope');
+      }
+      else {
+        filters.filters.tagScope = undefined;
       }
 
       if (searchParams.get('tagKey')) {
@@ -358,6 +407,51 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       
       // Always set form values - this will clear fields not in URL
       form.setFieldsValue(filters);
+
+      // Load tag names if tagScope is present
+      const tagScope = searchParams.get('tagScope');
+      if (tagScope) {
+        (async () => {
+          try {
+            const response = await TempoApiProvider.getTagsByScope(tagScope);
+            let tags = [];
+            if (response?.scopes?.[0]?.tags) {
+              tags = response.scopes[0].tags;
+            } else if (response?.tags) {
+              tags = response.tags;
+            } else if (Array.isArray(response)) {
+              tags = response;
+            }
+            setTagNames(tags);
+          } catch (error) {
+            console.error(`Error loading tags for scope ${tagScope} from URL:`, error);
+          }
+        })();
+      } else {
+        // Clear tag names if no scope in URL
+        setTagNames([]);
+        setTagValues([]);
+      }
+
+      // Load tag values if tagScope and tagKey are present
+      const tagKey = searchParams.get('tagKey');
+      if (tagScope && tagKey) {
+        (async () => {
+          try {
+            const response = await TempoApiProvider.getTagValuesByScope(tagScope, tagKey);
+            const values = response?.tagValues || [];
+            const valueOptions: DropdownOption[] = values.map((item: any) => 
+              new DropdownOption(item.value, item.value, item.value)
+            );
+            setTagValues(valueOptions.map((item: any) => item.value));
+          } catch (error) {
+            console.error(`Error loading tag values for ${tagKey} from URL:`, error);
+          }
+        })();
+      } else if (tagScope && !tagKey) {
+        // Clear tag values if scope exists but no tag selected
+        setTagValues([]);
+      }
     };
     
     loadFiltersFromURL();
@@ -439,6 +533,71 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     // No API call needed here
   }, [form]);
 
+  const handleTagScopeChange = useCallback(async (scope: string) => {
+    // Reset tag name and tag value
+    form.setFieldsValue({ 
+      filters: { 
+        ...form.getFieldValue('filters'),
+        tagKey: undefined,
+        tagValue: undefined 
+      } 
+    });
+    setTagNames([]);
+    setTagValues([]);
+
+    if (scope) {
+      setLoadingTagNames(true);
+      try {
+        const response = await TempoApiProvider.getTagsByScope(scope);
+        
+        // Try different possible response formats
+        let tags = [];
+        if (response?.scopes?.[0]?.tags) {
+          tags = response.scopes[0].tags;
+        } else if (response?.tags) {
+          tags = response.tags;
+        } else if (Array.isArray(response)) {
+          tags = response;
+        }
+        
+        setTagNames(tags);
+      } catch (error) {
+        console.error(`Error fetching tags for scope ${scope}:`, error);
+      } finally {
+        setLoadingTagNames(false);
+      }
+    }
+  }, [form]);
+
+  const handleTagNameChange = useCallback(async (tagName: string) => {
+    // Reset tag value
+    const currentScope = form.getFieldValue(['filters', 'tagScope']);
+    form.setFieldsValue({ 
+      filters: { 
+        ...form.getFieldValue('filters'),
+        tagValue: undefined 
+      } 
+    });
+    setTagValues([]);
+
+    if (tagName && currentScope) {
+      setLoadingTagValues(true);
+      try {
+        const response = await TempoApiProvider.getTagValuesByScope(currentScope, tagName);
+        
+      const values = response?.tagValues || [];
+      const valueOptions: DropdownOption[] = values.map((item: any) => 
+        new DropdownOption(item.value, item.value, item.value)
+      );
+      setTagValues(valueOptions.map((item: any) => item.value));
+      } catch (error) {
+        console.error(`Error fetching tag values for ${tagName}:`, error);
+      } finally {
+        setLoadingTagValues(false);
+      }
+    }
+  }, [form]);
+
   const handleApply = () => {
     const values = form.getFieldsValue();
     updateURLWithFilters(values);
@@ -501,6 +660,14 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       }
     }
 
+    // Add tempo status filter
+    if (filters.filters?.tempoStatus) {
+      searchParams.set('tempoStatus', filters.filters.tempoStatus);
+      if (filters.filters.tempoStatusOperator) {
+        searchParams.set('tempoStatusOperator', filters.filters.tempoStatusOperator);
+      }
+    }
+
     // Add exception type filter
     if (filters.filters?.level) {
       searchParams.set('exceptionType', filters.filters.exceptionType);
@@ -510,6 +677,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     }
     
     // Add duration filters
+    if (filters.filters?.durationScope) {
+      searchParams.set('durationScope', filters.filters.durationScope);
+    }
     if (filters.filters?.durationMin) {
       searchParams.set('durationMin', filters.filters.durationMin);
     }
@@ -518,6 +688,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     }
     
     // Add tag filters
+    if (filters.filters?.tagScope) {
+      searchParams.set('tagScope', filters.filters.tagScope);
+    }
     if (filters.filters?.tagKey) {
       searchParams.set('tagKey', filters.filters.tagKey);
       if (filters.filters.tagOperator) {
@@ -702,6 +875,39 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         
         </Form.Item>
       )}
+
+{hasTempoStatusesFilter && (
+        <Form.Item label="Status">
+          <Space.Compact className="filter-compact-space">
+            <Form.Item name={['filters', 'tempoStatusOperator']} noStyle initialValue="=">
+              <Select className="filter-operator-select">
+                {EQUAL_OPERATOR_OPTIONS.map((op) => (
+                  <Option key={op} value={op}>
+                    {op}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item name={['filters', 'tempoStatus']} noStyle>
+              <Select
+                showSearch
+                allowClear
+                placeholder="Select status"
+                className="filter-value-select"
+              >
+                {tempoStatuses.map((tempoStatus) => {
+                  return (
+                    <Option key={tempoStatus.key} value={tempoStatus.value}>
+                      {tempoStatus.name}
+                    </Option>
+                  );
+                })}
+              </Select>
+            </Form.Item>
+          </Space.Compact>
+        
+        </Form.Item>
+      )}
       {hasExceptionTypesFilter && (
         <Form.Item label="Exception Type">
           <Space.Compact className="filter-compact-space">
@@ -735,50 +941,93 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         </Form.Item>
       )}
       {hasDurationFilter && (
-        <Form.Item label="Duration (ms)">
-          <Row gutter={8}>
-            <Col span={12}>
+        <>
+          <Divider orientation={'center'}>Duration</Divider>
+            <Form.Item name={['filters', 'durationScope']} noStyle initialValue="span">
+              <Select placeholder="Select scope" className="filter-value-select" style={{ width: '40%' }} >
+                <Option value="span">span</Option>
+                <Option value="trace">trace</Option>
+              </Select>
+            </Form.Item>
               <Form.Item name={['filters', 'durationMin']} noStyle>
-                <Input placeholder="> Min" />
+                <Input placeholder="> Min" style={{ width: '30%' }} />
               </Form.Item>
-            </Col>
-            <Col span={12}>
               <Form.Item name={['filters', 'durationMax']} noStyle>
-                <Input placeholder="< Max" />
+                <Input placeholder="< Max" style={{ width: '30%' }} />
               </Form.Item>
-            </Col>
-          </Row>
-        </Form.Item>
+        </>
       )}
       {hasTagsFilter && (
         <>
           <Divider orientation={'center'}>Tags</Divider>
 
-      <Row gutter={8}>
-          <>
-            <Col span={10}>
+          <Form.Item label="Tag Type">
+            <Form.Item name={['filters', 'tagScope']} noStyle>
+              <Select
+                showSearch
+                allowClear
+                placeholder="Select tag type"
+                className="filter-value-select"
+                onChange={handleTagScopeChange}
+              >
+                {tagScopes.map((scope) => (
+                  <Option key={scope} value={scope}>
+                    {scope}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Form.Item>
+
+          <Form.Item label="Tag">
               <Form.Item name={['filters', 'tagKey']} noStyle>
-                <Input placeholder="Tag key" />
-              </Form.Item>
-            </Col>
-            <Col span={4}>
-              <Form.Item name={['filters', 'tagOperator']} noStyle initialValue="=">
-                <Select>
-                  {EQUAL_OPERATOR_OPTIONS.map((op) => (
-                    <Option key={op} value={op}>
-                      {op}
+                <Select
+                  showSearch
+                  allowClear
+                  placeholder="Select tag"
+                  className="filter-value-select"
+                  disabled={tagNames.length === 0 && !loadingTagNames}
+                  loading={loadingTagNames}
+                  onChange={handleTagNameChange}
+                >
+                  {tagNames.map((tag) => (
+                    <Option key={tag} value={tag}>
+                      {tag}
                     </Option>
                   ))}
                 </Select>
               </Form.Item>
-            </Col>
-            <Col span={10}>
-              <Form.Item name={['filters', 'tagValue']} noStyle>
-                <Input placeholder="Tag value" />
-              </Form.Item>
-            </Col>
-          </>
-      </Row>
+          </Form.Item>
+
+          <Form.Item label="Tag Value">
+          <Space.Compact className="filter-compact-space">
+            <Form.Item name={['filters', 'tagOperator']} noStyle initialValue="=">
+              <Select className="filter-operator-select">
+                {EQUAL_OPERATOR_OPTIONS.map((op) => (
+                  <Option key={op} value={op}>
+                    {op}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item name={['filters', 'tagValue']} noStyle>
+              <Select
+                showSearch
+                allowClear
+                placeholder="Select value"
+                className="filter-value-select"
+                disabled={!form.getFieldValue(['filters', 'tagKey'])}
+                loading={loadingTagValues}
+              >
+                {tagValues.map((value) => (
+                  <Option key={value} value={value}>
+                    {value}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            </Space.Compact>
+          </Form.Item>
         </>
       )}
 

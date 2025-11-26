@@ -54,6 +54,14 @@ export const TempoApi = {
         return res;
     },
 
+    async getStatus(): Promise<any> {
+        const url = await this.getBaseUrl();
+        const res = await getBackendSrv().get(
+            `${url}/api/v2/search/tag/status/values`,
+        );
+        return res;
+    },
+
     async getTrace(traceId: string): Promise<any> {
         const url = await this.getBaseUrl();
         const res = await getBackendSrv().get(`${url}/api/traces/${traceId}`);
@@ -74,10 +82,23 @@ export const TempoApi = {
         return res;
     },
 
-    async getTagValues(tagName: string): Promise<string[]> {
+    async getTagScopes(): Promise<string[]> {
+        // Tempo tag scopes (intrinsic, resource, span, event, unscoped)
+        return ['span', 'event', 'intrinsic', 'resource', 'unscoped'];
+    },
+
+    async getTagsByScope(scope: string): Promise<any> {
         const url = await this.getBaseUrl();
-        const res = await getBackendSrv().get(`${url}/api/v2/search/tag/${tagName}/values`);
-        return res.values ?? [];
+        const endpoint = `${url}/api/v2/search/tags?scope=${scope}`;
+        const res = await getBackendSrv().get(endpoint);
+        return res;
+    },
+
+    async getTagValuesByScope(scope: string, tagName: string): Promise<any> {
+        const url = await this.getBaseUrl();
+        const endpoint = `${url}/api/v2/search/tag/${scope}.${tagName}/values`;
+        const res = await getBackendSrv().get(endpoint);
+        return res;
     },
     async getAvgLatency(serviceName: string, start: number, end: number): Promise<Object | null> {
         const uid = store.getState().datasource.selectedUid;

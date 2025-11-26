@@ -71,6 +71,7 @@ export class FilterParamsModel {
   };
   
   duration: {
+    scope: string;
     min: string;
     max: string;
   };
@@ -96,6 +97,7 @@ export class FilterParamsModel {
   };
   
   tag: {
+    scope: string;
     key: string;
     operator: string;
     value: string;
@@ -152,6 +154,7 @@ export class FilterParamsModel {
 
     // Duration
     this.duration = {
+      scope: params.duration_scope || 'span',
       min: params.duration_min || '',
       max: params.duration_max || ''
     };
@@ -209,6 +212,7 @@ export class FilterParamsModel {
 
     // Tag
     this.tag = {
+      scope: params.tagScope || 'span',
       key: params.tagKey || '',
       operator: params.tagOperator || '=',
       value: params.tagValue || ''
@@ -346,44 +350,40 @@ export class FilterParamsModel {
         }
 
         // Operation filter -> TraceQL: name
-        // if (this.operation?.name) {
-        //   const op = this.operation.operator || '=';
-        //   terms.push(`name${op}"${this.operation.name}"`);
-        // }
+        if (this.operation?.name) {
+          const op = this.operation.operator || '=';
+          terms.push(`name${op}"${this.operation.name}"`);
+        }
 
-        // // Duration filters (milliseconds)
-        // if (this.duration?.min) {
-        //   const min = parseFloat(this.duration.min);
-        //   if (Number.isFinite(min) && min > 0) {
-        //     terms.push(`duration > ${Math.floor(min)}ms`);
-        //   }
-        // }
-        // if (this.duration?.max) {
-        //   const max = parseFloat(this.duration.max);
-        //   if (Number.isFinite(max) && max > 0) {
-        //     terms.push(`duration < ${Math.floor(max)}ms`);
-        //   }
-        // }
+        if(this.duration?.min && this.duration?.max) {
+          let durationLabel = 'duration';
+          if(this.duration.scope === 'trace') {
+            durationLabel = 'traceDuration';
+          }
+          if (this.duration?.min) {
+            const min = parseFloat(this.duration.min);
+            if (Number.isFinite(min) && min > 0) {
+              terms.push(`${durationLabel} > ${Math.floor(min)}ms`);
+            }
+          }
+          if (this.duration?.max) {
+            const max = parseFloat(this.duration.max);
+            if (Number.isFinite(max) && max > 0) {
+              terms.push(`${durationLabel} < ${Math.floor(max)}ms`);
+            }
+          }
+        }
 
-        // // Status (best effort)
-        // if (this.status?.name) {
-        //   const op = this.status.operator || '=';
-        //   terms.push(`status${op}"${this.status.name}"`);
-        // }
-
-        // // Arbitrary labels (best effort)
-        // if (Array.isArray(this.labels)) {
-        //   this.labels.forEach((label) => {
-        //     (label.value || []).forEach((v) => {
-        //       terms.push(`${label.name}="${v}"`);
-        //     });
-        //   });
-        // }
+        // Status (best effort)
+        if (this.status?.name) {
+          const op = this.status.operator || '=';
+          terms.push(`status${op}"${this.status.name}"`);
+        }
 
         // Tag single key/value
         if (this.tag?.key && this.tag?.value) {
           const op = this.tag.operator || '=';
-          terms.push(`${this.tag.key}${op}"${this.tag.value}"`);
+          terms.push(`${this.tag.scope}.${this.tag.key}${op}"${this.tag.value}"`);
         }
 
         // Free-text query if provided already

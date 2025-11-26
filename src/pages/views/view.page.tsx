@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Typography, Form, Card, Button, Space, Empty, Modal, Input, message, Row, Col, Tag, Skeleton } from 'antd';
+import { Typography, Form, Card, Button, Space, Empty, Modal, Input, message, Row, Col, Skeleton } from 'antd';
 import { PluginPage } from '@grafana/runtime';
 import { getPluginSettings, savePluginSettings, PluginSettings } from '../../api/service/settings.service';
-import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, EyeOutlined, PlayCircleOutlined, PauseCircleOutlined, StopOutlined } from '@ant-design/icons';
 import { getRegions } from '../../api/service/service-map.service';
 import { getServicesTableData } from '../../api/service/services.service';
+import { getTracesTableData } from '../../api/service/traces.service';
+import { getLogsTableData } from '../../api/service/logs.service';
+import { getExceptions } from '../../api/service/exception.service';
+import { getFailedChecks } from '../../api/service/alert.service';
 import { FilterParamsModel } from '../../api/service/query.service';
 
 const { Title, Text } = Typography;
@@ -154,16 +158,59 @@ function ViewsPage() {
     }
   };
 
-  const ViewPreview: React.FC<{ widget: PageViewItem }> = ({ widget }) => {
-    const [loadingPreview, setLoadingPreview] = useState(true);
-    const [previewData, setPreviewData] = useState<{
-      title: string;
-      accent: string;
-      highlights: Array<{ label: string; value: string }>;
-      chips?: string[];
-      footer?: string;
-    } | null>(null);
+  const ViewPreview: React.FC<{ widget: PageViewItem }> = React.memo(({ widget }) => {
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const [highlights, setHighlights] = useState<Array<{ label: string; value: string }>>([]);
     const [previewError, setPreviewError] = useState<string | null>(null);
+    const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+    const [isLive, setIsLive] = useState(true); // Default: Live
+
+    // Static metadata based on page type (doesn't change)
+    const metadata = useMemo(() => {
+      const meta: Record<string, { title: string; accent: string; footer: string }> = {
+        'service-map': {
+          title: 'Topology Snapshot',
+          accent: '#7c3aed',
+          footer: 'Metrics refreshed in real-time'
+        },
+        'services': {
+          title: 'Top Services',
+          accent: '#10b981',
+          footer: 'Metrics refreshed in real-time'
+        },
+        'traces': {
+          title: 'Trace Metrics',
+          accent: '#f59e0b',
+          footer: 'Metrics refreshed in real-time'
+        },
+        'logs': {
+          title: 'Log Statistics',
+          accent: '#8b5cf6',
+          footer: 'Metrics refreshed in real-time'
+        },
+        'exceptions': {
+          title: 'Exception Summary',
+          accent: '#ef4444',
+          footer: 'Metrics refreshed in real-time'
+        },
+        'overview': {
+          title: 'Overview Dashboard',
+          accent: '#06b6d4',
+          footer: 'Metrics refreshed in real-time'
+        },
+        'alerts': {
+          title: 'Alert Summary',
+          accent: '#f97316',
+          footer: 'Metrics refreshed in real-time'
+        }
+      };
+      
+      return meta[widget.page] || {
+        title: 'Stored Filters',
+        accent: '#3b82f6',
+        footer: 'Click View for the full experience'
+      };
+    }, [widget.page]);
 
     const parseQueryEntries = (query: string): [string, string][] => {
       const sp = new URLSearchParams(query?.startsWith('?') ? query.slice(1) : query || '');
@@ -182,69 +229,162 @@ function ViewsPage() {
 
     useEffect(() => {
       let isMounted = true;
+      let intervalId: NodeJS.Timeout;
+
       const loadPreview = async () => {
-        setLoadingPreview(true);
+        if (!isMounted) return;
+        
+        // Don't show skeleton on refresh, only on initial load
         setPreviewError(null);
         try {
-          const queryEntries = parseQueryEntries(widget.query || '');
           const filterModel = buildFilterModel(widget.query || '');
 
-          let preview;
+          let newHighlights: Array<{ label: string; value: string }> = [];
           switch (widget.page) {
             case 'service-map': {
               const data = await getRegions(filterModel);
               const regions = data ?? [];
               const infrastructures = regions.flatMap((region: any) => region.infrastructures || []);
               const applications = infrastructures.flatMap((infra: any) => infra.applications || []);
-              const services = applications.flatMap((app: any) => app.services || []);
-              const operations = services.flatMap((service: any) => service.operations || []);
-              preview = {
-                title: 'Topology Snapshot',
-                accent: '#7c3aed',
-                highlights: [
-                  { label: 'Regions', value: regions.length.toString() },
-                  { label: 'Infrastructures', value: infrastructures.length.toString() },
-                  { label: 'Applications', value: applications.length.toString() },
-                  { label: 'Services', value: services.length.toString() },
-                  { label: 'Operations', value: operations.length.toString() }
-                ],
-                chips: queryEntries.map(([key, value]) => `${key}=${value}`),
-                footer: 'Live data pulled from the service graph'
-              };
+              const serviceCount = applications.flatMap((app: any) => app.services || []).length;
+              
+              newHighlights = [
+                { label: 'Regions', value: regions.length.toString() },
+                { label: 'Infrastructures', value: infrastructures.length.toString() },
+                { label: 'Applications', value: applications.length.toString() },
+                { label: 'Services', value: serviceCount.toString() }
+              ];
               break;
             }
             case 'services': {
               const servicesData = await getServicesTableData(filterModel);
-              const top = servicesData.slice(0, 3).map(service => ({
-                label: service.name,
-                value: `${(service.metrics?.callsPerSecond ?? 0).toFixed(1)} ms`
-              }));
-              preview = {
-                title: 'Top Services',
-                accent: '#10b981',
-                highlights: top.length
-                  ? top
-                  : [{ label: 'Status', value: 'No service data for this time window' }],
-                chips: queryEntries.map(([key, value]) => `${key}=${value}`),
-                footer: 'Metrics refreshed in real-time'
-              };
+              const sortedServices = servicesData
+                .filter(s => s.metrics?.avgDurationMs)
+                .sort((a, b) => (b.metrics?.avgDurationMs ?? 0) - (a.metrics?.avgDurationMs ?? 0))
+                .slice(0, 3);
+              
+              newHighlights = sortedServices.length
+                ? sortedServices.map(service => ({
+                    label: service.name,
+                    value: `${(service.metrics?.avgDurationMs ?? 0).toFixed(2)} ms`
+                  }))
+                : [{ label: 'No data', value: '-' }];
+              break;
+            }
+            case 'traces': {
+              const tracesData = await getTracesTableData(filterModel);
+              
+              if (tracesData.length > 0) {
+                const durations = tracesData.map(t => t.durationMs || 0).filter(d => d > 0);
+                const avgDuration = durations.length > 0 ? durations.reduce((a, b) => a + b, 0) / durations.length : 0;
+                const maxDuration = durations.length > 0 ? Math.max(...durations) : 0;
+                const totalSpans = tracesData.reduce((sum, t) => sum + (t.spanCount || 0), 0);
+
+                newHighlights = [
+                  { label: 'Total Traces', value: tracesData.length.toString() },
+                  { label: 'Avg Latency', value: `${avgDuration.toFixed(2)} ms` },
+                  { label: 'Max Latency', value: `${maxDuration.toFixed(2)} ms` },
+                  { label: 'Total Spans', value: totalSpans.toString() }
+                ].slice(0, 4);
+              } else {
+                newHighlights = [{ label: 'No data', value: '-' }];
+              }
+              break;
+            }
+            case 'logs': {
+              const logsData = await getLogsTableData(filterModel);
+              
+              if (logsData.length > 0) {
+                const levels = logsData.reduce((acc: any, log: any) => {
+                  const level = log.level || 'unknown';
+                  acc[level] = (acc[level] || 0) + 1;
+                  return acc;
+                }, {});
+
+                const sortedLevels = Object.entries(levels)
+                  .sort(([, a]: any, [, b]: any) => b - a)
+                  .slice(0, 3);
+
+                newHighlights = [
+                  { label: 'Total Logs', value: logsData.length.toString() },
+                  ...sortedLevels.map(([level, count]: any) => ({
+                    label: level,
+                    value: count.toString()
+                  }))
+                ].slice(0, 4);
+              } else {
+                newHighlights = [{ label: 'No data', value: '-' }];
+              }
+              break;
+            }
+            case 'exceptions': {
+              const exceptionsData = await getExceptions(filterModel);
+              
+              if (exceptionsData.length > 0) {
+                const totalExceptions = exceptionsData.reduce((sum, ex) => sum + (ex.count || 0), 0);
+                const topExceptions = exceptionsData
+                  .sort((a, b) => (b.count || 0) - (a.count || 0))
+                  .slice(0, 3);
+
+                newHighlights = [
+                  { label: 'Total Count', value: totalExceptions.toString() },
+                  ...topExceptions.map(ex => ({
+                    label: ex.exceptionType || 'Unknown',
+                    value: (ex.count || 0).toString()
+                  }))
+                ].slice(0, 4);
+              } else {
+                newHighlights = [{ label: 'No data', value: '-' }];
+              }
+              break;
+            }
+            case 'overview': {
+              const [regionsData, servicesData, tracesData] = await Promise.all([
+                getRegions(filterModel),
+                getServicesTableData(filterModel),
+                getTracesTableData(filterModel)
+              ]);
+              
+              const regions = regionsData ?? [];
+              const infrastructures = regions.flatMap((r: any) => r.infrastructures || []);
+              const healthyServices = servicesData.filter(s => s.status?.value === 'healthy').length;
+              const totalTraces = tracesData.length;
+
+              newHighlights = [
+                { label: 'Regions', value: regions.length.toString() },
+                { label: 'Infrastructures', value: infrastructures.length.toString() },
+                { label: 'Healthy Services', value: `${healthyServices}/${servicesData.length}` },
+                { label: 'Traces', value: totalTraces.toString() }
+              ];
+              break;
+            }
+            case 'alerts': {
+              try {
+                const alertsData = await getFailedChecks();
+                const activeAlerts = Array.isArray(alertsData) ? alertsData : [];
+                const criticalAlerts = activeAlerts.filter((a: any) => a.labels?.severity === 'critical').length;
+                const warningAlerts = activeAlerts.filter((a: any) => a.labels?.severity === 'warning').length;
+                const totalAlerts = activeAlerts.length;
+
+                newHighlights = [
+                  { label: 'Total Alerts', value: totalAlerts.toString() },
+                  { label: 'Critical', value: criticalAlerts.toString() },
+                  { label: 'Warning', value: warningAlerts.toString() },
+                  { label: 'Other', value: (totalAlerts - criticalAlerts - warningAlerts).toString() }
+                ].slice(0, 4);
+              } catch (error) {
+                newHighlights = [{ label: 'Status', value: 'Unable to fetch alerts' }];
+              }
               break;
             }
             default: {
-              preview = {
-                title: 'Stored Filters',
-                accent: '#3b82f6',
-                highlights: [{ label: 'Target Page', value: widget.page }],
-                chips: queryEntries.length
-                  ? queryEntries.map(([key, value]) => `${key}=${value}`)
-                  : ['No query parameters'],
-                footer: 'Click View for the full experience'
-              };
+              newHighlights = [{ label: 'Target Page', value: widget.page }];
             }
           }
 
           if (isMounted) {
-            setPreviewData(preview);
+            setHighlights(newHighlights);
+            setLastUpdate(new Date());
           }
         } catch (error) {
           console.error('Error building view preview:', error);
@@ -253,16 +393,30 @@ function ViewsPage() {
           }
         } finally {
           if (isMounted) {
-            setLoadingPreview(false);
+            setIsInitialLoad(false);
           }
         }
       };
 
+      // Initial load
       loadPreview();
+
+      // Auto-refresh every 5 seconds only when live
+      if (isLive) {
+        intervalId = setInterval(() => {
+          if (isMounted) {
+            loadPreview();
+          }
+        }, 5000);
+      }
+
       return () => {
         isMounted = false;
+        if (intervalId) {
+          clearInterval(intervalId);
+        }
       };
-    }, [widget.page, widget.query, widget.id]);
+    }, [widget.page, widget.query, widget.id, isLive]);
 
     return (
       <div
@@ -271,66 +425,103 @@ function ViewsPage() {
           border: '1px solid #303030',
           borderRadius: 12,
           background: 'radial-gradient(circle at top, rgba(255,255,255,0.08), rgba(0,0,0,0.2))',
-          height: 200,
-          padding: 12,
+          minHeight: 180,
+          padding: 16,
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
         }}
       >
-        {loadingPreview ? (
-          <Skeleton active title={false} paragraph={{ rows: 4 }} />
+        {isInitialLoad ? (
+          <Skeleton active title={false} paragraph={{ rows: 3 }} />
         ) : previewError ? (
           <div style={{ color: '#8c8c8c', fontSize: 12, textAlign: 'center', margin: 'auto 0' }}>
             {previewError}
           </div>
         ) : (
           <>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <Text style={{ color: previewData?.accent, fontWeight: 600 }}>
-                {previewData?.title}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <Text style={{ color: metadata.accent, fontWeight: 600, fontSize: 14 }}>
+                {metadata.title}
               </Text>
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                {new Date().toLocaleTimeString()}
-              </Text>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8 }}>
-              {previewData?.highlights.map((item) => (
-                <div
-                  key={`${item.label}-${item.value}`}
+              <Space size={8}>
+                <Text type="secondary" style={{ fontSize: 11 }}>
+                  {lastUpdate.toLocaleTimeString()}
+                </Text>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={isLive ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
+                  onClick={() => setIsLive(!isLive)}
                   style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    borderRadius: 8,
-                    padding: '8px 10px',
+                    height: 24,
+                    padding: '0 8px',
+                    fontSize: 11,
+                    color: isLive ? '#52c41a' : '#8c8c8c',
+                    border: `1px solid ${isLive ? '#52c41a' : '#434343'}`,
+                    borderRadius: 4,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4
                   }}
                 >
-                  <Text style={{ fontSize: 11, color: '#8c8c8c' }}>{item.label}</Text>
-                  <div style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>{item.value}</div>
+                  {isLive ? 'Live' : 'Paused'}
+                </Button>
+                {!isLive && (
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<StopOutlined />}
+                    onClick={() => setIsLive(true)}
+                    style={{
+                      height: 24,
+                      width: 24,
+                      padding: 0,
+                      fontSize: 11,
+                      color: '#ff4d4f',
+                      border: '1px solid #434343',
+                      borderRadius: 4,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  />
+                )}
+              </Space>
+            </div>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(2, 1fr)', 
+              gap: 12,
+              marginBottom: 12
+            }}>
+              {highlights.slice(0, 4).map((item, index) => (
+                <div
+                  key={`${item.label}-${index}`}
+                  style={{
+                    background: 'rgba(0,0,0,0.3)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: 8,
+                    padding: '12px',
+                  }}
+                >
+                  <Text style={{ fontSize: 11, color: '#8c8c8c', display: 'block', marginBottom: 4 }}>
+                    {item.label}
+                  </Text>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', wordBreak: 'break-word' }}>
+                    {item.value}
+                  </div>
                 </div>
               ))}
             </div>
-            {previewData?.chips?.length ? (
-              <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {previewData.chips.map((chip) => (
-                  <Tag
-                    key={chip}
-                    style={{ borderRadius: 999, background: 'rgba(255,255,255,0.08)', color: '#fff' }}
-                  >
-                    {chip}
-                  </Tag>
-                ))}
-              </div>
-            ) : null}
-            {previewData?.footer && (
-              <Text type="secondary" style={{ marginTop: 'auto', fontSize: 11 }}>
-                {previewData.footer}
-              </Text>
-            )}
+            <Text type="secondary" style={{ marginTop: 'auto', fontSize: 11 }}>
+              {metadata.footer}
+            </Text>
           </>
         )}
       </div>
     );
-  };
+  });
 
   const renderWidget = (widget: PageViewItem) => {
     const iframeUrl = buildWidgetUrl(widget);

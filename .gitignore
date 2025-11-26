@@ -1,5 +1,6 @@
 node_modules
 dist
+grafana-data
 .DS_Store
 tempo-data
 /loki-data
