@@ -36,7 +36,7 @@ export const getInventoryHosts = async () => {
   const statusPromise = getQueryData(`
     inventory_process_status
       * on (cloud_region, host_name)
-        group_left(host_arch, host_ip, host_mac, infrastructureType, os_description, os_type)
+        group_left(shost_arch, host_ip, host_mac, infrastructureType, os_description, os_type)
           __inv_info
   `);
 

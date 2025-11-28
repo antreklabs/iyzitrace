@@ -5,8 +5,6 @@ import {
   Input,
   Table,
   Modal,
-  Form,
-  Input as AntInput,
   Checkbox,
   message,
   Space,
@@ -18,11 +16,10 @@ import {
   SearchOutlined,
   DeleteOutlined,
   ArrowLeftOutlined,
-  UserDeleteOutlined,
 } from '@ant-design/icons';
 import { css } from '@emotion/css';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api, type Team, type TeamMember, type TeamSettings, type AvailableMember, type TeamPage, type AvailablePage } from '../../api/teams';
+import { api, type Team, type TeamMember, type TeamPage, type AvailablePage } from '../../api/teams';
 import pluginJson from '../../plugin.json';
 import { getTeams } from '../../api/service/team.service';
 
@@ -307,13 +304,9 @@ const TeamsManagePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('members');
   const [searchText, setSearchText] = useState('');
-  const [addMemberModalVisible, setAddMemberModalVisible] = useState(false);
-  const [availableMembers, setAvailableMembers] = useState<AvailableMember[]>([]);
-  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [addPageModalVisible, setAddPageModalVisible] = useState(false);
   const [availablePages, setAvailablePages] = useState<AvailablePage[]>([]);
   const [selectedPages, setSelectedPages] = useState<string[]>([]);
-  const [form] = Form.useForm();
 
   // Data will be fetched from API
 
@@ -346,51 +339,12 @@ const TeamsManagePage: React.FC = () => {
     }
   };
 
-  const fetchAvailableMembers = async () => {
-    try {
-      const members = await api.getAvailableMembers();
-      setAvailableMembers(members);
-    } catch (error) {
-      console.error('Error fetching available members:', error);
-    }
-  };
-
   const fetchAvailablePages = async () => {
     try {
       const pages = await api.getAvailablePages();
       setAvailablePages(pages);
     } catch (error) {
       console.error('Error fetching available pages:', error);
-    }
-  };
-
-  const handleAddMembers = async () => {
-    try {
-      await api.updateTeamMembers(teamId!, { memberIds: selectedMembers });
-      
-      // Refresh team data
-      await fetchTeam();
-      
-      setAddMemberModalVisible(false);
-      setSelectedMembers([]);
-      message.success('Members added successfully');
-    } catch (error) {
-      console.error('Error adding members:', error);
-      message.error('Failed to add members');
-    }
-  };
-
-  const handleRemoveMember = async (memberId: string) => {
-    try {
-      await api.removeTeamMember(teamId!, memberId);
-      
-      // Refresh team data
-      await fetchTeam();
-      
-      message.success('Member removed successfully');
-    } catch (error) {
-      console.error('Error removing member:', error);
-      message.error('Failed to remove member');
     }
   };
 
@@ -424,27 +378,6 @@ const TeamsManagePage: React.FC = () => {
     }
   };
 
-  const handleUpdateSettings = async (values: TeamSettings) => {
-    try {
-      await api.updateTeamSettings(teamId!, values);
-      
-      // Update local state
-      if (team) {
-        setTeam({
-          ...team,
-          settings: values,
-          name: values.name,
-          icon: values.icon,
-        });
-      }
-      
-      message.success('Settings updated successfully');
-    } catch (error) {
-      console.error('Error updating settings:', error);
-      message.error('Failed to update settings');
-    }
-  };
-
   const membersColumns = [
     {
       title: 'Member',
@@ -458,19 +391,6 @@ const TeamsManagePage: React.FC = () => {
             <div className={styles.memberEmail}>{record.email}</div>
           </div>
         </div>
-      ),
-    },
-    {
-      title: 'Action',
-      key: 'action',
-      render: (text: any, record: TeamMember) => (
-        <Button
-          className={styles.removeButton}
-          icon={<UserDeleteOutlined />}
-          onClick={() => handleRemoveMember(record.id)}
-        >
-          Remove from team
-        </Button>
       ),
     },
   ];
@@ -589,21 +509,6 @@ const TeamsManagePage: React.FC = () => {
               />
             </div>
 
-            {/* Add Member Button */}
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
-              <Button
-                type="primary"
-                className={styles.addMemberButton}
-                icon={<PlusOutlined />}
-                onClick={() => {
-                  setAddMemberModalVisible(true);
-                  fetchAvailableMembers();
-                }}
-              >
-                Add member
-              </Button>
-            </div>
-
             {/* Members Table */}
             <Table
               className={styles.table}
@@ -670,119 +575,8 @@ const TeamsManagePage: React.FC = () => {
               </div>
             )}
           </TabPane>
-
-          <TabPane tab="Settings" key="settings">
-            <Form
-              form={form}
-              layout="vertical"
-              initialValues={team.settings || { name: team.name, icon: team.icon }}
-              onFinish={handleUpdateSettings}
-              className={styles.settingsForm}
-            >
-              <Form.Item label="Display settings">
-                <div style={{ marginBottom: 24 }}>
-                  <Form.Item
-                    name="name"
-                    label="Name"
-                    rules={[{ required: true, message: 'Please enter team name' }]}
-                  >
-                    <AntInput />
-                  </Form.Item>
-                  
-                  <Form.Item name="icon" hidden>
-                    <AntInput />
-                  </Form.Item>
-                </div>
-              </Form.Item>
-              
-              <div style={{ textAlign: 'right' }}>
-                <Button type="primary" htmlType="submit" className={styles.addMemberButton}>
-                  Save Changes
-                </Button>
-              </div>
-            </Form>
-
-            {/* Danger Zone */}
-            <div className={styles.dangerZone}>
-              <div className={styles.dangerTitle}>Danger zone</div>
-              <div className={styles.dangerDescription}>
-                Permanently remove this team. Deleting the team will reset all team-specific permissions and accesses. 
-                The member will remain in the system, but will no longer have any team-specific roles or data associated. 
-                This action cannot be undone.
-              </div>
-              <Button
-                danger
-                className={styles.deleteButton}
-                icon={<DeleteOutlined />}
-              >
-                Delete team
-              </Button>
-            </div>
-          </TabPane>
         </Tabs>
       </Card>
-
-      {/* Add Member Modal */}
-      <Modal
-        title="Add member"
-        open={addMemberModalVisible}
-        onCancel={() => setAddMemberModalVisible(false)}
-        footer={null}
-        className={styles.modal}
-        width={500}
-      >
-        <div className={styles.searchBar} style={{ marginBottom: 16 }}>
-          <Search
-            placeholder="Search members..."
-            allowClear
-            enterButton={<SearchOutlined />}
-            size="large"
-          />
-        </div>
-        
-        <div style={{ maxHeight: 300, overflowY: 'auto' }}>
-          {availableMembers.map(member => (
-            <div key={member.id} style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              padding: '12px 0',
-              borderBottom: '1px solid #404040'
-            }}>
-              <Checkbox
-                checked={selectedMembers.includes(member.id)}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedMembers([...selectedMembers, member.id]);
-                  } else {
-                    setSelectedMembers(selectedMembers.filter(id => id !== member.id));
-                  }
-                }}
-              />
-              <img src={member.avatar} width={32} height={32} />
-              <div>
-                <div style={{ color: '#fff', fontWeight: 500 }}>{member.name}</div>
-                <div style={{ color: '#8c8c8c', fontSize: 12 }}>{member.email}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        <div style={{ textAlign: 'right', marginTop: 24 }}>
-          <Space>
-            <Button onClick={() => setAddMemberModalVisible(false)}>
-              Discard
-            </Button>
-            <Button 
-              type="primary" 
-              onClick={handleAddMembers}
-              disabled={selectedMembers.length === 0}
-              className={styles.addMemberButton}
-            >
-              Add
-            </Button>
-          </Space>
-        </div>
-      </Modal>
 
       {/* Add Pages Modal */}
       <Modal

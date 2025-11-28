@@ -6,7 +6,7 @@ import DefinitionsTable, { DEFAULT_DEFINITIONS } from './definitions-table.compo
 import GrafanaLikeRangePicker from '../core/graphanadatepicker';
 import dayjs from 'dayjs';
 import { KeyOutlined, DatabaseOutlined, FieldTimeOutlined, DeploymentUnitOutlined, SaveOutlined, FileTextOutlined, EditOutlined, CheckOutlined, CloseOutlined, AlignLeftOutlined, RobotOutlined } from '@ant-design/icons';
-import { Table, Input as AntInput, Button as AntButton } from 'antd';
+import { Table, Input as AntInput, Button as AntButton, message } from 'antd';
 import { getPluginSettings, savePluginSettings } from '../../api/service/settings.service';
 
 // guid helper not needed in paste-only model
@@ -445,7 +445,7 @@ const ConfigForm: React.FC = () => {
 };
 
 const ServiceMapPageViewsSection: React.FC = () => {
-  const [pageViews, setPageViews] = useState<Array<{ id: string; title: string; data?: { items?: any[] } }>>([]);
+  const [pageViews, setPageViews] = useState<Array<{ id: string; title: string; page: string; data?: { items?: any[] } }>>([]);
   const [selectedViewId, setSelectedViewId] = useState<string | null>(null);
   const [searchText, setSearchText] = useState<string>('');
   const [editingKey, setEditingKey] = useState<string>('');
@@ -555,6 +555,27 @@ const ServiceMapPageViewsSection: React.FC = () => {
         [subField]: value,
       },
     }));
+  };
+
+  const saveAllChanges = async () => {
+    if (!selectedViewId) return;
+
+    try {
+      const settings = await getPluginSettings();
+      const allPageViews = (settings.pageViews || []).map((view: any) => {
+        const matchingView = pageViews.find(v => v.id === view.id);
+        if (matchingView && matchingView.page === 'service-map') {
+          return matchingView;
+        }
+        return view;
+      });
+
+      await savePluginSettings({ ...settings, pageViews: allPageViews });
+      message.success('All changes saved successfully');
+    } catch (error) {
+      console.error('Error saving all changes:', error);
+      message.error('Failed to save changes');
+    }
   };
 
   const autoAlignItems = async () => {
@@ -917,13 +938,22 @@ const ServiceMapPageViewsSection: React.FC = () => {
           <h3 className="page-heading" style={{ margin: 0 }}>Service Map Page Views</h3>
         </div>
         {selectedView && items.length > 0 && (
-          <AntButton
-            type="primary"
-            icon={<AlignLeftOutlined />}
-            onClick={autoAlignItems}
-          >
-            Auto Align Items
-          </AntButton>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <AntButton
+              type="default"
+              icon={<SaveOutlined />}
+              onClick={saveAllChanges}
+            >
+              Save All Changes
+            </AntButton>
+            <AntButton
+              type="primary"
+              icon={<AlignLeftOutlined />}
+              onClick={autoAlignItems}
+            >
+              Auto Align Items
+            </AntButton>
+          </div>
         )}
       </div>
       <div style={{ marginBottom: 12, color: '#9CA3AF' }}>

@@ -85,13 +85,13 @@ const Sidebar: React.FC = () => {
         items={[
           { key: 'landing', icon: <HomeOutlined style={{ fontSize: 16 }} />, label: 'Home' },
           { key: 'overview', icon: <BuildOutlined style={{ fontSize: 16 }} />, label: 'Overview' },
+          { key: 'views', icon: <ClusterOutlined style={{ fontSize: 16 }} />, label: 'Views' },
           { key: 'service-map', icon: <DeploymentUnitOutlined style={{ fontSize: 16 }} />, label: 'Service Map' },
           { key: 'services', icon: <BarChartOutlined style={{ fontSize: 16 }} />, label: 'Services' },  
           { key: 'traces', icon: <FileSearchOutlined style={{ fontSize: 16 }} />, label: 'Traces' },
           { key: 'logs', icon: <ProfileOutlined style={{ fontSize: 16 }} />, label: 'Logs' },
-          { key: 'views', icon: <ClusterOutlined style={{ fontSize: 16 }} />, label: 'Views' },
-          { key: 'ai', icon: <RobotOutlined style={{ fontSize: 16 }} />, label: 'AI Assistant' },
           { key: 'exceptions', icon: <RadarChartOutlined style={{ fontSize: 16 }} />, label: 'Exceptions' },
+          { key: 'ai', icon: <RobotOutlined style={{ fontSize: 16 }} />, label: 'AI Assistant' },
           { key: 'teams', icon: <TeamOutlined style={{ fontSize: 16 }} />, label: 'Teams' },
           { key: 'settings', icon: <SettingOutlined style={{ fontSize: 16 }} />, label: 'Settings' },
         ]}

@@ -14,7 +14,6 @@ import {
   Avatar,
 } from 'antd';
 import {
-  PlusOutlined,
   SearchOutlined,
   SettingOutlined,
   EditOutlined,
@@ -312,14 +311,7 @@ const TeamsPage: React.FC = () => {
             Manage existing teams in your organization.
           </p>
         </div>
-        <Button
-          type="primary"
-          className={styles.createButton}
-          icon={<PlusOutlined />}
-          onClick={() => setCreateModalVisible(true)}
-        >
-          Create new team
-        </Button>
+        
       </div>
 
       {/* Search Bar */}
