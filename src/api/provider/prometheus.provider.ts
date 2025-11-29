@@ -38,7 +38,7 @@ export const getLabelValues = async (labelName: string): Promise<string[]> => {
 
 export const getQueryData = async (query: string): Promise<any> => {
   const prometheusUid = await getDefaultPrometheusUid();
-  console.log('getQueryData', query);
+  // console.log('getQueryData', query);
   const response = await getBackendSrv().get(`/api/datasources/proxy/uid/${prometheusUid}/api/v1/query`, {
     query: query,
   });

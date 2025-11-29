@@ -127,7 +127,6 @@ const ApplicationsSidebar: React.FC<ApplicationsSidebarProps> = ({
                   }}>
                     <div>{application.platform}</div>
                     <div>Version: {application.version}</div>
-                    <div>{application.services?.length || 0} services</div>
                   </div>
                 }
               />

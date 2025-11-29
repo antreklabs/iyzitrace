@@ -211,23 +211,6 @@ console.log('data', data);
                     {app.platform}
                   </span>
                 </div>
-                {app.services && app.services.length > 0 && (
-                  <div style={{ marginLeft: '16px' }}>
-                    {app.services.map((service: any, sIndex: number) => (
-                      <div key={sIndex} style={{ 
-                        color: '#94a3b8', 
-                        fontSize: '11px',
-                        marginBottom: '2px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px'
-                      }}>
-                        <span style={{ color: '#64748b' }}>•</span>
-                        {service.name}
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             ))}
           </div>
@@ -401,7 +384,7 @@ const ApplicationDetailPanel: React.FC<{
       </div>
 
       {/* Services */}
-      {data.services && data.services.length > 0 && (
+      {'services' in data && (data as any).services && Array.isArray((data as any).services) && (data as any).services.length > 0 && (
         <div style={{ marginBottom: '16px' }}>
           <h4 
             style={{ 
@@ -445,11 +428,11 @@ const ApplicationDetailPanel: React.FC<{
             overflowY: 'auto',
             marginBottom: 10
           }}>
-            {data.services.map((svc: Service, idx: number) => (
+            {(data as any).services.map((svc: Service, idx: number) => (
               <div key={idx} style={{
-                borderBottom: idx < data.services.length - 1 ? '1px solid #334155' : 'none',
-                paddingBottom: idx < data.services.length - 1 ? 12 : 0,
-                marginBottom: idx < data.services.length - 1 ? 12 : 0
+                borderBottom: idx < (data as any).services.length - 1 ? '1px solid #334155' : 'none',
+                paddingBottom: idx < (data as any).services.length - 1 ? 12 : 0,
+                marginBottom: idx < (data as any).services.length - 1 ? 12 : 0
               }}>
                 <div 
                   style={{ 
@@ -1067,17 +1050,15 @@ const processLayerData = (data: any, layer: string) => {
     
     data.regions.forEach((region: any) => {
       region.infrastructures.forEach((infra: any) => {
-        infra.applications.forEach((app: any) => {
-          if (app.services) {
-            groups.push({
-              id: app.id,
-              name: app.name,
-              items: app.services,
-              groupPosition: app.groupPosition,
-              groupSize: app.groupSize
-            });
-          }
-        });
+        if (infra.services) {
+          groups.push({
+            id: infra.id,
+            name: infra.name,
+            items: infra.services,
+            groupPosition: infra.groupPosition,
+            groupSize: infra.groupSize
+          });
+        }
       });
     });
   } 
@@ -1124,12 +1105,9 @@ const MapInner = forwardRef<any, MapLayerProps>(({ selectedNodeId, onNodeClick, 
       for (const region of (data as any).regions) {
         if (!region?.infrastructures) continue;
         for (const infra of region.infrastructures) {
-          if (!infra?.applications) continue;
-          for (const app of infra.applications) {
-            if (!app?.services) continue;
-            const found = app.services.find((s: any) => s && s.id === serviceId);
-            if (found) return found.name as string;
-          }
+          if (!infra?.services) continue;
+          const found = infra.services.find((s: any) => s && s.id === serviceId);
+          if (found) return found.name as string;
         }
       }
     } catch {}
@@ -1143,31 +1121,9 @@ const MapInner = forwardRef<any, MapLayerProps>(({ selectedNodeId, onNodeClick, 
       for (const region of (data as any).regions) {
         if (!region?.infrastructures) continue;
         for (const infra of region.infrastructures) {
-          if (!infra?.applications) continue;
-          for (const app of infra.applications) {
-            if (!app?.services) continue;
-            const found = app.services.find((s: any) => s && s.id === serviceId);
-            if (found) return { infraId: infra.id as string, infraName: infra.name as string };
-          }
-        }
-      }
-    } catch {}
-    return {};
-  }, [data]);
-
-  // Find application id (and name) by a service id in full data
-  const getApplicationIdByServiceId = useCallback((serviceId: string | null | undefined): { appId?: string; appName?: string } => {
-    if (!serviceId || !data || !Array.isArray((data as any).regions)) return {};
-    try {
-      for (const region of (data as any).regions) {
-        if (!region?.infrastructures) continue;
-        for (const infra of region.infrastructures) {
-          if (!infra?.applications) continue;
-          for (const app of infra.applications) {
-            if (!app?.services) continue;
-            const found = app.services.find((s: any) => s && s.id === serviceId);
-            if (found) return { appId: app.id as string, appName: app.name as string };
-          }
+          if (!infra?.services) continue;
+          const found = infra.services.find((s: any) => s && s.id === serviceId);
+          if (found) return { infraId: infra.id as string, infraName: infra.name as string };
         }
       }
     } catch {}
@@ -1248,22 +1204,19 @@ const MapInner = forwardRef<any, MapLayerProps>(({ selectedNodeId, onNodeClick, 
               w: 120,
               h: 160
             };
-            // Build infra-level edges by inspecting underlying applications/services/operations
+            // Build infra-level edges by inspecting underlying services/operations
             try {
-              const applications = Array.isArray((item as any).applications) ? (item as any).applications : [];
+              const services = Array.isArray((item as any).services) ? (item as any).services : [];
               const groupedInfraTargets = new Map<string, number>();
-              applications.forEach((app: any) => {
-                const services = Array.isArray(app?.services) ? app.services : [];
-                services.forEach((svc: any) => {
-                  const ops = Array.isArray(svc?.operations) ? svc.operations : [];
-                  ops.forEach((op: any) => {
-                    const tgt = op?.targetServiceId ? String(op.targetServiceId).trim() : '';
-                    if (!tgt) return;
-                    const { infraId: targetInfraId } = getInfrastructureIdByServiceId(tgt);
-                    if (!targetInfraId || targetInfraId === item.id) return;
-                    const key = `${item.id}__${targetInfraId}`;
-                    groupedInfraTargets.set(key, (groupedInfraTargets.get(key) || 0) + 1);
-                  });
+              services.forEach((svc: any) => {
+                const ops = Array.isArray(svc?.operations) ? svc.operations : [];
+                ops.forEach((op: any) => {
+                  const tgt = op?.targetServiceId ? String(op.targetServiceId).trim() : '';
+                  if (!tgt) return;
+                  const { infraId: targetInfraId } = getInfrastructureIdByServiceId(tgt);
+                  if (!targetInfraId || targetInfraId === item.id) return;
+                  const key = `${item.id}__${targetInfraId}`;
+                  groupedInfraTargets.set(key, (groupedInfraTargets.get(key) || 0) + 1);
                 });
               });
               groupedInfraTargets.forEach((count, key) => {
@@ -1291,34 +1244,9 @@ const MapInner = forwardRef<any, MapLayerProps>(({ selectedNodeId, onNodeClick, 
               h: 160
             };
 
-            // Build application-level edges by inspecting services' operations targetServiceId
-            try {
-              const appServices = Array.isArray((item as any).services) ? (item as any).services : [];
-              const groupedTargets = new Map<string, number>();
-              appServices.forEach((svc: any) => {
-                const ops = Array.isArray(svc?.operations) ? svc.operations : [];
-                ops.forEach((op: any) => {
-                  const tgt = op?.targetServiceId ? String(op.targetServiceId).trim() : '';
-                  if (!tgt) return;
-                  const { appId: targetAppId } = getApplicationIdByServiceId(tgt);
-                  if (!targetAppId || targetAppId === item.id) return; // ignore self or unresolved
-                  const key = `${item.id}__${targetAppId}`;
-                  groupedTargets.set(key, (groupedTargets.get(key) || 0) + 1);
-                });
-              });
-              groupedTargets.forEach((count, key) => {
-                const [, targetAppId] = key.split('__');
-                // Add one edge between applications; show count if >1
-                edges.push({
-                  id: `app-edge-${item.id}-${targetAppId}`,
-                  source: item.id,
-                  target: targetAppId,
-                  // label: count > 1 ? `+${count}` : 'link',
-                  type: 'smoothstep',
-                  animated: true
-                } as any);
-              });
-            } catch {}
+            // Note: Services are now at infrastructure level, not application level
+            // Application-level edges are not applicable anymore
+            // Applications no longer contain services
 
           } else if (layer === 'service') {
             // Service items
@@ -1646,9 +1574,9 @@ const handleSaveOnView = useCallback(async () => {
           items.push({ id: infra.id, type: 'infrastructure', position: infra.position, groupPosition: infra.groupPosition, groupSize: infra.groupSize });
           (infra.applications || []).forEach((app: any) => {
             items.push({ id: app.id, type: 'application', position: app.position, groupPosition: app.groupPosition, groupSize: app.groupSize });
-            (app.services || []).forEach((svc: any) => {
-              items.push({ id: svc.id, type: 'service', position: svc.position, groupPosition: svc.groupPosition, groupSize: svc.groupSize });
-            });
+          });
+          (infra.services || []).forEach((svc: any) => {
+            items.push({ id: svc.id, type: 'service', position: svc.position, groupPosition: svc.groupPosition, groupSize: svc.groupSize });
           });
         });
       });

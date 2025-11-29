@@ -267,14 +267,14 @@ const ensureLayoutForServiceMap = async (regions: Region[]): Promise<void> => {
           groupPosition: app.groupPosition,
           groupSize: app.groupSize,
         });
-        (app.services || []).forEach((service: Service) => {
-          layoutItems.push({
-            id: service.id,
-            type: 'service',
-            position: service.position,
-            groupPosition: service.groupPosition,
-            groupSize: service.groupSize,
-          });
+      });
+      (infra.services || []).forEach((service: Service) => {
+        layoutItems.push({
+          id: service.id,
+          type: 'service',
+          position: service.position,
+          groupPosition: service.groupPosition,
+          groupSize: service.groupSize,
         });
       });
     });

@@ -1,8 +1,5 @@
 import { getPluginSettings, savePluginSettings } from './service/settings.service';
 
-// Teams API Service
-// Bu dosya gerçek API endpoint'leri ile entegrasyon için hazırlanmıştır
-
 export interface Team {
   id: string;
   uid: string;
@@ -75,6 +72,13 @@ const PLUGIN_PAGE_CATALOG: AvailablePage[] = [
     icon: '🧱',
   },
   {
+    id: 'views',
+    name: 'Views',
+    route: '/views',
+    description: 'Custom visualizations',
+    icon: '🧩',
+  },
+  {
     id: 'service-map',
     name: 'Service Map',
     route: '/service-map',
@@ -103,11 +107,11 @@ const PLUGIN_PAGE_CATALOG: AvailablePage[] = [
     icon: '📄',
   },
   {
-    id: 'views',
-    name: 'Views',
-    route: '/views',
-    description: 'Custom visualizations',
-    icon: '🧩',
+    id: 'exceptions',
+    name: 'Exceptions',
+    route: '/exceptions',
+    description: 'Error tracking & triage',
+    icon: '🧨',
   },
   {
     id: 'alerts',
@@ -117,18 +121,11 @@ const PLUGIN_PAGE_CATALOG: AvailablePage[] = [
     icon: '⏰',
   },
   {
-    id: 'exceptions',
-    name: 'Exceptions',
-    route: '/exceptions',
-    description: 'Error tracking & triage',
-    icon: '🧨',
-  },
-  {
-    id: 'teams',
-    name: 'Teams',
-    route: '/teams',
-    description: 'Team management',
-    icon: '👥',
+    id: 'ai',
+    name: 'AI Assistant',
+    route: '/ai',
+    description: 'Intelligent observability insights powered by AI',
+    icon: '🤖',
   },
   {
     id: 'settings',

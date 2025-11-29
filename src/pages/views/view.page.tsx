@@ -246,7 +246,7 @@ function ViewsPage() {
               const regions = data ?? [];
               const infrastructures = regions.flatMap((region: any) => region.infrastructures || []);
               const applications = infrastructures.flatMap((infra: any) => infra.applications || []);
-              const serviceCount = applications.flatMap((app: any) => app.services || []).length;
+              const serviceCount = infrastructures.flatMap((infra: any) => infra.services || []).length;
               
               newHighlights = [
                 { label: 'Regions', value: regions.length.toString() },

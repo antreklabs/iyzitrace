@@ -113,7 +113,7 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
   const selected = await getSelectedViewData('service-map');
   // console.log('[getRegions] selected:', selected);
   const data = await getInventoryHosts();
-  console.log('[getRegions] data:', data);
+  // console.log('[getRegions] data:', data);
 
   // Step 1: Group by cloud_region
   const regionMap = new Map<string, any[]>();
@@ -181,25 +181,6 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
         
         // Create app ID using only process_executable_name
         const appId = `app|${regionName}|${hostName}|${processName}`.toLowerCase();
-        let services: Service[] = [];
-        if (infraId === 'infra|onprem|docker-desktop' && appId === 'app|onprem|docker-desktop|java') {
-          try {
-            services = await getServicesTableData(filterModel);
-            services.forEach((srv: Service) => {
-
-              const selSrv = findItem(selected, srv.id, 'service');
-              if(selSrv) {
-                srv.position = selSrv.position;
-                srv.groupPosition = selSrv.groupPosition;
-                srv.groupSize = selSrv.groupSize;
-              }
-              srv.applicationId = appId;
-            });
-          } catch (error) {
-            console.error('Error fetching services table data:', error);
-            services = [];
-          }
-        }
         
         const selApp = findItem(selected, appId, 'application');
         
@@ -212,20 +193,39 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
           status: {
             value: firstAppItem.status as HealthValue,
             metrics: {
-              errorCount: services.filter((srv: Service) => srv.status?.value === 'error').length,
-              errorPercentage: services.filter((srv: Service) => srv.status?.value === 'error').length / services.length * 100,
-              warningCount: services.filter((srv: Service) => srv.status?.value === 'warning').length,
-              warningPercentage: services.filter((srv: Service) => srv.status?.value === 'warning').length / services.length * 100,
-              degradedCount: services.filter((srv: Service) => srv.status?.value === 'degraded').length,
-              degradedPercentage: services.filter((srv: Service) => srv.status?.value === 'degraded').length / services.length * 100,
-              totalCount: services.length,
+              errorCount: 0,
+              errorPercentage: 0,
+              warningCount: 0,
+              warningPercentage: 0,
+              degradedCount: 0,
+              degradedPercentage: 0,
+              totalCount: 0,
             },
           },
-          services: services,
           position: selApp?.position ?? { x: 0, y: 0 },
           groupPosition: selApp?.groupPosition ?? { x: 0, y: 0 },
           groupSize: selApp?.groupSize ?? { width: 100, height: 100 },
         });
+      }
+
+      // Fetch services for this infrastructure
+      let services: Service[] = [];
+      if (infraId === 'infra|onprem|docker-desktop') {
+        try {
+          services = await getServicesTableData(filterModel);
+          services.forEach((srv: Service) => {
+            const selSrv = findItem(selected, srv.id, 'service');
+            if(selSrv) {
+              srv.position = selSrv.position;
+              srv.groupPosition = selSrv.groupPosition;
+              srv.groupSize = selSrv.groupSize;
+            }
+            srv.infrastructureId = infraId;
+          });
+        } catch (error) {
+          console.error('Error fetching services table data:', error);
+          services = [];
+        }
       }
 
       const selInfra = findItem(selected, infraId, 'infrastructure');
@@ -247,23 +247,24 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
         },
         status: {
           metrics: {
-            errorCount: applications.filter((app: Application) => app.status?.value === 'error').length,
-            errorPercentage: applications.filter((app: Application) => app.status?.value === 'error').length / applications.length * 100,
-            warningCount: applications.filter((app: Application) => app.status?.value === 'warning').length,
-            warningPercentage: applications.filter((app: Application) => app.status?.value === 'warning').length / applications.length * 100,
-            degradedCount: applications.filter((app: Application) => app.status?.value === 'degraded').length,
-            degradedPercentage: applications.filter((app: Application) => app.status?.value === 'degraded').length / applications.length * 100,
-            totalCount: applications.length,
+            errorCount: services.filter((srv: Service) => srv.status?.value === 'error').length,
+            errorPercentage: services.length > 0 ? services.filter((srv: Service) => srv.status?.value === 'error').length / services.length * 100 : 0,
+            warningCount: services.filter((srv: Service) => srv.status?.value === 'warning').length,
+            warningPercentage: services.length > 0 ? services.filter((srv: Service) => srv.status?.value === 'warning').length / services.length * 100 : 0,
+            degradedCount: services.filter((srv: Service) => srv.status?.value === 'degraded').length,
+            degradedPercentage: services.length > 0 ? services.filter((srv: Service) => srv.status?.value === 'degraded').length / services.length * 100 : 0,
+            totalCount: services.length,
           },
-          value: applications.filter((app: Application) => app.status?.value === 'error').length > 0 ? 'error' : 
-                applications.filter((app: Application) => app.status?.value === 'warning').length > 0 ? 'warning' :
-                applications.filter((app: Application) => app.status?.value === 'degraded').length > 0 ? 'degraded' :
+          value: services.filter((srv: Service) => srv.status?.value === 'error').length > 0 ? 'error' : 
+                services.filter((srv: Service) => srv.status?.value === 'warning').length > 0 ? 'warning' :
+                services.filter((srv: Service) => srv.status?.value === 'degraded').length > 0 ? 'degraded' :
                 'healthy',
         },
         position: selInfra?.position ?? { x: 0, y: 0 },
         groupPosition: selInfra?.groupPosition ?? { x: 0, y: 0 },
         groupSize: selInfra?.groupSize ?? { width: 100, height: 100 },
         applications: applications,
+        services: services,
       });
     }
 
@@ -293,7 +294,7 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
       infrastructures: infrastructures,
     });
   }
-  
+  console.log('[getRegions] regions:', regions);
   return regions;
 };
 

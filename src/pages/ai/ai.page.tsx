@@ -699,34 +699,22 @@ const AIPage: React.FC = () => {
                 return infraCopy;
               });
             } else if (includeApplications && regionCopy.infrastructures) {
-              // Filter services within applications
+              // Filter services within infrastructures
               if (!includeServices) {
                 regionCopy.infrastructures = regionCopy.infrastructures.map(infra => {
                   const infraCopy = { ...infra };
-                  if (infraCopy.applications) {
-                    infraCopy.applications = infraCopy.applications.map(app => {
-                      const appCopy = { ...app };
-                      delete appCopy.services;
-                      return appCopy;
-                    });
-                  }
+                  delete infraCopy.services;
                   return infraCopy;
                 });
               } else if (includeServices && !includeOperations) {
                 // Filter operations within services
                 regionCopy.infrastructures = regionCopy.infrastructures.map(infra => {
                   const infraCopy = { ...infra };
-                  if (infraCopy.applications) {
-                    infraCopy.applications = infraCopy.applications.map(app => {
-                      const appCopy = { ...app };
-                      if (appCopy.services) {
-                        appCopy.services = appCopy.services.map(svc => {
-                          const svcCopy = { ...svc };
-                          delete svcCopy.operations;
-                          return svcCopy;
-                        });
-                      }
-                      return appCopy;
+                  if (infraCopy.services) {
+                    infraCopy.services = infraCopy.services.map(svc => {
+                      const svcCopy = { ...svc };
+                      delete svcCopy.operations;
+                      return svcCopy;
                     });
                   }
                   return infraCopy;

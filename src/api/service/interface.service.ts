@@ -63,6 +63,7 @@ export interface Infrastructure {
     groupPosition: PositionItem;
     groupSize: SizeItem;
     applications?: Application[] | [];
+    services?: Service[] | [];
     }
 
   export interface Application {
@@ -76,12 +77,11 @@ export interface Infrastructure {
     groupSize: SizeItem;
     position: PositionItem;
     groupPosition: PositionItem;
-    services?: Service[] | [];
   }
 
   export interface Service {
     id: string;
-    applicationId?: string;
+    infrastructureId?: string;
     name: string;
     port?: string;
     type?: string;

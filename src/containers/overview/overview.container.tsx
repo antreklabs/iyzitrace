@@ -7,7 +7,7 @@ import {
   CloudOutlined
 } from '@ant-design/icons';
 import { getRegions } from '../../api/service/service-map.service';
-import { Infrastructure, Application, Service, Operation, Region } from '../../api/service/interface.service';
+import { Infrastructure, Service, Operation, Region } from '../../api/service/interface.service';
 import RegionCard from '../../components/overview/overview.card.Region';
 import InfrastructureCard from '../../components/overview/overview.card.Infrastructure';
 import ApplicationsSidebar from '../../components/overview/overview.applications-sidebar.component';
@@ -98,11 +98,6 @@ const OverviewContainer: React.FC = () => {
     );
   }, [regions]);
 
-  // Get applications from filtered infrastructures
-  const filteredAllApplications = useMemo(() => {
-    return filteredInfrastructures.flatMap(infra => infra.applications || []);
-  }, [filteredInfrastructures]);
-
   // Sidebar shows all applications (no filter)
   const sidebarApplications = useMemo(() => {
     if (sidebarInfrastructure) {
@@ -111,21 +106,10 @@ const OverviewContainer: React.FC = () => {
     return allApplications;
   }, [sidebarInfrastructure, allApplications]);
 
-  // Filter applications based on selection
-  const filteredApplications = useMemo(() => {
-    if (selectedApplicationId) {
-      return filteredAllApplications.filter(app => app.id === selectedApplicationId);
-    }
-    if (selectedInfrastructureId) {
-      return filteredAllApplications;
-    }
-    return filteredAllApplications;
-  }, [filteredAllApplications, selectedApplicationId, selectedInfrastructureId]);
-
-  // Get all services from filtered applications
+  // Get all services from filtered infrastructures
   const allServices = useMemo(() => {
-    return filteredApplications.flatMap(app => app.services || []);
-  }, [filteredApplications]);
+    return filteredInfrastructures.flatMap(infra => infra.services || []);
+  }, [filteredInfrastructures]);
 
   // Filter services based on selection
   const filteredServices = useMemo(() => {
@@ -143,17 +127,7 @@ const OverviewContainer: React.FC = () => {
     const groups: { [infraId: string]: { infrastructure: Infrastructure; services: Service[] } } = {};
     
     filteredInfrastructures.forEach(infrastructure => {
-      const infraServices: Service[] = [];
-      const applications = (infrastructure.applications || []) as Application[];
-      
-      applications.forEach((app: Application) => {
-        const appServices = (app.services || []) as Service[];
-        appServices.forEach((service: Service) => {
-          if (filteredServices.some(s => s.id === service.id)) {
-            infraServices.push(service);
-          }
-        });
-      });
+      const infraServices = (infrastructure.services || []) as Service[];
       
       if (infraServices.length > 0) {
         groups[infrastructure.id] = {
@@ -164,7 +138,7 @@ const OverviewContainer: React.FC = () => {
     });
     
     return groups;
-  }, [filteredInfrastructures, filteredServices]);
+  }, [filteredInfrastructures]);
 
 
   // Get all operations from filtered services
