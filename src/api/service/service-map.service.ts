@@ -1,10 +1,11 @@
 // Service Map Service - Infrastructure and service mapping data provider
-import { Infrastructure, Application, Service, Region } from './interface.service';
+import { Infrastructure, Application, Service, Region, ServiceInfrastructureMapping } from './interface.service';
 import { getSelectedViewData } from './view.service';
 import { getQueryData } from '../provider/prometheus.provider';
 import { getServicesTableData } from './services.service';
 import { FilterParamsModel } from './query.service';
 import { HealthValue } from './interface.service';
+import { getPluginSettings, savePluginSettings } from './settings.service';
 
 type PromVectorSample = {
   metric: Record<string, string>;
@@ -101,6 +102,73 @@ export const getInventoryHosts = async () => {
   return rows;
 };
 
+export const getOrphanServices = async (filterModel: FilterParamsModel): Promise<Service[]> => {
+  try {
+    const pluginData = await getPluginSettings();
+    const serviceMapping: ServiceInfrastructureMapping = pluginData?.serviceInfrastructureMapping || {};
+    const selected = await getSelectedViewData('service-map');
+    
+    const allServices = await getServicesTableData(filterModel);
+    
+    // Filter services that don't have an infrastructure mapping
+    const orphanServices = allServices.filter(srv => !serviceMapping[srv.id]);
+    
+    // Apply positioning from saved data
+    orphanServices.forEach((srv: Service) => {
+      const selSrv = findItem(selected, srv.id, 'service');
+      if(selSrv) {
+        srv.position = selSrv.position;
+        srv.groupPosition = selSrv.groupPosition;
+        srv.groupSize = selSrv.groupSize;
+      }
+      srv.infrastructureId = undefined; // Explicitly mark as orphan
+    });
+    
+    return orphanServices;
+  } catch (error) {
+    console.error('Error fetching orphan services:', error);
+    return [];
+  }
+};
+
+export const mapServiceToInfrastructure = async (serviceId: string, infrastructureId: string): Promise<void> => {
+  try {
+    const pluginData = await getPluginSettings();
+    const serviceMapping: ServiceInfrastructureMapping = pluginData?.serviceInfrastructureMapping || {};
+    
+    // Update mapping
+    serviceMapping[serviceId] = infrastructureId;
+    
+    // Save to plugin settings
+    await savePluginSettings({
+      ...pluginData,
+      serviceInfrastructureMapping: serviceMapping,
+    });
+  } catch (error) {
+    console.error('Error mapping service to infrastructure:', error);
+    throw error;
+  }
+};
+
+export const unmapServiceFromInfrastructure = async (serviceId: string): Promise<void> => {
+  try {
+    const pluginData = await getPluginSettings();
+    const serviceMapping: ServiceInfrastructureMapping = pluginData?.serviceInfrastructureMapping || {};
+    
+    // Remove mapping
+    delete serviceMapping[serviceId];
+    
+    // Save to plugin settings
+    await savePluginSettings({
+      ...pluginData,
+      serviceInfrastructureMapping: serviceMapping,
+    });
+  } catch (error) {
+    console.error('Error unmapping service from infrastructure:', error);
+    throw error;
+  }
+};
+
 const findItem = (selected: any, id: string, type?: string) => {
   if (!selected) return undefined;
   const items = selected.items || [];
@@ -111,9 +179,32 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
   
   const regions: Region[] = [];
   const selected = await getSelectedViewData('service-map');
-  // console.log('[getRegions] selected:', selected);
+  console.log('[getRegions] selected:', selected);
   const data = await getInventoryHosts();
-  // console.log('[getRegions] data:', data);
+  console.log('[getRegions] data:', data);
+
+  // Get service-infrastructure mapping from plugin settings
+  const pluginData = await getPluginSettings();
+  const serviceMapping: ServiceInfrastructureMapping = pluginData?.serviceInfrastructureMapping || {};
+  
+  // Fetch all services
+  let allServices: Service[] = [];
+  try {
+    allServices = await getServicesTableData(filterModel);
+    allServices.forEach((srv: Service) => {
+      const selSrv = findItem(selected, srv.id, 'service');
+      if(selSrv) {
+        srv.position = selSrv.position;
+        srv.groupPosition = selSrv.groupPosition;
+        srv.groupSize = selSrv.groupSize;
+      }
+      // Set infrastructureId from mapping
+      srv.infrastructureId = serviceMapping[srv.id];
+    });
+  } catch (error) {
+    console.error('Error fetching services table data:', error);
+    allServices = [];
+  }
 
   // Step 1: Group by cloud_region
   const regionMap = new Map<string, any[]>();
@@ -208,25 +299,8 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
         });
       }
 
-      // Fetch services for this infrastructure
-      let services: Service[] = [];
-      if (infraId === 'infra|onprem|docker-desktop') {
-        try {
-          services = await getServicesTableData(filterModel);
-          services.forEach((srv: Service) => {
-            const selSrv = findItem(selected, srv.id, 'service');
-            if(selSrv) {
-              srv.position = selSrv.position;
-              srv.groupPosition = selSrv.groupPosition;
-              srv.groupSize = selSrv.groupSize;
-            }
-            srv.infrastructureId = infraId;
-          });
-        } catch (error) {
-          console.error('Error fetching services table data:', error);
-          services = [];
-        }
-      }
+      // Get services mapped to this infrastructure
+      const services: Service[] = allServices.filter(srv => srv.infrastructureId === infraId);
 
       const selInfra = findItem(selected, infraId, 'infrastructure');
       

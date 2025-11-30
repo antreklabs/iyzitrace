@@ -1051,14 +1051,14 @@ const processLayerData = (data: any, layer: string) => {
     data.regions.forEach((region: any) => {
       region.infrastructures.forEach((infra: any) => {
         if (infra.services) {
-          groups.push({
+            groups.push({
             id: infra.id,
             name: infra.name,
             items: infra.services,
             groupPosition: infra.groupPosition,
             groupSize: infra.groupSize
-          });
-        }
+            });
+          }
       });
     });
   } 
@@ -1107,7 +1107,7 @@ const MapInner = forwardRef<any, MapLayerProps>(({ selectedNodeId, onNodeClick, 
         for (const infra of region.infrastructures) {
           if (!infra?.services) continue;
           const found = infra.services.find((s: any) => s && s.id === serviceId);
-          if (found) return found.name as string;
+            if (found) return found.name as string;
         }
       }
     } catch {}
@@ -1123,7 +1123,7 @@ const MapInner = forwardRef<any, MapLayerProps>(({ selectedNodeId, onNodeClick, 
         for (const infra of region.infrastructures) {
           if (!infra?.services) continue;
           const found = infra.services.find((s: any) => s && s.id === serviceId);
-          if (found) return { infraId: infra.id as string, infraName: infra.name as string };
+            if (found) return { infraId: infra.id as string, infraName: infra.name as string };
         }
       }
     } catch {}
@@ -1208,15 +1208,15 @@ const MapInner = forwardRef<any, MapLayerProps>(({ selectedNodeId, onNodeClick, 
             try {
               const services = Array.isArray((item as any).services) ? (item as any).services : [];
               const groupedInfraTargets = new Map<string, number>();
-              services.forEach((svc: any) => {
-                const ops = Array.isArray(svc?.operations) ? svc.operations : [];
-                ops.forEach((op: any) => {
-                  const tgt = op?.targetServiceId ? String(op.targetServiceId).trim() : '';
-                  if (!tgt) return;
-                  const { infraId: targetInfraId } = getInfrastructureIdByServiceId(tgt);
-                  if (!targetInfraId || targetInfraId === item.id) return;
-                  const key = `${item.id}__${targetInfraId}`;
-                  groupedInfraTargets.set(key, (groupedInfraTargets.get(key) || 0) + 1);
+                services.forEach((svc: any) => {
+                  const ops = Array.isArray(svc?.operations) ? svc.operations : [];
+                  ops.forEach((op: any) => {
+                    const tgt = op?.targetServiceId ? String(op.targetServiceId).trim() : '';
+                    if (!tgt) return;
+                    const { infraId: targetInfraId } = getInfrastructureIdByServiceId(tgt);
+                    if (!targetInfraId || targetInfraId === item.id) return;
+                    const key = `${item.id}__${targetInfraId}`;
+                    groupedInfraTargets.set(key, (groupedInfraTargets.get(key) || 0) + 1);
                 });
               });
               groupedInfraTargets.forEach((count, key) => {
@@ -1576,7 +1576,7 @@ const handleSaveOnView = useCallback(async () => {
             items.push({ id: app.id, type: 'application', position: app.position, groupPosition: app.groupPosition, groupSize: app.groupSize });
           });
           (infra.services || []).forEach((svc: any) => {
-            items.push({ id: svc.id, type: 'service', position: svc.position, groupPosition: svc.groupPosition, groupSize: svc.groupSize });
+              items.push({ id: svc.id, type: 'service', position: svc.position, groupPosition: svc.groupPosition, groupSize: svc.groupSize });
           });
         });
       });

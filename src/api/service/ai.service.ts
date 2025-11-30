@@ -131,7 +131,7 @@ const optimizeRegionData = (regions: Region[]): string => {
     region.infrastructures?.forEach((infra: Infrastructure) => {
       if (infra.services) {
         services.push(...infra.services);
-      }
+        }
     });
 
     const healthyServices = services.filter((s) => s.status?.value === 'healthy').length;

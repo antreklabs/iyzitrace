@@ -1,14 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { Card, List, Badge, Typography, Avatar, Button } from 'antd';
+import { Card, Badge, Typography, Avatar, Button } from 'antd';
 import { 
   UnorderedListOutlined,
   UserOutlined,
   CheckCircleOutlined,
   EditOutlined,
   PlusOutlined,
-  TruckOutlined,
-  DownOutlined,
-  UpOutlined
+  TruckOutlined
 } from '@ant-design/icons';
 import { Operation } from '../../api/service/interface.service';
 
@@ -19,15 +17,27 @@ interface OperationCardProps {
   title: string;
   onClick: (operation: Operation) => void;
   selectedOperationId?: string;
+  searchQuery?: string;
 }
 
 const OperationCard: React.FC<OperationCardProps> = ({ 
   operations, 
   title, 
   onClick,
-  selectedOperationId
+  selectedOperationId,
+  searchQuery = ''
 }) => {
   const [expanded, setExpanded] = useState(false);
+
+  const formatDuration = (ms: number) => {
+    if (ms >= 60000) {
+      return `${(ms / 60000).toFixed(2)}m`;
+    }
+    if (ms >= 1000) {
+      return `${(ms / 1000).toFixed(2)}s`;
+    }
+    return `${ms.toFixed(2)}ms`;
+  };
 
   const getStatusColor = (status?: string) => {
     switch (status) {
@@ -84,7 +94,18 @@ const OperationCard: React.FC<OperationCardProps> = ({
 
   // Sort operations: error > degraded > warning > healthy, then by avgLatency
   const sortedOperations = useMemo(() => {
-    return [...operations].sort((a, b) => {
+    let filtered = operations;
+    
+    // Filter by search query
+    if (searchQuery && searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = operations.filter(operation => 
+        operation.name.toLowerCase().includes(query) ||
+        operation.type?.toLowerCase().includes(query)
+      );
+    }
+    
+    return filtered.sort((a, b) => {
       const statusPriorityA = getStatusPriority(a.status?.value);
       const statusPriorityB = getStatusPriority(b.status?.value);
       
@@ -96,12 +117,13 @@ const OperationCard: React.FC<OperationCardProps> = ({
       const avgLatencyB = b.metrics?.avgDurationMs || 0;
       return avgLatencyB - avgLatencyA; // Higher latency first
     });
-  }, [operations]);
+  }, [operations, searchQuery]);
 
   const displayOperations = expanded ? sortedOperations : sortedOperations.slice(0, 2);
   const hasMore = sortedOperations.length > 2;
 
-  if (operations.length === 0) {
+  // Don't show card if no operations match search
+  if (sortedOperations.length === 0) {
     return null;
   }
 
@@ -113,44 +135,81 @@ const OperationCard: React.FC<OperationCardProps> = ({
         border: '1px solid #333',
         background: '#1f1f1f',
         height: '100%',
+        minWidth: '300px',
+        width: 'max-content',
         display: 'flex',
         flexDirection: 'column',
-        overflow: 'hidden',
+        overflow: 'visible',
+        transition: 'all 0.3s ease',
       }}
-      bodyStyle={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}
+      bodyStyle={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'visible' }}
     >
-      <Title 
-        level={4} 
-        style={{ 
-          marginBottom: '16px', 
-          color: '#e8e8e8',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        }}
-        title={title}
-      >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <Title 
+          level={4} 
+          style={{ 
+            margin: 0,
+            color: '#e8e8e8',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+          title={title}
+        >
         {title}
       </Title>
-      <List
-        dataSource={displayOperations}
-        style={{ flex: 1, overflow: 'hidden', width: '100%' }}
-        renderItem={(operation) => {
+        {hasMore && (
+          <Button
+            type="default"
+            onClick={() => setExpanded(!expanded)}
+            style={{
+              background: '#2a2a2a',
+              borderColor: '#404040',
+              color: '#b8b8b8',
+              padding: '4px 12px',
+              height: 'auto',
+              fontWeight: 600,
+              fontSize: '12px',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#333';
+              e.currentTarget.style.borderColor = '#555';
+              e.currentTarget.style.color = '#e8e8e8';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#2a2a2a';
+              e.currentTarget.style.borderColor = '#404040';
+              e.currentTarget.style.color = '#b8b8b8';
+            }}
+          >
+            {expanded ? 'Less' : `More (+${sortedOperations.length - 2})`}
+          </Button>
+        )}
+      </div>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: expanded ? `repeat(${Math.ceil(sortedOperations.length / 2)}, 240px)` : '240px',
+          gridTemplateRows: 'repeat(2, min-content)',
+          gap: '8px',
+          gridAutoFlow: 'column'
+        }}>
+          {displayOperations.map((operation) => {
           const status = operation.status?.value || 'unknown';
           const avgDurationMs = operation.metrics?.avgDurationMs || 0;
           const callsPerSecond = operation.metrics?.callsPerSecond || 0;
           const isSelected = operation.id === selectedOperationId;
           
           return (
-            <List.Item 
+            <div 
+              key={operation.id}
               style={{ 
                 border: 'none', 
-                padding: '12px',
+                padding: '6px',
                 cursor: 'pointer',
                 backgroundColor: isSelected ? '#1890ff' : '#2a2a2a',
                 borderRadius: '8px',
                 transition: 'all 0.2s ease',
-                marginBottom: '8px',
                 overflow: 'hidden',
               }}
               onClick={() => onClick(operation)}
@@ -166,7 +225,7 @@ const OperationCard: React.FC<OperationCardProps> = ({
               }}
             >
               <div style={{ width: '100%', minWidth: 0, overflow: 'hidden' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', gap: '6px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0, overflow: 'hidden' }}>
                     <Avatar icon={getOperationIcon(operation.name)} style={{ background: '#1f1f1f', border: '1px solid #404040', flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
@@ -206,7 +265,7 @@ const OperationCard: React.FC<OperationCardProps> = ({
                       Avg Duration
                     </Text>
                     <Text style={{ fontWeight: 600, fontSize: '13px', color: isSelected ? 'white' : '#b8b8b8' }}>
-                      {avgDurationMs.toFixed(2)}ms
+                      {formatDuration(avgDurationMs)}
                     </Text>
                   </div>
                   <div>
@@ -219,36 +278,10 @@ const OperationCard: React.FC<OperationCardProps> = ({
                   </div>
                 </div>
               </div>
-            </List.Item>
+            </div>
           );
-        }}
-      />
-      <div style={{ minHeight: '40px', marginTop: '8px' }}>
-        {hasMore && (
-          <Button
-            type="default"
-            icon={expanded ? <UpOutlined /> : <DownOutlined />}
-            onClick={() => setExpanded(!expanded)}
-            style={{
-              width: '100%',
-              background: '#2a2a2a',
-              borderColor: '#404040',
-              color: '#b8b8b8',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#333';
-              e.currentTarget.style.borderColor = '#555';
-              e.currentTarget.style.color = '#e8e8e8';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#2a2a2a';
-              e.currentTarget.style.borderColor = '#404040';
-              e.currentTarget.style.color = '#b8b8b8';
-            }}
-          >
-            {expanded ? 'Show Less' : `Show ${sortedOperations.length - 2} More`}
-          </Button>
-        )}
+        })}
+        </div>
       </div>
     </Card>
   );

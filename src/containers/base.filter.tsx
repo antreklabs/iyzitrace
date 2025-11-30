@@ -164,7 +164,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       extractFieldsFromColumns(columns);
     }
   }, [columns, hasFieldsFilter]);
-
+      
   // Update field values for existing field filters when data changes
   useEffect(() => {
     if (hasFieldsFilter && data && Array.isArray(data) && data.length > 0) {
@@ -1001,16 +1001,16 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
 
           <Form.Item label="Tag Value">
           <Space.Compact className="filter-compact-space">
-            <Form.Item name={['filters', 'tagOperator']} noStyle initialValue="=">
+              <Form.Item name={['filters', 'tagOperator']} noStyle initialValue="=">
               <Select className="filter-operator-select">
-                {EQUAL_OPERATOR_OPTIONS.map((op) => (
-                  <Option key={op} value={op}>
-                    {op}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-            <Form.Item name={['filters', 'tagValue']} noStyle>
+                  {EQUAL_OPERATOR_OPTIONS.map((op) => (
+                    <Option key={op} value={op}>
+                      {op}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item name={['filters', 'tagValue']} noStyle>
               <Select
                 showSearch
                 allowClear
@@ -1025,7 +1025,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                   </Option>
                 ))}
               </Select>
-            </Form.Item>
+              </Form.Item>
             </Space.Compact>
           </Form.Item>
         </>

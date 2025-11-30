@@ -475,13 +475,13 @@ const ServiceMapComponent: React.FC<ServiceMapComponentProps> = ({ data }) => {
           });
           
           (infra.services || []).forEach((service: Service) => {
-            const serviceNode: TreeNode = {
-              title: service.name,
-              key: `service-${service.id}`,
-              type: 'service',
-              children: []
-            };
-            
+              const serviceNode: TreeNode = {
+                title: service.name,
+                key: `service-${service.id}`,
+                type: 'service',
+                children: []
+              };
+              
             infraNode.children!.push(serviceNode);
           });
           

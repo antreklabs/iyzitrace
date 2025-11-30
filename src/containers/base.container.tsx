@@ -6,6 +6,7 @@ import FiltersSider from '../components/core/layout/filters-sider.component';
 import '../assets/styles/base/base.container.css';
 import { TableColumn } from '../api/service/table.services';
 import { getFilterParams, FilterParamsModel, getDefaultSearchQuery } from '../api/service/query.service';
+import AIChatbot from '../components/ai/ai-chatbot.component';
 
 const { Content } = Layout;
 
@@ -21,6 +22,7 @@ interface BaseContainerProps {
   onFetchData?: (filterModel: FilterParamsModel) => Promise<FetchedModel>;
   filterComponent?: React.ReactElement;
   initialFilterCollapsed?: boolean;
+  refreshTrigger?: number;
   children?: React.ReactNode;
 }
 
@@ -30,6 +32,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   onFetchData,
   filterComponent,
   initialFilterCollapsed = true,
+  refreshTrigger,
   children
 }) => {
   const location = useLocation();
@@ -70,7 +73,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
 
   useEffect(() => {
     fetchModelData();
-  }, [location.search]);
+  }, [location.search, refreshTrigger]);
 
   useEffect(() => {
     initializeUrlWithDefaults();
@@ -103,6 +106,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
           )}
         </Content>
       </Layout>
+      <AIChatbot contextData={modelData} contextTitle={title} />
     </BaseContainer>
   );
 };

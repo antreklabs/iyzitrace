@@ -71,14 +71,14 @@ const ServiceMapV2Container: React.FC = () => {
       <InfrastructureMap data={mapLevelData} />
       {columns && columns.RootColumns && columns.RootColumns.length > 0 && (
         <BaseTable
-          data={infraLevelData}
-          columns={columns}
+        data={infraLevelData}
+        columns={columns}
           title="Infrastructure Overview"
-          showSearch={true}
-          searchPlaceholder="Search..."
-          l1Key="applications"
-          l2Key="services"
-          l3Key="operations"
+        showSearch={true}
+        searchPlaceholder="Search..."
+        l1Key="applications"
+        l2Key="services"
+        l3Key="operations"
         />
       )}
     </BaseContainerComponent>

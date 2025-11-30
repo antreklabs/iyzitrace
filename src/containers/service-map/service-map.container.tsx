@@ -269,12 +269,12 @@ const ensureLayoutForServiceMap = async (regions: Region[]): Promise<void> => {
         });
       });
       (infra.services || []).forEach((service: Service) => {
-        layoutItems.push({
-          id: service.id,
-          type: 'service',
-          position: service.position,
-          groupPosition: service.groupPosition,
-          groupSize: service.groupSize,
+          layoutItems.push({
+            id: service.id,
+            type: 'service',
+            position: service.position,
+            groupPosition: service.groupPosition,
+            groupSize: service.groupSize,
         });
       });
     });

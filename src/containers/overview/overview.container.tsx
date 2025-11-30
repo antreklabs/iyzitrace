@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { Row, Col, Typography } from 'antd';
+import { Modal } from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { 
   CloudServerOutlined, 
   SettingOutlined, 
   UnorderedListOutlined,
   CloudOutlined
 } from '@ant-design/icons';
-import { getRegions } from '../../api/service/service-map.service';
+import { getRegions, getOrphanServices, mapServiceToInfrastructure, unmapServiceFromInfrastructure } from '../../api/service/service-map.service';
 import { Infrastructure, Service, Operation, Region } from '../../api/service/interface.service';
 import RegionCard from '../../components/overview/overview.card.Region';
 import InfrastructureCard from '../../components/overview/overview.card.Infrastructure';
@@ -19,11 +20,11 @@ import { TableColumn, getTableColumns } from '../../api/service/table.services';
 import { columns as columnUtils } from '../../api/service/table.services';
 import BaseFilter from '../base.filter';
 import BaseTable from '../base.table';
-
-const { Title } = Typography;
+import HorizontalScrollContainer from '../../components/core/horizontal-scroll-container.component';
 
 const OverviewContainer: React.FC = () => {
   const [regions, setRegions] = useState<Region[]>([]);
+  const [orphanServices, setOrphanServices] = useState<Service[]>([]);
   const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null);
   const [selectedInfrastructureId, setSelectedInfrastructureId] = useState<string | null>(null);
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
@@ -33,11 +34,24 @@ const OverviewContainer: React.FC = () => {
   const [sidebarInfrastructure, setSidebarInfrastructure] = useState<Infrastructure | null>(null);
   const [infraLevelData, setInfraLevelData] = useState<Infrastructure[]>([]);
   const [columns, setColumns] = useState<TableColumn>();
-  
+  const [draggedService, setDraggedService] = useState<Service | null>(null);
+  const [dropTargetId, setDropTargetId] = useState<string | null>(null);
+  const [droppingTargetId, setDroppingTargetId] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [unmapModalVisible, setUnmapModalVisible] = useState(false);
+  const [serviceToUnmap, setServiceToUnmap] = useState<Service | null>(null);
+  const [servicesSearchQuery, setServicesSearchQuery] = useState('');
+  const [operationsSearchQuery, setOperationsSearchQuery] = useState('');
+
 
   const fetchModelData = async (filterModel: FilterParamsModel): Promise<FetchedModel> => {
-    const regions = await getRegions(filterModel);
+    const [regions, orphans] = await Promise.all([
+      getRegions(filterModel),
+      getOrphanServices(filterModel)
+    ]);
     setRegions(regions);
+    console.log('[OverviewContainer] regions:', regions);
+    setOrphanServices(orphans);
     const infrastructures = (regions || []).flatMap((r: Region) => r.infrastructures || []);
     setInfraLevelData(infrastructures);
     setColumnInDetail(infrastructures);
@@ -229,11 +243,81 @@ const OverviewContainer: React.FC = () => {
     }
   };
 
+  const handleServiceDragStart = (service: Service) => {
+    setDraggedService(service);
+  };
+
+  const handleInfrastructureDragEnter = (infrastructure: Infrastructure, e: React.DragEvent) => {
+    e.preventDefault();
+    setDropTargetId(infrastructure.id);
+  };
+
+  const handleInfrastructureDragLeave = (infrastructure: Infrastructure, e: React.DragEvent) => {
+    // Only clear if we're actually leaving the card, not just entering a child element
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    // Check if mouse is still within the card boundaries
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setDropTargetId(null);
+    }
+  };
+
+  const handleInfrastructureDrop = async (infrastructure: Infrastructure, e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    setDropTargetId(null);
+    setDroppingTargetId(infrastructure.id);
+    
+    if (draggedService && draggedService.id) {
+      try {
+        await mapServiceToInfrastructure(draggedService.id, infrastructure.id);
+        // Trigger refresh by incrementing counter
+        setRefreshTrigger(prev => prev + 1);
+      } catch (error) {
+        console.error('Error mapping service to infrastructure:', error);
+      }
+    }
+    
+    setDraggedService(null);
+    setDroppingTargetId(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleUnmapService = (service: Service) => {
+    setServiceToUnmap(service);
+    setUnmapModalVisible(true);
+  };
+
+  const confirmUnmap = async () => {
+    if (serviceToUnmap && serviceToUnmap.id) {
+      try {
+        await unmapServiceFromInfrastructure(serviceToUnmap.id);
+        setRefreshTrigger(prev => prev + 1);
+        setUnmapModalVisible(false);
+        setServiceToUnmap(null);
+      } catch (error) {
+        console.error('Error unmapping service:', error);
+      }
+    }
+  };
+
+  const cancelUnmap = () => {
+    setUnmapModalVisible(false);
+    setServiceToUnmap(null);
+  };
+
   return (
     <BaseContainerComponent
       title="Overview"
       initialFilterCollapsed={true}
       onFetchData={fetchModelData}
+      refreshTrigger={refreshTrigger}
       filterComponent={
         <BaseFilter 
           hasServiceFilter={true}
@@ -253,43 +337,71 @@ const OverviewContainer: React.FC = () => {
     >
       <div style={{ padding: '24px', minHeight: '100vh' }}>
       {/* Regions Section */}
-      <div style={{ marginBottom: '32px' }}>
-        <Title level={2} style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <CloudOutlined style={{ color: '#1890ff' }} />
-          Regions
-        </Title>
-        <Row gutter={[16, 16]}>
-          {regions.map((region) => (
-            <Col xs={12} sm={8} md={6} lg={4} key={region.id} style={{ minWidth: '270px' }}>
-              <RegionCard
-                region={region}
-                onClick={handleRegionClick}
-                isSelected={selectedRegionId === region.id}
-              />
-            </Col>
-          ))}
-        </Row>
-      </div>
+      <HorizontalScrollContainer 
+        title="Regions" 
+        icon={<CloudOutlined style={{ color: '#1890ff' }} />}
+        searchable={true}
+        searchPlaceholder="Search regions..."
+        getSearchableText={(child) => {
+          const props = child.props as any;
+          // Child is a div wrapper, get the RegionCard inside
+          let children = props?.children;
+          // Handle React.Children array
+          if (Array.isArray(children)) {
+            children = children.find((c: any) => React.isValidElement(c));
+          }
+          const regionCard = React.isValidElement(children) ? (children as any) : null;
+          const region = regionCard?.props?.region;
+          return region?.name || '';
+        }}
+      >
+        {regions.map((region) => (
+          <div key={region.id} style={{ display: 'inline-block', width: '280px' }}>
+            <RegionCard
+              region={region}
+              onClick={handleRegionClick}
+              isSelected={selectedRegionId === region.id}
+            />
+          </div>
+        ))}
+      </HorizontalScrollContainer>
 
       {/* Servers & Infrastructure Section */}
-      <div style={{ marginBottom: '32px' }}>
-        <Title level={2} style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <CloudServerOutlined style={{ color: '#1890ff' }} />
-          Infrastructures
-        </Title>
-        <Row gutter={[16, 16]}>
+      <HorizontalScrollContainer 
+        title="Infrastructures" 
+        icon={<CloudServerOutlined style={{ color: '#1890ff' }} />}
+        searchable={true}
+        searchPlaceholder="Search infrastructures..."
+        getSearchableText={(child) => {
+          const props = child.props as any;
+          // Child is a div wrapper, get the InfrastructureCard inside
+          let children = props?.children;
+          // Handle React.Children array
+          if (Array.isArray(children)) {
+            children = children.find((c: any) => React.isValidElement(c));
+          }
+          const infraCard = React.isValidElement(children) ? (children as any) : null;
+          const infrastructure = infraCard?.props?.infrastructure;
+          return infrastructure?.name || '';
+        }}
+      >
           {filteredInfrastructures.map((infrastructure) => (
-            <Col xs={12} sm={8} md={6} lg={4} key={infrastructure.id} style={{ minWidth: '270px' }}>
+          <div key={infrastructure.id} style={{ display: 'inline-block', width: '300px' }}>
               <InfrastructureCard
                 infrastructure={infrastructure}
                 onClick={handleInfrastructureClick}
                 isSelected={selectedInfrastructureId === infrastructure.id}
-                onApplicationsClick={handleApplicationsClick}
+              onApplicationsClick={handleApplicationsClick}
+              onDrop={handleInfrastructureDrop}
+              onDragOver={handleDragOver}
+              onDragEnter={handleInfrastructureDragEnter}
+              onDragLeave={handleInfrastructureDragLeave}
+              isDropTarget={dropTargetId === infrastructure.id}
+              isDropping={droppingTargetId === infrastructure.id}
               />
-            </Col>
-          ))}
-        </Row>
-      </div>
+          </div>
+        ))}
+      </HorizontalScrollContainer>
 
       {/* Applications Sidebar */}
       <ApplicationsSidebar
@@ -299,50 +411,102 @@ const OverviewContainer: React.FC = () => {
         selectedApplicationId={selectedApplicationId}
       />
 
-      {/* Services Layer Section */}
-      {Object.keys(servicesByInfrastructure).length > 0 && (
-      <div style={{ marginBottom: '32px' }}>
-        <Title level={2} style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <SettingOutlined style={{ color: '#1890ff' }} />
-          Services
-        </Title>
-        <Row gutter={[16, 16]}>
-          {Object.entries(servicesByInfrastructure).map(([infraId, { infrastructure, services }]) => (
-            <Col xs={12} sm={8} md={6} lg={4} key={infraId} style={{ minWidth: '270px' }}>
+      {/* Orphan Services Section */}
+      {orphanServices.length > 0 && (
+        <HorizontalScrollContainer 
+          title="Orphan Services (Drag to Infrastructure)" 
+          icon={<SettingOutlined style={{ color: '#8c8c8c' }} />}
+          searchPlaceholder="Search orphan services..."
+          searchable={true}
+          getSearchableText={(child) => {
+            const props = child.props as any;
+            // Child is a div wrapper, get the ServiceCard inside
+            let children = props?.children;
+            // Handle React.Children array
+            if (Array.isArray(children)) {
+              children = children.find((c: any) => React.isValidElement(c));
+            }
+            const serviceCard = React.isValidElement(children) ? (children as any) : null;
+            const title = serviceCard?.props?.title;
+            return title || '';
+          }}
+        >
+          {orphanServices.map((service) => (
+            <div 
+              key={service.id} 
+              style={{ 
+                display: 'inline-block', 
+                minWidth: '240px',
+                cursor: 'grab',
+                opacity: draggedService?.id === service.id ? 0.5 : 1,
+                transition: 'opacity 0.2s ease'
+              }}
+              draggable
+              onDragStart={() => handleServiceDragStart(service)}
+            >
               <ServiceCard
-                services={services}
-                title={`${infrastructure.name}`}
+                services={[service]}
+                title={service.name}
                 icon={<SettingOutlined style={{ color: 'white' }} />}
-                gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                gradient="linear-gradient(135deg, #6b7280 0%, #4b5563 100%)"
                 onClick={handleServiceClick}
                 selectedServiceId={selectedServiceId}
               />
-            </Col>
-          ))}
-        </Row>
       </div>
+          ))}
+        </HorizontalScrollContainer>
+      )}
+
+      {/* Services Layer Section */}
+      {Object.keys(servicesByInfrastructure).length > 0 && (
+        <HorizontalScrollContainer 
+          title="Services" 
+          icon={<SettingOutlined style={{ color: '#1890ff' }} />}
+          searchable={true}
+          searchPlaceholder="Search services..."
+          searchQuery={servicesSearchQuery}
+          onSearchChange={setServicesSearchQuery}
+        >
+          {Object.entries(servicesByInfrastructure).map(([infraId, { infrastructure, services }]) => (
+            <div key={infraId} style={{ display: 'inline-block' }}>
+                <ServiceCard
+                services={services}
+                title={`${infrastructure.name}`}
+                icon={<SettingOutlined style={{ color: 'white' }} />}
+                  gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                  onClick={handleServiceClick}
+                onUnmap={handleUnmapService}
+                  selectedServiceId={selectedServiceId}
+                showUnmap={true}
+                searchQuery={servicesSearchQuery}
+                />
+      </div>
+          ))}
+        </HorizontalScrollContainer>
       )}
 
       {/* Operations Layer Section */}
       {Object.keys(operationsByService).length > 0 && (
-      <div>
-        <Title level={2} style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <UnorderedListOutlined style={{ color: '#1890ff' }} />
-          Operations
-        </Title>
-        <Row gutter={[16, 16]}>
+        <HorizontalScrollContainer 
+          title="Operations" 
+          icon={<UnorderedListOutlined style={{ color: '#1890ff' }} />}
+          searchable={true}
+          searchPlaceholder="Search operations..."
+          searchQuery={operationsSearchQuery}
+          onSearchChange={setOperationsSearchQuery}
+        >
             {Object.entries(operationsByService).map(([serviceName, operations]) => (
-              <Col xs={12} sm={8} md={6} lg={4} key={serviceName} style={{ minWidth: '270px' }}>
+            <div key={serviceName} style={{ display: 'inline-block' }}>
                 <OperationCard
                   operations={operations}
-                  title={`${serviceName}`}
+                title={`${serviceName}`}
                   onClick={handleOperationClick}
                   selectedOperationId={selectedOperationId}
+                searchQuery={operationsSearchQuery}
                 />
-          </Col>
+            </div>
             ))}
-        </Row>
-      </div>
+        </HorizontalScrollContainer>
       )}
     </div>
     {columns && columns.RootColumns && columns.RootColumns.length > 0 && (
@@ -357,6 +521,30 @@ const OverviewContainer: React.FC = () => {
         l3Key="operations"
         />
       )}
+      <Modal
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <ExclamationCircleOutlined style={{ color: '#faad14', fontSize: '24px' }} />
+            <span>Remove Service Mapping</span>
+          </div>
+        }
+        open={unmapModalVisible}
+        onOk={confirmUnmap}
+        onCancel={cancelUnmap}
+        okText="Remove Mapping"
+        cancelText="Cancel"
+        okButtonProps={{ danger: true }}
+        width={500}
+      >
+        <div style={{ padding: '16px 0' }}>
+          <p style={{ fontSize: '16px', marginBottom: '12px' }}>
+            Are you sure you want to remove the mapping for <strong>"{serviceToUnmap?.name}"</strong>?
+          </p>
+          <p style={{ color: '#8c8c8c', fontSize: '14px' }}>
+            This will move the service back to <strong>Orphan Services</strong> and it will no longer be associated with its current infrastructure.
+          </p>
+        </div>
+      </Modal>
     </BaseContainerComponent>
   );
 };

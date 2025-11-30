@@ -28,6 +28,7 @@ const RegionCard: React.FC<RegionCardProps> = ({ region, onClick, isSelected }) 
         transition: 'all 0.3s ease',
         background: isSelected ? '#1890ff' : 'white',
         height: '100%',
+        width: '100%',
       }}
       bodyStyle={{ padding: '20px' }}
     >

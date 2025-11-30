@@ -1,13 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { Card, List, Badge, Typography, Avatar, Button } from 'antd';
+import { Card, Badge, Typography, Avatar, Button, Tooltip } from 'antd';
 import { 
   SettingOutlined,
   SafetyCertificateOutlined,
   ShoppingCartOutlined,
   CreditCardOutlined,
   BellOutlined,
-  DownOutlined,
-  UpOutlined
+  CloseCircleOutlined
 } from '@ant-design/icons';
 import { Service } from '../../api/service/interface.service';
 
@@ -19,7 +18,10 @@ interface ServiceCardProps {
   icon: React.ReactNode;
   gradient: string;
   onClick: (service: Service) => void;
+  onUnmap?: (service: Service) => void;
   selectedServiceId?: string;
+  showUnmap?: boolean;
+  searchQuery?: string;
 }
 
 const ServiceCard: React.FC<ServiceCardProps> = ({ 
@@ -28,9 +30,22 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   icon, 
   gradient,
   onClick,
-  selectedServiceId
+  onUnmap,
+  selectedServiceId,
+  showUnmap = false,
+  searchQuery = ''
 }) => {
   const [expanded, setExpanded] = useState(false);
+
+  const formatDuration = (ms: number) => {
+    if (ms >= 60000) {
+      return `${(ms / 60000).toFixed(2)}m`;
+    }
+    if (ms >= 1000) {
+      return `${(ms / 1000).toFixed(2)}s`;
+    }
+    return `${ms.toFixed(2)}ms`;
+  };
 
   const getStatusColor = (status?: string) => {
     switch (status) {
@@ -81,7 +96,18 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 
   // Sort services: error > degraded > warning > healthy, then by avgLatency
   const sortedServices = useMemo(() => {
-    return [...services].sort((a, b) => {
+    let filtered = services;
+    
+    // Filter by search query
+    if (searchQuery && searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = services.filter(service => 
+        service.name.toLowerCase().includes(query) ||
+        service.type?.toLowerCase().includes(query)
+      );
+    }
+    
+    return filtered.sort((a, b) => {
       const statusPriorityA = getStatusPriority(a.status?.value);
       const statusPriorityB = getStatusPriority(b.status?.value);
       
@@ -93,10 +119,15 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
       const avgLatencyB = b.metrics?.avgDurationMs || 0;
       return avgLatencyB - avgLatencyA; // Higher latency first
     });
-  }, [services]);
+  }, [services, searchQuery]);
 
   const displayServices = expanded ? sortedServices : sortedServices.slice(0, 2);
   const hasMore = sortedServices.length > 2;
+  
+  // Don't show card if no services match search
+  if (sortedServices.length === 0) {
+    return null;
+  }
 
   if (services.length === 0) {
     return null;
@@ -110,54 +141,81 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
         border: 'none',
         boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
         height: '100%',
+        minWidth: '300px',
+        width: 'max-content',
         display: 'flex',
         flexDirection: 'column',
-        overflow: 'hidden',
+        overflow: 'visible',
+        transition: 'all 0.3s ease',
       }}
-      bodyStyle={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}
+      bodyStyle={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'visible' }}
     >
-      <Title 
-        level={4} 
-        style={{ 
-          color: 'white', 
-          marginBottom: '16px', 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '8px',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        }}
-        title={title}
-      >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <Title 
+          level={4} 
+          style={{ 
+            color: 'white', 
+            margin: 0,
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+          title={title}
+        >
         {icon}
         {title}
       </Title>
-      <List
-        dataSource={displayServices}
-        style={{ flex: 1, overflow: 'hidden', width: '100%' }}
-        renderItem={(service) => {
+        {hasMore && (
+          <Button
+            type="text"
+            onClick={() => setExpanded(!expanded)}
+            style={{
+              color: 'white',
+              fontWeight: 600,
+              background: 'rgba(255,255,255,0.1)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              padding: '4px 12px',
+              height: 'auto',
+              fontSize: '12px',
+            }}
+          >
+            {expanded ? 'Less' : `More (+${sortedServices.length - 2})`}
+          </Button>
+        )}
+      </div>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: expanded ? `repeat(${Math.ceil(sortedServices.length / 2)}, 240px)` : '240px',
+          gridTemplateRows: 'repeat(2, min-content)',
+          gap: '8px',
+          gridAutoFlow: 'column'
+        }}>
+          {displayServices.map((service) => {
           const status = service.status?.value || 'unknown';
           const isSelected = service.id === selectedServiceId;
           const avgDurationMs = service.metrics?.avgDurationMs || 0;
           const callsPerSecond = service.metrics?.callsPerSecond || 0;
           
           return (
-            <List.Item 
+            <div 
+              key={service.id}
               style={{ 
                 border: 'none', 
-                padding: '12px',
+                padding: '6px',
                 cursor: 'pointer',
                 backgroundColor: isSelected ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)',
                 borderRadius: '8px',
                 transition: 'all 0.2s ease',
-                marginBottom: '8px',
                 overflow: 'hidden',
               }}
               onClick={() => onClick(service)}
             >
               <div style={{ width: '100%', minWidth: 0, overflow: 'hidden' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', gap: '6px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0, overflow: 'hidden' }}>
                     <Avatar icon={getServiceIcon(service.name)} style={{ background: 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
@@ -189,7 +247,31 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                       </Text>
                     </div>
                   </div>
-                  <Badge color={getStatusColor(status)} style={{ flexShrink: 0 }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+              <Badge color={getStatusColor(status)} />
+                    {showUnmap && onUnmap && (
+                      <Tooltip title="Remove mapping">
+                        <CloseCircleOutlined
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onUnmap(service);
+                          }}
+                          style={{
+                            color: 'rgba(255,255,255,0.6)',
+                            fontSize: '16px',
+                            cursor: 'pointer',
+                            transition: 'color 0.2s',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.color = '#ff4d4f';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = 'rgba(255,255,255,0.6)';
+                          }}
+                        />
+                      </Tooltip>
+                    )}
+                  </div>
                 </div>
                 <div style={{ display: 'flex', gap: '16px', paddingLeft: '44px' }}>
                   <div>
@@ -197,7 +279,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                       Avg Duration
                     </Text>
                     <Text style={{ color: 'white', fontWeight: 600, fontSize: '13px' }}>
-                      {avgDurationMs.toFixed(2)}ms
+                      {formatDuration(avgDurationMs)}
                     </Text>
                   </div>
                   <div>
@@ -210,27 +292,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                   </div>
                 </div>
               </div>
-            </List.Item>
+            </div>
           );
-        }}
-      />
-      <div style={{ minHeight: '40px', marginTop: '8px' }}>
-        {hasMore && (
-          <Button
-            type="text"
-            icon={expanded ? <UpOutlined /> : <DownOutlined />}
-            onClick={() => setExpanded(!expanded)}
-            style={{
-              width: '100%',
-              color: 'white',
-              fontWeight: 600,
-              background: 'rgba(255,255,255,0.1)',
-              border: '1px solid rgba(255,255,255,0.2)',
-            }}
-          >
-            {expanded ? 'Show Less' : `Show ${sortedServices.length - 2} More`}
-          </Button>
-        )}
+        })}
+        </div>
       </div>
     </Card>
   );

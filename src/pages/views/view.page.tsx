@@ -249,9 +249,9 @@ function ViewsPage() {
               const serviceCount = infrastructures.flatMap((infra: any) => infra.services || []).length;
               
               newHighlights = [
-                { label: 'Regions', value: regions.length.toString() },
-                { label: 'Infrastructures', value: infrastructures.length.toString() },
-                { label: 'Applications', value: applications.length.toString() },
+                  { label: 'Regions', value: regions.length.toString() },
+                  { label: 'Infrastructures', value: infrastructures.length.toString() },
+                  { label: 'Applications', value: applications.length.toString() },
                 { label: 'Services', value: serviceCount.toString() }
               ];
               break;
@@ -265,7 +265,7 @@ function ViewsPage() {
               
               newHighlights = sortedServices.length
                 ? sortedServices.map(service => ({
-                    label: service.name,
+                label: service.name,
                     value: `${(service.metrics?.avgDurationMs ?? 0).toFixed(2)} ms`
                   }))
                 : [{ label: 'No data', value: '-' }];
@@ -447,7 +447,7 @@ function ViewsPage() {
               <Space size={8}>
                 <Text type="secondary" style={{ fontSize: 11 }}>
                   {lastUpdate.toLocaleTimeString()}
-                </Text>
+              </Text>
                 <Button
                   type="text"
                   size="small"
@@ -514,9 +514,9 @@ function ViewsPage() {
                 </div>
               ))}
             </div>
-            <Text type="secondary" style={{ marginTop: 'auto', fontSize: 11 }}>
+              <Text type="secondary" style={{ marginTop: 'auto', fontSize: 11 }}>
               {metadata.footer}
-            </Text>
+              </Text>
           </>
         )}
       </div>

@@ -29,8 +29,13 @@ export interface RangeMetricItem {
   }[];
 }
 
+export interface ServiceInfrastructureMapping {
+  [serviceId: string]: string; // serviceId -> infrastructureId
+}
+
 export interface ServiceMapData {
   regions?: Region[] | [];
+  serviceInfrastructureMapping?: ServiceInfrastructureMapping;
 }
 
 export interface Region {

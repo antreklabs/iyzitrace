@@ -9,6 +9,12 @@ interface InfrastructureCardProps {
   infrastructure: Infrastructure;
   onClick: (infrastructure: Infrastructure) => void;
   onApplicationsClick: (infrastructure: Infrastructure, e: React.MouseEvent) => void;
+  onDrop?: (infrastructure: Infrastructure, e: React.DragEvent) => void;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDragEnter?: (infrastructure: Infrastructure, e: React.DragEvent) => void;
+  onDragLeave?: (infrastructure: Infrastructure, e: React.DragEvent) => void;
+  isDropTarget?: boolean;
+  isDropping?: boolean;
   isSelected: boolean;
 }
 
@@ -16,6 +22,12 @@ const InfrastructureCard: React.FC<InfrastructureCardProps> = ({
   infrastructure, 
   onClick, 
   onApplicationsClick,
+  onDrop,
+  onDragOver,
+  onDragEnter,
+  onDragLeave,
+  isDropTarget,
+  isDropping,
   isSelected 
 }) => {
   const getStatusColor = (status?: string) => {
@@ -43,27 +55,72 @@ const InfrastructureCard: React.FC<InfrastructureCardProps> = ({
   const memoryPercentage = infrastructure.memory?.percentage || 0;
   const status = infrastructure.status?.value || 'unknown';
   
-  const gradients = [
-    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-    'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-  ];
+  const getGradientByOS = (type?: string, osVersion?: string) => {
+    const osType = (type || osVersion || '').toLowerCase();
+    
+    // Windows - Very Dark Blue
+    if (osType.includes('windows') || osType.includes('win')) {
+      return 'linear-gradient(135deg, #1e293b 0%, #334155 100%)';
+    }
+    
+    // Linux - Very Dark Orange/Brown
+    if (osType.includes('linux') || osType.includes('ubuntu') || osType.includes('debian') || osType.includes('centos')) {
+      return 'linear-gradient(135deg, #422006 0%, #713f12 100%)';
+    }
+    
+    // MacOS/Darwin - Very Dark Purple
+    if (osType.includes('mac') || osType.includes('darwin') || osType.includes('osx')) {
+      return 'linear-gradient(135deg, #3b0764 0%, #581c87 100%)';
+    }
+    
+    // Docker - Very Dark Cyan
+    if (osType.includes('docker') || osType.includes('container')) {
+      return 'linear-gradient(135deg, #164e63 0%, #0e7490 100%)';
+    }
+    
+    // Default - Very Dark Teal
+    return 'linear-gradient(135deg, #134e4a 0%, #115e59 100%)';
+  };
   
-  const gradientIndex = Math.abs(infrastructure.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % gradients.length;
-  const gradient = gradients[gradientIndex];
+  const gradient = getGradientByOS(infrastructure.type, infrastructure.osVersion);
+
+  const showDropEffect = isDropTarget || isDropping;
 
   return (
+    <div style={{ position: 'relative', width: '100%' }}>
+      {showDropEffect && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: '12px',
+          border: '4px solid #52c41a',
+          background: 'rgba(82, 196, 26, 0.15)',
+          zIndex: 10,
+          pointerEvents: 'none',
+          animation: 'pulse 1.5s ease-in-out infinite',
+        }} />
+      )}
     <Card
       hoverable
       onClick={() => onClick(infrastructure)}
+        onDrop={(e) => onDrop && onDrop(infrastructure, e)}
+        onDragOver={(e) => onDragOver && onDragOver(e)}
+        onDragEnter={(e) => onDragEnter && onDragEnter(infrastructure, e)}
+        onDragLeave={(e) => onDragLeave && onDragLeave(infrastructure, e)}
       style={{
         borderRadius: '12px',
         background: gradient,
         color: 'white',
         border: isSelected ? '2px solid #1890ff' : 'none',
-        boxShadow: isSelected ? '0 4px 16px rgba(24, 144, 255, 0.4)' : '0 4px 12px rgba(0,0,0,0.1)',
+          boxShadow: isSelected 
+            ? '0 4px 16px rgba(24, 144, 255, 0.4)' 
+            : showDropEffect 
+              ? '0 8px 24px rgba(82, 196, 26, 0.6), 0 0 0 4px rgba(82, 196, 26, 0.2)'
+              : '0 4px 12px rgba(0,0,0,0.1)',
         cursor: 'pointer',
         transition: 'all 0.3s ease',
+          width: '100%',
+          transform: showDropEffect ? 'scale(1.05)' : 'scale(1)',
       }}
       bodyStyle={{ padding: '20px' }}
     >
@@ -85,7 +142,7 @@ const InfrastructureCard: React.FC<InfrastructureCardProps> = ({
             strokeColor={getProgressColor(cpuPercentage)}
             trailColor="rgba(255,255,255,0.3)"
             showInfo={false}
-            style={{ marginTop: '4px' }}
+            style={{ margin: '4px', width: '50%' }}
           />
           <Text style={{ color: 'white', fontSize: '12px' }}>{cpuPercentage.toFixed(1)}%</Text>
         </div>
@@ -98,7 +155,7 @@ const InfrastructureCard: React.FC<InfrastructureCardProps> = ({
             strokeColor={getProgressColor(memoryPercentage)}
             trailColor="rgba(255,255,255,0.3)"
             showInfo={false}
-            style={{ marginTop: '4px' }}
+            style={{ margin: '4px', width: '50%' }}
           />
           <Text style={{ color: 'white', fontSize: '12px' }}>
             {infrastructure.memory.usage.toFixed(1)}GB / {infrastructure.memory.capacity.toFixed(1)}GB
@@ -120,6 +177,19 @@ const InfrastructureCard: React.FC<InfrastructureCardProps> = ({
         Applications
       </Button>
     </Card>
+    <style>{`
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.7;
+          transform: scale(0.98);
+        }
+      }
+    `}</style>
+    </div>
   );
 };
 

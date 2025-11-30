@@ -16,7 +16,6 @@ import {
   BarChartOutlined,
   FileSearchOutlined,
   ProfileOutlined,
-  AlertOutlined,
   ClusterOutlined,
   RadarChartOutlined,
   SettingOutlined,
@@ -32,7 +31,6 @@ const NAV_ITEMS = [
   { key: 'traces', title: 'Traces', icon: FileSearchOutlined, route: '/traces', description: 'Explore distributed traces to find slow spans, bottlenecks, and analyze request flows.' },
   { key: 'logs', title: 'Logs', icon: ProfileOutlined, route: '/logs', description: 'Search and correlate application logs with traces for comprehensive debugging and analysis.' },
   { key: 'views', title: 'Views', icon: ClusterOutlined, route: '/dashboards', description: 'Create and manage saved queries, custom dashboards, and curated views for your team.' },
-  { key: 'alerts', title: 'Alerts', icon: AlertOutlined, route: '/alerts', description: 'Set up intelligent alerting rules and notifications for proactive monitoring and incident response.' },
   { key: 'errors', title: 'Exceptions', icon: RadarChartOutlined, route: '/exceptions', description: 'Track and analyze error patterns, exception groups, and failure trends across your services.' },
   { key: 'teams', title: 'Teams', icon: TeamOutlined, route: '/teams', description: 'Manage team members, permissions, and access controls for collaborative observability.' },
   { key: 'settings', title: 'Settings', icon: SettingOutlined, route: '/settings', description: 'Configure data sources, plugin settings, and customize your IyziTrace workspace.' },
@@ -44,7 +42,6 @@ const STEPS_CONFIG: Omit<Step, 'done'>[] = [
   { key: 'logs', title: 'Send your logs', description: 'Configure log collection from your applications and infrastructure.', route: '/logs', skippable: true },
   { key: 'traces', title: 'Send your traces', description: 'Set up distributed tracing to track requests across services.', route: '/traces', skippable: true },
   { key: 'metrics', title: 'Send your metrics', description: 'Collect application and infrastructure metrics for monitoring.', route: '/services', skippable: true },
-  { key: 'alerts', title: 'Setup Alerts', description: 'Create alerting rules to get notified of issues in your system.', route: '/alerts', skippable: true },
   { key: 'savedViews', title: 'Setup Saved Views', description: 'Save frequently used queries and views for your team.', route: '/views', skippable: true },
   { key: 'dashboards', title: 'Setup Dashboards', description: 'Create custom dashboards to visualize your observability data.', route: '/views', skippable: true },
 ];

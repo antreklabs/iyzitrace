@@ -20,7 +20,7 @@
   "includes": [
     {
       "type": "page",
-      "name": "Landing",
+      "name": "Home",
       "path": "/a/iyzitrace-app/landing",
       "addToNav": true
     },
@@ -28,6 +28,12 @@
       "type": "page",
       "name": "Overview",
       "path": "/a/iyzitrace-app/overview",
+      "addToNav": true
+    },
+    {
+      "type": "page",
+      "name": "Views",
+      "path": "/a/iyzitrace-app/views",
       "addToNav": true
     },
     {
@@ -56,20 +62,14 @@
     },
     {
       "type": "page",
-      "name": "Views",
-      "path": "/a/iyzitrace-app/views",
-      "addToNav": true
-    },
-    {
-      "type": "page",
-      "name": "AI",
-      "path": "/a/iyzitrace-app/ai",
-      "addToNav": true
-    },
-    {
-      "type": "page",
       "name": "Exceptions",
       "path": "/a/iyzitrace-app/exceptions",
+      "addToNav": true
+    },
+    {
+      "type": "page",
+      "name": "AI Assistant",
+      "path": "/a/iyzitrace-app/ai",
       "addToNav": true
     },
     {
