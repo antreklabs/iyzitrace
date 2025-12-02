@@ -11,7 +11,7 @@ services:
     command: [ "-config.file=/etc/tempo/tempo.yaml" ]
     volumes:
       - ./tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
-      - tempo-data:/tmp/tempo
+      - tempo-data:/var/tempo
     ports:
       - "3200" # Tempo HTTP (changed from 3200 to avoid conflict)
       - "4317"   # OTLP gRPC (changed from 4317 to avoid conflict)
@@ -21,7 +21,7 @@ services:
     image: grafana/loki:latest
     command: [ "-config.file=/etc/loki/config.yml" ]
     volumes:
-      - ./loki/config.yml:/etc/loki/config.yml:ro
+      - ./loki/loki.yml:/etc/loki/config.yml:ro
       - loki-data:/loki
     ports:
       - "3100" # Changed from 3100 to avoid conflict
@@ -93,9 +93,10 @@ services:
     image: nginx:1.27-alpine
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
     ports:
-      - "4317" # gRPC ingress (changed from 4317 to avoid conflict)
-      - "4318" # HTTP ingress (changed from 4318 to avoid conflict)
+      - "80:80" # OTLP/HTTP ingress
+      - "443:443" # OTLP/HTTPS ingress
     depends_on: [ trace-otel-enrichment, metric-otel-enrichment, log-otel-enrichment ]
 
 networks:

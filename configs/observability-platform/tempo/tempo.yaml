@@ -5,6 +5,7 @@ server:
   log_level: info
 
 query_frontend:
+  # Keep search and trace query SLAs predictable
   search:
     duration_slo: 5s
     throughput_bytes_slo: 1.073741824e+09
@@ -24,16 +25,25 @@ distributor:
           endpoint: 0.0.0.0:4318
 
 ingester:
-  max_block_duration: 5m # cut the headblock when this much time passes. this is being set for demo purposes and should probably be left alone normally
+  # Flush larger blocks less often for better compression and fewer compactions
+  max_block_bytes: 5242880     # 5 MiB target block size
+  max_block_duration: 15m      # cap block duration
+  trace_idle_period: 30s       # flush idle traces sooner to avoid stragglers
 
 compactor:
   compaction:
-    block_retention: 1h # overall Tempo trace retention. set for demo purposes
+    # Retain traces for 7d by default; tune per environment/SLO
+    block_retention: 168h
 
 storage:
   trace:
-    backend: local # backend configuration to use
+    backend: local # swap to object storage (s3/gcs/azure) for real HA deployments
     wal:
-      path: /var/tempo/wal # where to store the wal locally
+      path: /var/tempo/wal
     local:
       path: /var/tempo/blocks
+    block:
+      bloom_filter_false_positive: 0.01
+    pool:
+      max_workers: 50
+      queue_depth: 20000

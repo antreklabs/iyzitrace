@@ -202,38 +202,25 @@ exporters:
   debug:
     verbosity: detailed
 # OTLP exporter (observability platform)
-  otlp/iyzitrace:
-    endpoint: "nginx-platform:4317"
+  otlphttp/iyzitrace:
+    endpoint: "http://nginx-platform:80"
     tls:
       insecure: true
-# OTLP exporter (Signoz)
-  otlp/signoz:
-    endpoint: "https://ingest.us.signoz.cloud:443"
-    tls:
-      insecure: false
-    headers:
-      signoz-ingestion-key: 28da4fd2-539f-4a45-a282-15cecdb5643e
-# OTLP exporter (dash0)
-  otlphttp/dash0:
-    endpoint: https://ingress.europe-west4.gcp.dash0.com
-    headers:
-      Authorization: Bearer auth_T2zx9Nu7ohOMTe6YEoT0yhivKvnzdANJ
-      Dash0-Dataset: default
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [resourcedetection, memory_limiter, batch, transform/span]
-      exporters: [otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
+      exporters: [otlphttp/iyzitrace]
     metrics:
       receivers: [otlp, docker_stats, httpcheck/frontend-proxy, hostmetrics, nginx, postgresql, redis]
       processors: [resourcedetection, memory_limiter, batch]
-      exporters: [otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
+      exporters: [otlphttp/iyzitrace]
     logs:
       receivers: [otlp]
       processors: [resourcedetection, memory_limiter, batch]
-      exporters: [otlp/iyzitrace, otlp/signoz, otlphttp/dash0]
+      exporters: [otlphttp/iyzitrace]
   telemetry:
     resource:
       service.name: "central-collector"

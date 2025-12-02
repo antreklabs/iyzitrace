@@ -155,8 +155,8 @@ exporters:
   debug:
     verbosity: detailed
 # OTLP exporter (observability platform)
-  otlp/iyzitrace:
-    endpoint: "nginx-platform:4317"
+  otlphttp/iyzitrace:
+    endpoint: "http://nginx-platform:80"
     tls:
       insecure: true
 
@@ -165,15 +165,16 @@ service:
     metrics:
       receivers: [hostmetrics, otlp]
       processors: [resourcedetection, memory_limiter, batch]
-      exporters: [debug, otlp/iyzitrace]
+      exporters: [debug, otlphttp/iyzitrace]
     logs:
       receivers: [otlp]
       processors: [resourcedetection, memory_limiter, batch]
-      exporters: [debug, otlp/iyzitrace]
+      exporters: [debug, otlphttp/iyzitrace]
   telemetry:
     resource:
       service.name: ${env:OTEL_COLLECTOR_HOST}
       service.namespace: "opentelemetry-demo"
+      host.id: "1234567890"
     metrics:
       level: detailed
       readers:
