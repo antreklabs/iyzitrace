@@ -20,7 +20,7 @@ receivers:
     collection_interval: 10s
   docker_stats:
     endpoint: unix:///var/run/docker.sock
-    api_version: "1.51"
+    api_version: "1.42"
   postgresql:
     collection_interval: 10s
     endpoint: ${POSTGRES_HOST}:${POSTGRES_PORT}
