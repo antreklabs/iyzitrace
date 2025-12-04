@@ -114,18 +114,18 @@ const PLUGIN_PAGE_CATALOG: AvailablePage[] = [
     icon: '🧨',
   },
   {
-    id: 'alerts',
-    name: 'Alerts',
-    route: '/alerts',
-    description: 'Alert rules and incidents',
-    icon: '⏰',
-  },
-  {
     id: 'ai',
     name: 'AI Assistant',
     route: '/ai',
     description: 'Intelligent observability insights powered by AI',
     icon: '🤖',
+  },
+  {
+    id: 'teams',
+    name: 'Teams',
+    route: '/teams',
+    description: 'Manage teams and members',
+    icon: '👥',
   },
   {
     id: 'settings',
@@ -154,7 +154,7 @@ const normaliseTeamPagesSetting = (data: any): TeamPagesSettingsEntry[] => {
     .filter((entry) => entry.teamId && entry.id);
 };
 
-const getStoredTeamPages = async (): Promise<TeamPagesSettingsEntry[]> => {
+export const getStoredTeamPages = async (): Promise<TeamPagesSettingsEntry[]> => {
   try {
     const settings = await getPluginSettings();
     return normaliseTeamPagesSetting(settings?.teamPages);

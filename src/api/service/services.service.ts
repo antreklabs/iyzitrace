@@ -5,6 +5,8 @@ import { Definitions } from "../../interfaces/options";
 
 interface ResultItem {
   metric: {
+    server: string;
+    client: string;
     service_name: string;
     span_name?: string;
     type?: string;
@@ -35,6 +37,8 @@ interface ServiceQueryData {
 interface ServiceMapQueryData {
   server_operation_name?: string;
   client_operation_name?: string;
+  server?: string;
+  client?: string;
 }
 
 const setSpanAdditionalDimensions = (item: ServiceQueryData, operation: Operation, service: Service) => {
@@ -101,8 +105,10 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
   const serviceQueryDataRateByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.RATE_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
   const serviceQueryDataTopKeyOperationsByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.TOP_KEY_OPERATIONS_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
 
-  const serviceSpanRelation = await getServiceMapQueryDataByServiceSpanRelation(QueryType.SERVICE_SPAN_RELATION, filterParamsModel, definitions);
+  // const serviceSpanRelation = await getServiceMapQueryDataByServiceSpanRelation(QueryType.SERVICE_SPAN_RELATION, filterParamsModel, definitions);
   // console.log('serviceSpanRelation', serviceSpanRelation);
+  const serviceRelation = await getServiceMapQueryDataByServiceSpanRelation(QueryType.SERVICE_RELATION, filterParamsModel, definitions);
+  console.log('serviceRelation', serviceRelation);
   let servicesWithOperations: Service[] = [];
 
   const serviceSpanMap = new Map<string, Set<string>>();
@@ -168,7 +174,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       id: serviceName,
       name: serviceName,
       operations: operations as Operation[],
-      
+      targetServiceIds: [],
       metrics: {
         sumDurationMs: 0,
         avgDurationMs: 0,
@@ -208,25 +214,41 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
     return servicesWithOperations;
   });
 
-  servicesWithOperations.forEach((service: Service) => {
-    service.operations.forEach((operation: Operation) => {
-      const serviceSpanRelationItem = serviceSpanRelation.find((item: any) => item.client_operation_name === operation.name);
-      if (serviceSpanRelationItem) {
+  // servicesWithOperations.forEach((service: Service) => {
+  //   service.operations.forEach((operation: Operation) => {
+  //     const serviceSpanRelationItem = serviceSpanRelation.find((item: any) => item.client_operation_name === operation.name);
+  //     if (serviceSpanRelationItem) {
 
-        const targetService = servicesWithOperations.find((s: Service) => 
-          s.operations.find((o: Operation) => o.name === serviceSpanRelationItem.server_operation_name));
-        if (targetService) {
-          operation.targetServiceId = targetService.id;
-        }
-      }
-    });
-  });
+  //       const targetService = servicesWithOperations.find((s: Service) => 
+  //         s.operations.find((o: Operation) => o.name === serviceSpanRelationItem.server_operation_name));
+  //       if (targetService) {
+  //         operation.targetServiceId = targetService.id;
+  //       }
+  //     }
+  //   });
+  // });
+
+  // servicesWithOperations.forEach((service: Service) => {
+  //     const serviceRelationItem = serviceRelation.find((item: any) => item.client === service.name);
+  //     if (serviceRelationItem) {
+  //       if(!service.targetServiceIds.includes(serviceRelationItem.server)) {
+  //         service.targetServiceIds.push(serviceRelationItem.server);
+  //       }
+  //     }
+  //   });
 
   const serviceMap = new Map<string, Service>();
   servicesWithOperations.forEach(service => {
     serviceMap.set(service.id, service);
   });
   
+  serviceRelation.forEach((item: ServiceMapQueryData) => {
+    const service = serviceMap.get(item.client);
+    const targetService = serviceMap.get(item.server);
+    if (service && targetService && !service.targetServiceIds.includes(targetService.id)) {
+      service.targetServiceIds.push(targetService.id);
+    }
+  });
 
   serviceQueryDataSumDurationByService.forEach((item: ServiceQueryData) => {
     const service = serviceMap.get(item.service_name);
@@ -481,11 +503,6 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
     }
   });
 
-
-
-
-
-
   serviceQueryDataAvgDurationByServiceAndSpan.forEach((item: ServiceQueryData) => {
     const service = serviceMap.get(item.service_name);
     if (service && service.operations) {
@@ -625,6 +642,8 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
 export const getServiceMapQueryData = async (filterParamsModel: FilterParamsModel, query: string): Promise<ServiceMapQueryData[]> => {
   const data = await getQueryData(query);
   const serviceMapQueryData: ServiceMapQueryData[] = data.result.map((result: ResultItem) => ({
+    server: result.metric.server,
+    client: result.metric.client,
     server_operation_name: result.metric.server_operation_name,
     client_operation_name: result.metric.client_operation_name,
   }));

@@ -575,7 +575,7 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
     let max = 0;
     services.forEach((service: Service) => {
       service.operations?.forEach((operation: Operation) => {
-        if (operation.targetServiceId && operation.metrics?.avgDurationMs) {
+        if (operation.metrics?.avgDurationMs) {
           max = Math.max(max, operation.metrics.avgDurationMs);
         }
       });
@@ -583,16 +583,36 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
 
     // Create edges from operations
     services.forEach((service: Service) => {
-      service.operations?.forEach((operation: Operation) => {
-        if (operation.targetServiceId && serviceMap.has(operation.targetServiceId)) {
-          const avgDuration = operation.metrics?.avgDurationMs || 0;
+      service.targetServiceIds?.forEach((targetServiceId: string) => {
+        if (targetServiceId && serviceMap.has(targetServiceId)) {
+          const operations = (service.operations || []) as Operation[];
+          const totalDuration = operations.reduce((acc: number, op: Operation) => acc + (op.metrics?.avgDurationMs || 0), 0);
+          const operationsCount = operations.length || 1;
+          const avgDuration = totalDuration / operationsCount;
+          
+          // Find the most frequent operation type
+          const typeCounts: Record<string, number> = {};
+          operations.forEach(op => {
+            const t = op.type || 'HTTP';
+            typeCounts[t] = (typeCounts[t] || 0) + 1;
+          });
+          
+          let type = 'HTTP';
+          let maxCount = 0;
+          Object.entries(typeCounts).forEach(([t, count]) => {
+            if (count > maxCount) {
+              maxCount = count;
+              type = t;
+            }
+          });
+
           const edgeColor = getEdgeColor(avgDuration, max);
           const animDuration = getAnimationDuration(avgDuration, max);
 
           edges.push({
-            id: `${service.id}-${operation.targetServiceId}-${operation.id}`,
+            id: `${service.id}-${targetServiceId}`,
             source: service.id,
-            target: operation.targetServiceId,
+            target: targetServiceId,
             animated: true,
             style: {
               stroke: edgeColor,
@@ -606,7 +626,7 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
               width: 20,
               height: 20
             },
-            label: operation.type,
+            label: type,
             labelStyle: {
               fill: '#e5e7eb',
               fontSize: 10,

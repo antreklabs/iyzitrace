@@ -217,11 +217,15 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
   useEffect(() => {
     if (initialSpanId && traceData.length > 0 && !selectedSpanId) {
       const allSpansFlat = flattenSpans(traceData);
+      console.log('allSpansFlat', allSpansFlat);
       const spanExists = allSpansFlat.some((span) => span.id === initialSpanId);
       if (spanExists) {
         setSelectedSpanId(initialSpanId);
       }
     }
+    console.log('initialSpanId', initialSpanId);
+    console.log('traceData', traceData);
+    console.log('selectedSpanId', selectedSpanId);
   }, [initialSpanId, traceData, selectedSpanId]);
 
   // Filter trace data based on selected operation types

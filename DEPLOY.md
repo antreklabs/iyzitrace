@@ -235,3 +235,11 @@ ssh $SERVER_USER@$SERVER_HOST 'docker system prune -af'
 - Ensure port exposure and firewall rules allow access to Grafana and related services.
 
 
+
+   docker compose -f docker-compose.yaml down
+   docker compose -f configs/observability-platform/docker-compose.yml down
+   docker compose -f configs/opentelemetry-demo/docker-compose.yml down
+
+   docker compose -f docker-compose.yaml up -d
+   docker compose -f configs/observability-platform/docker-compose.yml up -d
+   docker compose -f configs/opentelemetry-demo/docker-compose.yml up -d

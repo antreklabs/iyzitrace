@@ -111,10 +111,10 @@ export const initAI = (config: AIConfig): void => {
     ...config,
   };
 
-  console.log('✅ AI Service initialized', {
-    model: AI_CONFIG.model,
-    baseUrl: AI_CONFIG.baseUrl,
-  });
+  // console.log('✅ AI Service initialized', {
+  //   model: AI_CONFIG.model,
+  //   baseUrl: AI_CONFIG.baseUrl,
+  // });
 };
 
 // ==================== UTILITY FUNCTIONS ====================

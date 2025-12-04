@@ -115,12 +115,58 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
                 .filter(([key]) => !basicFields.some(f => f.value === attributes[key]) && 
                                  !runtimeFields.some(f => f.value === attributes[key]) && 
                                  !telemetryFields.some(f => f.value === attributes[key]))
-                .map(([key, value], index, array) => (
-                  <div key={key} className="log-expanded-row-attribute-item">
-                    <div className="log-expanded-row-attribute-key">{key}</div>
-                    <div className="log-expanded-row-attribute-value">{value as string}</div>
-                  </div>
-                ))}
+                .sort(([keyA], [keyB]) => {
+                  const traceKeys = ['otelTraceID', 'trace_id', 'traceId', 'traceID'];
+                  const spanKeys = ['otelSpanID', 'span_id', 'spanId', 'spanID'];
+                  
+                  const isTraceA = traceKeys.includes(keyA);
+                  const isTraceB = traceKeys.includes(keyB);
+                  const isSpanA = spanKeys.includes(keyA);
+                  const isSpanB = spanKeys.includes(keyB);
+
+                  if (isTraceA) return -1;
+                  if (isTraceB) return 1;
+                  if (isSpanA) return -1;
+                  if (isSpanB) return 1;
+                  return 0;
+                })
+                .map(([key, value]) => {
+                  let content: React.ReactNode = value as string;
+
+                  if (key === 'otelTraceID' || key === 'trace_id' || key === 'traceId' || key === 'traceID') {
+                    content = (
+                      <a 
+                        href={`/a/iyzitrace-app/traces/${value}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: '#1890ff', textDecoration: 'underline' }}
+                      >
+                        {value as string}
+                      </a>
+                    );
+                  } else if (key === 'otelSpanID' || key === 'span_id' || key === 'spanId' || key === 'spanID') {
+                    const traceId = attributes['otelTraceID'] || attributes['trace_id'] || attributes['traceId'] || attributes['traceID'];
+                    if (traceId) {
+                      content = (
+                        <a 
+                          href={`/a/iyzitrace-app/traces/${traceId}?spanId=${value}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: '#1890ff', textDecoration: 'underline' }}
+                        >
+                          {value as string}
+                        </a>
+                      );
+                    }
+                  }
+
+                  return (
+                    <div key={key} className="log-expanded-row-attribute-item">
+                      <div className="log-expanded-row-attribute-key">{key}</div>
+                      <div className="log-expanded-row-attribute-value">{content}</div>
+                    </div>
+                  );
+                })}
             </div>
           </div>
         )}

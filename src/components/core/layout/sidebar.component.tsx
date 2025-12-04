@@ -1,6 +1,6 @@
 // src/components/Sidebar.tsx
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Layout, Menu, Button } from 'antd';
 import {
   BarChartOutlined,
@@ -17,6 +17,7 @@ import {
   RobotOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { getStoredTeamPages } from '../../../api/teams';
 import pluginJson from '../../../plugin.json';
 
 export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
@@ -24,8 +25,55 @@ const { Sider } = Layout;
 
 const Sidebar: React.FC = () => {
   const [collapsed, setCollapsed] = React.useState(true);
+  const [menuItems, setMenuItems] = useState<any[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Placeholder: Replace with your actual user/team context
+  const user = { role: 'user' }; // e.g., { role: 'admin' } or { role: 'user' }
+  const teamId = '1'; // Replace with actual teamId from context or props
+
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      // All possible menu items (key must match PLUGIN_PAGE_CATALOG id)
+      const allMenuItems = [
+        { key: 'landing', icon: <HomeOutlined style={{ fontSize: 16 }} />, label: 'Home' },
+        { key: 'overview', icon: <BuildOutlined style={{ fontSize: 16 }} />, label: 'Overview' },
+        { key: 'views', icon: <ClusterOutlined style={{ fontSize: 16 }} />, label: 'Views' },
+        { key: 'service-map', icon: <DeploymentUnitOutlined style={{ fontSize: 16 }} />, label: 'Service Map' },
+        { key: 'services', icon: <BarChartOutlined style={{ fontSize: 16 }} />, label: 'Services' },  
+        { key: 'traces', icon: <FileSearchOutlined style={{ fontSize: 16 }} />, label: 'Traces' },
+        { key: 'logs', icon: <ProfileOutlined style={{ fontSize: 16 }} />, label: 'Logs' },
+        { key: 'exceptions', icon: <RadarChartOutlined style={{ fontSize: 16 }} />, label: 'Exceptions' },
+        { key: 'ai', icon: <RobotOutlined style={{ fontSize: 16 }} />, label: 'AI Assistant' },
+        { key: 'teams', icon: <TeamOutlined style={{ fontSize: 16 }} />, label: 'Teams' },
+        { key: 'settings', icon: <SettingOutlined style={{ fontSize: 16 }} />, label: 'Settings' },
+      ];
+
+      // Admins see all
+      if (user.role === 'admin') {
+        setMenuItems(allMenuItems);
+        return;
+      }
+
+      // Get allowed pages for this team
+      const pages = await getStoredTeamPages();
+      // If no records, show all
+      if (!pages || pages.length === 0) {
+        setMenuItems(allMenuItems);
+        return;
+      }
+      // Only show allowed pages for this team
+      const allowed = pages.filter((p: { teamId: string }) => p.teamId === teamId);
+      if (allowed.length === 0) {
+        setMenuItems(allMenuItems);
+        return;
+      }
+      const allowedKeys = allowed.map((p: { id: string }) => p.id);
+      setMenuItems(allMenuItems.filter(item => allowedKeys.includes(item.key)));
+    };
+    fetchMenuItems();
+  }, [teamId, user.role]);
 
   const handleMenuClick = (e: any) => {
     navigate(`${PLUGIN_BASE_URL}/${e.key}`);
@@ -82,19 +130,7 @@ const Sidebar: React.FC = () => {
           borderRight: 0,
           background: 'transparent',
         }}
-        items={[
-          { key: 'landing', icon: <HomeOutlined style={{ fontSize: 16 }} />, label: 'Home' },
-          { key: 'overview', icon: <BuildOutlined style={{ fontSize: 16 }} />, label: 'Overview' },
-          { key: 'views', icon: <ClusterOutlined style={{ fontSize: 16 }} />, label: 'Views' },
-          { key: 'service-map', icon: <DeploymentUnitOutlined style={{ fontSize: 16 }} />, label: 'Service Map' },
-          { key: 'services', icon: <BarChartOutlined style={{ fontSize: 16 }} />, label: 'Services' },  
-          { key: 'traces', icon: <FileSearchOutlined style={{ fontSize: 16 }} />, label: 'Traces' },
-          { key: 'logs', icon: <ProfileOutlined style={{ fontSize: 16 }} />, label: 'Logs' },
-          { key: 'exceptions', icon: <RadarChartOutlined style={{ fontSize: 16 }} />, label: 'Exceptions' },
-          { key: 'ai', icon: <RobotOutlined style={{ fontSize: 16 }} />, label: 'AI Assistant' },
-          { key: 'teams', icon: <TeamOutlined style={{ fontSize: 16 }} />, label: 'Teams' },
-          { key: 'settings', icon: <SettingOutlined style={{ fontSize: 16 }} />, label: 'Settings' },
-        ]}
+        items={menuItems}
       />
     </Sider>
   );

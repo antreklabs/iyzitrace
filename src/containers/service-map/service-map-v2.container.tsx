@@ -48,7 +48,7 @@ const ServiceMapV2Container: React.FC = () => {
 
   return (
     <BaseContainerComponent
-      title="Service Map V2"
+      title="Service Map"
       initialFilterCollapsed={true}
       onFetchData={fetchModelData}
       filterComponent={

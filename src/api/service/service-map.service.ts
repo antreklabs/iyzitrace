@@ -36,9 +36,14 @@ export const getInventoryHosts = async () => {
   // 1) Status + metadata (inv_info join'li)
   const statusPromise = getQueryData(`
     inventory_process_status
-      * on (cloud_region, host_name)
-        group_left(shost_arch, host_ip, host_mac, infrastructureType, os_description, os_type)
-          __inv_info
+  `);
+
+  const inventoryBasePromise = getQueryData(`
+    __inv_base
+  `);
+
+  const targetInfoPromise = getQueryData(`
+    target_info
   `);
 
   // 2) CPU %
@@ -56,38 +61,51 @@ export const getInventoryHosts = async () => {
     inventory_machine_memory_total_gb
   `);
 
-  const [statusData, cpuData, memUsedData, memTotalData] = await Promise.all([
+  const [statusData, cpuData, memUsedData, memTotalData, inventoryBaseData, targetInfoData] = await Promise.all([
     statusPromise,
     cpuPromise,
     memUsedPromise,
     memTotalPromise,
+    inventoryBasePromise,
+    targetInfoPromise,
   ]);
 
   const cpuMap = buildMap(cpuData);
   const memUsedMap = buildMap(memUsedData);
   const memTotalMap = buildMap(memTotalData);
+  const inventoryBaseMap = buildMap(inventoryBaseData);
+  const targetInfoMap = buildMap(targetInfoData);
+  const statusMap = buildMap(statusData);
+
+  // create a unique key array from all maps
+  const allKeys = new Set<string>();
+  [statusMap, cpuMap, memUsedMap, memTotalMap, inventoryBaseMap, targetInfoMap].forEach(map => {
+    map.forEach((_, key) => allKeys.add(key));
+  });
+  const keyArray = Array.from(allKeys);
 
   // Base olarak status + metadata'yı kullanıyoruz
-  const rows = (statusData.result as PromVectorSample[]).map((s) => {
-    const key = makeKey(s.metric);
-
+  const rows = keyArray.map((key) => {
     const cpuSample = cpuMap.get(key);
     const memUsedSample = memUsedMap.get(key);
     const memTotalSample = memTotalMap.get(key);
+    const inventoryBaseSample = inventoryBaseMap.get(key);
+    const targetInfoSample = targetInfoMap.get(key);
+    const statusSample = statusMap.get(key);
 
     return {
       // labels
-      cloud_region: s.metric.cloud_region,
-      host_name: s.metric.host_name,
-      host_arch: s.metric.host_arch,
-      host_ip: s.metric.host_ip,
-      host_mac: s.metric.host_mac,
-      infrastructureType: s.metric.infrastructureType,
-      os_description: s.metric.os_description,
-      os_type: s.metric.os_type,
-      process_executable_name: s.metric.process_executable_name,
-      process_pid: s.metric.process_pid,
-      status: s.metric.status,
+      cloud_region: inventoryBaseSample.metric.cloud_region,
+      host_name: inventoryBaseSample.metric.host_name,
+      host_arch: targetInfoSample.metric.host_arch,
+      host_ip: targetInfoSample.metric.host_ip,
+      host_mac: targetInfoSample.metric.host_mac,
+      os_description: targetInfoSample.metric.os_description,
+      os_type: targetInfoSample.metric.os_type,
+      infrastructureType: statusSample.metric.infrastructureType,
+      process_executable_name: statusSample.metric.process_executable_name,
+      process_pid: statusSample.metric.process_pid,
+      status: statusSample.metric.status,
 
       // values
       cpuUsagePercent: parseValue(cpuSample),
@@ -95,7 +113,7 @@ export const getInventoryHosts = async () => {
       memoryTotalGB: parseValue(memTotalSample),
 
       // istersen status metric value'sini de ekleyebilirsin
-      statusMetricValue: Number(s.value[1]),
+      statusMetricValue: Number(statusSample.value[1]),
     };
   });
 
@@ -104,25 +122,23 @@ export const getInventoryHosts = async () => {
 
 export const getOrphanServices = async (filterModel: FilterParamsModel): Promise<Service[]> => {
   try {
-    const pluginData = await getPluginSettings();
-    const serviceMapping: ServiceInfrastructureMapping = pluginData?.serviceInfrastructureMapping || {};
     const selected = await getSelectedViewData('service-map');
+    const data = await getInventoryHosts();
+    const regionMap = new Map<string, any[]>();
+    if (data && Array.isArray(data)) {
+      data.forEach((item: any) => {
+        const cloudRegion = item?.cloud_region || 'unknown';
+        if (!regionMap.has(cloudRegion)) {
+          regionMap.set(cloudRegion, []);
+        }
+        regionMap.get(cloudRegion)!.push(item);
+      });
+    }
     
-    const allServices = await getServicesTableData(filterModel);
+    const allServices = await getServicesWithInfrastructure(filterModel, selected, regionMap);
     
     // Filter services that don't have an infrastructure mapping
-    const orphanServices = allServices.filter(srv => !serviceMapping[srv.id]);
-    
-    // Apply positioning from saved data
-    orphanServices.forEach((srv: Service) => {
-      const selSrv = findItem(selected, srv.id, 'service');
-      if(selSrv) {
-        srv.position = selSrv.position;
-        srv.groupPosition = selSrv.groupPosition;
-        srv.groupSize = selSrv.groupSize;
-      }
-      srv.infrastructureId = undefined; // Explicitly mark as orphan
-    });
+    const orphanServices = allServices.filter(srv => srv.infrastructureId === undefined);
     
     return orphanServices;
   } catch (error) {
@@ -175,6 +191,64 @@ const findItem = (selected: any, id: string, type?: string) => {
   return items.find((it: any) => it.id === id && (!type || it.type === type));
 };
 
+export const getServiceInfrastructureMapping = async (): Promise<any[]> => {
+  const serviceInfrastructureMappingPromise = getQueryData(`
+    sum by(host_name, service_name, server) (iyzitrace_span_metrics_calls_total)
+  `);
+  const serviceInfrastructureMappingData = await serviceInfrastructureMappingPromise;
+  return serviceInfrastructureMappingData.result.map((item: any) => ({
+    host_name: item.metric.host_name,
+    service_name: item.metric.service_name,
+  }));
+};
+
+const getServicesWithInfrastructure = async (filterModel: FilterParamsModel, selected: any, regionMap: Map<string, any[]>): Promise<Service[]> => {
+  // Get service-infrastructure mapping from plugin settings
+  const pluginData = await getPluginSettings();
+  const serviceMapping: ServiceInfrastructureMapping = pluginData?.serviceInfrastructureMapping || {};
+
+  // Build a lookup map for infrastructures across all regions
+  const infraLookup = new Map<string, { id: string; hostName: string; regionName: string }>();
+  
+  for (const [cloudRegion, items] of regionMap.entries()) {
+    const regionName = cloudRegion.charAt(0).toUpperCase() + cloudRegion.slice(1);
+    items.forEach((item: any) => {
+      if (item.host_name) {
+        const infraId = `infra|${regionName}|${item.host_name}`.toLowerCase();
+        infraLookup.set(item.host_name, { id: infraId, hostName: item.host_name, regionName });
+      }
+    });
+  }
+
+  const allServices = await getServicesTableData(filterModel);
+  const serviceInfraMap = await getServiceInfrastructureMapping();
+
+  allServices.forEach((srv: Service) => {
+    const selSrv = findItem(selected, srv.id, 'service');
+    if(selSrv) {
+      srv.position = selSrv.position;
+      srv.groupPosition = selSrv.groupPosition;
+      srv.groupSize = selSrv.groupSize;
+    }
+
+    // Try to find infrastructure by auto-discovery
+    const serviceInfraItem = serviceInfraMap.find((item: any) => item.service_name === srv.name);
+    if(serviceInfraItem && serviceInfraItem.host_name) {
+      const infraInfo = infraLookup.get(serviceInfraItem.host_name);
+      if(infraInfo) {
+        srv.infrastructureId = infraInfo.id;
+      }
+    }
+    
+    // Fallback to manual mapping if not found
+    if(!srv.infrastructureId && serviceMapping[srv.id]) {
+      srv.infrastructureId = serviceMapping[srv.id];
+    }
+  });
+
+  return allServices;
+};
+
 export const getRegions = async (filterModel: FilterParamsModel): Promise<Region[]> => {
   
   const regions: Region[] = [];
@@ -183,28 +257,8 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
   const data = await getInventoryHosts();
   console.log('[getRegions] data:', data);
 
-  // Get service-infrastructure mapping from plugin settings
-  const pluginData = await getPluginSettings();
-  const serviceMapping: ServiceInfrastructureMapping = pluginData?.serviceInfrastructureMapping || {};
-  
-  // Fetch all services
-  let allServices: Service[] = [];
-  try {
-    allServices = await getServicesTableData(filterModel);
-    allServices.forEach((srv: Service) => {
-      const selSrv = findItem(selected, srv.id, 'service');
-      if(selSrv) {
-        srv.position = selSrv.position;
-        srv.groupPosition = selSrv.groupPosition;
-        srv.groupSize = selSrv.groupSize;
-      }
-      // Set infrastructureId from mapping
-      srv.infrastructureId = serviceMapping[srv.id];
-    });
-  } catch (error) {
-    console.error('Error fetching services table data:', error);
-    allServices = [];
-  }
+//sum by() (iyzitrace_span_metrics_calls_total{host_name="docker-desktop"})
+
 
   // Step 1: Group by cloud_region
   const regionMap = new Map<string, any[]>();
@@ -234,6 +288,26 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
       }
       infraMap.get(hostName)!.push(item);
     });
+
+    
+
+  // Get service-infrastructure mapping from plugin settings
+  // const pluginData = await getPluginSettings();
+  // const serviceMapping: ServiceInfrastructureMapping = pluginData?.serviceInfrastructureMapping || {};
+  
+  // Fetch all services
+  let allServices: Service[] = [];
+  try {
+    allServices = await getServicesWithInfrastructure(filterModel, selected, regionMap);
+  } catch (error) {
+    console.error('Error fetching services table data:', error);
+    allServices = [];
+  }
+
+
+
+
+
 
     const infrastructures: Infrastructure[] = [];
     
@@ -580,7 +654,7 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
 //         method: operation.method,
 //         path: operation.path,
 //         sourceServiceId: svc.id,
-//         targetServiceId: operation.targetServiceId,
+//         targetServiceId: operation.a,
 //         metrics: {
 //           avgLatencyMs: operation.avg_latency_ms,
 //           p95LatencyMs: operation.p95_ms,

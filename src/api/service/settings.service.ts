@@ -28,6 +28,15 @@ export const getPluginSettings = async (): Promise<PluginSettings> => {
     return {};
   }
 };
+export const getSecurePluginSettings = async (): Promise<PluginSettings> => {
+  try {
+    const response = await getBackendSrv().get(`/api/plugins/${PLUGIN_ID}/settings`);
+    return response.secureJsonFields || {};
+  } catch (error) {
+    console.error('Error getting plugin settings:', error);
+    return {};
+  }
+};
 
 /**
  * Plugin settings'ini kaydeder

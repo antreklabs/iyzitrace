@@ -29,6 +29,7 @@ import {
 import { getRegions } from '../../api/service/service-map.service';
 import { getServicesTableData } from '../../api/service/services.service';
 import { FilterParamsModel } from '../../api/service/query.service';
+import { isAIActive } from '../../api/service/landing.service';
 import type { Region, Service, Infrastructure } from '../../api/service/interface.service';
 import type { PluginJsonData } from '../../interfaces/options';
 
@@ -515,6 +516,69 @@ const styles = {
       border-radius: 8px !important;
     }
   `,
+  
+  statusCard: css`
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  `,
+  
+  statusLeft: css`
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  `,
+  
+  statusIcon: css`
+    font-size: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `,
+  
+  statusInfo: css`
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  `,
+  
+  statusTitle: css`
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+  `,
+  
+  statusDesc: css`
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+  `,
+  
+  statusBadge: css`
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 13px;
+  `,
+  
+  statusBadgeActive: css`
+    background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+    color: white;
+  `,
+  
+  statusBadgeInactive: css`
+    background: linear-gradient(135deg, #8c8c8c 0%, #bfbfbf 100%);
+    color: white;
+  `,
 };
 
 // ==================== INTERFACES ====================
@@ -557,6 +621,7 @@ const AIPage: React.FC = () => {
   const [totalTokens, setTotalTokens] = useState(0);
   const [requestCount, setRequestCount] = useState(0);
   const [aiModel, setAiModel] = useState('deepseek/deepseek-chat');
+  const [isApiKeyConfigured, setIsApiKeyConfigured] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<any>(null);
 
@@ -564,6 +629,10 @@ const AIPage: React.FC = () => {
   useEffect(() => {
     const initializeAI = async () => {
       try {
+        // Check if API key is configured
+        const apiKeyConfigured = await isAIActive();
+        setIsApiKeyConfigured(apiKeyConfigured);
+        
         const settings = await getBackendSrv().get(`/api/plugins/${PLUGIN_ID}/settings`);
         const aiConfig = (settings?.jsonData as PluginJsonData)?.aiConfig;
         
@@ -835,6 +904,30 @@ const AIPage: React.FC = () => {
             <p className={styles.subtitle}>
               Intelligent observability insights powered by AI • Analyze, detect, and optimize in seconds
             </p>
+          </div>
+
+          {/* AI Status Card */}
+          <div className={styles.statusCard}>
+            <div className={styles.statusLeft}>
+              <div className={styles.statusIcon}>
+                <RobotOutlined style={{ 
+                  color: isApiKeyConfigured ? '#52c41a' : '#8c8c8c',
+                }} />
+              </div>
+              <div className={styles.statusInfo}>
+                <h3 className={styles.statusTitle}>AI Assistant Configuration</h3>
+                <p className={styles.statusDesc}>
+                  {isApiKeyConfigured 
+                    ? 'API key is configured and ready to use' 
+                    : 'API key is not configured. Please configure in Settings.'}
+                </p>
+              </div>
+            </div>
+            <div className={`${styles.statusBadge} ${
+              isApiKeyConfigured ? styles.statusBadgeActive : styles.statusBadgeInactive
+            }`}>
+              {isApiKeyConfigured ? 'Active' : 'Inactive'}
+            </div>
           </div>
 
           {/* Quick Actions */}

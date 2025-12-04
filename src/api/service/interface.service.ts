@@ -90,6 +90,7 @@ export interface Infrastructure {
     name: string;
     port?: string;
     type?: string;
+    targetServiceIds: string[];
     metrics?: {
         sumDurationMs?: number;
         avgDurationMs?: number;
@@ -126,7 +127,7 @@ export interface Infrastructure {
     type: string;
     method?: string;
     path?: string;
-    targetServiceId?: string;
+    // targetServiceId?: string;
     metrics: {
         avgDurationMs?: number;
         minDurationMs?: number;

@@ -11,7 +11,8 @@ import {
 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import { useNavigate } from 'react-router-dom';
-import { getIngestionStatus, getStepStatuses, type IngestionStatus, type Step } from '../../api/iyzitrace';
+import { getStepStatuses, type Step } from '../../api/iyzitrace';
+import { getAllSectionStatuses } from '../../api/service/landing.service';
 import {
   BarChartOutlined,
   FileSearchOutlined,
@@ -21,19 +22,29 @@ import {
   SettingOutlined,
   TeamOutlined,
   DeploymentUnitOutlined,
-  BuildOutlined
+  BuildOutlined,
+  RocketOutlined
 } from '@ant-design/icons';
 
-const NAV_ITEMS = [
-  { key: 'infra', title: 'Overview', icon: BuildOutlined, route: '/landing', description: 'High-level health & topology overview of your entire infrastructure and service ecosystem.' },
-  { key: 'map', title: 'Service Map', icon: DeploymentUnitOutlined, route: '/service-map', description: 'Visualize service dependencies and data flow from infrastructure to applications and services.' },
-  { key: 'services', title: 'Services', icon: BarChartOutlined, route: '/services', description: 'Monitor service performance metrics including P99 latency, error rates, and throughput.' },
-  { key: 'traces', title: 'Traces', icon: FileSearchOutlined, route: '/traces', description: 'Explore distributed traces to find slow spans, bottlenecks, and analyze request flows.' },
-  { key: 'logs', title: 'Logs', icon: ProfileOutlined, route: '/logs', description: 'Search and correlate application logs with traces for comprehensive debugging and analysis.' },
-  { key: 'views', title: 'Views', icon: ClusterOutlined, route: '/dashboards', description: 'Create and manage saved queries, custom dashboards, and curated views for your team.' },
-  { key: 'errors', title: 'Exceptions', icon: RadarChartOutlined, route: '/exceptions', description: 'Track and analyze error patterns, exception groups, and failure trends across your services.' },
-  { key: 'teams', title: 'Teams', icon: TeamOutlined, route: '/teams', description: 'Manage team members, permissions, and access controls for collaborative observability.' },
-  { key: 'settings', title: 'Settings', icon: SettingOutlined, route: '/settings', description: 'Configure data sources, plugin settings, and customize your IyziTrace workspace.' },
+type SectionKey = 'overview' | 'serviceMap' | 'services' | 'traces' | 'logs' | 'views' | 'exceptions' | 'teams' | 'settings' | 'ai';
+
+const NAV_ITEMS: Array<{
+  key: SectionKey;
+  title: string;
+  icon: any;
+  route: string;
+  description: string;
+}> = [
+  { key: 'overview', title: 'Overview', icon: BuildOutlined, route: '/a/iyzitrace-app/overview', description: 'High-level health & topology overview of your entire infrastructure and service ecosystem.' },
+  { key: 'views', title: 'Views', icon: ClusterOutlined, route: '/a/iyzitrace-app/views', description: 'Create and manage saved queries, custom dashboards, and curated views for your team.' },
+  { key: 'serviceMap', title: 'Service Map', icon: DeploymentUnitOutlined, route: '/a/iyzitrace-app/service-map', description: 'Visualize service dependencies and data flow from infrastructure to applications and services.' },
+  { key: 'services', title: 'Services', icon: BarChartOutlined, route: '/a/iyzitrace-app/services', description: 'Monitor service performance metrics including P99 latency, error rates, and throughput.' },
+  { key: 'traces', title: 'Traces', icon: FileSearchOutlined, route: '/a/iyzitrace-app/traces', description: 'Explore distributed traces to find slow spans, bottlenecks, and analyze request flows.' },
+  { key: 'logs', title: 'Logs', icon: ProfileOutlined, route: '/a/iyzitrace-app/logs', description: 'Search and correlate application logs with traces for comprehensive debugging and analysis.' },
+  { key: 'exceptions', title: 'Exceptions', icon: RadarChartOutlined, route: '/a/iyzitrace-app/exceptions', description: 'Track and analyze error patterns, exception groups, and failure trends across your services.' },
+  { key: 'ai', title: 'AI Assistant', icon: RocketOutlined, route: '/a/iyzitrace-app/ai', description: 'Get intelligent insights and recommendations powered by AI to optimize your observability workflow.' },
+  { key: 'teams', title: 'Teams', icon: TeamOutlined, route: '/a/iyzitrace-app/teams', description: 'Manage team members, permissions, and access controls for collaborative observability.' },
+  { key: 'settings', title: 'Settings', icon: SettingOutlined, route: '/a/iyzitrace-app/settings', description: 'Configure data sources, plugin settings, and customize your IyziTrace workspace.' },
 ];
 
 const STEPS_CONFIG: Omit<Step, 'done'>[] = [
@@ -106,7 +117,6 @@ const getStyles = () => ({
   `,
   menuCard: css`
     padding: 20px;
-    cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
     
@@ -114,11 +124,6 @@ const getStyles = () => ({
     flex-direction: column; /* alt alta */
     justify-content: space-between;
     gap: 8px; /* üst-alt boşluk */
-    
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
   `,
   cardRow: css`
     display: flex;
@@ -281,27 +286,21 @@ const getStyles = () => ({
 
 interface MenuCardProps {
   item: typeof NAV_ITEMS[0];
-  ingestionStatus?: IngestionStatus;
+  sectionStatuses: Record<SectionKey, boolean>;
 }
 
-const MenuCard: React.FC<MenuCardProps> = ({ item, ingestionStatus }) => {
+const MenuCard: React.FC<MenuCardProps> = ({ item, sectionStatuses }) => {
   const navigate = useNavigate();
   const styles = useStyles2(getStyles);
   
-  const isIngestionItem = ['logs', 'traces', 'services'].includes(item.key);
-  const isActive = isIngestionItem && ingestionStatus?.[item.key as keyof IngestionStatus];
+  const isActive = sectionStatuses[item.key];
   
-  const handleClick = () => {
-    navigate(item.route);
-  };
-  
-  const handleExploreClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleExploreClick = () => {
     navigate(item.route);
   };
   
   return (
-    <Card className={styles.menuCard} onClick={handleClick}>
+    <Card className={styles.menuCard}>
       {/* First Row: Icon + Title | Explore Button + Status Badge */}
       <div className={styles.cardRow}>
         <div className={styles.cardLeft}>
@@ -313,7 +312,6 @@ const MenuCard: React.FC<MenuCardProps> = ({ item, ingestionStatus }) => {
           <Button 
             size="sm" 
             variant="secondary"
-            disabled={isIngestionItem && !isActive}
             onClick={handleExploreClick}
           >
             Explore
@@ -399,7 +397,18 @@ const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const styles = useStyles2(getStyles);
   
-  const [ingestionStatus, setIngestionStatus] = useState<IngestionStatus | null>(null);
+  const [sectionStatuses, setSectionStatuses] = useState<Record<SectionKey, boolean>>({
+    overview: false,
+    serviceMap: false,
+    services: false,
+    traces: false,
+    logs: false,
+    views: false,
+    exceptions: false,
+    teams: false,
+    settings: false,
+    ai: false,
+  });
   const [steps, setSteps] = useState<Step[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -408,12 +417,12 @@ const LandingPage: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [ingestion, stepStatuses] = await Promise.all([
-          getIngestionStatus(),
+        const [statuses, stepStatuses] = await Promise.all([
+          getAllSectionStatuses(),
           getStepStatuses(),
         ]);
         
-        setIngestionStatus(ingestion);
+        setSectionStatuses(statuses);
         
         const stepsWithStatus = STEPS_CONFIG.map(step => ({
           ...step,
@@ -497,7 +506,7 @@ const LandingPage: React.FC = () => {
               <MenuCard 
                 key={item.key} 
                 item={item} 
-                ingestionStatus={ingestionStatus || undefined}
+                sectionStatuses={sectionStatuses}
               />
             ))}
           </div>

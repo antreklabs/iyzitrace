@@ -56,5 +56,6 @@ export const getQueryRangeData = async (query: string, startMs: number, endMs: n
     end,
     step,
   });
+  // console.log('getQueryRangeData response', response.data);
   return response.data;
 };

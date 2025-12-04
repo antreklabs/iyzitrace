@@ -11,7 +11,7 @@ export const DEFAULT_DEFINITIONS: Definitions = {
   service_label_name: 'service_name',
   span_label_name: 'span_name',
   type_label_name: 'type',
-  status_label_name: 'status',
+  status_label_name: 'status_code',
   exception_type_label_name: 'exception_type',
   region_label_name: 'region_name',
   infrastructure_label_name: 'infrastructure_name',
@@ -26,6 +26,20 @@ export const DEFAULT_DEFINITIONS: Definitions = {
   p95_duration_metric_name: 'http_client_duration_milliseconds_sum',
   p99_duration_metric_name: 'http_client_duration_milliseconds_sum',
   avg_duration_metric_name: 'http_client_duration_milliseconds_sum',
+  
+  duration_ms_label_name: 'duration_ms',
+  http_method_label_name: 'http_method',
+  http_url_label_name: 'http_url',
+  net_host_port_label_name: 'net_host_port',
+  client_label_name: 'client',
+  client_operation_name_label_name: 'client_operation_name',
+  server_label_name: 'server',
+  server_operation_name_label_name: 'server_operation_name',
+  service_graph_metric_name: 'iyzitrace_service_graph_request_total',
+
+  apdex_min_threshold_seconds: '100',
+  apdex_max_threshold_seconds: '400',
+  error_status_code_value: 'STATUS_CODE_ERROR',
 };
 
 const DefinitionsTable: React.FC<DefinitionsTableProps> = ({ value, onChange }) => {
@@ -103,6 +117,63 @@ const DefinitionsTable: React.FC<DefinitionsTableProps> = ({ value, onChange }) 
             width={40}
           />
         </InlineField>
+        <InlineField label="duration_ms_label_name">
+          <Input
+            value={definitions.duration_ms_label_name}
+            onChange={(e) => handleChange('duration_ms_label_name', e.currentTarget.value)}
+            width={40}
+          />
+        </InlineField>
+        <InlineField label="http_method_label_name">
+          <Input
+            value={definitions.http_method_label_name}
+            onChange={(e) => handleChange('http_method_label_name', e.currentTarget.value)}
+            width={40}
+          />
+        </InlineField>
+        <InlineField label="http_url_label_name">
+          <Input
+            value={definitions.http_url_label_name}
+            onChange={(e) => handleChange('http_url_label_name', e.currentTarget.value)}
+            width={40}
+          />
+        </InlineField>
+        <InlineField label="net_host_port_label_name">
+          <Input
+            value={definitions.net_host_port_label_name}
+            onChange={(e) => handleChange('net_host_port_label_name', e.currentTarget.value)}
+            width={40}
+          />
+        </InlineField>
+        <InlineField label="client_label_name">
+          <Input
+            value={definitions.client_label_name}
+            onChange={(e) => handleChange('client_label_name', e.currentTarget.value)}
+            width={40}
+          />
+        </InlineField>
+        <InlineField label="client_operation_name_label_name">
+          <Input
+            value={definitions.client_operation_name_label_name}
+            onChange={(e) => handleChange('client_operation_name_label_name', e.currentTarget.value)}
+            width={40}
+          />
+        </InlineField>
+        <InlineField label="server_label_name">
+          <Input
+            value={definitions.server_label_name}
+            onChange={(e) => handleChange('server_label_name', e.currentTarget.value)}
+            width={40}
+          />
+        </InlineField>
+        <InlineField label="server_operation_name_label_name">
+          <Input
+            value={definitions.server_operation_name_label_name}
+            onChange={(e) => handleChange('server_operation_name_label_name', e.currentTarget.value)}
+            width={40}
+          />
+        </InlineField>
+        
       </div>
 
       <div style={{ 
@@ -145,6 +216,35 @@ const DefinitionsTable: React.FC<DefinitionsTableProps> = ({ value, onChange }) 
           <Input
             value={definitions.bucket_duration_ms_metric_name}
             onChange={(e) => handleChange('bucket_duration_ms_metric_name', e.currentTarget.value)}
+            width={40}
+          />
+        </InlineField>
+
+        <InlineField label="service_graph_metric_name">
+          <Input
+            value={definitions.service_graph_metric_name}
+            onChange={(e) => handleChange('service_graph_metric_name', e.currentTarget.value)}
+            width={40}
+          />
+        </InlineField>
+        <InlineField label="apdex_min_threshold_seconds">
+          <Input
+            value={definitions.apdex_min_threshold_seconds}
+            onChange={(e) => handleChange('apdex_min_threshold_seconds', e.currentTarget.value)}
+            width={40}
+          />
+        </InlineField>
+        <InlineField label="apdex_max_threshold_seconds">
+          <Input
+            value={definitions.apdex_max_threshold_seconds}
+            onChange={(e) => handleChange('apdex_max_threshold_seconds', e.currentTarget.value)}
+            width={40}
+          />
+        </InlineField>
+        <InlineField label="error_status_code_value">
+          <Input
+            value={definitions.error_status_code_value}
+            onChange={(e) => handleChange('error_status_code_value', e.currentTarget.value)}
             width={40}
           />
         </InlineField>
