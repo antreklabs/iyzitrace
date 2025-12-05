@@ -32,36 +32,31 @@ processors:
     trace_statements:
       - context: span
         statements:
-          - set(attributes["type"], "http")
-            where (
-              attributes["http.request.method"] != nil or
-              attributes["http.method"] != nil or
-              attributes["url.full"] != nil or
-              attributes["server.address"] != nil
-            ) and attributes["type"] == nil
+          - set(attributes["type"], "unknown") where attributes["type"] == nil
+          - set(attributes["type"], "http") 
+            where attributes["type"] == "unknown" and (attributes["http.method"] != nil or attributes["http.request.method"] != nil or attributes["http.url"] != nil or attributes["http.protocol"] != nil)
           - set(attributes["type"], "messaging")
             where (
               attributes["messaging.system"] != nil or
               attributes["messaging.destination.name"] != nil
-            ) and attributes["type"] == nil
+            ) and attributes["type"] == "unknown"
           - set(attributes["type"], "cache")
             where (
               attributes["db.system"] != nil and attributes["db.system"] == "redis"
-            ) and attributes["type"] == nil
+            ) and attributes["type"] == "unknown"
           - set(attributes["type"], "database")
             where (
               attributes["db.system"] != nil or
               attributes["db.namespace"] != nil or
               attributes["db.operation.name"] != nil or
               attributes["db.operation"] != nil
-            ) and attributes["type"] == nil
+            ) and attributes["type"] == "unknown"
           - set(attributes["type"], "rpc")
             where (
               attributes["rpc.system"] != nil or
               attributes["rpc.service"] != nil or
               attributes["rpc.method"] != nil
-            ) and attributes["type"] == nil
-          - set(attributes["type"], "unknown") where attributes["type"] == nil
+            ) and attributes["type"] == "unknown"
 
   transform/span:
     error_mode: ignore
@@ -105,9 +100,9 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch, memory_limiter, transform/span, transform/type_classifier]
+      processors: [memory_limiter, transform/type_classifier, transform/span, batch]
       exporters: [debug, otlp, spanmetrics, servicegraph]
     metrics:
       receivers: [spanmetrics, servicegraph]
-      processors: [batch, memory_limiter]
+      processors: [memory_limiter, batch]
       exporters: [otlp/metric]
