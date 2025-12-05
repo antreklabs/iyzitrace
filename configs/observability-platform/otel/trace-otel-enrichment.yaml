@@ -32,7 +32,6 @@ processors:
     trace_statements:
       - context: span
         statements:
-          - set(attributes["type"], "unknown")
           - set(attributes["type"], "http")
             where (
               attributes["http.request.method"] != nil or
@@ -62,6 +61,7 @@ processors:
               attributes["rpc.service"] != nil or
               attributes["rpc.method"] != nil
             ) and attributes["type"] == nil
+          - set(attributes["type"], "unknown") where attributes["type"] == nil
 
   transform/span:
     error_mode: ignore
