@@ -29,7 +29,7 @@ import {
 import { getRegions } from '../../api/service/service-map.service';
 import { getServicesTableData } from '../../api/service/services.service';
 import { FilterParamsModel } from '../../api/service/query.service';
-import { isAIActive } from '../../api/service/landing.service';
+import { isAIConfigured } from '../../api/service/landing.service';
 import type { Region, Service, Infrastructure } from '../../api/service/interface.service';
 import type { PluginJsonData } from '../../interfaces/options';
 
@@ -630,7 +630,7 @@ const AIPage: React.FC = () => {
     const initializeAI = async () => {
       try {
         // Check if API key is configured
-        const apiKeyConfigured = await isAIActive();
+        const apiKeyConfigured = await isAIConfigured();
         setIsApiKeyConfigured(apiKeyConfigured);
         
         const settings = await getBackendSrv().get(`/api/plugins/${PLUGIN_ID}/settings`);

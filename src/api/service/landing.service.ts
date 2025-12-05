@@ -1,10 +1,155 @@
 // Landing Service - Check if different sections of the app have active data
+import { getBackendSrv } from '@grafana/runtime';
 import { getQueryData as getPrometheusQueryData } from '../provider/prometheus.provider';
 import { getLabels } from '../provider/prometheus.provider';
 import { getQueryData as getTempoQueryData } from '../provider/tempo.provider';
 import { getQueryData as getLokiQueryData } from '../provider/loki.provider';
 import { getPluginSettings, getSecurePluginSettings } from './settings.service';
 import { getTeams } from './team.service';
+import { getOrphanServices } from './service-map.service';
+import { FilterParamsModel } from './query.service';
+
+/**
+ * Step 1: Check if API Key is set
+ * @returns Promise<boolean> - true if API key is configured
+ */
+export const isApiKeySet = async (): Promise<boolean> => {
+  try {
+    const settings = await getSecurePluginSettings();
+    return !!(settings?.apiKey);
+  } catch (error) {
+    console.error('Error checking API key:', error);
+    return false;
+  }
+};
+
+/**
+ * Step 2: Check if Tempo datasource is added
+ * @returns Promise<boolean> - true if at least one Tempo datasource exists
+ */
+export const hasTempoDataSource = async (): Promise<boolean> => {
+  try {
+    const datasources = await getBackendSrv().get('/api/datasources');
+    return datasources.some((ds: any) => ds.type === 'tempo');
+  } catch (error) {
+    console.error('Error checking Tempo datasource:', error);
+    return false;
+  }
+};
+
+/**
+ * Step 3: Check if Loki datasource is added
+ * @returns Promise<boolean> - true if at least one Loki datasource exists
+ */
+export const hasLokiDataSource = async (): Promise<boolean> => {
+  try {
+    const datasources = await getBackendSrv().get('/api/datasources');
+    return datasources.some((ds: any) => ds.type === 'loki');
+  } catch (error) {
+    console.error('Error checking Loki datasource:', error);
+    return false;
+  }
+};
+
+/**
+ * Step 4: Check if Prometheus datasource is added
+ * @returns Promise<boolean> - true if at least one Prometheus datasource exists
+ */
+export const hasPrometheusDataSource = async (): Promise<boolean> => {
+  try {
+    const datasources = await getBackendSrv().get('/api/datasources');
+    return datasources.some((ds: any) => ds.type === 'prometheus');
+  } catch (error) {
+    console.error('Error checking Prometheus datasource:', error);
+    return false;
+  }
+};
+
+/**
+ * Step 5: Check if traces are being sent
+ * Traces is active if Tempo has any trace records
+ * @returns Promise<boolean> - true if traces have data
+ */
+export const isTracesActive = async (): Promise<boolean> => {
+  try {
+    // Query last 1 hour for any traces, limit to 1 result
+    const now = Date.now();
+    const oneHourAgo = now - (60 * 60 * 1000);
+    const data = await getTempoQueryData('{}', oneHourAgo, now, 1);
+    return data?.traces && data.traces.length > 0;
+  } catch (error) {
+    console.error('Error checking traces active status:', error);
+    return false;
+  }
+};
+
+/**
+ * Step 6: Check if logs are being sent
+ * Logs is active if Loki has any log records
+ * @returns Promise<boolean> - true if logs have data
+ */
+export const isLogsActive = async (): Promise<boolean> => {
+  try {
+    // Query last 1 hour for any logs, limit to 1 result
+    const now = Date.now();
+    const oneHourAgo = now - (60 * 60 * 1000);
+    const data = await getLokiQueryData('{job=~".+"}', oneHourAgo, now, 1, 'time', 'desc', '1m');
+    return data?.data && data.data.length > 0;
+  } catch (error) {
+    console.error('Error checking logs active status:', error);
+    return false;
+  }
+};
+
+/**
+ * Step 7: Check if metrics are being sent
+ * Metrics is active if Prometheus has any data
+ * @returns Promise<boolean> - true if metrics have data
+ */
+export const hasMetrics = async (): Promise<boolean> => {
+  try {
+    const labels = await getLabels();
+    return labels && labels.length > 0;
+  } catch (error) {
+    console.error('Error checking metrics active status:', error);
+    return false;
+  }
+};
+
+/**
+ * Step 8: Check if orphan services are assigned
+ * @returns Promise<boolean> - true if there are no orphan services (all services are assigned)
+ */
+export const hasOrphanServicesAssigned = async (): Promise<boolean> => {
+  try {
+    // Create a simple filter with default time range
+    const filterModel = new FilterParamsModel({
+      from: String(Date.now() - 86400000), // Last 24 hours
+      to: String(Date.now()),
+    });
+    
+    const orphanServices = await getOrphanServices(filterModel);
+    // If there are no orphan services, it means all services are assigned
+    return orphanServices.length === 0;
+  } catch (error) {
+    console.error('Error checking orphan services assignment:', error);
+    return false;
+  }
+};
+
+/**
+ * Step 9: Check if AI Assistant is configured
+ * @returns Promise<boolean> - true if AI API key is configured
+ */
+export const isAIConfigured = async (): Promise<boolean> => {
+  try {
+    const settings = await getPluginSettings();
+    return !!(settings?.aiConfig?.apiKey);
+  } catch (error) {
+    console.error('Error checking AI configuration:', error);
+    return false;
+  }
+};
 
 /**
  * Check if Overview section is active
@@ -47,42 +192,6 @@ export const isServicesActive = async (): Promise<boolean> => {
     return labels && labels.length > 0;
   } catch (error) {
     console.error('Error checking services active status:', error);
-    return false;
-  }
-};
-
-/**
- * Check if Traces section is active
- * Traces is active if Tempo has any trace records
- * @returns Promise<boolean> - true if traces have data
- */
-export const isTracesActive = async (): Promise<boolean> => {
-  try {
-    // Query last 1 hour for any traces, limit to 1 result
-    const now = Date.now();
-    const oneHourAgo = now - (60 * 60 * 1000);
-    const data = await getTempoQueryData('{}', oneHourAgo, now, 1);
-    return data?.traces && data.traces.length > 0;
-  } catch (error) {
-    console.error('Error checking traces active status:', error);
-    return false;
-  }
-};
-
-/**
- * Check if Logs section is active
- * Logs is active if Loki has any log records
- * @returns Promise<boolean> - true if logs have data
- */
-export const isLogsActive = async (): Promise<boolean> => {
-  try {
-    // Query last 1 hour for any logs, limit to 1 result
-    const now = Date.now();
-    const oneHourAgo = now - (60 * 60 * 1000);
-    const data = await getLokiQueryData('{job=~".+"}', oneHourAgo, now, 1, 'time', 'desc', '1m');
-    return data?.data && data.data.length > 0;
-  } catch (error) {
-    console.error('Error checking logs active status:', error);
     return false;
   }
 };
@@ -149,14 +258,71 @@ export const isSettingsActive = async (): Promise<boolean> => {
   }
 };
 
-export const isAIActive = async (): Promise<boolean> => {
+
+/**
+ * Get setup step statuses for landing page
+ * @returns Promise<object> - Object with all setup step statuses
+ */
+export const getSetupStepStatuses = async (): Promise<{
+  apiKey: boolean;
+  tempo: boolean;
+  loki: boolean;
+  prometheus: boolean;
+  traces: boolean;
+  logs: boolean;
+  metrics: boolean;
+  orphanServices: boolean;
+  ai: boolean;
+}> => {
   try {
-    const settings = await getPluginSettings();
-    // Check if AI API key is configured
-    return !!(settings?.aiConfig?.apiKey);
+    // Run all checks in parallel for better performance
+    const [
+      apiKey,
+      tempo,
+      loki,
+      prometheus,
+      traces,
+      logs,
+      metrics,
+      orphanServices,
+      ai,
+    ] = await Promise.all([
+      isApiKeySet(),
+      hasTempoDataSource(),
+      hasLokiDataSource(),
+      hasPrometheusDataSource(),
+      isTracesActive(),
+      isLogsActive(),
+      hasMetrics(),
+      hasOrphanServicesAssigned(),
+      isAIConfigured(),
+    ]);
+
+    return {
+      apiKey,
+      tempo,
+      loki,
+      prometheus,
+      traces,
+      logs,
+      metrics,
+      orphanServices,
+      ai,
+    };
   } catch (error) {
-    console.error('Error checking AI active status:', error);
-    return false;
+    console.error('Error getting setup step statuses:', error);
+    // Return all false on error
+    return {
+      apiKey: false,
+      tempo: false,
+      loki: false,
+      prometheus: false,
+      traces: false,
+      logs: false,
+      metrics: false,
+      orphanServices: false,
+      ai: false,
+    };
   }
 };
 
@@ -199,7 +365,7 @@ export const getAllSectionStatuses = async (): Promise<{
       isExceptionsActive(),
       isTeamsActive(),
       isSettingsActive(),
-      isAIActive(),
+      isAIConfigured(),
     ]);
 
     return {

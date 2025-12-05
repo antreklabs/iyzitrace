@@ -16,8 +16,7 @@ import ServiceCard from '../../components/overview/overview.card.Service';
 import OperationCard from '../../components/overview/overview.card.Operation';
 import { FilterParamsModel } from '../../api/service/query.service';
 import BaseContainerComponent, { FetchedModel } from '../base.container';
-import { TableColumn, getTableColumns } from '../../api/service/table.services';
-import { columns as columnUtils } from '../../api/service/table.services';
+import { TableColumn, getTableColumns, columns as columnUtils } from '../../api/service/table.services';
 import BaseFilter from '../base.filter';
 import BaseTable from '../base.table';
 import HorizontalScrollContainer from '../../components/core/horizontal-scroll-container.component';
@@ -50,9 +49,10 @@ const OverviewContainer: React.FC = () => {
       getOrphanServices(filterModel)
     ]);
     setRegions(regions);
-    console.log('[OverviewContainer] regions:', regions);
+    // console.log('[OverviewContainer] regions:', regions);
     setOrphanServices(orphans);
     const infrastructures = (regions || []).flatMap((r: Region) => r.infrastructures || []);
+    // console.log('[OverviewContainer] infrastructures:', infrastructures);
     setInfraLevelData(infrastructures);
     setColumnInDetail(infrastructures);
 
@@ -64,7 +64,7 @@ const OverviewContainer: React.FC = () => {
     if(columns) {
       return;
     }
-    const cols = getTableColumns(data, 'applications', 'services', 'operations')
+    const cols = getTableColumns(data, 'services', 'operations')
     // Example: rename and reorder Root columns before hiding
     let root = columnUtils.renameColumns(cols.RootColumns, {
       osversion: 'OS Version',
@@ -72,14 +72,46 @@ const OverviewContainer: React.FC = () => {
       cpupercentage: 'CPU Usage',
       memorypercentage: 'Memory Usage'
     });
-    root = columnUtils.reorderColumns(root, ['region','name', 'osversion', 'ip', 'type']);
+    root = columnUtils.reorderColumns(root, ['region','name', 'osversion', 'ip', 'type', 'status.value']);
+    let l1 = columnUtils.renameColumns(cols.L1Columns ?? [], {
+      metricsavgdurationms: 'Avg',
+      metricsmindurationms: 'Min',
+      metricsmaxdurationms: 'Max',
+      metricssumdurationms: 'Sum',
+      metricsp50durationms: 'P50',
+      metricsp75durationms: 'P75',
+      metricsp90durationms: 'P90',
+      metricsp95durationms: 'P95',
+      metricsp99durationms: 'P99',
+      metricscallscount: 'Calls',
+      metricscallspersecond: 'Calls/s',
+      metricsoperationcounts: 'Ops',
+    });
+    l1 = columnUtils.reorderColumns(l1, ['name', 'type', 'port']);
+
+    let l2 = columnUtils.renameColumns(cols.L2Columns ?? [], {
+      metricsavgdurationms: 'Avg',
+      metricsmindurationms: 'Min',
+      metricsmaxdurationms: 'Max',
+      metricssumdurationms: 'Sum',
+      metricsp50durationms: 'P50',
+      metricsp75durationms: 'P75',
+      metricsp90durationms: 'P90',
+      metricsp95durationms: 'P95',
+      metricsp99durationms: 'P99',
+      metricscallscount: 'Calls',
+      metricscallspersecond: 'Calls/s',
+      metricsoperationcounts: 'Ops',
+    });
+    l2 = columnUtils.reorderColumns(l2, ['name', 'type', 'method', 'path']);
 
     const hiddenCols: TableColumn = {
-      RootColumns: columnUtils.hideColumns(root, ['id', 'cpu.usage', 'cpu.capacity', 'memory.usage', 'memory.capacity']),
-      L1Columns: columnUtils.hideColumns(cols.L1Columns ?? [], ['id', 'infrastructureId']),
-      L2Columns: columnUtils.hideColumns(cols.L2Columns ?? [], ['id', 'applicationId']),
-      L3Columns: columnUtils.hideColumns(cols.L3Columns ?? [], ['id', 'serviceId'])
+      RootColumns: columnUtils.hideColumns(root, ['id', 'cpu.usage', 'cpu.capacity', 'memory.usage', 'memory.capacity', 'regionId']),
+      L1Columns: columnUtils.hideColumns(l1, ['id', 'infrastructureId']),
+      L2Columns: columnUtils.hideColumns(l2, ['id', 'serviceId'])
     };
+
+    // const cols = getTableColumns(data, 'services', 'operations')
 
     setColumns(hiddenCols);
   };
@@ -341,7 +373,7 @@ const OverviewContainer: React.FC = () => {
         title="Regions" 
         icon={<CloudOutlined style={{ color: '#1890ff' }} />}
         searchable={true}
-        searchPlaceholder="Search regions..."
+        searchPlaceholder=" Search regions..."
         getSearchableText={(child) => {
           const props = child.props as any;
           // Child is a div wrapper, get the RegionCard inside
@@ -371,7 +403,7 @@ const OverviewContainer: React.FC = () => {
         title="Infrastructures" 
         icon={<CloudServerOutlined style={{ color: '#1890ff' }} />}
         searchable={true}
-        searchPlaceholder="Search infrastructures..."
+        searchPlaceholder=" Search infrastructures..."
         getSearchableText={(child) => {
           const props = child.props as any;
           // Child is a div wrapper, get the InfrastructureCard inside
@@ -416,7 +448,7 @@ const OverviewContainer: React.FC = () => {
         <HorizontalScrollContainer 
           title="Orphan Services (Drag to Infrastructure)" 
           icon={<SettingOutlined style={{ color: '#8c8c8c' }} />}
-          searchPlaceholder="Search orphan services..."
+          searchPlaceholder=" Search orphan services..."
           searchable={true}
           getSearchableText={(child) => {
             const props = child.props as any;
@@ -463,7 +495,7 @@ const OverviewContainer: React.FC = () => {
           title="Services" 
           icon={<SettingOutlined style={{ color: '#1890ff' }} />}
           searchable={true}
-          searchPlaceholder="Search services..."
+          searchPlaceholder=" Search services..."
           searchQuery={servicesSearchQuery}
           onSearchChange={setServicesSearchQuery}
         >
@@ -491,7 +523,7 @@ const OverviewContainer: React.FC = () => {
           title="Operations" 
           icon={<UnorderedListOutlined style={{ color: '#1890ff' }} />}
           searchable={true}
-          searchPlaceholder="Search operations..."
+          searchPlaceholder=" Search operations..."
           searchQuery={operationsSearchQuery}
           onSearchChange={setOperationsSearchQuery}
         >
@@ -516,9 +548,8 @@ const OverviewContainer: React.FC = () => {
         title="Overview"
         showSearch={true}
         searchPlaceholder="Search..."
-        l1Key="applications"
-        l2Key="services"
-        l3Key="operations"
+        l1Key="services"
+        l2Key="operations"
         />
       )}
       <Modal

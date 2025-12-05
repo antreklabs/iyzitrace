@@ -11,8 +11,7 @@ import {
 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import { useNavigate } from 'react-router-dom';
-import { getStepStatuses, type Step } from '../../api/iyzitrace';
-import { getAllSectionStatuses } from '../../api/service/landing.service';
+import { getAllSectionStatuses, getSetupStepStatuses } from '../../api/service/landing.service';
 import {
   BarChartOutlined,
   FileSearchOutlined,
@@ -23,7 +22,8 @@ import {
   TeamOutlined,
   DeploymentUnitOutlined,
   BuildOutlined,
-  RocketOutlined
+  RocketOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons';
 
 type SectionKey = 'overview' | 'serviceMap' | 'services' | 'traces' | 'logs' | 'views' | 'exceptions' | 'teams' | 'settings' | 'ai';
@@ -47,15 +47,52 @@ const NAV_ITEMS: Array<{
   { key: 'settings', title: 'Settings', icon: SettingOutlined, route: '/a/iyzitrace-app/settings', description: 'Configure data sources, plugin settings, and customize your IyziTrace workspace.' },
 ];
 
-const STEPS_CONFIG: Omit<Step, 'done'>[] = [
-  { key: 'workspace', title: 'Set up your workspace', description: 'Configure your IyziTrace workspace and basic settings.', route: '/settings', skippable: false },
-  { key: 'dataSource', title: 'Add your first data source', description: 'Connect Tempo, Loki, or Prometheus to start collecting data.', route: '/settings', skippable: true },
-  { key: 'logs', title: 'Send your logs', description: 'Configure log collection from your applications and infrastructure.', route: '/logs', skippable: true },
-  { key: 'traces', title: 'Send your traces', description: 'Set up distributed tracing to track requests across services.', route: '/traces', skippable: true },
-  { key: 'metrics', title: 'Send your metrics', description: 'Collect application and infrastructure metrics for monitoring.', route: '/services', skippable: true },
-  { key: 'savedViews', title: 'Setup Saved Views', description: 'Save frequently used queries and views for your team.', route: '/views', skippable: true },
-  { key: 'dashboards', title: 'Setup Dashboards', description: 'Create custom dashboards to visualize your observability data.', route: '/views', skippable: true },
-];
+interface SetupStep {
+  key: string;
+  title: string;
+  description: string;
+  route: string;
+  done: boolean;
+}
+
+const STEPS_INFO: Record<string, { description: string; learnMoreUrl: string }> = {
+  apiKey: {
+    description: 'Configure your IyziTrace API key to enable secure communication between your services and the observability platform.',
+    learnMoreUrl: 'https://beta.iyzitrace.com/product',
+  },
+  tempo: {
+    description: 'Add Tempo datasource to collect and visualize distributed traces from your microservices.',
+    learnMoreUrl: 'https://beta.iyzitrace.com/product',
+  },
+  loki: {
+    description: 'Add Loki datasource to aggregate and query logs from all your applications and infrastructure.',
+    learnMoreUrl: 'https://beta.iyzitrace.com/product',
+  },
+  prometheus: {
+    description: 'Add Prometheus datasource to collect metrics and monitor the health and performance of your services.',
+    learnMoreUrl: 'https://beta.iyzitrace.com/product',
+  },
+  traces: {
+    description: 'Start sending distributed traces to track request flows across your microservices architecture.',
+    learnMoreUrl: 'https://beta.iyzitrace.com/product',
+  },
+  logs: {
+    description: 'Begin collecting logs from your applications to enable powerful search, filtering, and correlation with traces.',
+    learnMoreUrl: 'https://beta.iyzitrace.com/product',
+  },
+  metrics: {
+    description: 'Send metrics data to monitor service performance, resource usage, and system health in real-time.',
+    learnMoreUrl: 'https://beta.iyzitrace.com/product',
+  },
+  orphanServices: {
+    description: 'Map orphan services to their infrastructure hosts to get a complete view of your service topology.',
+    learnMoreUrl: 'https://beta.iyzitrace.com/product',
+  },
+  ai: {
+    description: 'Configure AI Assistant with your API key to get intelligent insights and optimization recommendations.',
+    learnMoreUrl: 'https://beta.iyzitrace.com/product',
+  },
+};
 
 const getStyles = () => ({
   container: css`
@@ -201,8 +238,80 @@ const getStyles = () => ({
     align-items: center;
     gap: 12px;
     padding: 8px 0;
-    cursor: pointer;
     position: relative;
+  `,
+  infoButtonWrapper: css`
+    position: relative;
+  `,
+  infoButton: css`
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #8c8c8c;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      color: #1890ff;
+      background: rgba(24, 144, 255, 0.1);
+    }
+  `,
+  tooltip: css`
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: 12px;
+    background: #1f1f1f;
+    border: 1px solid #404040;
+    border-radius: 8px;
+    padding: 16px;
+    min-width: 320px;
+    max-width: 400px;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    pointer-events: auto;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 8px solid #404040;
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+    }
+    
+    &::before {
+      content: '';
+      position: absolute;
+      right: -7px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 7px solid #1f1f1f;
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
+    }
+  `,
+  tooltipDescription: css`
+    color: #8c8c8c;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+  `,
+  tooltipActions: css`
+    display: flex;
+    justify-content: flex-end;
   `,
   stepIcon: css`
     width: 20px;
@@ -330,14 +439,13 @@ const MenuCard: React.FC<MenuCardProps> = ({ item, sectionStatuses }) => {
 };
 
 interface StepRowProps {
-  step: Step;
-  onGetStarted: (step: Step) => void;
-  onSkip: (step: Step) => void;
+  step: SetupStep;
 }
 
-const StepRow: React.FC<StepRowProps> = ({ step, onGetStarted, onSkip }) => {
+const StepRow: React.FC<StepRowProps> = ({ step }) => {
   const styles = useStyles2(getStyles);
-  const [showHoverInfo, setShowHoverInfo] = useState(false);
+  const navigate = useNavigate();
+  const [showTooltip, setShowTooltip] = useState(false);
   
   const getIconClass = () => {
     if (step.done) return 'done';
@@ -349,12 +457,16 @@ const StepRow: React.FC<StepRowProps> = ({ step, onGetStarted, onSkip }) => {
     return '';
   };
   
+  const stepInfo = STEPS_INFO[step.key];
+  
+  const handleGetStarted = () => {
+    if (step.route) {
+      navigate(step.route);
+    }
+  };
+  
   return (
-    <div 
-      className={styles.stepRow}
-      onMouseEnter={() => setShowHoverInfo(true)}
-      onMouseLeave={() => setShowHoverInfo(false)}
-    >
+    <div className={styles.stepRow}>
       <div className={`${styles.stepIcon} ${getIconClass()}`}>
         {getIconName() && <Icon name={getIconName() as any} size="sm" />}
       </div>
@@ -365,28 +477,33 @@ const StepRow: React.FC<StepRowProps> = ({ step, onGetStarted, onSkip }) => {
         </div>
       </div>
       
-      {showHoverInfo && !step.done && (
-        <div className={styles.hoverInfo}>
-          <div className={styles.hoverDescription}>
-            {step.description}
+      {!step.done && (
+        <div 
+          className={styles.infoButtonWrapper}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+        >
+          <button className={styles.infoButton}>
+            <InfoCircleOutlined style={{ fontSize: 16 }} />
+          </button>
+          
+          {showTooltip && (
+            <div className={styles.tooltip}>
+              <div className={styles.tooltipDescription}>
+                {stepInfo?.description}
           </div>
-          <div className={styles.hoverActions}>
-            <Button size="sm" onClick={() => onGetStarted(step)}>
+              
+              <div className={styles.tooltipActions}>
+                <Button 
+                  size="sm"
+                  variant="primary" 
+                  onClick={handleGetStarted}
+                >
               Get Started
             </Button>
-            {step.skippable && (
-              <a 
-                href="#" 
-                className={styles.skipLink}
-                onClick={(e) => {
-                  e.preventDefault();
-                  onSkip(step);
-                }}
-              >
-                Skip for now
-              </a>
-            )}
-          </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -409,7 +526,7 @@ const LandingPage: React.FC = () => {
     settings: false,
     ai: false,
   });
-  const [steps, setSteps] = useState<Step[]>([]);
+  const [steps, setSteps] = useState<SetupStep[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -419,17 +536,79 @@ const LandingPage: React.FC = () => {
         setLoading(true);
         const [statuses, stepStatuses] = await Promise.all([
           getAllSectionStatuses(),
-          getStepStatuses(),
+          getSetupStepStatuses(),
         ]);
         
         setSectionStatuses(statuses);
         
-        const stepsWithStatus = STEPS_CONFIG.map(step => ({
-          ...step,
-          done: stepStatuses[step.key],
-        }));
+        // Create steps array based on new structure
+        const setupSteps: SetupStep[] = [
+          { 
+            key: 'apiKey', 
+            title: 'Set Api Key', 
+            description: 'Configure your API key in settings',
+            route: '/a/iyzitrace-app/settings',
+            done: stepStatuses.apiKey 
+          },
+          { 
+            key: 'tempo', 
+            title: 'Add Tempo Datasource', 
+            description: 'Add Tempo datasource for traces',
+            route: '/connections/datasources',
+            done: stepStatuses.tempo 
+          },
+          { 
+            key: 'loki', 
+            title: 'Add Loki Datasource', 
+            description: 'Add Loki datasource for logs',
+            route: '/connections/datasources',
+            done: stepStatuses.loki 
+          },
+          { 
+            key: 'prometheus', 
+            title: 'Add Prometheus Datasource', 
+            description: 'Add Prometheus datasource for metrics',
+            route: '/connections/datasources',
+            done: stepStatuses.prometheus 
+          },
+          { 
+            key: 'traces', 
+            title: 'Send Traces', 
+            description: 'Start sending trace data',
+            route: '/a/iyzitrace-app/traces',
+            done: stepStatuses.traces 
+          },
+          { 
+            key: 'logs', 
+            title: 'Send Logs', 
+            description: 'Start sending log data',
+            route: '/a/iyzitrace-app/logs',
+            done: stepStatuses.logs 
+          },
+          { 
+            key: 'metrics', 
+            title: 'Send Metrics', 
+            description: 'Start sending metrics data',
+            route: '/a/iyzitrace-app/services',
+            done: stepStatuses.metrics 
+          },
+          { 
+            key: 'orphanServices', 
+            title: 'Assign Orphan Services', 
+            description: 'Map services to infrastructure',
+            route: '/a/iyzitrace-app/overview',
+            done: stepStatuses.orphanServices 
+          },
+          { 
+            key: 'ai', 
+            title: 'Setup AI Assistant', 
+            description: 'Configure AI Assistant',
+            route: '/a/iyzitrace-app/settings',
+            done: stepStatuses.ai 
+          },
+        ];
         
-        setSteps(stepsWithStatus);
+        setSteps(setupSteps);
       } catch (err) {
         setError('Failed to load workspace data');
         console.error('Error fetching data:', err);
@@ -440,17 +619,6 @@ const LandingPage: React.FC = () => {
     
     fetchData();
   }, []);
-  
-  const handleGetStarted = (step: Step) => {
-    if (step.route) {
-      navigate(step.route);
-    }
-  };
-  
-  const handleSkip = (step: Step) => {
-    // In a real app, this would call an API to mark the step as skipped
-    // console.log('Skipped step:', step.key);
-  };
   
   const handleConnectDataSource = () => {
     navigate('/connections/datasources');
@@ -538,17 +706,8 @@ const LandingPage: React.FC = () => {
                 <StepRow
                   key={step.key}
                   step={step}
-                  onGetStarted={handleGetStarted}
-                  onSkip={handleSkip}
                 />
               ))}
-            </div>
-            
-            {/* Skip Link - Right Aligned */}
-            <div className={styles.laterLink}>
-              <a href="#" className={styles.laterLinkText}>
-                I'll do this later
-              </a>
             </div>
           </Card>
         </div>

@@ -70,52 +70,116 @@ export const getInventoryHosts = async () => {
     targetInfoPromise,
   ]);
 
+  // Build maps for joining
   const cpuMap = buildMap(cpuData);
   const memUsedMap = buildMap(memUsedData);
   const memTotalMap = buildMap(memTotalData);
   const inventoryBaseMap = buildMap(inventoryBaseData);
   const targetInfoMap = buildMap(targetInfoData);
-  const statusMap = buildMap(statusData);
-
-  // create a unique key array from all maps
-  const allKeys = new Set<string>();
-  [statusMap, cpuMap, memUsedMap, memTotalMap, inventoryBaseMap, targetInfoMap].forEach(map => {
-    map.forEach((_, key) => allKeys.add(key));
+  
+  // For process_status, we need multiple records per host (1:N)
+  // Build a map of arrays instead of single values
+  const statusArrayMap = new Map<string, PromVectorSample[]>();
+  statusData.result.forEach((s: PromVectorSample) => {
+    const key = makeKey(s.metric);
+    if (!statusArrayMap.has(key)) {
+      statusArrayMap.set(key, []);
+    }
+    statusArrayMap.get(key)!.push(s);
   });
-  const keyArray = Array.from(allKeys);
+  
+  console.log('[getInventoryHosts] statusArrayMap entries:', 
+    Array.from(statusArrayMap.entries()).map(([key, values]) => ({ key, count: values.length }))
+  );
 
-  // Base olarak status + metadata'yı kullanıyoruz
-  const rows = keyArray.map((key) => {
+  // Base: __inv_base (should be 4 records)
+  // Use only keys from inventoryBaseMap as the base
+  const baseKeys = Array.from(inventoryBaseMap.keys());
+  console.log('[getInventoryHosts] Base keys from __inv_base:', baseKeys);
+
+  // Process each base key and LEFT JOIN with process_status
+  const rows: any[] = [];
+  
+  baseKeys.forEach((key) => {
+    const inventoryBaseSample = inventoryBaseMap.get(key);
+    if (!inventoryBaseSample) return;
+
+    // Extract cloud_region and host_name from base
+    const cloud_region = inventoryBaseSample.metric.cloud_region;
+    const host_name = inventoryBaseSample.metric.host_name;
+
+    // LEFT JOIN: cpu, memory (1:1 based on cloud_region:host_name)
     const cpuSample = cpuMap.get(key);
     const memUsedSample = memUsedMap.get(key);
     const memTotalSample = memTotalMap.get(key);
-    const inventoryBaseSample = inventoryBaseMap.get(key);
+    
+    // LEFT JOIN: target_info (1:1, take first match)
     const targetInfoSample = targetInfoMap.get(key);
-    const statusSample = statusMap.get(key);
 
-    return {
-      // labels
-      cloud_region: inventoryBaseSample.metric.cloud_region,
-      host_name: inventoryBaseSample.metric.host_name,
-      host_arch: targetInfoSample.metric.host_arch,
-      host_ip: targetInfoSample.metric.host_ip,
-      host_mac: targetInfoSample.metric.host_mac,
-      os_description: targetInfoSample.metric.os_description,
-      os_type: targetInfoSample.metric.os_type,
-      infrastructureType: statusSample.metric.infrastructureType,
-      process_executable_name: statusSample.metric.process_executable_name,
-      process_pid: statusSample.metric.process_pid,
-      status: statusSample.metric.status,
+    // LEFT JOIN: inventory_process_status (1:N based on cloud_region:host_name)
+    // Get all process_status entries for this host
+    const matchingProcesses = statusArrayMap.get(key) || [];
+    console.log(`[getInventoryHosts] Host ${key}: ${matchingProcesses.length} processes found`);
 
-      // values
-      cpuUsagePercent: parseValue(cpuSample),
-      memoryUsedGB: parseValue(memUsedSample),
-      memoryTotalGB: parseValue(memTotalSample),
+    // If no matching processes, create one row with null process info
+    if (matchingProcesses.length === 0) {
+      rows.push({
+        // labels from base
+        cloud_region: cloud_region,
+        host_name: host_name,
+        
+        // labels from target_info (can be null)
+        host_arch: targetInfoSample?.metric.host_arch || null,
+        host_ip: targetInfoSample?.metric.host_ip || null,
+        host_mac: targetInfoSample?.metric.host_mac || null,
+        os_description: targetInfoSample?.metric.os_description || null,
+        os_type: targetInfoSample?.metric.os_type || null,
+        
+        // labels from process_status (null if not exists)
+        infrastructureType: null,
+        process_executable_name: null,
+        process_pid: null,
+        status: null,
+        statusMetricValue: null,
 
-      // istersen status metric value'sini de ekleyebilirsin
-      statusMetricValue: Number(statusSample.value[1]),
-    };
+        // values from metrics
+        cpuUsagePercent: cpuSample ? parseValue(cpuSample) : null,
+        memoryUsedGB: memUsedSample ? parseValue(memUsedSample) : null,
+        memoryTotalGB: memTotalSample ? parseValue(memTotalSample) : null,
+      });
+    } else {
+      // Create one row for each matching process
+      matchingProcesses.forEach((statusSample) => {
+        rows.push({
+          // labels from base
+          cloud_region: cloud_region,
+          host_name: host_name,
+          
+          // labels from target_info (can be null)
+          host_arch: targetInfoSample?.metric.host_arch || null,
+          host_ip: targetInfoSample?.metric.host_ip || null,
+          host_mac: targetInfoSample?.metric.host_mac || null,
+          os_description: targetInfoSample?.metric.os_description || null,
+          os_type: targetInfoSample?.metric.os_type || null,
+          
+          // labels from process_status
+          infrastructureType: statusSample.metric.infrastructureType || null,
+          process_executable_name: statusSample.metric.process_executable_name || null,
+          process_pid: statusSample.metric.process_pid || null,
+          status: statusSample.metric.status || null,
+          statusMetricValue: statusSample.value ? Number(statusSample.value[1]) : null,
+
+          // values from metrics
+          cpuUsagePercent: cpuSample ? parseValue(cpuSample) : null,
+          memoryUsedGB: memUsedSample ? parseValue(memUsedSample) : null,
+          memoryTotalGB: memTotalSample ? parseValue(memTotalSample) : null,
+        });
+      });
+    }
   });
+
+  console.log('[getInventoryHosts] Final rows count:', rows.length);
+  console.log('[getInventoryHosts] rows:', rows);
 
   return rows;
 };
@@ -253,9 +317,9 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
   
   const regions: Region[] = [];
   const selected = await getSelectedViewData('service-map');
-  console.log('[getRegions] selected:', selected);
+  // console.log('[getRegions] selected:', selected);
   const data = await getInventoryHosts();
-  console.log('[getRegions] data:', data);
+  // console.log('[getRegions] data:', data);
 
 //sum by() (iyzitrace_span_metrics_calls_total{host_name="docker-desktop"})
 
@@ -442,7 +506,7 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
       infrastructures: infrastructures,
     });
   }
-  console.log('[getRegions] regions:', regions);
+  // console.log('[getRegions] regions:', regions);
   return regions;
 };
 

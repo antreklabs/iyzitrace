@@ -108,7 +108,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
   // const serviceSpanRelation = await getServiceMapQueryDataByServiceSpanRelation(QueryType.SERVICE_SPAN_RELATION, filterParamsModel, definitions);
   // console.log('serviceSpanRelation', serviceSpanRelation);
   const serviceRelation = await getServiceMapQueryDataByServiceSpanRelation(QueryType.SERVICE_RELATION, filterParamsModel, definitions);
-  console.log('serviceRelation', serviceRelation);
+  // console.log('serviceRelation', serviceRelation);
   let servicesWithOperations: Service[] = [];
 
   const serviceSpanMap = new Map<string, Set<string>>();

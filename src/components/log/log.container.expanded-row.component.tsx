@@ -161,10 +161,10 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
                   }
 
                   return (
-                    <div key={key} className="log-expanded-row-attribute-item">
-                      <div className="log-expanded-row-attribute-key">{key}</div>
+                  <div key={key} className="log-expanded-row-attribute-item">
+                    <div className="log-expanded-row-attribute-key">{key}</div>
                       <div className="log-expanded-row-attribute-value">{content}</div>
-                    </div>
+                  </div>
                   );
                 })}
             </div>
