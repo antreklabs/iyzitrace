@@ -243,3 +243,5 @@ ssh $SERVER_USER@$SERVER_HOST 'docker system prune -af'
    docker compose -f docker-compose.yaml up -d
    docker compose -f configs/observability-platform/docker-compose.yml up -d
    docker compose -f configs/opentelemetry-demo/docker-compose.yml up -d
+
+   pnpm run dev     

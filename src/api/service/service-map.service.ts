@@ -88,14 +88,14 @@ export const getInventoryHosts = async () => {
     statusArrayMap.get(key)!.push(s);
   });
   
-  console.log('[getInventoryHosts] statusArrayMap entries:', 
-    Array.from(statusArrayMap.entries()).map(([key, values]) => ({ key, count: values.length }))
-  );
+  // console.log('[getInventoryHosts] statusArrayMap entries:', 
+  //   Array.from(statusArrayMap.entries()).map(([key, values]) => ({ key, count: values.length }))
+  // );
 
   // Base: __inv_base (should be 4 records)
   // Use only keys from inventoryBaseMap as the base
   const baseKeys = Array.from(inventoryBaseMap.keys());
-  console.log('[getInventoryHosts] Base keys from __inv_base:', baseKeys);
+  // console.log('[getInventoryHosts] Base keys from __inv_base:', baseKeys);
 
   // Process each base key and LEFT JOIN with process_status
   const rows: any[] = [];
@@ -119,7 +119,7 @@ export const getInventoryHosts = async () => {
     // LEFT JOIN: inventory_process_status (1:N based on cloud_region:host_name)
     // Get all process_status entries for this host
     const matchingProcesses = statusArrayMap.get(key) || [];
-    console.log(`[getInventoryHosts] Host ${key}: ${matchingProcesses.length} processes found`);
+    // console.log(`[getInventoryHosts] Host ${key}: ${matchingProcesses.length} processes found`);
 
     // If no matching processes, create one row with null process info
     if (matchingProcesses.length === 0) {
@@ -178,8 +178,8 @@ export const getInventoryHosts = async () => {
     }
   });
 
-  console.log('[getInventoryHosts] Final rows count:', rows.length);
-  console.log('[getInventoryHosts] rows:', rows);
+  // console.log('[getInventoryHosts] Final rows count:', rows.length);
+  // console.log('[getInventoryHosts] rows:', rows);
 
   return rows;
 };
