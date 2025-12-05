@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Modal } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { Modal, Tag } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { 
   CloudServerOutlined, 
@@ -16,12 +17,15 @@ import ServiceCard from '../../components/overview/overview.card.Service';
 import OperationCard from '../../components/overview/overview.card.Operation';
 import { FilterParamsModel } from '../../api/service/query.service';
 import BaseContainerComponent, { FetchedModel } from '../base.container';
-import { TableColumn, getTableColumns, columns as columnUtils } from '../../api/service/table.services';
+import { TableColumn, getTableColumns, columns as columnUtils, ColumnItem } from '../../api/service/table.services';
 import BaseFilter from '../base.filter';
 import BaseTable from '../base.table';
 import HorizontalScrollContainer from '../../components/core/horizontal-scroll-container.component';
+import { getOperationTypeColor } from '../../api/service/services.service';
+
 
 const OverviewContainer: React.FC = () => {
+  const navigate = useNavigate();
   const [regions, setRegions] = useState<Region[]>([]);
   const [orphanServices, setOrphanServices] = useState<Service[]>([]);
   const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null);
@@ -88,6 +92,18 @@ const OverviewContainer: React.FC = () => {
       metricsoperationcounts: 'Ops',
     });
     l1 = columnUtils.reorderColumns(l1, ['name', 'type', 'port']);
+    const serviceTypeColumn = l1.find((col: ColumnItem) => col.key === 'type');
+    if (serviceTypeColumn) {
+      serviceTypeColumn.render = (value: string) => {
+        return <Tag color={getOperationTypeColor(value)}>{value}</Tag>;
+      };
+    }
+    const serviceNameColumn = l1.find((col: ColumnItem) => col.key === 'name');
+    if (serviceNameColumn) {
+      serviceNameColumn.render = (value: string) => {
+        return <span style={{ color: '#1890ff', cursor: 'pointer' }} onClick={() => navigate(`/a/iyzitrace-app/services/${value}`)}>{value}</span>;
+      };
+    }
 
     let l2 = columnUtils.renameColumns(cols.L2Columns ?? [], {
       metricsavgdurationms: 'Avg',
@@ -104,6 +120,12 @@ const OverviewContainer: React.FC = () => {
       metricsoperationcounts: 'Ops',
     });
     l2 = columnUtils.reorderColumns(l2, ['name', 'type', 'method', 'path']);
+    const operationTypeColumn = l2.find((col: ColumnItem) => col.key === 'type');
+    if (operationTypeColumn) {
+      operationTypeColumn.render = (value: string) => {
+        return <Tag color={getOperationTypeColor(value)}>{value}</Tag>;
+      };
+    }
 
     const hiddenCols: TableColumn = {
       RootColumns: columnUtils.hideColumns(root, ['id', 'cpu.usage', 'cpu.capacity', 'memory.usage', 'memory.capacity', 'regionId']),
