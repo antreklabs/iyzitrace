@@ -56,10 +56,14 @@ const CallMetrics: React.FC<CallMetricsProps> = ({ data, serviceBased }) => {
       
       <Col span={12}>
         <Card 
-          title="Latency (ms)" 
+          title={<span style={{ fontSize: '14px', fontWeight: 600 }}>Latency</span>}
           loading={loading}
-          style={{ height: '350px' }}
-          styles={{ body: { height: '300px', padding: '16px' } }}
+          style={{ 
+            height: '380px',
+            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%)',
+            border: '1px solid rgba(59, 130, 246, 0.2)',
+          }}
+          styles={{ body: { height: '330px', padding: '20px' } }}
         >
           {chartsReady && <MsCharts chartId="latency-chart" series={serviceBased ? latencyData : latencyDataByOperation as any} />}
         </Card>
@@ -67,10 +71,14 @@ const CallMetrics: React.FC<CallMetricsProps> = ({ data, serviceBased }) => {
 
       <Col span={12}>
         <Card 
-          title="Operation Rate (ops/s)" 
+          title={<span style={{ fontSize: '14px', fontWeight: 600 }}>Operation Rate</span>}
           loading={loading}
-          style={{ height: '350px' }}
-          styles={{ body: { height: '300px', padding: '16px' } }}
+          style={{ 
+            height: '380px',
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%)',
+            border: '1px solid rgba(16, 185, 129, 0.2)',
+          }}
+          styles={{ body: { height: '330px', padding: '20px' } }}
         >
           {chartsReady && <MsCharts chartId="rate-chart" series={rateDataByOperation as any} />}
         </Card>
@@ -78,10 +86,14 @@ const CallMetrics: React.FC<CallMetricsProps> = ({ data, serviceBased }) => {
 
       <Col span={12}>
         <Card 
-          title="Apdex Score" 
+          title={<span style={{ fontSize: '14px', fontWeight: 600 }}>Apdex Score</span>}
           loading={loading}
-          style={{ height: '350px' }}
-          styles={{ body: { height: '300px', padding: '16px' } }}
+          style={{ 
+            height: '380px',
+            background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%)',
+            border: '1px solid rgba(245, 158, 11, 0.2)',
+          }}
+          styles={{ body: { height: '330px', padding: '20px' } }}
         >
           {chartsReady && <MsCharts chartId="apdex-chart" series={serviceBased ? apdexData : apdexDataByOperation as any} />}
         </Card>
@@ -89,10 +101,14 @@ const CallMetrics: React.FC<CallMetricsProps> = ({ data, serviceBased }) => {
 
       <Col span={12}>
         <Card 
-          title="Key Operations (ops/sec)" 
+          title={<span style={{ fontSize: '14px', fontWeight: 600 }}>Key Operations</span>}
           loading={loading}
-          style={{ height: '350px' }}
-          styles={{ body: { height: '300px', padding: '16px' } }}
+          style={{ 
+            height: '380px',
+            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%)',
+            border: '1px solid rgba(139, 92, 246, 0.2)',
+          }}
+          styles={{ body: { height: '330px', padding: '20px' } }}
         >
           {chartsReady && <MsCharts chartId="keyops-chart" series={keyOpsDataByOperation as any} />}
         </Card>

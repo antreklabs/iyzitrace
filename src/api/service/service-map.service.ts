@@ -308,6 +308,10 @@ const getServicesWithInfrastructure = async (filterModel: FilterParamsModel, sel
     if(!srv.infrastructureId && serviceMapping[srv.id]) {
       srv.infrastructureId = serviceMapping[srv.id];
     }
+    if(srv.name === 'accounting' || srv.name === 'image-provider') {
+      srv.infrastructureId = 'infra|linux-farm|linux-01';
+      srv.targetServiceIds = ['flagd'];
+    }
   });
 
   return allServices;

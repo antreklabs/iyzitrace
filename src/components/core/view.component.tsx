@@ -114,7 +114,7 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
 
   const ensureDefaultView = async (): Promise<ViewData | null> => {
     const defaultView: ViewData = {
-      id: 'default',
+      id: `view-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       title: 'default',
       description: '',
       page: pageName,
@@ -203,7 +203,7 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
       
       const currentQuery = location.search;
       const viewData: ViewData = {
-        id: editingView?.id || Date.now().toString(),
+        id: editingView?.id || `view-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
         title: values.title,
         description: values.description || '',
         page: pageName,

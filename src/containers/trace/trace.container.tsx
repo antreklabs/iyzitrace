@@ -30,7 +30,15 @@ const TraceContainer: React.FC = () => {
   const buildColumns = (data: Trace[]): TableColumn => {
     const cols = getTableColumns(data);
 
-    const traceIdColumn = cols.RootColumns.find((col: ColumnItem) => col.key === 'traceId');
+    let root = columnUtils.renameColumns(cols.RootColumns, {
+      servicename: 'Service',
+      tracename: 'Trace',
+      durationms: 'Duration',
+      starttime: 'Start Time',
+      endtime: 'End Time'
+    });
+
+    const traceIdColumn = root.find((col: ColumnItem) => col.key === 'traceId');
     if (traceIdColumn) {
       traceIdColumn.render = (value: string) => {
         return (
@@ -41,7 +49,7 @@ const TraceContainer: React.FC = () => {
       };
     }
 
-    const serviceNameColumn = cols.RootColumns.find((col: ColumnItem) => col.key === 'serviceName');
+    const serviceNameColumn = root.find((col: ColumnItem) => col.key === 'serviceName');
     if (serviceNameColumn) {
       serviceNameColumn.render = (value: string) => {
         return (
@@ -52,7 +60,7 @@ const TraceContainer: React.FC = () => {
     }
 
     const visibleColumns: TableColumn = {
-      RootColumns: columnUtils.hideColumns(cols.RootColumns, ['StartTimeUnixNano', 'SpanCount', 'SpanSet', 'SpanSets', 'ServiceStats'])
+      RootColumns: columnUtils.hideColumns(root, ['StartTimeUnixNano', 'SpanCount', 'SpanSet', 'SpanSets', 'ServiceStats', 'SpanSetMatched', 'ServiceStatsAccountingSpanCount'])
     };
 
     return visibleColumns;

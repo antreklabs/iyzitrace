@@ -66,26 +66,40 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
     nodes.flatMap((n) => [n, ...(n.children ? flattenSpans(n.children) : [])]);
 
   const getOperationType = (s: any): string => {
-    let type = s.tags['type'];
+    // Debug: Log span details
+    console.log('🔍 Getting operation type for span:', {
+      name: s.name,
+      serviceName: s.serviceName,
+      tags: s.tags,
+      typeTag: s.tags?.['type']
+    });
+    
+    let type = s.tags?.['type'];
     
     if (type === 'http') {
+      console.log('  ✅ Found HTTP from type tag');
       return 'HTTP';
     }
     else if (type === 'messaging') {
+      console.log('  ✅ Found MESSAGING from type tag');
       return 'MESSAGING';
     }
     else if (type === 'cache') {
+      console.log('  ✅ Found CACHE from type tag');
       return 'CACHE';
     }
     else if (type === 'database') {
+      console.log('  ✅ Found DATABASE from type tag');
       return 'DATABASE';
     }
     else if (type === 'rpc') {
+      console.log('  ✅ Found RPC from type tag');
       return 'RPC';
     }
     else {
       const name = s.serviceName?.toLowerCase() || '';
-      if (Object.keys(s.tags).includes('http.method') || name.includes('http')) {
+      if (Object.keys(s.tags || {}).includes('http.method') || name.includes('http')) {
+        console.log('  ✅ Detected HTTP from http.method or service name');
         return 'HTTP';
       }
       if (
@@ -93,20 +107,24 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
           name.includes(db)
         )
       ) {
+        console.log('  ✅ Detected DATABASE from service name');
         return 'DATABASE';
       }
-      const netPeerName = s.tags['net.peer.name'];
+      const netPeerName = s.tags?.['net.peer.name'];
       if (
         ['postgre', 'postgresql', 'mysql', 'mariadb', 'mongo', 'mongodb', 'db', 'database'].some((db) =>
           name.includes(db)
         ) &&
         netPeerName
       ) {
+        console.log('  ✅ Detected DATABASE from net.peer.name');
         return 'DATABASE';
       }
       if (name.includes('redis') || name.includes('cache')) {
+        console.log('  ✅ Detected CACHE from service name');
         return 'CACHE';
       }
+      console.log('  ⚠️ Defaulting to GENERAL');
       return 'GENERAL';
     }
   };
@@ -230,43 +248,47 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
 
   // Filter trace data based on selected operation types
   useEffect(() => {
-    // console.log('Filtering effect triggered. Selected types:', selectedOperationTypes);
-    // console.log('Original trace data length:', traceData.length);
+    console.log('Filtering effect triggered. Selected types:', selectedOperationTypes);
+    console.log('Original trace data length:', traceData.length);
     
     if (selectedOperationTypes.length === 0) {
-      // console.log('No filters selected, showing all spans');
+      console.log('No filters selected, showing all spans');
       setFilteredTraceData(traceData);
       return;
     }
 
     const filterSpans = (nodes: SpanNode[]): SpanNode[] => {
-      return nodes.filter(node => {
-        const operationType = getOperationType(node);
-        const matchesFilter = selectedOperationTypes.includes(operationType);
-        
-        // console.log(`Span ${node.serviceName} -> ${node.name}: operationType=${operationType}, matches=${matchesFilter}`);
-        
-        // If this node matches, include it and all its children
-        if (matchesFilter) {
-          return true;
-        }
-        
-        // If this node doesn't match but has children that might match, check children
-        if (node.children && node.children.length > 0) {
-          const filteredChildren = filterSpans(node.children);
-          if (filteredChildren.length > 0) {
-            // Update the node with filtered children
-            node.children = filteredChildren;
-            return true;
+      const allMatchingSpans: SpanNode[] = [];
+      
+      const collectMatchingSpans = (nodes: SpanNode[]) => {
+        nodes.forEach(node => {
+          const operationType = getOperationType(node);
+          const matchesFilter = selectedOperationTypes.includes(operationType);
+          
+          console.log(`Span ${node.serviceName} -> ${node.name}: operationType=${operationType}, matches=${matchesFilter}`);
+          
+          // If this node matches, add it as a root-level span (without children)
+          if (matchesFilter) {
+            const { children, ...nodeWithoutChildren } = node;
+            allMatchingSpans.push(nodeWithoutChildren as SpanNode);
+            console.log(`  ✅ Including node ${node.serviceName} -> ${node.name}`);
+          } else {
+            console.log(`  ❌ Excluding node ${node.serviceName} -> ${node.name}`);
           }
-        }
-        
-        return false;
-      });
+          
+          // Continue checking children
+          if (node.children && node.children.length > 0) {
+            collectMatchingSpans(node.children);
+          }
+        });
+      };
+      
+      collectMatchingSpans(nodes);
+      return allMatchingSpans;
     };
 
-    const filtered = filterSpans(traceData);
-    // console.log('Filtered trace data length:', filtered.length);
+    const filtered = filterSpans(JSON.parse(JSON.stringify(traceData))); // Deep clone to avoid mutation
+    console.log('Filtered trace data length:', filtered.length);
     setFilteredTraceData(filtered);
   }, [traceData, selectedOperationTypes]);
 

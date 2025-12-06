@@ -7,6 +7,18 @@ interface ServiceDurationChartProps {
   metric: string;
 }
 
+// Format time values intelligently
+const formatTimeValue = (val: number): string => {
+  const absVal = Math.abs(val);
+  
+  if (absVal === 0) return '0 ms';
+  if (absVal < 1000) return `${val.toFixed(2)} ms`;
+  if (absVal < 60000) return `${(val / 1000).toFixed(2)} s`;
+  if (absVal < 3600000) return `${(val / 60000).toFixed(2)} min`;
+  if (absVal < 86400000) return `${(val / 3600000).toFixed(2)} h`;
+  return `${(val / 86400000).toFixed(2)} d`;
+};
+
 const ServiceDurationChart: React.FC<ServiceDurationChartProps> = ({ services, metric }) => {
   const chartData = useMemo(() => {
     const colors = ['#8B5CF6', '#3B82F6', '#F59E0B', '#6B7280', '#EC4899', '#10B981'];
@@ -62,7 +74,7 @@ const ServiceDurationChart: React.FC<ServiceDurationChartProps> = ({ services, m
     yaxis: {
       labels: { 
         style: { colors: '#8c8c8c' },
-        formatter: (val: number) => `${val.toFixed(0)} ms`,
+        formatter: (val: number) => formatTimeValue(val),
       },
       axisBorder: { show: false },
       axisTicks: { show: false },
@@ -72,18 +84,57 @@ const ServiceDurationChart: React.FC<ServiceDurationChartProps> = ({ services, m
       enabled: false,
     },
     legend: {
-      position: 'bottom' as const,
-      labels: { colors: '#8c8c8c' },
+      position: 'top' as const,
+      horizontalAlign: 'left' as const,
+      floating: false,
+      fontSize: '11px',
+      fontWeight: 500,
+      labels: { colors: '#a1a1aa' },
       markers: { size: 8 },
-      itemMargin: { horizontal: 8, vertical: 4 },
+      itemMargin: { horizontal: 10, vertical: 0 },
+      offsetY: 0,
     },
     tooltip: {
       theme: 'dark' as const,
-      y: { formatter: (val: number) => `${val.toFixed(2)} ms` },
+      y: { formatter: (val: number) => formatTimeValue(val) },
     },
   };
 
-  return <ApexCharts options={options} series={chartData} type="line" height={200} />;
+  return (
+    <div style={{ width: '100%', height: '200px', position: 'relative' }}>
+      <style>{`
+        .apexcharts-legend {
+          display: flex !important;
+          flex-wrap: nowrap !important;
+          overflow-x: auto !important;
+          overflow-y: hidden !important;
+          white-space: nowrap !important;
+          max-width: 100% !important;
+          scrollbar-width: thin;
+          scrollbar-color: #3f3f46 #18181b;
+        }
+        .apexcharts-legend::-webkit-scrollbar {
+          height: 6px;
+        }
+        .apexcharts-legend::-webkit-scrollbar-track {
+          background: #18181b;
+          border-radius: 3px;
+        }
+        .apexcharts-legend::-webkit-scrollbar-thumb {
+          background: #3f3f46;
+          border-radius: 3px;
+        }
+        .apexcharts-legend::-webkit-scrollbar-thumb:hover {
+          background: #52525b;
+        }
+        .apexcharts-legend-series {
+          display: inline-flex !important;
+          flex-shrink: 0 !important;
+        }
+      `}</style>
+      <ApexCharts options={options} series={chartData} type="line" height={200} />
+    </div>
+  );
 };
 
 export default ServiceDurationChart;

@@ -641,7 +641,7 @@ const AIPage: React.FC = () => {
           model: aiConfig?.model || 'deepseek/deepseek-chat',
           baseUrl: 'https://openrouter.ai/api/v1',
           temperature: aiConfig?.temperature ?? 0.7,
-          maxTokens: aiConfig?.maxTokens ?? 150,
+          maxTokens: aiConfig?.maxTokens ?? 1500,
         };
         
         initAI(config);

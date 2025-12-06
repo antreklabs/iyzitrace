@@ -22,6 +22,14 @@ interface PageViewItem {
   createdAt: string;
 }
 
+// Format duration: if >= 1000ms, convert to seconds
+const formatDuration = (ms: number): string => {
+  if (ms >= 1000) {
+    return `${(ms / 1000).toFixed(2)} s`;
+  }
+  return `${ms.toFixed(2)} ms`;
+};
+
 function ViewsPage() {
   const [widgets, setWidgets] = useState<PageViewItem[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -35,7 +43,37 @@ function ViewsPage() {
     const load = async () => {
       try {
         const settings: PluginSettings = await getPluginSettings();
-        setWidgets((settings.pageViews as PageViewItem[]) || []);
+        let loadedWidgets = (settings.pageViews as PageViewItem[]) || [];
+        
+        console.log('📂 Loaded views:', loadedWidgets.length);
+        loadedWidgets.forEach(w => console.log(`  - ${w.id}: ${w.title}`));
+        
+        // FIX: Duplicate ID'leri düzelt
+        const idCounts = new Map<string, number>();
+        let needsFix = false;
+        
+        loadedWidgets.forEach(w => {
+          const count = idCounts.get(w.id) || 0;
+          idCounts.set(w.id, count + 1);
+          if (count > 0) {
+            needsFix = true;
+          }
+        });
+        
+        if (needsFix) {
+          console.warn('⚠️ Duplicate IDs detected! Fixing...');
+          loadedWidgets = loadedWidgets.map((w, index) => {
+            const newId = `view-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 9)}`;
+            console.log(`  🔧 ${w.id} → ${newId} (${w.title})`);
+            return { ...w, id: newId };
+          });
+          
+          // Düzeltilmiş view'ları kaydet
+          await savePluginSettings({ ...settings, pageViews: loadedWidgets });
+          console.log('✅ Fixed and saved unique IDs');
+        }
+        
+        setWidgets(loadedWidgets);
       } catch (error) {
         console.error('Error loading pageViews:', error);
         setWidgets([]);
@@ -62,9 +100,30 @@ function ViewsPage() {
     setModalVisible(true);
   };
 
-  const handleDeleteWidget = (widgetId: string) => {
-    const newWidgets = widgets.filter(w => w.id !== widgetId);
-    persist(newWidgets).then(() => message.success('View deleted'));
+  const handleDeleteWidget = (widget: PageViewItem) => {
+    console.log('🗑️ Delete requested for:', widget.id, widget.title);
+    console.log('📋 Current widgets count:', widgets.length);
+    
+    Modal.confirm({
+      title: 'Delete View',
+      content: `Are you sure you want to delete "${widget.title}"?`,
+      okText: 'Delete',
+      okType: 'danger',
+      cancelText: 'Cancel',
+      onOk: () => {
+        console.log('✅ Delete confirmed for:', widget.id);
+        const newWidgets = widgets.filter(w => {
+          const keep = w.id !== widget.id;
+          console.log(`  ${keep ? '✓ Keep' : '✗ Delete'}: ${w.id} - ${w.title}`);
+          return keep;
+        });
+        console.log('📦 New widgets count:', newWidgets.length);
+        persist(newWidgets).then(() => {
+          console.log('💾 Persisted successfully');
+          message.success('View deleted');
+        });
+      }
+    });
   };
 
   const handleModalOk = () => {
@@ -266,7 +325,7 @@ function ViewsPage() {
               newHighlights = sortedServices.length
                 ? sortedServices.map(service => ({
                 label: service.name,
-                    value: `${(service.metrics?.avgDurationMs ?? 0).toFixed(2)} ms`
+                    value: formatDuration(service.metrics?.avgDurationMs ?? 0)
                   }))
                 : [{ label: 'No data', value: '-' }];
               break;
@@ -282,8 +341,8 @@ function ViewsPage() {
 
                 newHighlights = [
                   { label: 'Total Traces', value: tracesData.length.toString() },
-                  { label: 'Avg Latency', value: `${avgDuration.toFixed(2)} ms` },
-                  { label: 'Max Latency', value: `${maxDuration.toFixed(2)} ms` },
+                  { label: 'Avg Latency', value: formatDuration(avgDuration) },
+                  { label: 'Max Latency', value: formatDuration(maxDuration) },
                   { label: 'Total Spans', value: totalSpans.toString() }
                 ].slice(0, 4);
               } else {
@@ -553,7 +612,7 @@ function ViewsPage() {
               icon={<DeleteOutlined />}
               size="small"
               danger
-              onClick={() => handleDeleteWidget(widget.id)}
+              onClick={() => handleDeleteWidget(widget)}
             >
               Delete
             </Button>

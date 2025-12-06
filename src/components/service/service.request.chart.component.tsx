@@ -50,10 +50,15 @@ const ServiceRequestChart: React.FC<{ services: Service[] }> = ({ services }) =>
       enabled: false,
     },
     legend: {
-      position: 'bottom' as const,
-      labels: { colors: '#8c8c8c' },
+      position: 'top' as const,
+      horizontalAlign: 'left' as const,
+      floating: false,
+      fontSize: '11px',
+      fontWeight: 500,
+      labels: { colors: '#a1a1aa' },
       markers: { size: 8 },
-      itemMargin: { horizontal: 8, vertical: 4 },
+      itemMargin: { horizontal: 10, vertical: 0 },
+      offsetY: 0,
     },
     tooltip: {
       theme: 'dark' as const,
@@ -61,7 +66,41 @@ const ServiceRequestChart: React.FC<{ services: Service[] }> = ({ services }) =>
     },
   };
 
-  return <ApexCharts options={options} series={chartData} type="bar" height={200} />;
+  return (
+    <div style={{ width: '100%', height: '200px', position: 'relative' }}>
+      <style>{`
+        .apexcharts-legend {
+          display: flex !important;
+          flex-wrap: nowrap !important;
+          overflow-x: auto !important;
+          overflow-y: hidden !important;
+          white-space: nowrap !important;
+          max-width: 100% !important;
+          scrollbar-width: thin;
+          scrollbar-color: #3f3f46 #18181b;
+        }
+        .apexcharts-legend::-webkit-scrollbar {
+          height: 6px;
+        }
+        .apexcharts-legend::-webkit-scrollbar-track {
+          background: #18181b;
+          border-radius: 3px;
+        }
+        .apexcharts-legend::-webkit-scrollbar-thumb {
+          background: #3f3f46;
+          border-radius: 3px;
+        }
+        .apexcharts-legend::-webkit-scrollbar-thumb:hover {
+          background: #52525b;
+        }
+        .apexcharts-legend-series {
+          display: inline-flex !important;
+          flex-shrink: 0 !important;
+        }
+      `}</style>
+      <ApexCharts options={options} series={chartData} type="bar" height={200} />
+    </div>
+  );
 };
 
 export default ServiceRequestChart;

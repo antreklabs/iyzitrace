@@ -39,7 +39,7 @@ const ServiceContainer: React.FC = () => {
       metricscallspersecond: 'Calls Per Second',
       metricsoperationcounts: 'Operations'
     });
-    root = columnUtils.reorderColumns(root, ['name', 'type', 'metricsavgdurationms', 'metricsmindurationms', 'metricsmaxdurationms', 'metricscallscount', 'metricscallspersecond']);
+    root = columnUtils.reorderColumns(root, ['name', 'type', 'port', 'metricsavgdurationms', 'metricsmindurationms', 'metricsmaxdurationms', 'metricscallscount', 'metricscallspersecond']);
 
     let l1 = columnUtils.renameColumns(cols.L1Columns ?? [], {
       metricsp50durationms: 'P50',
@@ -52,7 +52,7 @@ const ServiceContainer: React.FC = () => {
       metricsmaxdurationms: 'Max',
       metricscallscount: 'Requests'
     })
-    l1 = columnUtils.reorderColumns(l1, ['name', 'type', 'metricsavgdurationms', 'metricsmindurationms', 'metricsmaxdurationms', 'metricscallscount', 'metricsp50durationms', 'metricsp75durationms', 'metricsp90durationms', 'metricsp95durationms', 'metricsp99durationms']);
+    l1 = columnUtils.reorderColumns(l1, ['name', 'type', 'method', 'path', 'metricsavgdurationms', 'metricsmindurationms', 'metricsmaxdurationms', 'metricscallscount', 'metricsp50durationms', 'metricsp75durationms', 'metricsp90durationms', 'metricsp95durationms', 'metricsp99durationms']);
 
     const visibleColumns: TableColumn = {
       RootColumns: columnUtils.hideColumns(root, ['id', 'metricssumdurationms', 'metricsp50durationms', 'metricsp75durationms', 'metricsp90durationms', 'metricsp95durationms', 'metricsp99durationms']),

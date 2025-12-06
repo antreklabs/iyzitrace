@@ -9,17 +9,19 @@ import {
   useEdgesState,
   Node,
   Edge,
-  useReactFlow
+  useReactFlow,
+  ControlButton
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { Card, Dropdown } from 'antd';
-import { AppstoreOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons';
 import { ServiceMapData } from '../../api/service/interface.service';
 import { InfrastructureNode } from './infrastructure-node.component';
 import { RegionGroup } from './region-group.component';
 import { InfrastructureDetailPanel } from './infrastructure-detail-panel.component';
 import { SearchTree } from './search-tree.component';
 import { ServiceMapBottomDrawer } from './service-map-bottom-drawer.component';
+import { getPluginSettings, savePluginSettings } from '../../api/service/settings.service';
 
 const nodeTypes = {
   infrastructure: InfrastructureNode,
@@ -38,6 +40,8 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
   const [searchValue, setSearchValue] = useState('');
   const [selectedKey, setSelectedKey] = useState('');
   const [isServiceMapOpen, setIsServiceMapOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const reactFlowInstance = useReactFlow();
 
   // Build nodes and edges from data with auto-layout
@@ -46,6 +50,9 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
     const edges: Edge[] = [];
     
     const regions = data?.regions || [];
+    console.log('🔍 InfrastructureMap - Data:', data);
+    console.log('🔍 InfrastructureMap - Regions count:', regions.length);
+    console.log('🔍 InfrastructureMap - Regions:', regions);
 
     // Layout constants
     const INFRA_WIDTH = 180;
@@ -108,6 +115,57 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
       currentRegionY += groupHeight + REGION_GAP_Y;
     });
 
+    // Create edges between infrastructures based on service relationships
+    const infraMap = new Map<string, string>(); // serviceId -> infraId
+    regions.forEach(region => {
+      region.infrastructures?.forEach(infraItem => {
+        const infra = infraItem as any;
+        infra.services?.forEach((service: any) => {
+          infraMap.set(service.id, infra.id);
+        });
+      });
+    });
+
+    const infraConnections = new Map<string, Set<string>>(); // infraId -> Set<targetInfraId>
+    regions.forEach(region => {
+      region.infrastructures?.forEach(infraItem => {
+        const infra = infraItem as any;
+        infra.services?.forEach((service: any) => {
+          service.targetServiceIds?.forEach((targetServiceId: string) => {
+            const targetInfraId = infraMap.get(targetServiceId);
+            if (targetInfraId && targetInfraId !== infra.id) {
+              if (!infraConnections.has(infra.id)) {
+                infraConnections.set(infra.id, new Set());
+              }
+              infraConnections.get(infra.id)!.add(targetInfraId);
+            }
+          });
+        });
+      });
+    });
+
+    // Create edges for infrastructure connections
+    infraConnections.forEach((targets, sourceInfraId) => {
+      targets.forEach(targetInfraId => {
+        edges.push({
+          id: `infra-edge-${sourceInfraId}-${targetInfraId}`,
+          source: sourceInfraId,
+          target: targetInfraId,
+          type: 'smoothstep',
+          animated: true,
+          style: {
+            stroke: '#60a5fa',
+            strokeWidth: 2,
+            strokeDasharray: '5 5'
+          }
+        });
+      });
+    });
+
+    console.log('🔍 InfrastructureMap - Total nodes created:', nodes.length);
+    console.log('🔍 InfrastructureMap - Total edges created:', edges.length);
+    console.log('🔍 InfrastructureMap - Nodes:', nodes);
+    
     return { nodes, edges };
   }, [data]);
 
@@ -119,6 +177,95 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
     setNodes(initialNodes);
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
+
+  // Load saved positions from view on mount
+  React.useEffect(() => {
+    const loadPositions = async () => {
+      let viewId: string | undefined;
+      try {
+        const lastRaw = localStorage.getItem('lastSelectedPageView_service-map');
+        if (lastRaw) {
+          const last = JSON.parse(lastRaw);
+          viewId = last?.viewId;
+        }
+      } catch {}
+
+      if (!viewId || !data?.regions) return;
+
+      // Try to load from plugin settings or localStorage
+      let savedItems: any[] = [];
+      try {
+        const settings = await getPluginSettings();
+        const pageViews = (settings.pageViews || []) as any[];
+        const view = pageViews.find((v: any) => v.id === viewId && v.page === 'service-map');
+        if (view && (view as any).data?.items) {
+          savedItems = (view as any).data.items;
+        }
+      } catch {
+        try {
+          const key = 'iyzitrace-views-service-map';
+          const localViews = JSON.parse(localStorage.getItem(key) || '[]');
+          const view = localViews.find((v: any) => v.id === viewId);
+          if (view && (view as any).data?.items) {
+            savedItems = (view as any).data.items;
+          }
+        } catch {}
+      }
+
+      if (savedItems.length === 0) return;
+
+      // Apply saved positions to data
+      savedItems.forEach((item: any) => {
+        if (item.type === 'region' && item.groupPosition) {
+          const region = data.regions?.find((r: any) => r.id === item.id);
+          if (region) {
+            (region as any).groupPosition = item.groupPosition;
+          }
+        } else if (item.type === 'infrastructure' && item.position) {
+          for (const region of (data.regions || [])) {
+            const infra = region.infrastructures?.find((i: any) => i.id === item.id);
+            if (infra) {
+              (infra as any).position = item.position;
+              break;
+            }
+          }
+        }
+      });
+
+      console.log('📥 Positions loaded from view');
+    };
+
+    loadPositions();
+  }, [data]);
+
+  // Helper to get connected nodes and edges for hover
+  const getConnectedElements = useCallback((nodeId: string) => {
+    const connectedNodeIds = new Set<string>();
+    const connectedEdgeIds = new Set<string>();
+    
+    edges.forEach(edge => {
+      if (edge.source === nodeId || edge.target === nodeId) {
+        connectedEdgeIds.add(edge.id);
+        connectedNodeIds.add(edge.source);
+        connectedNodeIds.add(edge.target);
+      }
+    });
+    
+    return { connectedNodeIds, connectedEdgeIds };
+  }, [edges]);
+
+  // Compute highlighted nodes and edges
+  const highlightedNodes = useMemo(() => {
+    if (!hoveredNodeId) return new Set<string>();
+    const { connectedNodeIds } = getConnectedElements(hoveredNodeId);
+    return connectedNodeIds;
+  }, [hoveredNodeId, getConnectedElements]);
+
+  const highlightedEdges = useMemo(() => {
+    if (!hoveredNodeId) return new Set<string>();
+    const { connectedEdgeIds } = getConnectedElements(hoveredNodeId);
+    return connectedEdgeIds;
+  }, [hoveredNodeId, getConnectedElements]);
 
   // Find selected infrastructure
   const selectedInfrastructure = useMemo(() => {
@@ -227,6 +374,63 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
     setIsServiceMapOpen(false);
   }, []);
 
+  // Save positions to view
+  const savePositionsToView = useCallback(async () => {
+    if (!data?.regions) return;
+
+    // Build minimized layout data
+    const items: any[] = [];
+    data.regions.forEach((region: any) => {
+      items.push({ 
+        id: region.id, 
+        type: 'region', 
+        groupPosition: region.groupPosition 
+      });
+      region.infrastructures?.forEach((infra: any) => {
+        items.push({ 
+          id: infra.id, 
+          type: 'infrastructure', 
+          position: infra.position 
+        });
+      });
+    });
+
+    const minimized = { items };
+
+    // Get current view ID
+    let viewId: string | undefined;
+    try {
+      const lastRaw = localStorage.getItem('lastSelectedPageView_service-map');
+      if (lastRaw) {
+        const last = JSON.parse(lastRaw);
+        viewId = last?.viewId;
+      }
+    } catch {}
+
+    if (!viewId) return;
+
+    // Save to plugin settings or localStorage
+    try {
+      const settings = await getPluginSettings();
+      const pageViews = settings.pageViews || [];
+      const updated = pageViews.map((v: any) => 
+        v.id === viewId && v.page === 'service-map' ? { ...v, data: minimized } : v
+      );
+      await savePluginSettings({ ...settings, pageViews: updated });
+      console.log('💾 Positions saved to plugin settings');
+    } catch (e) {
+      try {
+        const key = 'iyzitrace-views-service-map';
+        const localViews = JSON.parse(localStorage.getItem(key) || '[]');
+        const updatedLocal = (localViews || []).map((v: any) =>
+          v.id === viewId ? { ...v, data: minimized } : v
+        );
+        localStorage.setItem(key, JSON.stringify(updatedLocal));
+        console.log('💾 Positions saved to localStorage');
+      } catch {}
+    }
+  }, [data]);
+
   const searchTreeContent = (
     <SearchTree
       regions={data?.regions || []}
@@ -331,19 +535,124 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
           )}
 
           {/* ReactFlow Canvas */}
-          <div style={{ position: 'absolute', inset: 0 }}>
+          <div 
+            style={{ 
+              position: isFullscreen ? 'fixed' : 'absolute', 
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: isFullscreen ? 9999 : 'auto'
+            }}
+          >
             <ReactFlow
-              nodes={nodes}
-              edges={edges}
+              nodes={nodes.map(n => ({
+                ...n,
+                style: {
+                  ...n.style,
+                  opacity: hoveredNodeId ? (n.id === hoveredNodeId || highlightedNodes.has(n.id) ? 1 : 0.3) : 1,
+                  transition: 'opacity 0.2s ease'
+                }
+              }))}
+              edges={edges.map(e => ({
+                ...e,
+                style: {
+                  ...e.style,
+                  opacity: hoveredNodeId ? (highlightedEdges.has(e.id) ? 1 : 0.2) : 1,
+                  strokeWidth: highlightedEdges.has(e.id) ? 3 : 2,
+                  transition: 'all 0.2s ease'
+                }
+              }))}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               nodeTypes={nodeTypes}
+              nodesDraggable={true}
+              nodesConnectable={false}
               fitView
-              fitViewOptions={{ padding: 0.2, minZoom: 0.5, maxZoom: 1.5 }}
-              attributionPosition="bottom-left"
+              fitViewOptions={{ padding: 0.2 }}
               style={{ background: '#0f172a' }}
               minZoom={0.1}
-              maxZoom={2}
+              maxZoom={2.5}
+              onNodeDragStop={async (_, node) => {
+                // Save node position to view data
+                console.log('💾 Saving node position:', node.id, node.position);
+                
+                // Update data structure with new position
+                if (node.type === 'group') {
+                  // Group node (region) - save groupPosition
+                  const regionId = node.id.replace('group::', '');
+                  const region = data?.regions?.find((r: any) => r.id === regionId);
+                  if (region) {
+                    (region as any).groupPosition = { x: Math.round(node.position.x), y: Math.round(node.position.y) };
+                  }
+                } else {
+                  // Infrastructure node - save position
+                  const infraId = node.id;
+                  for (const region of (data?.regions || [])) {
+                    const infra = region.infrastructures?.find((i: any) => i.id === infraId);
+                    if (infra) {
+                      (infra as any).position = { x: Math.round(node.position.x), y: Math.round(node.position.y) };
+                      break;
+                    }
+                  }
+                }
+                
+                // Save to view (plugin settings or localStorage)
+                await savePositionsToView();
+              }}
+              onNodeClick={(_, node) => {
+                // Handle group clicks - zoom to group
+                if (node.type === 'group') {
+                  const groupChildren = nodes.filter(n => n.parentNode === node.id);
+                  if (groupChildren.length > 0) {
+                    reactFlowInstance.fitView({
+                      nodes: [node, ...groupChildren],
+                      padding: 0.3,
+                      duration: 800
+                    });
+                  } else {
+                    reactFlowInstance.fitView({
+                      nodes: [node],
+                      padding: 0.3,
+                      duration: 800
+                    });
+                  }
+                } else {
+                  // Regular node click - zoom to node
+                  const nodeId = node.data?.infrastructure?.id || node.id;
+                  if (nodeId) {
+                    setSelectedNodeId(nodeId);
+                    setTimeout(() => {
+                      reactFlowInstance.fitView({
+                        nodes: [node],
+                        padding: 0.2,
+                        duration: 800
+                      });
+                    }, 50);
+                  }
+                }
+              }}
+              onNodeMouseEnter={(_, node) => {
+                // Don't highlight group nodes
+                if (node.type !== 'group') {
+                  setHoveredNodeId(node.id);
+                }
+              }}
+              onNodeMouseLeave={(_, node) => {
+                if (node.type !== 'group') {
+                  setHoveredNodeId(null);
+                }
+              }}
+              onPaneClick={() => {
+                setSelectedNodeId('');
+                setHoveredNodeId(null);
+                // Fit view on empty space click
+                reactFlowInstance.fitView({
+                  padding: 0.2,
+                  duration: 800
+                });
+              }}
+              proOptions={{ hideAttribution: true }}
             >
               <Background color="#1f2937" gap={20} />
               <Controls 
@@ -351,7 +660,14 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
                   background: '#1f2937',
                   border: '1px solid #374151'
                 }}
-              />
+              >
+                <ControlButton
+                  onClick={() => setIsFullscreen(!isFullscreen)}
+                  title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                >
+                  {isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+                </ControlButton>
+              </Controls>
               <MiniMap 
                 style={{
                   background: '#1f2937',
@@ -359,6 +675,12 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
                 }}
                 nodeColor="#60a5fa"
               />
+              <style>{`
+                /* Hide React Flow attribution */
+                .react-flow__attribution {
+                  display: none !important;
+                }
+              `}</style>
             </ReactFlow>
           </div>
         </div>

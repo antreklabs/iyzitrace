@@ -1,10 +1,24 @@
 import React, { useEffect, useRef } from 'react';
 import ApexCharts from 'react-apexcharts';
+
 interface MsChartsProps {
   series: [];
   colors?: string[];
   chartId?: string;
 }
+
+// Format time values intelligently
+const formatTimeValue = (val: number): string => {
+  const absVal = Math.abs(val);
+  
+  if (absVal === 0) return '0 ms';
+  if (absVal < 1000) return `${val.toFixed(2)} ms`;
+  if (absVal < 60000) return `${(val / 1000).toFixed(2)} s`;
+  if (absVal < 3600000) return `${(val / 60000).toFixed(2)} min`;
+  if (absVal < 86400000) return `${(val / 3600000).toFixed(2)} h`;
+  return `${(val / 86400000).toFixed(2)} d`;
+};
+
 const MsCharts: React.FC<MsChartsProps> = ({ series, colors, chartId = 'default' }) => {
   const chartRef = useRef<HTMLDivElement>(null);
 
@@ -58,17 +72,27 @@ const MsCharts: React.FC<MsChartsProps> = ({ series, colors, chartId = 'default'
   const options = {
     chart: {
       id: chartId,
-      foreColor: '#fff',
+      foreColor: '#a1a1aa',
       height: 250,
       width: '100%',
       type: 'line',
       animations: {
-        enabled: false,
+        enabled: true,
+        easing: 'easeinout',
+        speed: 800,
+        animateGradually: {
+          enabled: true,
+          delay: 150
+        },
+        dynamicAnimation: {
+          enabled: true,
+          speed: 350
+        }
       },
       redrawOnParentResize: true,
       redrawOnWindowResize: true,
       parentHeightOffset: 0,
-      fontFamily: 'inherit',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
       background: 'transparent',
       toolbar: {
         show: false,
@@ -78,10 +102,8 @@ const MsCharts: React.FC<MsChartsProps> = ({ series, colors, chartId = 'default'
       },
       events: {
         mounted: (chartContext: any, config: any) => {
-          // Disable touch events completely to prevent warnings
           const chartElement = chartContext.w.globals.dom.baseEl;
           if (chartElement) {
-            // Remove all touch event listeners
             const touchEvents = ['touchstart', 'touchmove', 'touchend', 'touchcancel'];
             touchEvents.forEach(eventType => {
               chartElement.addEventListener(eventType, (e: Event) => {
@@ -89,8 +111,6 @@ const MsCharts: React.FC<MsChartsProps> = ({ series, colors, chartId = 'default'
                 e.preventDefault();
               }, { passive: true, capture: true });
             });
-            
-            // Disable zoom and pan
             chartContext.w.globals.zoomEnabled = false;
             chartContext.w.globals.panEnabled = false;
           }
@@ -108,53 +128,177 @@ const MsCharts: React.FC<MsChartsProps> = ({ series, colors, chartId = 'default'
       gradient: {
         shade: 'dark',
         type: 'vertical',
-        shadeIntensity: 0.5,
+        shadeIntensity: 0.3,
         gradientToColors: undefined as any,
         inverseColors: false,
-        opacityFrom: 1,
-        opacityTo: 0.7,
-        stops: [0, 90, 100],
+        opacityFrom: 0.5,
+        opacityTo: 0.1,
+        stops: [0, 100],
       },
     },
-    colors: colors ?? ['#1E90FF', '#FF4E50', '#32CD32'],
+    colors: colors ?? [
+      '#3b82f6', // blue
+      '#ef4444', // red  
+      '#10b981', // green
+      '#f59e0b', // amber
+      '#8b5cf6', // purple
+      '#ec4899', // pink
+      '#06b6d4', // cyan
+      '#f97316', // orange
+    ],
     stroke: {
-      width: 3,
+      width: 2,
       curve: 'smooth',
     },
-    xaxis: { type: 'datetime' },
+    markers: {
+      size: 0,
+      strokeColors: '#fff',
+      strokeWidth: 2,
+      strokeOpacity: 0.9,
+      strokeDashArray: 0,
+      fillOpacity: 1,
+      shape: "circle",
+      radius: 2,
+      offsetX: 0,
+      offsetY: 0,
+      hover: {
+        size: 6,
+        sizeOffset: 3
+      }
+    },
+    xaxis: { 
+      type: 'datetime',
+      labels: {
+        style: {
+          colors: '#71717a',
+          fontSize: '11px',
+          fontWeight: 500,
+        },
+        datetimeFormatter: {
+          year: 'yyyy',
+          month: 'MMM \'yy',
+          day: 'dd MMM',
+          hour: 'HH:mm'
+        }
+      },
+      axisBorder: {
+        show: true,
+        color: '#27272a',
+      },
+      axisTicks: {
+        show: true,
+        color: '#27272a',
+      },
+    },
     yaxis: {
       labels: {
-        formatter: (val: number) => `${(val * 100).toFixed(2)} ms`,
+        formatter: (val: number) => formatTimeValue(val),
         style: {
-          colors: '#fff',
+          colors: '#71717a',
+          fontSize: '11px',
+          fontWeight: 500,
         },
+      },
+      axisBorder: {
+        show: true,
+        color: '#27272a',
+      },
+      axisTicks: {
+        show: true,
+        color: '#27272a',
       },
     },
     dataLabels: {
       enabled: false,
     },
     legend: {
+      show: true,
+      showForSingleSeries: false,
+      showForNullSeries: true,
+      showForZeroSeries: true,
       position: 'top',
+      horizontalAlign: 'left',
+      floating: false,
+      fontSize: '11px',
+      fontWeight: 500,
+      offsetX: 0,
+      offsetY: 0,
+      formatter: function(seriesName: string) {
+        // Show full name, will scroll horizontally
+        return seriesName;
+      },
       labels: {
-        colors: '#fff',
+        colors: '#a1a1aa',
+        useSeriesColors: false
+      },
+      markers: {
+        width: 8,
+        height: 8,
+        strokeWidth: 0,
+        strokeColor: '#fff',
+        radius: 8,
+        offsetX: 0,
+        offsetY: 0
+      },
+      itemMargin: {
+        horizontal: 10,
+        vertical: 0
+      },
+      onItemClick: {
+        toggleDataSeries: true
+      },
+      onItemHover: {
+        highlightDataSeries: true
       },
     },
     tooltip: {
       theme: 'dark',
+      enabled: true,
+      shared: true,
+      intersect: false,
+      followCursor: true,
       style: {
-        fontSize: '14px',
-        color: '#fff',
+        fontSize: '12px',
+        fontFamily: 'inherit',
+      },
+      x: {
+        show: true,
+        format: 'dd MMM HH:mm:ss',
       },
       y: {
-        formatter: (val: number, x: any) => {
-          // console.log(val, x);
-          return `${val.toFixed(2)} ms`;
-        },
+        formatter: (val: number) => formatTimeValue(val),
+      },
+      marker: {
+        show: true,
+      },
+      fixed: {
+        enabled: false,
+        position: 'topRight',
+        offsetX: 0,
+        offsetY: 0,
       },
     },
     grid: {
-      borderColor: '#555',
-      strokeDashArray: 4,
+      show: true,
+      borderColor: '#27272a',
+      strokeDashArray: 3,
+      position: 'back',
+      xaxis: {
+        lines: {
+          show: false
+        }
+      },
+      yaxis: {
+        lines: {
+          show: true
+        }
+      },
+      padding: {
+        top: 0,
+        right: 10,
+        bottom: 0,
+        left: 10
+      },
     },
     toolbar: {
       show: false,
@@ -172,6 +316,36 @@ const MsCharts: React.FC<MsChartsProps> = ({ series, colors, chartId = 'default'
         position: 'relative'
       }}
     >
+      <style>{`
+        .apexcharts-legend {
+          display: flex !important;
+          flex-wrap: nowrap !important;
+          overflow-x: auto !important;
+          overflow-y: hidden !important;
+          white-space: nowrap !important;
+          max-width: 100% !important;
+          scrollbar-width: thin;
+          scrollbar-color: #3f3f46 #18181b;
+        }
+        .apexcharts-legend::-webkit-scrollbar {
+          height: 6px;
+        }
+        .apexcharts-legend::-webkit-scrollbar-track {
+          background: #18181b;
+          border-radius: 3px;
+        }
+        .apexcharts-legend::-webkit-scrollbar-thumb {
+          background: #3f3f46;
+          border-radius: 3px;
+        }
+        .apexcharts-legend::-webkit-scrollbar-thumb:hover {
+          background: #52525b;
+        }
+        .apexcharts-legend-series {
+          display: inline-flex !important;
+          flex-shrink: 0 !important;
+        }
+      `}</style>
       <ApexCharts 
         options={options as any} 
         series={series} 

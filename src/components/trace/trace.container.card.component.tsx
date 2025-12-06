@@ -15,6 +15,19 @@ interface TraceMetricsCardProps {
 
 const TraceMetricsCard: React.FC<TraceMetricsCardProps> = ({ title, value, unit, chartData }) => {
   const formatValue = (numValue: number, unitStr: string): string => {
+    // If unit is "ms", use time formatting (ms, s, min, h, d)
+    if (unitStr === 'ms') {
+      const absVal = Math.abs(numValue);
+      
+      if (absVal === 0) return '0 ms';
+      if (absVal < 1000) return `${numValue.toFixed(2)} ms`;
+      if (absVal < 60000) return `${(numValue / 1000).toFixed(2)} s`;
+      if (absVal < 3600000) return `${(numValue / 60000).toFixed(2)} min`;
+      if (absVal < 86400000) return `${(numValue / 3600000).toFixed(2)} h`;
+      return `${(numValue / 86400000).toFixed(2)} d`;
+    }
+    
+    // For other units, use K/M formatting
     if (numValue >= 1000000) {
       return `${(numValue / 1000000).toFixed(2)} M ${unitStr}`;
     } else if (numValue >= 1000) {
