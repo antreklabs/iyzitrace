@@ -206,21 +206,44 @@ exporters:
     endpoint: "http://nginx-platform:80"
     tls:
       insecure: true
+  kafka:
+    brokers: 
+      - kafka.perfect-drive.nl:9092 
+    protocol_version: 2.0.0 
+    client_id: "opentelemetry-demo"
+    logs: 
+      topic: otel-logs 
+      encoding: otlp_json
+    metrics: 
+      topic: otlp_metrics
+      encoding: otlp_json
+    traces: 
+      topic: otlp_spans
+      encoding: otlp_json
+    auth: 
+      sasl: 
+        mechanism: SCRAM-SHA-256 
+        username: otel_it90
+        password: jrh0a7gZBa8N3DDNEhbz 
+    producer: 
+      required_acks: 1 
+      compression: gzip 
+      max_message_bytes: 10485760
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [resourcedetection, memory_limiter, batch, transform/span]
-      exporters: [otlphttp/iyzitrace]
+      processors: [memory_limiter, resourcedetection, transform/span, batch]
+      exporters: [otlphttp/iyzitrace,kafka]
     metrics:
       receivers: [otlp, docker_stats, httpcheck/frontend-proxy, hostmetrics, nginx, postgresql, redis]
-      processors: [resourcedetection, memory_limiter, batch]
-      exporters: [otlphttp/iyzitrace]
+      processors: [memory_limiter, resourcedetection, batch]
+      exporters: [otlphttp/iyzitrace,kafka]
     logs:
       receivers: [otlp]
-      processors: [resourcedetection, memory_limiter, batch]
-      exporters: [otlphttp/iyzitrace]
+      processors: [memory_limiter, resourcedetection, batch]
+      exporters: [otlphttp/iyzitrace,kafka]
   telemetry:
     resource:
       service.name: "central-collector"
