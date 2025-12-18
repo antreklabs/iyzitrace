@@ -199,21 +199,25 @@ function ViewsPage() {
 
   const buildWidgetUrl = (widget: PageViewItem) => {
     const url = widget.query || '';
+    // Add viewId parameter to URL
+    const separator = url.includes('?') ? '&' : '?';
+    const urlWithViewId = `${url}${separator}viewId=${widget.id}`;
+    
     switch (widget.page) {
       case 'logs':
-        return `/a/iyzitrace-app/logs${url}`;
+        return `/a/iyzitrace-app/logs${urlWithViewId}`;
       case 'traces':
-        return `/a/iyzitrace-app/traces${url}`;
+        return `/a/iyzitrace-app/traces${urlWithViewId}`;
       case 'services':
-        return `/a/iyzitrace-app/services${url}`;
+        return `/a/iyzitrace-app/services${urlWithViewId}`;
       case 'service-map':
-        return `/a/iyzitrace-app/service-map${url}`;
+        return `/a/iyzitrace-app/service-map${urlWithViewId}`;
       case 'alerts':
-        return `/a/iyzitrace-app/alerts${url}`;
+        return `/a/iyzitrace-app/alerts${urlWithViewId}`;
       case 'exceptions':
-        return `/a/iyzitrace-app/exceptions${url}`;
+        return `/a/iyzitrace-app/exceptions${urlWithViewId}`;
       default:
-        return `/a/iyzitrace-app/${widget.page || ''}${url}`;
+        return `/a/iyzitrace-app/${widget.page || ''}${urlWithViewId}`;
     }
   };
 

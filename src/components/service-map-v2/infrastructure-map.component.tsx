@@ -50,9 +50,9 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
     const edges: Edge[] = [];
     
     const regions = data?.regions || [];
-    console.log('🔍 InfrastructureMap - Data:', data);
-    console.log('🔍 InfrastructureMap - Regions count:', regions.length);
-    console.log('🔍 InfrastructureMap - Regions:', regions);
+    // console.log('🔍 InfrastructureMap - Data:', data);
+    // console.log('🔍 InfrastructureMap - Regions count:', regions.length);
+    // console.log('🔍 InfrastructureMap - Regions:', regions);
 
     // Layout constants
     const INFRA_WIDTH = 180;
@@ -162,9 +162,9 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
       });
     });
 
-    console.log('🔍 InfrastructureMap - Total nodes created:', nodes.length);
-    console.log('🔍 InfrastructureMap - Total edges created:', edges.length);
-    console.log('🔍 InfrastructureMap - Nodes:', nodes);
+    // console.log('🔍 InfrastructureMap - Total nodes created:', nodes.length);
+    // console.log('🔍 InfrastructureMap - Total edges created:', edges.length);
+    // console.log('🔍 InfrastructureMap - Nodes:', nodes);
     
     return { nodes, edges };
   }, [data]);
@@ -232,7 +232,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
         }
       });
 
-      console.log('📥 Positions loaded from view');
+      // console.log('📥 Positions loaded from view');
     };
 
     loadPositions();

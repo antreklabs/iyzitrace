@@ -35,9 +35,39 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
     loadViews();
   }, []);
 
+  // Check if URL contains viewId parameter and select that view
+  useEffect(() => {
+    if (Array.isArray(views) && views.length > 0) {
+      const searchParams = new URLSearchParams(location.search);
+      const viewIdFromUrl = searchParams.get('viewId');
+      
+      if (viewIdFromUrl) {
+        const matchingView = views.find(v => v.id === viewIdFromUrl);
+        if (matchingView && (!selectedView || selectedView.id !== matchingView.id)) {
+          setSelectedView(matchingView);
+          writeLastSelected(matchingView.id);
+        }
+      }
+    }
+  }, [location.search, views]);
+
   // Final guard: when views arrive but no selection yet, choose last or first
   useEffect(() => {
     if (!selectedView && Array.isArray(views) && views.length > 0) {
+      // Check URL first
+      const searchParams = new URLSearchParams(location.search);
+      const viewIdFromUrl = searchParams.get('viewId');
+      
+      if (viewIdFromUrl) {
+        const matchingView = views.find(v => v.id === viewIdFromUrl);
+        if (matchingView) {
+          setSelectedView(matchingView);
+          writeLastSelected(matchingView.id);
+          return;
+        }
+      }
+      
+      // Fallback to last selected or first
       const last = safeReadLastSelected();
       const candidate = last && last.pageName === pageName
         ? views.find(v => v.id === last.viewId) || views[0]
@@ -151,14 +181,34 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
 
   const autoSelectView = (list: ViewData[]) => {
     if (!Array.isArray(list) || list.length === 0) return;
+    
+    // Check if URL already has a viewId
+    const searchParams = new URLSearchParams(location.search);
+    const viewIdFromUrl = searchParams.get('viewId');
+    
+    if (viewIdFromUrl) {
+      const matchingView = list.find(v => v.id === viewIdFromUrl);
+      if (matchingView) {
+        setSelectedView(matchingView);
+        writeLastSelected(matchingView.id);
+        return;
+      }
+    }
+    
+    // Otherwise, use last selected or first
     const last = safeReadLastSelected();
     const candidate = last && last.pageName === pageName
       ? list.find(v => v.id === last.viewId) || list[0]
       : list[0];
     setSelectedView(candidate);
     writeLastSelected(candidate.id);
+    
     if (candidate.query) {
-      navigate(`${location.pathname}${candidate.query}`, { replace: true });
+      // Add viewId parameter to the URL
+      const queryString = candidate.query;
+      const separator = queryString.includes('?') ? '&' : '?';
+      const urlWithViewId = `${queryString}${separator}viewId=${candidate.id}`;
+      navigate(`${location.pathname}${urlWithViewId}`, { replace: true });
     }
   };
 
@@ -191,7 +241,11 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
 
   const handleClearView = () => {
     setSelectedView(null);
-    // Reset URL to default parameters
+    // Remove viewId from localStorage
+    try {
+      localStorage.removeItem(`lastSelectedPageView_${pageName}`);
+    } catch {}
+    // Reset URL to default parameters (without viewId)
     const defaultQuery = getDefaultSearchQuery();
     navigate(`${location.pathname}?${defaultQuery}`, { replace: true });
   };
@@ -201,7 +255,13 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
       setLoading(true);
       const values = await form.validateFields();
       
-      const currentQuery = location.search;
+      // Get current query and remove viewId parameter if it exists
+      let currentQuery = location.search;
+      const searchParams = new URLSearchParams(currentQuery);
+      searchParams.delete('viewId');
+      const cleanQuery = searchParams.toString();
+      currentQuery = cleanQuery ? `?${cleanQuery}` : '';
+      
       const viewData: ViewData = {
         id: editingView?.id || `view-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
         title: values.title,
@@ -274,8 +334,14 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
     if (view) {
       setSelectedView(view);
       writeLastSelected(view.id);
-      // Navigate to the saved query
-      navigate(`${location.pathname}${view.query}`, { replace: true });
+      
+      // Add viewId parameter to the URL
+      const queryString = view.query || '';
+      const separator = queryString.includes('?') ? '&' : '?';
+      const urlWithViewId = `${queryString}${separator}viewId=${view.id}`;
+      
+      // Navigate to the saved query with viewId
+      navigate(`${location.pathname}${urlWithViewId}`, { replace: true });
     }
   };
 

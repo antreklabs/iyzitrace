@@ -20,11 +20,11 @@ const ServiceMapV2Container: React.FC = () => {
 
   const fetchModelData = async (filterModel: FilterParamsModel): Promise<FetchedModel> => {
     const regions = await getRegions(filterModel);
-    console.log('📊 [ServiceMapV2Container] Regions received:', regions);
-    console.log('📊 [ServiceMapV2Container] Regions count:', regions?.length || 0);
+    // console.log('📊 [ServiceMapV2Container] Regions received:', regions);
+    // console.log('📊 [ServiceMapV2Container] Regions count:', regions?.length || 0);
     
     const infrastructures = (regions || []).flatMap((r: Region) => r.infrastructures || []);
-    console.log('📊 [ServiceMapV2Container] Infrastructures count:', infrastructures.length);
+    // console.log('📊 [ServiceMapV2Container] Infrastructures count:', infrastructures.length);
     
     setMapLevelData({ regions: regions });
     setInfraLevelData(infrastructures);

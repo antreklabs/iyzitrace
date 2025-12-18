@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Handle, Position } from 'reactflow';
 import { Infrastructure } from '../../api/service/interface.service';
-import { css, keyframes } from '@emotion/css';
+import { css } from '@emotion/css';
 
 interface InfrastructureNodeProps {
   data: {
@@ -10,25 +10,25 @@ interface InfrastructureNodeProps {
   };
 }
 
-const pulse = keyframes`
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.05); }
-`;
+// const pulse = keyframes`
+//   0%, 100% { opacity: 1; transform: scale(1); }
+//   50% { opacity: 0.7; transform: scale(1.05); }
+// `;
 
-const float = keyframes`
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-`;
+// const float = keyframes`
+//   0%, 100% { transform: translateY(0px); }
+//   50% { transform: translateY(-8px); }
+// `;
 
-const shimmer = keyframes`
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-`;
+// const shimmer = keyframes`
+//   0% { background-position: -200% center; }
+//   100% { background-position: 200% center; }
+// `;
 
-const glow = keyframes`
-  0%, 100% { box-shadow: 0 0 20px currentColor, 0 0 40px currentColor, 0 10px 60px rgba(0,0,0,0.5); }
-  50% { box-shadow: 0 0 30px currentColor, 0 0 60px currentColor, 0 10px 80px rgba(0,0,0,0.7); }
-`;
+// const glow = keyframes`
+//   0%, 100% { box-shadow: 0 0 20px currentColor, 0 0 40px currentColor, 0 10px 60px rgba(0,0,0,0.5); }
+//   50% { box-shadow: 0 0 30px currentColor, 0 0 60px currentColor, 0 10px 80px rgba(0,0,0,0.7); }
+// `;
 
 const getStatusConfig = (status?: string) => {
   const s = status?.toLowerCase();
@@ -66,7 +66,7 @@ const getStatusConfig = (status?: string) => {
 
 export const InfrastructureNode: React.FC<InfrastructureNodeProps> = ({ data }) => {
   const { infrastructure, onNodeClick } = data;
-  const [isHovered, setIsHovered] = useState(false);
+  // const [isHovered, setIsHovered] = useState(false);
   const statusConfig = getStatusConfig(infrastructure.status?.value);
   
   const containerStyle = css`
@@ -76,7 +76,6 @@ export const InfrastructureNode: React.FC<InfrastructureNodeProps> = ({ data }) 
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     transform-style: preserve-3d;
-    animation: ${isHovered ? float : 'none'} 2s ease-in-out infinite;
     
     &:hover {
       transform: translateY(-10px) scale(1.05);
@@ -92,7 +91,6 @@ export const InfrastructureNode: React.FC<InfrastructureNodeProps> = ({ data }) 
     left: 50%;
     transform: translate(-50%, -50%);
     transform-style: preserve-3d;
-    animation: ${glow} 3s ease-in-out infinite;
     color: ${statusConfig.color};
   `;
 
@@ -114,8 +112,8 @@ export const InfrastructureNode: React.FC<InfrastructureNodeProps> = ({ data }) 
       content: '';
       position: absolute;
       top: 0;
-      left: -200%;
-      width: 200%;
+      left: -20%;
+      width: 20%;
       height: 100%;
       background: linear-gradient(
         90deg,
@@ -123,7 +121,7 @@ export const InfrastructureNode: React.FC<InfrastructureNodeProps> = ({ data }) 
         rgba(255, 255, 255, 0.3),
         transparent
       );
-      animation: ${shimmer} 3s infinite;
+      
     }
   `;
 
@@ -167,7 +165,6 @@ export const InfrastructureNode: React.FC<InfrastructureNodeProps> = ({ data }) 
       0 0 20px ${statusConfig.glow},
       inset 0 1px 0 rgba(255,255,255,0.3);
     border: 2px solid ${statusConfig.color};
-    animation: ${pulse} 2s ease-in-out infinite;
     z-index: 10;
     backdrop-filter: blur(10px);
   `;
@@ -246,8 +243,8 @@ export const InfrastructureNode: React.FC<InfrastructureNodeProps> = ({ data }) 
     <div 
       className={containerStyle}
       onClick={handleClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      // onMouseEnter={() => setIsHovered(true)}
+      // onMouseLeave={() => setIsHovered(false)}
     >
       <div className={badgeStyle}>
         {statusConfig.label}

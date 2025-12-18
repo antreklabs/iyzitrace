@@ -38,6 +38,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
   const [modelData, setModelData] = useState<any[]>([]);
+  const [aiModelData, setAiModelData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [collapsed, setCollapsed] = useState(initialFilterCollapsed);
 
@@ -63,6 +64,9 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
       const filterModel = getFilterParams();
       const fetchedModel = await onFetchData(filterModel);
       setModelData(fetchedModel.data);
+      setAiModelData(fetchedModel.data);
+      console.log('modelData', modelData);
+      console.log('aiModelData', aiModelData);
     } catch (error) {
       console.error('Error fetching data:', error);
       setModelData([]);
@@ -106,7 +110,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
           )}
         </Content>
       </Layout>
-      <AIChatbot contextData={modelData} contextTitle={title} />
+      <AIChatbot contextData={aiModelData} contextTitle={title} />
     </BaseContainer>
   );
 };

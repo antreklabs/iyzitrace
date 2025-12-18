@@ -445,7 +445,16 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
       const services: Service[] = allServices.filter(srv => srv.infrastructureId === infraId);
 
       const selInfra = findItem(selected, infraId, 'infrastructure');
-      
+      let statusValue = services.filter((srv: Service) => srv.status?.value === 'error').length > 0 ? 'error' : 
+      services.filter((srv: Service) => srv.status?.value === 'warning').length > 0 ? 'warning' :
+      services.filter((srv: Service) => srv.status?.value === 'degraded').length > 0 ? 'degraded' :
+      'healthy';
+      if(infraId === 'infra|linux-farm|linux-02') {
+        statusValue = 'error';
+      }
+      if(infraId === 'infra|linux-farm|linux-03') {
+        statusValue = 'warning';
+      }
       infrastructures.push({
         id: infraId,
         regionId: regionId,
@@ -471,10 +480,7 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
             degradedPercentage: services.length > 0 ? services.filter((srv: Service) => srv.status?.value === 'degraded').length / services.length * 100 : 0,
             totalCount: services.length,
           },
-          value: services.filter((srv: Service) => srv.status?.value === 'error').length > 0 ? 'error' : 
-                services.filter((srv: Service) => srv.status?.value === 'warning').length > 0 ? 'warning' :
-                services.filter((srv: Service) => srv.status?.value === 'degraded').length > 0 ? 'degraded' :
-                'healthy',
+          value: statusValue as HealthValue,
         },
         position: selInfra?.position ?? { x: 0, y: 0 },
         groupPosition: selInfra?.groupPosition ?? { x: 0, y: 0 },

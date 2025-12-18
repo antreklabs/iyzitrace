@@ -542,7 +542,7 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ contextData, contextTitle = 'Curr
   // Start with optimization tips if it's the first open
   useEffect(() => {
     if (isOpen && messages.length === 0 && initialized) {
-      sendMessage('Give me optimization tips');
+      // sendMessage('Give me optimization tips');
       setShowBadge(false);
     }
   }, [isOpen, initialized]);
@@ -581,10 +581,25 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ contextData, contextTitle = 'Curr
 
       setMessages(prev => [...prev, aiMsg]);
     } catch (error: any) {
+      let errorMessage = '❌ Sorry, something went wrong.';
+      
+      // Handle different error types
+      if (error.code === 'TOKEN_LIMIT_EXCEEDED') {
+        errorMessage = `⚠️ **Too Much Data**\n\nYour question includes too much context data. Please try:\n\n1. Being more specific in your question\n2. Focusing on a specific region or service\n3. Asking about a smaller time range\n\n*Technical: ${error.details?.estimated || 'Unknown'} tokens estimated, limit is ${error.details?.limit || 'Unknown'}*`;
+      } else if (error.code === 'TIMEOUT') {
+        errorMessage = '⏱️ **Request Timeout**\n\nThe request took too long. Please try again with a simpler question.';
+      } else if (error.code === 'CANCELLED') {
+        errorMessage = '🚫 **Request Cancelled**\n\nYour previous request was cancelled.';
+      } else if (error.code === 'NOT_INITIALIZED') {
+        errorMessage = '⚙️ **AI Not Configured**\n\nPlease configure your OpenRouter API key in plugin settings.';
+      } else if (error.message) {
+        errorMessage = `❌ **Error**\n\n${error.message}`;
+      }
+      
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: 'ai',
-        content: `❌ ${error.message || 'Sorry, something went wrong.'}`,
+        content: errorMessage,
         timestamp: new Date(),
         isError: true
       };

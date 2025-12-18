@@ -120,88 +120,207 @@ export const initAI = (config: AIConfig): void => {
 // ==================== UTILITY FUNCTIONS ====================
 
 /**
+ * Estimate token count (rough approximation: ~4 chars per token)
+ */
+const estimateTokens = (text: string): number => {
+  return Math.ceil(text.length / 4);
+};
+
+/**
  * Optimize region data for token efficiency
  * Removes unnecessary fields and summarizes data
+ * Only includes regions/services with issues to save tokens
  */
-const optimizeRegionData = (regions: Region[]): string => {
-  const summary = regions.map((region) => {
+const optimizeRegionData = (regions: Region[], maxTokens: number = 5000): string => {
+  const summary: any[] = [];
+  
+  regions.forEach((region) => {
     const infraCount = region.infrastructures?.length || 0;
     const services: Service[] = [];
     
     region.infrastructures?.forEach((infra: Infrastructure) => {
       if (infra.services) {
         services.push(...infra.services);
-        }
+      }
     });
 
+    // Count by status
     const healthyServices = services.filter((s) => s.status?.value === 'healthy').length;
     const errorServices = services.filter((s) => s.status?.value === 'error').length;
     const degradedServices = services.filter((s) => s.status?.value === 'degraded').length;
 
-    return {
-      region: region.name,
-      infrastructures: infraCount,
-      services: {
-        total: services.length,
-        healthy: healthyServices,
-        degraded: degradedServices,
-        error: errorServices,
-      },
-      avgLatency: services.length > 0
-        ? (services.reduce((acc, s) => acc + (s.metrics?.avgDurationMs || 0), 0) / services.length).toFixed(2)
-        : 0,
-    };
+    // Calculate average latency
+    const avgLatency = services.length > 0
+      ? (services.reduce((acc, s) => acc + (s.metrics?.avgDurationMs || 0), 0) / services.length).toFixed(2)
+      : 0;
+
+    // Only include regions with issues or high latency to save tokens
+    const hasIssues = errorServices > 0 || degradedServices > 0 || parseFloat(avgLatency as string) > 500;
+
+    if (hasIssues || summary.length < 3) { // Always include at least 3 regions
+      const regionData: any = {
+        region: region.name,
+        infrastructures: infraCount,
+        services: {
+          total: services.length,
+          healthy: healthyServices,
+        },
+        avgLatency,
+      };
+
+      // Only include error/degraded counts if they exist
+      if (degradedServices > 0) regionData.services.degraded = degradedServices;
+      if (errorServices > 0) regionData.services.error = errorServices;
+
+      // Include problematic services details (top 3 worst)
+      if (errorServices > 0 || degradedServices > 0) {
+        const problematicServices = services
+          .filter((s) => s.status?.value === 'error' || s.status?.value === 'degraded')
+          .slice(0, 3)
+          .map((s) => ({
+            name: s.name,
+            status: s.status?.value,
+            latency: s.metrics?.avgDurationMs,
+            errorRate: s.status?.metrics?.errorPercentage,
+          }));
+        
+        if (problematicServices.length > 0) {
+          regionData.issues = problematicServices;
+        }
+      }
+
+      summary.push(regionData);
+    }
   });
 
-  return JSON.stringify(summary, null, 2);
+  // If still too large, truncate
+  let result = JSON.stringify(summary, null, 2);
+  if (estimateTokens(result) > maxTokens) {
+    // Take only first few regions
+    const truncated = summary.slice(0, Math.min(5, summary.length));
+    result = JSON.stringify(truncated, null, 2) + '\n(... truncated to save tokens)';
+  }
+
+  return result;
 };
 
 /**
  * Optimize service data for token efficiency
+ * Prioritizes problematic services
  */
-const optimizeServiceData = (services: Service[]): string => {
-  const summary = services.map((service) => ({
-    name: service.name,
-    type: service.type,
-    status: service.status?.value,
-    metrics: {
-      avgLatency: service.metrics?.avgDurationMs,
-      p95Latency: service.metrics?.p95DurationMs,
-      p99Latency: service.metrics?.p99DurationMs,
-      callsPerSecond: service.metrics?.callsPerSecond,
-      errorRate: service.status?.metrics?.errorPercentage,
-    },
-    operations: service.operations?.length || 0,
-  }));
+const optimizeServiceData = (services: Service[], maxTokens: number = 5000): string => {
+  // Separate services by status
+  const errorServices = services.filter((s) => s.status?.value === 'error');
+  const degradedServices = services.filter((s) => s.status?.value === 'degraded');
+  const highLatencyServices = services.filter(
+    (s) => (s.metrics?.p95DurationMs || 0) > 1000 && s.status?.value !== 'error'
+  );
 
-  return JSON.stringify(summary, null, 2);
+  // Prioritize problematic services
+  const prioritized = [
+    ...errorServices.slice(0, 5),
+    ...degradedServices.slice(0, 5),
+    ...highLatencyServices.slice(0, 5),
+  ];
+
+  // If no issues, include top 10 services by latency
+  if (prioritized.length === 0) {
+    prioritized.push(
+      ...services
+        .sort((a, b) => (b.metrics?.avgDurationMs || 0) - (a.metrics?.avgDurationMs || 0))
+        .slice(0, 10)
+    );
+  }
+
+  const summary = prioritized.map((service) => {
+    const data: any = {
+      name: service.name,
+      status: service.status?.value,
+    };
+
+    // Only include metrics if they exist
+    if (service.metrics?.avgDurationMs) data.avgLatency = service.metrics.avgDurationMs;
+    if (service.metrics?.p95DurationMs && service.metrics.p95DurationMs > 500)
+      data.p95 = service.metrics.p95DurationMs;
+    if (service.metrics?.p99DurationMs && service.metrics.p99DurationMs > 1000)
+      data.p99 = service.metrics.p99DurationMs;
+    if (service.status?.metrics?.errorPercentage)
+      data.errorRate = service.status.metrics.errorPercentage;
+
+    return data;
+  });
+
+  let result = JSON.stringify(summary, null, 2);
+  
+  // Add stats summary
+  const stats = `\nTotal Services: ${services.length} | Showing: ${summary.length} (prioritized by issues)`;
+  result = stats + '\n' + result;
+
+  // If still too large, truncate
+  if (estimateTokens(result) > maxTokens) {
+    const truncated = summary.slice(0, Math.min(10, summary.length));
+    result =
+      stats +
+      '\n' +
+      JSON.stringify(truncated, null, 2) +
+      '\n(... truncated to save tokens)';
+  }
+
+  return result;
 };
 
 /**
  * Build context string from provided data
+ * Limits total context size to prevent token overflow
  */
-const buildContextString = (context?: AIInsightRequest['context']): string => {
+const buildContextString = (context?: AIInsightRequest['context'], maxContextTokens: number = 10000): string => {
   if (!context) return '';
 
   const parts: string[] = [];
+  let estimatedTokens = 0;
 
+  // Add regions data (limit to 5000 tokens)
   if (context.regions && context.regions.length > 0) {
-    parts.push('📍 **Regions Data:**\n' + optimizeRegionData(context.regions));
+    const regionData = '📍 **Regions Data:**\n' + optimizeRegionData(context.regions, 5000);
+    const tokens = estimateTokens(regionData);
+    if (estimatedTokens + tokens < maxContextTokens) {
+      parts.push(regionData);
+      estimatedTokens += tokens;
+    }
   }
 
-  if (context.services && context.services.length > 0) {
-    parts.push('🔧 **Services Data:**\n' + optimizeServiceData(context.services));
+  // Add services data (limit to 5000 tokens)
+  if (context.services && context.services.length > 0 && estimatedTokens < maxContextTokens) {
+    const serviceData = '🔧 **Services Data:**\n' + optimizeServiceData(context.services, 5000);
+    const tokens = estimateTokens(serviceData);
+    if (estimatedTokens + tokens < maxContextTokens) {
+      parts.push(serviceData);
+      estimatedTokens += tokens;
+    } else {
+      // Try with smaller limit
+      const smallerData = '🔧 **Services Data:**\n' + optimizeServiceData(context.services, 2000);
+      parts.push(smallerData);
+      estimatedTokens += estimateTokens(smallerData);
+    }
   }
 
-  if (context.timeRange) {
+  // Add time range (minimal tokens)
+  if (context.timeRange && estimatedTokens < maxContextTokens) {
     parts.push(`⏰ **Time Range:** ${context.timeRange.from} to ${context.timeRange.to}`);
   }
 
-  if (context.customData) {
-    parts.push('📊 **Additional Data:**\n' + JSON.stringify(context.customData, null, 2));
+  // Skip custom data if we're close to limit
+  if (context.customData && estimatedTokens < maxContextTokens * 0.8) {
+    const customStr = JSON.stringify(context.customData, null, 2);
+    if (estimateTokens(customStr) < 1000) {
+      parts.push('📊 **Additional Data:**\n' + customStr);
+    }
   }
 
-  return parts.join('\n\n');
+  const result = parts.join('\n\n');
+  console.log(`📊 Context built: ~${estimateTokens(result)} tokens (limit: ${maxContextTokens})`);
+  
+  return result;
 };
 
 // ==================== CORE AI FUNCTIONS ====================
@@ -346,49 +465,19 @@ const makeOpenRouterRequest = async (
 
 // ==================== SYSTEM PROMPTS ====================
 
-const SYSTEM_PROMPT = `You are an AI assistant specialized in observability, distributed systems, and performance analysis for IyziTrace platform.
+const SYSTEM_PROMPT = `You are an observability AI for IyziTrace platform. Analyze metrics, traces, and service topology.
 
-🎯 **Your Role:**
-You analyze metrics, traces, logs, and service topology to provide:
-- Anomaly detection and root cause analysis
-- Performance optimization recommendations
-- Service health insights
-- Proactive alerting suggestions
-- Dashboard and metric explanations
+**Guidelines:**
+- Prioritize errors, high latency (P95>1000ms), degraded services
+- Be specific: reference exact values, service names
+- Provide actionable recommendations
+- Use emojis: 🔴 critical, 🟡 warning, 🟢 healthy
+- Keep responses concise (2-4 paragraphs)
 
-📊 **IyziTrace Platform Context:**
-IyziTrace is a comprehensive observability platform that monitors:
-- **Services**: Microservices with metrics (latency, error rate, throughput)
-- **Traces**: Distributed traces from Tempo
-- **Logs**: Application logs from Loki
-- **Metrics**: System and application metrics from Prometheus
-- **Infrastructure**: Hosts, regions, CPU, memory, network
-- **Topology**: Service maps showing dependencies and communication patterns
-
-🔍 **Analysis Guidelines:**
-1. **Be Specific**: Reference exact metric values, service names, and timestamps
-2. **Prioritize Issues**: Focus on errors, high latency, and degraded services first
-3. **Provide Context**: Explain why something is a problem and its impact
-4. **Actionable Insights**: Always suggest concrete next steps or actions
-5. **Link to Details**: When mentioning issues, suggest which dashboard/page to check
-6. **Use Emojis**: Make responses readable with appropriate emojis (🔴 error, 🟡 warning, 🟢 healthy)
-
-📝 **Response Format:**
-- Start with a brief summary (1-2 sentences)
-- List key findings with severity indicators
-- Provide detailed analysis for each issue
-- End with actionable recommendations
-- Keep responses concise but comprehensive (aim for 2-4 paragraphs)
-
-🚨 **Critical Indicators:**
-- Error rate > 1%: 🔴 Critical
-- P95 latency > 1000ms: 🟡 Warning  
-- P99 latency > 2000ms: 🟡 Warning
-- Service degraded/error status: 🔴 Critical
-- CPU > 80%: 🟡 Warning
-- Memory > 85%: 🟡 Warning
-
-Always maintain a professional, helpful, and solution-oriented tone.`;
+**Response format:**
+1. Brief summary
+2. Key findings with severity
+3. Actionable recommendations`;
 
 // ==================== PUBLIC API ====================
 
@@ -435,13 +524,43 @@ export const askAI = async (request: AIInsightRequest): Promise<AIResponse> => {
     } as AIError;
   }
 
-  // Build context string
-  const contextString = buildContextString(context);
+  // Estimate system prompt tokens
+  const systemTokens = estimateTokens(SYSTEM_PROMPT);
+  const promptTokens = estimateTokens(prompt);
+  const responseTokens = maxTokens || AI_CONFIG.maxTokens || 150;
+
+  // Calculate available tokens for context (conservative limit for deepseek)
+  // DeepSeek context: 64K tokens, but we use 30K to be safe
+  const totalAvailable = 30000;
+  const availableForContext = totalAvailable - systemTokens - promptTokens - responseTokens - 1000; // 1000 buffer
+
+  if (availableForContext < 1000) {
+    console.warn('⚠️ Very limited context space available, using minimal context');
+  }
+
+  // Build context string with token limit
+  const contextString = buildContextString(context, Math.max(1000, availableForContext));
 
   // Construct user message
   const userMessage = contextString
     ? `${prompt}\n\n---\n\n${contextString}`
     : prompt;
+
+  // Final token check
+  const totalEstimatedTokens = systemTokens + estimateTokens(userMessage) + responseTokens;
+  console.log(`📊 Estimated tokens - System: ${systemTokens}, User: ${estimateTokens(userMessage)}, Response: ${responseTokens}, Total: ${totalEstimatedTokens}`);
+
+  if (totalEstimatedTokens > totalAvailable) {
+    console.error(`❌ Token limit would be exceeded: ${totalEstimatedTokens} > ${totalAvailable}`);
+    throw {
+      message: `Request too large. Estimated ${totalEstimatedTokens} tokens, limit is ${totalAvailable}. Try reducing the amount of data or being more specific in your question.`,
+      code: 'TOKEN_LIMIT_EXCEEDED',
+      details: {
+        estimated: totalEstimatedTokens,
+        limit: totalAvailable,
+      },
+    } as AIError;
+  }
 
   // Build messages array
   const messages: AIMessage[] = [
