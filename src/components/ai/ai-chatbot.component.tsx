@@ -19,11 +19,9 @@ import {
   askAI,
   type AIResponse,
 } from '../../api/service/ai.service';
-import type { PluginJsonData } from '../../interfaces/options';
+import type { PluginJsonData } from '../../interfaces/utils/options';
 
 const PLUGIN_ID = 'iyzitrace-app';
-
-// ==================== ANIMATIONS ====================
 
 const slideIn = keyframes`
   from { opacity: 0; transform: translateX(20px) scale(0.95); }
@@ -40,8 +38,6 @@ const typing = keyframes`
   0%, 100% { opacity: 0.3; transform: translateY(0); }
   50% { opacity: 1; transform: translateY(-3px); }
 `;
-
-// ==================== STYLES ====================
 
 const styles = {
   chatbotWrapper: css`
@@ -482,8 +478,6 @@ const styles = {
   `
 };
 
-// ==================== TYPES ====================
-
 interface Message {
   id: string;
   role: 'user' | 'ai';
@@ -497,8 +491,6 @@ interface AIChatbotProps {
   contextTitle?: string;
 }
 
-// ==================== COMPONENT ====================
-
 const AIChatbot: React.FC<AIChatbotProps> = ({ contextData, contextTitle = 'Current View' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isFullscreen, setFullscreen] = useState(false);
@@ -509,7 +501,6 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ contextData, contextTitle = 'Curr
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showBadge, setShowBadge] = useState(true);
 
-  // Initialize AI
   useEffect(() => {
     const initializeAI = async () => {
       try {
@@ -526,23 +517,19 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ contextData, contextTitle = 'Curr
         
         setInitialized(true);
       } catch (error) {
-        console.error('Failed to initialize AI:', error);
       }
     };
     initializeAI();
   }, []);
 
-  // Auto scroll
   useEffect(() => {
     if (isOpen) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isOpen]);
 
-  // Start with optimization tips if it's the first open
   useEffect(() => {
     if (isOpen && messages.length === 0 && initialized) {
-      // sendMessage('Give me optimization tips');
       setShowBadge(false);
     }
   }, [isOpen, initialized]);
@@ -583,7 +570,6 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ contextData, contextTitle = 'Curr
     } catch (error: any) {
       let errorMessage = '❌ Sorry, something went wrong.';
       
-      // Handle different error types
       if (error.code === 'TOKEN_LIMIT_EXCEEDED') {
         errorMessage = `⚠️ **Too Much Data**\n\nYour question includes too much context data. Please try:\n\n1. Being more specific in your question\n2. Focusing on a specific region or service\n3. Asking about a smaller time range\n\n*Technical: ${error.details?.estimated || 'Unknown'} tokens estimated, limit is ${error.details?.limit || 'Unknown'}*`;
       } else if (error.code === 'TIMEOUT') {
@@ -617,7 +603,6 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ contextData, contextTitle = 'Curr
   };
 
   const formatContent = (content: string) => {
-    // Basic markdown formatting
     let formatted = content
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/`(.*?)`/g, '<code>$1</code>')
@@ -634,7 +619,8 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ contextData, contextTitle = 'Curr
     <div className={styles.chatbotWrapper}>
       {isOpen && (
         <div className={`${styles.window} ${isFullscreen ? 'fullscreen' : ''}`}>
-          {/* Header */}
+          {
+}
           <div className={styles.header}>
             <div className={styles.headerTitle}>
               <Avatar icon={<RobotOutlined />} style={{ background: 'rgba(255,255,255,0.2)' }} />
@@ -653,7 +639,8 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ contextData, contextTitle = 'Curr
             </div>
           </div>
 
-          {/* Messages */}
+          {
+}
           <div className={styles.content}>
             <div className={styles.messagesArea}>
               {messages.map(msg => (
@@ -698,7 +685,8 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ contextData, contextTitle = 'Curr
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Quick Actions */}
+            {
+}
             {!loading && messages.length < 3 && (
               <div className={styles.suggestions}>
                 <button className={styles.chip} onClick={() => sendMessage('Analyze this data for anomalies')}>
@@ -713,7 +701,8 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ contextData, contextTitle = 'Curr
               </div>
             )}
 
-            {/* Input */}
+            {
+}
             <div className={styles.footer}>
               <div className={styles.inputWrapper}>
                 <Input.TextArea
@@ -738,7 +727,8 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ contextData, contextTitle = 'Curr
         </div>
       )}
 
-      {/* Toggle Button */}
+      {
+}
       <Tooltip title="AI Assistant" placement="left">
         <Badge count={showBadge ? 1 : 0} dot>
           <button 
@@ -754,4 +744,3 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ contextData, contextTitle = 'Curr
 };
 
 export default AIChatbot;
-

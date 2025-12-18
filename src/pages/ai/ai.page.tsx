@@ -11,7 +11,6 @@ import {
   FireOutlined,
   HeartOutlined,
   CloseCircleOutlined,
-//   CheckCircleOutlined,
   ClockCircleOutlined,
   CodeOutlined,
   BarChartOutlined,
@@ -31,13 +30,11 @@ import { getServicesTableData } from '../../api/service/services.service';
 import { FilterParamsModel } from '../../api/service/query.service';
 import { isAIConfigured } from '../../api/service/landing.service';
 import type { Region, Service, Infrastructure } from '../../api/service/interface.service';
-import type { PluginJsonData } from '../../interfaces/options';
+import type { PluginJsonData } from '../../interfaces/utils/options';
 
 const { TextArea } = Input;
 
 const PLUGIN_ID = 'iyzitrace-app';
-
-// ==================== ANIMATIONS ====================
 
 const gradientAnimation = keyframes`
   0% { background-position: 0% 50%; }
@@ -59,8 +56,6 @@ const typing = keyframes`
   0%, 100% { opacity: 0; }
   50% { opacity: 1; }
 `;
-
-// ==================== STYLES ====================
 
 const styles = {
   container: css`
@@ -581,8 +576,6 @@ const styles = {
   `,
 };
 
-// ==================== INTERFACES ====================
-
 interface Message {
   id: string;
   role: 'user' | 'ai';
@@ -604,8 +597,6 @@ interface QuickAction {
   action: () => Promise<void>;
 }
 
-// ==================== COMPONENT ====================
-
 const AIPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -625,11 +616,9 @@ const AIPage: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<any>(null);
 
-  // Initialize AI service from settings
   useEffect(() => {
     const initializeAI = async () => {
       try {
-        // Check if API key is configured
         const apiKeyConfigured = await isAIConfigured();
         setIsApiKeyConfigured(apiKeyConfigured);
         
@@ -649,14 +638,12 @@ const AIPage: React.FC = () => {
         setInitialized(true);
         message.success('🤖 AI Service initialized successfully!');
       } catch (error) {
-        console.error('Failed to initialize AI service:', error);
         message.error('Failed to initialize AI service. Please configure in Settings.');
       }
     };
     initializeAI();
   }, []);
 
-  // Load data
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -671,18 +658,15 @@ const AIPage: React.FC = () => {
         setRegions(regionsData);
         setServices(servicesData);
       } catch (error) {
-        console.error('Failed to load data:', error);
       }
     };
     loadData();
   }, []);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Quick actions
   const quickActions: QuickAction[] = [
     {
       id: 'overview',
@@ -751,16 +735,13 @@ const AIPage: React.FC = () => {
     try {
       const context: any = {};
       
-      // Build filtered regions based on toggle states
       if (includeRegions && regions.length > 0) {
         const filteredRegions = regions.map(region => {
           const regionCopy = { ...region };
           
-          // Filter infrastructures
           if (!includeInfrastructures) {
             delete regionCopy.infrastructures;
           } else if (includeInfrastructures && regionCopy.infrastructures) {
-            // Filter applications within infrastructures
             if (!includeApplications) {
               regionCopy.infrastructures = regionCopy.infrastructures.map(infra => {
                 const infraCopy = { ...infra };
@@ -768,7 +749,6 @@ const AIPage: React.FC = () => {
                 return infraCopy;
               });
             } else if (includeApplications && regionCopy.infrastructures) {
-              // Filter services within infrastructures
               if (!includeServices) {
                 regionCopy.infrastructures = regionCopy.infrastructures.map(infra => {
                   const infraCopy = { ...infra };
@@ -776,7 +756,6 @@ const AIPage: React.FC = () => {
                   return infraCopy;
                 });
               } else if (includeServices && !includeOperations) {
-                // Filter operations within services
                 regionCopy.infrastructures = regionCopy.infrastructures.map(infra => {
                   const infraCopy = { ...infra };
                   if (infraCopy.services) {
@@ -798,7 +777,6 @@ const AIPage: React.FC = () => {
         context.regions = filteredRegions;
       }
       
-      // Add standalone services if needed
       if (includeServices && services.length > 0) {
         const filteredServices = includeOperations 
           ? services 
@@ -874,7 +852,6 @@ const AIPage: React.FC = () => {
   };
 
   const formatMessageContent = (content: string) => {
-    // Simple markdown-like formatting
     let formatted = content
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
@@ -896,7 +873,8 @@ const AIPage: React.FC = () => {
     <PluginPage layout={PageLayoutType.Canvas}>
       <div className={styles.container}>
         <div className={styles.innerContainer}>
-          {/* Header */}
+          {
+}
           <div className={styles.header}>
             <h1 className={styles.title}>
               <RobotOutlined /> IyziTrace AI Assistant
@@ -906,7 +884,8 @@ const AIPage: React.FC = () => {
             </p>
           </div>
 
-          {/* AI Status Card */}
+          {
+}
           <div className={styles.statusCard}>
             <div className={styles.statusLeft}>
               <div className={styles.statusIcon}>
@@ -930,7 +909,8 @@ const AIPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Quick Actions */}
+          {
+}
           <div className={styles.quickActionsGrid}>
             {quickActions.map((action) => (
               <div
@@ -945,9 +925,11 @@ const AIPage: React.FC = () => {
             ))}
           </div>
 
-          {/* Main Chat Card */}
+          {
+}
           <Card className={styles.mainCard} bordered={false}>
-            {/* Stats Bar */}
+            {
+}
             <div className={styles.statsBar}>
               <div className={styles.statsGrid}>
                 <div className={styles.statItem}>
@@ -958,14 +940,8 @@ const AIPage: React.FC = () => {
                   <BarChartOutlined style={{ color: '#f5576c' }} />
                   <span>Tokens: <span className={styles.statValue}>{totalTokens.toLocaleString()}</span></span>
                 </div>
-                {/* <div className={styles.statItem}>
-                  <CheckCircleOutlined style={{ color: regions.length > 0 ? '#51cf66' : '#868e96' }} />
-                  <span>Data: <span className={styles.statValue}>
-                    {regions.length}R / 
-                    {regions.reduce((sum: number, r: Region) => sum + (r.infrastructures?.length || 0), 0)}I / 
-                    {services.length}S
-                  </span></span>
-                </div> */}
+                {
+}
               </div>
               <Space>
                 <Button size="small" icon={<DeleteOutlined />} onClick={clearChat}>
@@ -974,7 +950,8 @@ const AIPage: React.FC = () => {
               </Space>
             </div>
 
-            {/* Context Bar */}
+            {
+}
             <div className={styles.contextBar}>
               <div className={styles.contextSection}>
                 <span style={{ fontWeight: 600, color: '#333', fontSize: '14px' }}>Context:</span>
@@ -1046,7 +1023,8 @@ const AIPage: React.FC = () => {
               </Tag>
             </div>
 
-            {/* Chat Container */}
+            {
+}
             <div className={styles.chatContainer}>
               <div className={styles.messagesArea}>
                 {messages.length === 0 ? (
@@ -1145,7 +1123,8 @@ const AIPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Input Area */}
+              {
+}
               <div className={styles.inputArea}>
                 <div className={styles.inputRow}>
                   <div className={styles.textAreaWrapper}>
@@ -1191,4 +1170,3 @@ const AIPage: React.FC = () => {
 };
 
 export default AIPage;
-

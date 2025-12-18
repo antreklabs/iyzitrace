@@ -21,14 +21,12 @@ import {
 } from '@ant-design/icons';
 import { css } from '@emotion/css';
 import { useNavigate } from 'react-router-dom';
-import { api, type Team, type CreateTeamData } from '../../api/teams';
+import { api, type Team, type CreateTeamData } from '../../api/service/team.service';
 import pluginJson from '../../plugin.json';
 import { getTeams } from '../../api/service/team.service';
 
 const { Search } = Input;
 const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
-
-// Types are imported from API service
 
 const getStyles = () => ({
   container: css`
@@ -201,8 +199,6 @@ const TeamsPage: React.FC = () => {
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
 
-  // Data will be fetched from API
-
   useEffect(() => {
     fetchTeams();
   }, [currentPage, pageSize, searchText]);
@@ -218,7 +214,6 @@ const TeamsPage: React.FC = () => {
       setTeams(filteredTeams);
       setTotal(filteredTeams.length);
     } catch (error) {
-      console.error('Error fetching teams:', error);
     } finally {
       setLoading(false);
     }
@@ -232,7 +227,6 @@ const TeamsPage: React.FC = () => {
       form.resetFields();
       message.success('Team created successfully');
     } catch (error) {
-      console.error('Error creating team:', error);
       message.error('Failed to create team');
     }
   };
@@ -303,7 +297,8 @@ const TeamsPage: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
+      {
+}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <h1 className={styles.title}>Teams</h1>
@@ -314,7 +309,8 @@ const TeamsPage: React.FC = () => {
         
       </div>
 
-      {/* Search Bar */}
+      {
+}
       <div className={styles.searchBar}>
         <Search
           placeholder="Search teams by name..."
@@ -327,7 +323,8 @@ const TeamsPage: React.FC = () => {
         />
       </div>
 
-      {/* Teams Table */}
+      {
+}
       <Card className={styles.table}>
         <Table
           columns={columns}
@@ -344,7 +341,8 @@ const TeamsPage: React.FC = () => {
         )}
       </Card>
 
-      {/* Pagination */}
+      {
+}
       {teams.length > 0 && (
         <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
           <Pagination
@@ -362,7 +360,8 @@ const TeamsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Create Team Modal */}
+      {
+}
       <Modal
         title="Create new team"
         open={createModalVisible}

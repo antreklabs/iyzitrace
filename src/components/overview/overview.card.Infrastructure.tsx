@@ -58,27 +58,22 @@ const InfrastructureCard: React.FC<InfrastructureCardProps> = ({
   const getGradientByOS = (type?: string, osVersion?: string) => {
     const osType = (type || osVersion || '').toLowerCase();
     
-    // Windows - Very Dark Blue
     if (osType.includes('windows') || osType.includes('win')) {
       return 'linear-gradient(135deg, #1e293b 0%, #334155 100%)';
     }
     
-    // Linux - Very Dark Orange/Brown
     if (osType.includes('linux') || osType.includes('ubuntu') || osType.includes('debian') || osType.includes('centos')) {
       return 'linear-gradient(135deg, #422006 0%, #713f12 100%)';
     }
     
-    // MacOS/Darwin - Very Dark Purple
     if (osType.includes('mac') || osType.includes('darwin') || osType.includes('osx')) {
       return 'linear-gradient(135deg, #3b0764 0%, #581c87 100%)';
     }
     
-    // Docker - Very Dark Cyan
     if (osType.includes('docker') || osType.includes('container')) {
       return 'linear-gradient(135deg, #164e63 0%, #0e7490 100%)';
     }
     
-    // Default - Very Dark Teal
     return 'linear-gradient(135deg, #134e4a 0%, #115e59 100%)';
   };
   
@@ -194,4 +189,3 @@ const InfrastructureCard: React.FC<InfrastructureCardProps> = ({
 };
 
 export default InfrastructureCard;
-

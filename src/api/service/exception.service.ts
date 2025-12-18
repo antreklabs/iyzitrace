@@ -1,8 +1,7 @@
 import { FilterParamsModel } from "./query.service";
 import { getQueryData } from "../provider/prometheus.provider";
 import { getQueryData as getTempoQueryData } from "../provider/tempo.provider";
-import { TempoApi } from "../../providers/api/tempo/tempo.api";
-
+import { TempoApi } from "../provider/tempo.provider";
 
 export const getExceptions = async (filterParamsModel: FilterParamsModel): Promise<ExceptionGroup[]> => {
   const query = 'sum by(service_name, span_name, type, exception_type, exception_message) (iyzitrace_span_metrics_events_total{exception_type=~".+"})';

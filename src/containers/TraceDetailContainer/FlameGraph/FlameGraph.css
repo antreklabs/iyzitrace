@@ -4,14 +4,12 @@
     font-size: 12px;
     width: 100%;
   }
-  
   .flamegraph-row {
     display: flex;
     align-items: center;
     height: 42px;
     border-bottom: 1px solid #2a2a2a;
   }
-  
   .flamegraph-label {
     flex: 0 0 300px;
     padding-left: 8px;
@@ -19,7 +17,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  
   .collapse-toggle {
     display: inline-block;
     width: 16px;
@@ -42,11 +39,9 @@
     color: #fff;
     cursor: pointer;
   }
-  
   .flamegraph-bar.selected {
    border: 2px solid #ff4d4f;
   }
-  
   .duration-label {
     white-space: nowrap;
     text-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
@@ -58,6 +53,5 @@
   }
   .flamegraph-bar-container {
     flex: 1;
-    position: relative; 
+    position: relative;
   }
-  

@@ -15,7 +15,8 @@ const ServiceChartContainer: React.FC<ServiceChartContainerProps> = ({ services 
   return (
     <div style={{ position: 'relative', marginBottom: '24px' }}>
       <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
-        {/* Requests Chart */}
+        {
+}
         <Col xs={24} lg={8}>
           <Card
             title={
@@ -30,7 +31,8 @@ const ServiceChartContainer: React.FC<ServiceChartContainerProps> = ({ services 
           </Card>
         </Col>
 
-        {/* Errors Chart */}
+        {
+}
         <Col xs={24} lg={8}>
           <Card
             title={
@@ -45,7 +47,8 @@ const ServiceChartContainer: React.FC<ServiceChartContainerProps> = ({ services 
           </Card>
         </Col>
 
-        {/* Duration Chart */}
+        {
+}
         <Col xs={24} lg={8}>
           <Card
             title={
@@ -83,4 +86,3 @@ const ServiceChartContainer: React.FC<ServiceChartContainerProps> = ({ services 
 };
 
 export default ServiceChartContainer;
-

@@ -8,7 +8,6 @@ interface BasePageProps {
   layout?: PageLayoutType;
 }
 
-
 const BasePage: React.FC<BasePageProps> = ({ children, layout = PageLayoutType.Canvas }) => {
   return (
     <PluginPage layout={layout}>
@@ -18,5 +17,3 @@ const BasePage: React.FC<BasePageProps> = ({ children, layout = PageLayoutType.C
 };
 
 export default BasePage;
-
-

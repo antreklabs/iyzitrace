@@ -1,7 +1,7 @@
 import React from 'react';
 
 import BasePage from '../core/base.page';
-import ServiceMapContainer from '../../containers/service-map/service-map-v2.container';
+import ServiceMapContainer from '../../containers/service-map/service-map.container';
 
 function ServiceMapPage() {
 

@@ -58,7 +58,6 @@ const GrafanaLikeRangePicker = ({
   const [search, setSearch] = useState('');
   const [selectedQuickLabel, setSelectedQuickLabel] = useState<string | null>('Last 1 hour');
   
-  // Initialize with value prop if available, otherwise use defaults
   const initialFrom = value ? dayjs(value[0]) : dayjs().subtract(1, 'hour');
   const initialTo = value ? dayjs(value[1]) : dayjs();
   
@@ -67,7 +66,6 @@ const GrafanaLikeRangePicker = ({
   const [fromTime, setFromTime] = useState<dayjs.Dayjs | null>(initialFrom);
   const [toTime, setToTime] = useState<dayjs.Dayjs | null>(initialTo);
 
-  // Derive quick label from absolute value when provided
   const applyQuickLabelFromValue = (start?: number, end?: number) => {
     if (typeof start === 'number' && typeof end === 'number') {
       const diffMin = Math.round((end - start) / 60000);
@@ -89,11 +87,9 @@ const GrafanaLikeRangePicker = ({
     if (value) {
       applyQuickLabelFromValue(value[0], value[1]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value?.[0], value?.[1]]);
 
   const handleApply = () => {
-    // Use absolute date/time if available, otherwise fall back to relative input
     let fromParsed: dayjs.Dayjs | null = null;
     let toParsed: dayjs.Dayjs | null = null;
 
@@ -113,9 +109,7 @@ const GrafanaLikeRangePicker = ({
       const startMs = fromParsed.valueOf();
       const endMs = toParsed.valueOf();
       
-      // Check if start and end are the same (within 1 minute)
       if (Math.abs(endMs - startMs) < 60 * 1000) {
-        // If they're the same, set to last 1 hour
         const newStart = dayjs().subtract(1, 'hour').valueOf();
         const newEnd = dayjs().valueOf();
         onApply(newStart, newEnd);
@@ -204,11 +198,8 @@ const GrafanaLikeRangePicker = ({
           >
             Read the documentation
           </Link>
-          {/* <div style={{ fontSize: 12, color: '#999', marginTop: 8 }}>
-            Browser Time <strong style={{ color: '#fff' }}>Turkey</strong>
-            <br />
-            UTC+03:00 <Button size="small" style={{ marginLeft: 8 }}>Change time settings</Button>
-          </div> */}
+          {
+}
         </Space>
       </div>
 
@@ -232,7 +223,6 @@ const GrafanaLikeRangePicker = ({
                 setTo('now');
                 setSelectedQuickLabel(item.label);
                 
-                // Update date/time pickers as well
                 const fromParsed = parseRelativeInput(relative);
                 const toParsed = parseRelativeInput('now');
                 

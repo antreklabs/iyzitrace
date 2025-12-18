@@ -1,4 +1,3 @@
-// src/components/Sidebar.tsx
 
 import React, { useEffect, useState } from 'react';
 import { Layout, Menu, Button } from 'antd';
@@ -17,7 +16,7 @@ import {
   RobotOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getStoredTeamPages } from '../../../api/teams';
+import { getStoredTeamPages } from '../../../api/service/team.service';
 import pluginJson from '../../../plugin.json';
 
 export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
@@ -29,13 +28,11 @@ const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Placeholder: Replace with your actual user/team context
-  const user = { role: 'user' }; // e.g., { role: 'admin' } or { role: 'user' }
-  const teamId = '1'; // Replace with actual teamId from context or props
+  const user = { role: 'user' };
+  const teamId = '1';
 
   useEffect(() => {
     const fetchMenuItems = async () => {
-      // All possible menu items (key must match PLUGIN_PAGE_CATALOG id)
       const allMenuItems = [
         { key: 'landing', icon: <HomeOutlined style={{ fontSize: 16 }} />, label: 'Home' },
         { key: 'overview', icon: <BuildOutlined style={{ fontSize: 16 }} />, label: 'Overview' },
@@ -50,20 +47,16 @@ const Sidebar: React.FC = () => {
         { key: 'settings', icon: <SettingOutlined style={{ fontSize: 16 }} />, label: 'Settings' },
       ];
 
-      // Admins see all
       if (user.role === 'admin') {
         setMenuItems(allMenuItems);
         return;
       }
 
-      // Get allowed pages for this team
       const pages = await getStoredTeamPages();
-      // If no records, show all
       if (!pages || pages.length === 0) {
         setMenuItems(allMenuItems);
         return;
       }
-      // Only show allowed pages for this team
       const allowed = pages.filter((p: { teamId: string }) => p.teamId === teamId);
       if (allowed.length === 0) {
         setMenuItems(allMenuItems);

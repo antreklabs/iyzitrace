@@ -1,4 +1,3 @@
-// ---------- Tipler ----------
 export type Operation = {
   name: string;
   method: string;
@@ -50,31 +49,6 @@ export type Position = {
 export type CustomSize = {
   width: number;
   height: number;
-};
-
-export type InfraJSON = {
-  schema_version: string;
-  generated_at: string;
-  infrastructure: Host[];
-};
-
-// Yeni şema (opsiyonel): regions -> infrastructures -> applications -> services -> operations
-export type RegionSchema = {
-  name: string;
-  infrastructures: Host[]; // Host ile aynı alanlar
-  position?: Position;
-};
-
-export type MapSchema = {
-  name: string;
-  hosts: Host[]; // Host ile aynı alanlar
-  position?: Position;
-};
-
-export type InfraJSONV2 = {
-  schema_version: string;
-  generated_at: string;
-  regions: RegionSchema[];
 };
 
 export type LayerKey = 'infra' | 'application' | 'service' | 'operation';

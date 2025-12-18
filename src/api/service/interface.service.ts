@@ -30,7 +30,7 @@ export interface RangeMetricItem {
 }
 
 export interface ServiceInfrastructureMapping {
-  [serviceId: string]: string; // serviceId -> infrastructureId
+  [serviceId: string]: string;
 }
 
 export interface ServiceMapData {
@@ -127,7 +127,6 @@ export interface Infrastructure {
     type: string;
     method?: string;
     path?: string;
-    // targetServiceId?: string;
     metrics: {
         avgDurationMs?: number;
         minDurationMs?: number;
@@ -143,7 +142,6 @@ export interface Infrastructure {
     status?: StatusItem;
     position?: PositionItem;
   }
-  
 
 export interface Trace {
   traceId: string;

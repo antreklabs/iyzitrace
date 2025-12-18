@@ -25,7 +25,6 @@ const ServiceDetailContainer: React.FC<ServiceDetailContainerProps> = ({ service
   const fetchModelData = async (filterModel: FilterParamsModel): Promise<FetchedModel> => {
     filterModel.options.interval = `${Math.floor((filterModel.timeRange.to - filterModel.timeRange.from)/60/1000)}m`;
     filterModel.service.name = serviceName;
-    console.log(filterModel);
     setFilter(filterModel);
     const data = await getServicesTableData(filterModel);
     setData(data);

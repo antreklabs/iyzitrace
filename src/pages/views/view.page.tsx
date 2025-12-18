@@ -22,7 +22,6 @@ interface PageViewItem {
   createdAt: string;
 }
 
-// Format duration: if >= 1000ms, convert to seconds
 const formatDuration = (ms: number): string => {
   if (ms >= 1000) {
     return `${(ms / 1000).toFixed(2)} s`;
@@ -38,17 +37,12 @@ function ViewsPage() {
   const [queryPairs, setQueryPairs] = useState<Array<{ id: string; key: string; value: string; lockedKey: boolean }>>([]);
   const previewQuery = useMemo(() => new URLSearchParams(queryPairs.filter(p => p.key).map(p => [p.key, p.value] as [string, string])).toString(), [queryPairs]);
 
-  // Plugin settings'den pageViews yükle
   useEffect(() => {
     const load = async () => {
       try {
         const settings: PluginSettings = await getPluginSettings();
         let loadedWidgets = (settings.pageViews as PageViewItem[]) || [];
         
-        console.log('📂 Loaded views:', loadedWidgets.length);
-        loadedWidgets.forEach(w => console.log(`  - ${w.id}: ${w.title}`));
-        
-        // FIX: Duplicate ID'leri düzelt
         const idCounts = new Map<string, number>();
         let needsFix = false;
         
@@ -61,21 +55,16 @@ function ViewsPage() {
         });
         
         if (needsFix) {
-          console.warn('⚠️ Duplicate IDs detected! Fixing...');
           loadedWidgets = loadedWidgets.map((w, index) => {
             const newId = `view-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 9)}`;
-            console.log(`  🔧 ${w.id} → ${newId} (${w.title})`);
             return { ...w, id: newId };
           });
           
-          // Düzeltilmiş view'ları kaydet
           await savePluginSettings({ ...settings, pageViews: loadedWidgets });
-          console.log('✅ Fixed and saved unique IDs');
         }
         
         setWidgets(loadedWidgets);
       } catch (error) {
-        console.error('Error loading pageViews:', error);
         setWidgets([]);
       }
     };
@@ -101,9 +90,6 @@ function ViewsPage() {
   };
 
   const handleDeleteWidget = (widget: PageViewItem) => {
-    console.log('🗑️ Delete requested for:', widget.id, widget.title);
-    console.log('📋 Current widgets count:', widgets.length);
-    
     Modal.confirm({
       title: 'Delete View',
       content: `Are you sure you want to delete "${widget.title}"?`,
@@ -111,15 +97,8 @@ function ViewsPage() {
       okType: 'danger',
       cancelText: 'Cancel',
       onOk: () => {
-        console.log('✅ Delete confirmed for:', widget.id);
-        const newWidgets = widgets.filter(w => {
-          const keep = w.id !== widget.id;
-          console.log(`  ${keep ? '✓ Keep' : '✗ Delete'}: ${w.id} - ${w.title}`);
-          return keep;
-        });
-        console.log('📦 New widgets count:', newWidgets.length);
+        const newWidgets = widgets.filter(w => w.id !== widget.id);
         persist(newWidgets).then(() => {
-          console.log('💾 Persisted successfully');
           message.success('View deleted');
         });
       }
@@ -148,8 +127,7 @@ function ViewsPage() {
       persist(newWidgets);
       setModalVisible(false);
       form.resetFields();
-    }).catch(errorInfo => {
-      // console.log('Validation failed:', errorInfo);
+    }).catch(() => {
     });
   };
 
@@ -199,7 +177,6 @@ function ViewsPage() {
 
   const buildWidgetUrl = (widget: PageViewItem) => {
     const url = widget.query || '';
-    // Add viewId parameter to URL
     const separator = url.includes('?') ? '&' : '?';
     const urlWithViewId = `${url}${separator}viewId=${widget.id}`;
     
@@ -226,9 +203,8 @@ function ViewsPage() {
     const [highlights, setHighlights] = useState<Array<{ label: string; value: string }>>([]);
     const [previewError, setPreviewError] = useState<string | null>(null);
     const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-    const [isLive, setIsLive] = useState(true); // Default: Live
+    const [isLive, setIsLive] = useState(true);
 
-    // Static metadata based on page type (doesn't change)
     const metadata = useMemo(() => {
       const meta: Record<string, { title: string; accent: string; footer: string }> = {
         'service-map': {
@@ -297,7 +273,6 @@ function ViewsPage() {
       const loadPreview = async () => {
         if (!isMounted) return;
         
-        // Don't show skeleton on refresh, only on initial load
         setPreviewError(null);
         try {
           const filterModel = buildFilterModel(widget.query || '');
@@ -450,7 +425,6 @@ function ViewsPage() {
             setLastUpdate(new Date());
           }
         } catch (error) {
-          console.error('Error building view preview:', error);
           if (isMounted) {
             setPreviewError('Preview unavailable');
           }
@@ -461,10 +435,8 @@ function ViewsPage() {
         }
       };
 
-      // Initial load
       loadPreview();
 
-      // Auto-refresh every 5 seconds only when live
       if (isLive) {
         intervalId = setInterval(() => {
           if (isMounted) {
@@ -672,7 +644,8 @@ function ViewsPage() {
           </div>
         )}
 
-        {/* Add/Edit Widget Modal */}
+        {
+}
         <Modal
           title={editingWidget ? 'Edit View' : 'Add View to Dashboard'}
           open={modalVisible}

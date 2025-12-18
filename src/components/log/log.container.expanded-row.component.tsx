@@ -6,10 +6,8 @@ interface LogExpandedRowProps {
 }
 
 const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
-  // Extract attributes from record
   const attributes = record.attributes || {};
 
-  // Basic fields with null checks
   const basicFields = [
     { label: 'Log ID', value: record.id },
     { label: 'Timestamp', value: record.timestamp ? new Date(record.timestamp).toLocaleString() : null },
@@ -23,7 +21,6 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
     { label: 'Container ID', value: attributes.container_id?.substring(0, 12) }
   ].filter(field => field.value != null);
 
-  // Runtime fields with null checks
   const runtimeFields = [
     { label: 'Runtime Name', value: attributes.process_runtime_name },
     { label: 'Runtime Version', value: attributes.process_runtime_version },
@@ -33,7 +30,6 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
     { label: 'Architecture', value: attributes.host_arch }
   ].filter(field => field.value != null);
 
-  // Telemetry fields with null checks
   const telemetryFields = [
     { label: 'Telemetry SDK', value: attributes.telemetry_sdk_name },
     { label: 'SDK Version', value: attributes.telemetry_sdk_version },
@@ -44,7 +40,8 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
 
   return (
     <div className="log-expanded-row-container">
-      {/* Message Section */}
+      {
+}
       {record.message && (
         <div>
           <h5 className="log-expanded-row-message-title">Message</h5>
@@ -54,7 +51,8 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
         </div>
       )}
 
-      {/* Telemetry Information */}
+      {
+}
       {telemetryFields.length > 0 && (
         <div className="log-expanded-row-telemetry-section">
           <h5 className="log-expanded-row-telemetry-title">Telemetry Information</h5>
@@ -69,9 +67,11 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
       )}
 
       <div className="log-expanded-row-grid">
-        {/* Left Column: Basic Information and Runtime Information */}
+        {
+}
         <div className="log-expanded-row-left-column">
-          {/* Basic Information */}
+          {
+}
           <div>
             <h5 className="log-expanded-row-section-title">Basic Information</h5>
             {basicFields.map(field => (
@@ -92,7 +92,8 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
             ))}
           </div>
 
-          {/* Runtime Information */}
+          {
+}
           {runtimeFields.length > 0 && (
           <div className="log-expanded-row-runtime-section">
             <h5 className="log-expanded-row-section-title">Runtime Information</h5>
@@ -106,7 +107,8 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
           )}
         </div>
 
-        {/* Right Column: Additional Attributes */}
+        {
+}
         {Object.keys(attributes).length > 0 && (
           <div className="log-expanded-row-right-column">
             <h5 className="log-expanded-row-section-title">Additional Attributes</h5>

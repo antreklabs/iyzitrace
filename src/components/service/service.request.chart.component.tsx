@@ -9,7 +9,7 @@ const ServiceRequestChart: React.FC<{ services: Service[] }> = ({ services }) =>
     return services.slice(0, 10).map((service, index) => ({
       name: service.name,
       data: Array.from({ length: 20 }, (_, i) => ({
-        x: new Date(Date.now() - (19 - i) * 60000), // Last 20 minutes
+        x: new Date(Date.now() - (19 - i) * 60000),
         y: service.metrics.callsCount,
       })),
       color: colors[index % colors.length],
@@ -104,4 +104,3 @@ const ServiceRequestChart: React.FC<{ services: Service[] }> = ({ services }) =>
 };
 
 export default ServiceRequestChart;
-

@@ -23,7 +23,6 @@ import BaseTable from '../base.table';
 import HorizontalScrollContainer from '../../components/core/horizontal-scroll-container.component';
 import { getOperationTypeColor } from '../../api/service/services.service';
 
-
 const OverviewContainer: React.FC = () => {
   const navigate = useNavigate();
   const [regions, setRegions] = useState<Region[]>([]);
@@ -46,30 +45,25 @@ const OverviewContainer: React.FC = () => {
   const [servicesSearchQuery, setServicesSearchQuery] = useState('');
   const [operationsSearchQuery, setOperationsSearchQuery] = useState('');
 
-
   const fetchModelData = async (filterModel: FilterParamsModel): Promise<FetchedModel> => {
     const [regions, orphans] = await Promise.all([
       getRegions(filterModel),
       getOrphanServices(filterModel)
     ]);
     setRegions(regions);
-    // console.log('[OverviewContainer] regions:', regions);
     setOrphanServices(orphans);
     const infrastructures = (regions || []).flatMap((r: Region) => r.infrastructures || []);
-    // console.log('[OverviewContainer] infrastructures:', infrastructures);
     setInfraLevelData(infrastructures);
     setColumnInDetail(infrastructures);
 
     return { data: regions, columns: columns };
   };
 
-
   const setColumnInDetail = (data: Infrastructure[]) => {
     if(columns) {
       return;
     }
     const cols = getTableColumns(data, 'services', 'operations')
-    // Example: rename and reorder Root columns before hiding
     let root = columnUtils.renameColumns(cols.RootColumns, {
       osversion: 'OS Version',
       ip: 'IP Address',
@@ -133,12 +127,9 @@ const OverviewContainer: React.FC = () => {
       L2Columns: columnUtils.hideColumns(l2, ['id', 'serviceId'])
     };
 
-    // const cols = getTableColumns(data, 'services', 'operations')
-
     setColumns(hiddenCols);
   };
 
-  // Filter regions based on selection
   const filteredRegions = useMemo(() => {
     if (selectedRegionId) {
       return regions.filter(region => region.id === selectedRegionId);
@@ -146,12 +137,10 @@ const OverviewContainer: React.FC = () => {
     return regions;
   }, [regions, selectedRegionId]);
 
-  // Get all infrastructures from filtered regions
   const allInfrastructures = useMemo(() => {
     return filteredRegions.flatMap(region => region.infrastructures || []);
   }, [filteredRegions]);
 
-  // Filter infrastructures based on selection
   const filteredInfrastructures = useMemo(() => {
     if (selectedInfrastructureId) {
       return allInfrastructures.filter(infra => infra.id === selectedInfrastructureId);
@@ -159,14 +148,12 @@ const OverviewContainer: React.FC = () => {
     return allInfrastructures;
   }, [allInfrastructures, selectedInfrastructureId]);
 
-  // Get all applications from all regions (no filter)
   const allApplications = useMemo(() => {
     return regions.flatMap(region => 
       region.infrastructures?.flatMap(infra => infra.applications || []) || []
     );
   }, [regions]);
 
-  // Sidebar shows all applications (no filter)
   const sidebarApplications = useMemo(() => {
     if (sidebarInfrastructure) {
       return sidebarInfrastructure.applications || [];
@@ -174,12 +161,10 @@ const OverviewContainer: React.FC = () => {
     return allApplications;
   }, [sidebarInfrastructure, allApplications]);
 
-  // Get all services from filtered infrastructures
   const allServices = useMemo(() => {
     return filteredInfrastructures.flatMap(infra => infra.services || []);
   }, [filteredInfrastructures]);
 
-  // Filter services based on selection
   const filteredServices = useMemo(() => {
     if (selectedServiceId) {
       return allServices.filter(service => service.id === selectedServiceId);
@@ -190,7 +175,6 @@ const OverviewContainer: React.FC = () => {
     return allServices;
   }, [allServices, selectedServiceId, selectedApplicationId, selectedInfrastructureId]);
 
-  // Group services by infrastructure
   const servicesByInfrastructure = useMemo(() => {
     const groups: { [infraId: string]: { infrastructure: Infrastructure; services: Service[] } } = {};
     
@@ -208,13 +192,10 @@ const OverviewContainer: React.FC = () => {
     return groups;
   }, [filteredInfrastructures]);
 
-
-  // Get all operations from filtered services
   const allOperations = useMemo(() => {
     return filteredServices.flatMap(service => service.operations || []);
   }, [filteredServices]);
 
-  // Filter operations based on selection
   const filteredOperations = useMemo(() => {
     if (selectedOperationId) {
       return allOperations.filter(op => op.id === selectedOperationId);
@@ -225,7 +206,6 @@ const OverviewContainer: React.FC = () => {
     return allOperations;
   }, [allOperations, selectedOperationId, selectedServiceId, selectedApplicationId, selectedInfrastructureId]);
 
-  // Group operations by service for display
   const operationsByService = useMemo(() => {
     const groups: { [serviceName: string]: Operation[] } = {};
     filteredOperations.forEach(op => {
@@ -307,12 +287,10 @@ const OverviewContainer: React.FC = () => {
   };
 
   const handleInfrastructureDragLeave = (infrastructure: Infrastructure, e: React.DragEvent) => {
-    // Only clear if we're actually leaving the card, not just entering a child element
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX;
     const y = e.clientY;
     
-    // Check if mouse is still within the card boundaries
     if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
       setDropTargetId(null);
     }
@@ -328,10 +306,8 @@ const OverviewContainer: React.FC = () => {
     if (draggedService && draggedService.id) {
       try {
         await mapServiceToInfrastructure(draggedService.id, infrastructure.id);
-        // Trigger refresh by incrementing counter
         setRefreshTrigger(prev => prev + 1);
       } catch (error) {
-        console.error('Error mapping service to infrastructure:', error);
       }
     }
     
@@ -356,7 +332,6 @@ const OverviewContainer: React.FC = () => {
         setUnmapModalVisible(false);
         setServiceToUnmap(null);
       } catch (error) {
-        console.error('Error unmapping service:', error);
       }
     }
   };
@@ -390,7 +365,8 @@ const OverviewContainer: React.FC = () => {
       }
     >
       <div style={{ padding: '24px', minHeight: '100vh' }}>
-      {/* Regions Section */}
+      {
+}
       <HorizontalScrollContainer 
         title="Regions" 
         icon={<CloudOutlined style={{ color: '#1890ff' }} />}
@@ -398,9 +374,7 @@ const OverviewContainer: React.FC = () => {
         searchPlaceholder=" Search regions..."
         getSearchableText={(child) => {
           const props = child.props as any;
-          // Child is a div wrapper, get the RegionCard inside
           let children = props?.children;
-          // Handle React.Children array
           if (Array.isArray(children)) {
             children = children.find((c: any) => React.isValidElement(c));
           }
@@ -420,7 +394,8 @@ const OverviewContainer: React.FC = () => {
         ))}
       </HorizontalScrollContainer>
 
-      {/* Servers & Infrastructure Section */}
+      {
+}
       <HorizontalScrollContainer 
         title="Infrastructures" 
         icon={<CloudServerOutlined style={{ color: '#1890ff' }} />}
@@ -428,9 +403,7 @@ const OverviewContainer: React.FC = () => {
         searchPlaceholder=" Search infrastructures..."
         getSearchableText={(child) => {
           const props = child.props as any;
-          // Child is a div wrapper, get the InfrastructureCard inside
           let children = props?.children;
-          // Handle React.Children array
           if (Array.isArray(children)) {
             children = children.find((c: any) => React.isValidElement(c));
           }
@@ -457,7 +430,8 @@ const OverviewContainer: React.FC = () => {
         ))}
       </HorizontalScrollContainer>
 
-      {/* Applications Sidebar */}
+      {
+}
       <ApplicationsSidebar
         visible={sidebarVisible}
         onClose={() => setSidebarVisible(false)}
@@ -465,7 +439,8 @@ const OverviewContainer: React.FC = () => {
         selectedApplicationId={selectedApplicationId}
       />
 
-      {/* Orphan Services Section */}
+      {
+}
       {orphanServices.length > 0 && (
         <HorizontalScrollContainer 
           title="Orphan Services (Drag to Infrastructure)" 
@@ -474,9 +449,7 @@ const OverviewContainer: React.FC = () => {
           searchable={true}
           getSearchableText={(child) => {
             const props = child.props as any;
-            // Child is a div wrapper, get the ServiceCard inside
             let children = props?.children;
-            // Handle React.Children array
             if (Array.isArray(children)) {
               children = children.find((c: any) => React.isValidElement(c));
             }
@@ -511,7 +484,8 @@ const OverviewContainer: React.FC = () => {
         </HorizontalScrollContainer>
       )}
 
-      {/* Services Layer Section */}
+      {
+}
       {Object.keys(servicesByInfrastructure).length > 0 && (
         <HorizontalScrollContainer 
           title="Services" 
@@ -539,7 +513,8 @@ const OverviewContainer: React.FC = () => {
         </HorizontalScrollContainer>
       )}
 
-      {/* Operations Layer Section */}
+      {
+}
       {Object.keys(operationsByService).length > 0 && (
         <HorizontalScrollContainer 
           title="Operations" 

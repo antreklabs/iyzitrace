@@ -19,15 +19,13 @@ import {
 } from '@ant-design/icons';
 import { css } from '@emotion/css';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api, type Team, type TeamMember, type TeamPage, type AvailablePage } from '../../api/teams';
+import { api, type Team, type TeamMember, type TeamPage, type AvailablePage, type TeamSettings } from '../../api/service/team.service';
 import pluginJson from '../../plugin.json';
 import { getTeams } from '../../api/service/team.service';
 
 const { Search } = Input;
 const { TabPane } = Tabs;
 const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
-
-// Types are imported from API service
 
 const getStyles = () => ({
   container: css`
@@ -308,8 +306,6 @@ const TeamsManagePage: React.FC = () => {
   const [availablePages, setAvailablePages] = useState<AvailablePage[]>([]);
   const [selectedPages, setSelectedPages] = useState<string[]>([]);
 
-  // Data will be fetched from API
-
   useEffect(() => {
     if (teamId) {
       fetchTeam();
@@ -320,20 +316,35 @@ const TeamsManagePage: React.FC = () => {
     setLoading(true);
     try {
       const teams = await getTeams();
-      console.log('teams', teams);
-      console.log('teamId', teamId);
-      const data = teams.find((team: Team) => team.id == teamId);
-      const settings = await api.getTeamSettings(teamId!);
-      const pages = await api.getTeamPages(teamId!);
+      const data = teams.find((team: Team) => String(team.id) === String(teamId) || team.uid === teamId);
+      
+      if (!data) {
+        setTeam(null);
+        return;
+      }
+
+      let settings: TeamSettings | undefined;
+      let pages: TeamPage[] = [];
+      
+      try {
+        settings = await api.getTeamSettings(teamId!);
+      } catch (error) {
+      }
+      
+      try {
+        pages = await api.getTeamPages(teamId!);
+      } catch (error) {
+      }
+      
       setTeam({
         ...data,
-        members: data.members,
-        settings: settings,
+        members: data.members || [],
+        settings: settings || { name: data.name, icon: data.icon },
         pages: pages,
       });
     } catch (error) {
-      console.error('Error fetching team:', error);
       message.error('Failed to fetch team data');
+      setTeam(null);
     } finally {
       setLoading(false);
     }
@@ -344,7 +355,6 @@ const TeamsManagePage: React.FC = () => {
       const pages = await api.getAvailablePages();
       setAvailablePages(pages);
     } catch (error) {
-      console.error('Error fetching available pages:', error);
     }
   };
 
@@ -352,14 +362,12 @@ const TeamsManagePage: React.FC = () => {
     try {
       await api.addTeamPages(teamId!, selectedPages);
       
-      // Refresh team data
       await fetchTeam();
       
       setAddPageModalVisible(false);
       setSelectedPages([]);
       message.success('Pages added successfully');
     } catch (error) {
-      console.error('Error adding pages:', error);
       message.error('Failed to add pages');
     }
   };
@@ -368,12 +376,10 @@ const TeamsManagePage: React.FC = () => {
     try {
       await api.removeTeamPage(teamId!, pageId);
       
-      // Refresh team data
       await fetchTeam();
       
       message.success('Page removed successfully');
     } catch (error) {
-      console.error('Error removing page:', error);
       message.error('Failed to remove page');
     }
   };
@@ -462,7 +468,8 @@ const TeamsManagePage: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
+      {
+}
       <div className={styles.header}>
         <div>
           <div className={styles.breadcrumb}>
@@ -492,11 +499,13 @@ const TeamsManagePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabs */}
+      {
+}
       <Card className={styles.tabs}>
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
           <TabPane tab="Members" key="members">
-            {/* Search Bar */}
+            {
+}
             <div className={styles.searchBar}>
               <Search
                 placeholder="Search members by name or email..."
@@ -509,7 +518,8 @@ const TeamsManagePage: React.FC = () => {
               />
             </div>
 
-            {/* Members Table */}
+            {
+}
             <Table
               className={styles.table}
               columns={membersColumns}
@@ -529,7 +539,8 @@ const TeamsManagePage: React.FC = () => {
           </TabPane>
 
           <TabPane tab="Pages" key="pages">
-            {/* Search Bar */}
+            {
+}
             <div className={styles.searchBar}>
               <Search
                 placeholder="Search pages by name..."
@@ -542,7 +553,8 @@ const TeamsManagePage: React.FC = () => {
               />
             </div>
 
-            {/* Add Pages Button */}
+            {
+}
             <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
               <Button
                 type="primary"
@@ -557,7 +569,8 @@ const TeamsManagePage: React.FC = () => {
               </Button>
             </div>
 
-            {/* Pages Table */}
+            {
+}
             <Table
               className={styles.table}
               columns={pagesColumns}
@@ -578,7 +591,8 @@ const TeamsManagePage: React.FC = () => {
         </Tabs>
       </Card>
 
-      {/* Add Pages Modal */}
+      {
+}
       <Modal
         title="Add pages"
         open={addPageModalVisible}

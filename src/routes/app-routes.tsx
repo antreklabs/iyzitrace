@@ -6,7 +6,6 @@ import { AppRoute } from '../interfaces';
 const renderRoutes = (routes: AppRoute[]): JSX.Element[] => {
     appRoutes.forEach((r:AppRoute) => {
         if (!r.element) {
-          console.error(`[❌ ROUTE ERROR] '${r.path}' için element eksik!`);
         }
       });
   return routes.flatMap((route) => {

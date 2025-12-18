@@ -4,7 +4,7 @@ import TraceMetaHeader from './TraceMetaHeader/TraceMetaHeader';
 import TimelineHeader from './TimelineHeader/TimelineHeader';
 import FlameGraph from './FlameGraph/FlameGraph';
 import SelectedSpanDetails from './SelectedSpanDetails/SelectedSpanDetails';
-import { TempoApi } from '../../providers';
+import { TempoApi } from '../../api/provider/tempo.provider';
 import BaseContainer from '../../components/core/basecontainer/basecontainer.component';
 import { Spin } from 'antd';
 import ServiceLegendPanel from './ServiceLegend/ServiceLegend';
@@ -66,40 +66,26 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
     nodes.flatMap((n) => [n, ...(n.children ? flattenSpans(n.children) : [])]);
 
   const getOperationType = (s: any): string => {
-    // Debug: Log span details
-    console.log('🔍 Getting operation type for span:', {
-      name: s.name,
-      serviceName: s.serviceName,
-      tags: s.tags,
-      typeTag: s.tags?.['type']
-    });
-    
     let type = s.tags?.['type'];
     
     if (type === 'http') {
-      console.log('  ✅ Found HTTP from type tag');
       return 'HTTP';
     }
     else if (type === 'messaging') {
-      console.log('  ✅ Found MESSAGING from type tag');
       return 'MESSAGING';
     }
     else if (type === 'cache') {
-      console.log('  ✅ Found CACHE from type tag');
       return 'CACHE';
     }
     else if (type === 'database') {
-      console.log('  ✅ Found DATABASE from type tag');
       return 'DATABASE';
     }
     else if (type === 'rpc') {
-      console.log('  ✅ Found RPC from type tag');
       return 'RPC';
     }
     else {
       const name = s.serviceName?.toLowerCase() || '';
       if (Object.keys(s.tags || {}).includes('http.method') || name.includes('http')) {
-        console.log('  ✅ Detected HTTP from http.method or service name');
         return 'HTTP';
       }
       if (
@@ -107,7 +93,6 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
           name.includes(db)
         )
       ) {
-        console.log('  ✅ Detected DATABASE from service name');
         return 'DATABASE';
       }
       const netPeerName = s.tags?.['net.peer.name'];
@@ -117,23 +102,17 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
         ) &&
         netPeerName
       ) {
-        console.log('  ✅ Detected DATABASE from net.peer.name');
         return 'DATABASE';
       }
       if (name.includes('redis') || name.includes('cache')) {
-        console.log('  ✅ Detected CACHE from service name');
         return 'CACHE';
       }
-      console.log('  ⚠️ Defaulting to GENERAL');
       return 'GENERAL';
     }
   };
 
   const getServiceIcon = (serviceName: string, s: any) => {
-    // console.log('span', s);
-
     const operationType = getOperationType(s);
-    
 
     const OPERATION_TYPES = [
       { type: 'HTTP', color: 'blue', icon: '🌐' },
@@ -155,7 +134,6 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
         const trace = await TempoApi.getTrace(traceId);
 
         if (!trace || !trace.batches || trace.batches.length === 0) {
-          // console.log('No trace data received');
           setTraceData([]);
           setFilteredTraceData([]);
           setIsLoading(false);
@@ -191,7 +169,6 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
         );
 
         if (spans.length === 0) {
-          // console.log('No spans found in trace data');
           setTraceData([]);
           setFilteredTraceData([]);
           setIsLoading(false);
@@ -220,7 +197,6 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
         setFilteredTraceData(result);
         setIsLoading(false);
       } catch (error) {
-        console.error('Error fetching trace:', error);
         setHasError(true);
         setIsLoading(false);
         setTraceData([]);
@@ -231,28 +207,18 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
     fetchTrace();
   }, [traceId, selectedUid]);
 
-  // Set initial span selection from URL parameter
   useEffect(() => {
     if (initialSpanId && traceData.length > 0 && !selectedSpanId) {
       const allSpansFlat = flattenSpans(traceData);
-      console.log('allSpansFlat', allSpansFlat);
       const spanExists = allSpansFlat.some((span) => span.id === initialSpanId);
       if (spanExists) {
         setSelectedSpanId(initialSpanId);
       }
     }
-    console.log('initialSpanId', initialSpanId);
-    console.log('traceData', traceData);
-    console.log('selectedSpanId', selectedSpanId);
   }, [initialSpanId, traceData, selectedSpanId]);
 
-  // Filter trace data based on selected operation types
   useEffect(() => {
-    console.log('Filtering effect triggered. Selected types:', selectedOperationTypes);
-    console.log('Original trace data length:', traceData.length);
-    
     if (selectedOperationTypes.length === 0) {
-      console.log('No filters selected, showing all spans');
       setFilteredTraceData(traceData);
       return;
     }
@@ -265,18 +231,11 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
           const operationType = getOperationType(node);
           const matchesFilter = selectedOperationTypes.includes(operationType);
           
-          console.log(`Span ${node.serviceName} -> ${node.name}: operationType=${operationType}, matches=${matchesFilter}`);
-          
-          // If this node matches, add it as a root-level span (without children)
           if (matchesFilter) {
             const { children, ...nodeWithoutChildren } = node;
             allMatchingSpans.push(nodeWithoutChildren as SpanNode);
-            console.log(`  ✅ Including node ${node.serviceName} -> ${node.name}`);
-          } else {
-            console.log(`  ❌ Excluding node ${node.serviceName} -> ${node.name}`);
           }
           
-          // Continue checking children
           if (node.children && node.children.length > 0) {
             collectMatchingSpans(node.children);
           }
@@ -287,8 +246,7 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
       return allMatchingSpans;
     };
 
-    const filtered = filterSpans(JSON.parse(JSON.stringify(traceData))); // Deep clone to avoid mutation
-    console.log('Filtered trace data length:', filtered.length);
+    const filtered = filterSpans(JSON.parse(JSON.stringify(traceData)));
     setFilteredTraceData(filtered);
   }, [traceData, selectedOperationTypes]);
 
@@ -309,12 +267,10 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
       }
     });
 
-    // console.log('serviceMetaMap', map);
     return map;
   }, [allSpans]);
 
   const handleOperationTypeFilter = (selectedTypes: string[]) => {
-    // console.log('Filtering by operation types:', selectedTypes);
     setSelectedOperationTypes(selectedTypes);
   };
 

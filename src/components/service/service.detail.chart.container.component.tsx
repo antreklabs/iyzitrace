@@ -18,7 +18,6 @@ const CallMetrics: React.FC<CallMetricsProps> = ({ data, serviceBased }) => {
   const [latencyDataByOperation, setLatencyDataByOperation] = useState<any[]>([]);
   const [apdexDataByOperation, setApdexDataByOperation] = useState<any[]>([]);
 
-
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -29,7 +28,6 @@ const CallMetrics: React.FC<CallMetricsProps> = ({ data, serviceBased }) => {
       setLatencyDataByOperation(data[0].rangeMetrics?.latencyByOperation ?? []);
       setApdexDataByOperation(data[0].rangeMetrics?.apdexByOperation ?? []);
     } catch (err) {
-      console.error('Failed to fetch metrics', err);
     } finally {
       setLoading(false);
       setTimeout(() => {

@@ -23,14 +23,6 @@ export interface ColumnItem {
   filterSearch?: boolean;
 }
 
-/**
- * Generates table columns based on the provided data structure
- * @param data - The service map data (any type)
- * @param L1ColumnProperty - Property name for L1 level (e.g., 'applications')
- * @param L2ColumnProperty - Property name for L2 level (e.g., 'services')
- * @param L3ColumnProperty - Property name for L3 level (e.g., 'operations')
- * @returns TableColumn object with columns for each level
- */
 export const getTableColumns = (
   data: any,
   L1ColumnProperty?: string,
@@ -42,28 +34,24 @@ export const getTableColumns = (
   const l2Columns: ColumnItem[] = L2ColumnProperty ? [] : undefined;
   const l3Columns: ColumnItem[] = L3ColumnProperty ? [] : undefined;
 
-  // Helper function to get nested property value
   const getNestedValue = (obj: any, path: string): any => {
     return path.split('.').reduce((current, key) => current?.[key], obj);
   };
 
-  // Build filters from a data array for a given property (unique values, strings only)
   const buildFilters = (dataArray: any[], property: string): { text: string; value: string }[] => {
     if (!Array.isArray(dataArray) || dataArray.length === 0) return [];
     const set = new Set<string>();
     for (const row of dataArray) {
       const v = getNestedValue(row, property);
       if (v === undefined || v === null) continue;
-      // Only add primitive string/number/boolean; convert to string for filter value
       if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
         set.add(String(v));
       }
-      if (set.size >= 50) break; // safety cap
+      if (set.size >= 50) break;
     }
     return Array.from(set).sort().map(v => ({ text: v, value: v }));
   };
 
-  // Estimate text width and compute auto width
   const estimateTextWidth = (text: string): number => ((text?.length || 0) * 8);
   const measureTextWidth = (() => {
     let canvas: HTMLCanvasElement | null = null;
@@ -94,23 +82,20 @@ export const getTableColumns = (
       const px = measureTextWidth(str);
       if (px > maxPx) maxPx = px;
     }
-    const padding = 32; // padding + icons
+    const padding = 32;
     const minW = isNumeric ? 100 : 160;
     const maxW = property.toLowerCase().includes('name') ? 520 : 360;
     return Math.min(maxW, Math.max(minW, maxPx + padding));
   };
 
-  // Pretty-print column titles like "cpu.usage" => "Cpu Usage"
   const formatColumnTitle = (raw: string): string => {
     if (!raw) return '';
-    // split by dot or underscore
     const parts = raw.split(/[._]/g).filter(Boolean);
     return parts
       .map(p => p.charAt(0).toUpperCase() + p.slice(1))
       .join('');
   };
 
-  // Helper function to create column item
   const createColumnItem = (property: string, title: string, _width: number, sourceData: any[] = []): ColumnItem => {
     const isNumericColumn = Array.isArray(sourceData) && sourceData.some(row => typeof getNestedValue(row, property) === 'number');
     const prettyTitle = formatColumnTitle(title || property);
@@ -120,7 +105,6 @@ export const getTableColumns = (
     const isStatusValue = isStatus && (propLc === 'status.value' || propLc.endsWith('.value'));
     const isImage = propLc.endsWith('imageurl') || propLc.includes('imageurl');
     const autoWidth = isImage ? 84 : computeAutoWidth(sourceData, property, prettyTitle, isNumericColumn);
-    // Hardcoded StatusItem-related renames
     const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
     const normProp = normalize(property);
     const statusRenameMap: Record<string, string> = {
@@ -181,14 +165,12 @@ export const getTableColumns = (
         }
         return actualValue;
       },
-      // dynamic filters
       filters: buildFilters(sourceData, property),
       filterSearch: true,
       onFilter: (val: any, record: any) => String(getNestedValue(record, property)) === String(val)
     };
   };
 
-  // Helper function to extract properties from data (including nested objects)
   const extractProperties = (dataArray: any[], level: number): string[] => {
     if (!Array.isArray(dataArray) || dataArray.length === 0) return [];
     
@@ -202,13 +184,10 @@ export const getTableColumns = (
         const value = obj[key];
         
         if (Array.isArray(value)) {
-          // Skip arrays
           return;
         } else if (value && typeof value === 'object') {
-          // Recursively extract from nested objects
           extractNestedProperties(value, fullKey);
         } else {
-          // Add primitive properties
           properties.add(fullKey);
         }
       });
@@ -223,17 +202,14 @@ export const getTableColumns = (
     return Array.from(properties);
   };
 
-  // Extract root level properties
   if (Array.isArray(data) && data.length > 0) {
     const rootProperties = extractProperties(data, 0);
     rootProperties.forEach(prop => {
       rootColumns.push(createColumnItem(prop, prop, 220, data));
     });
-    // Default hide geometry-like columns
     rootColumns.splice(0, rootColumns.length, ...columns.applyDefaultHidden(rootColumns));
   }
 
-  // Extract L1 level properties (applications)
   if (Array.isArray(data) && data.length > 0) {
     const l1Data: any[] = [];
     data.forEach(item => {
@@ -251,7 +227,6 @@ export const getTableColumns = (
     }
   }
 
-  // Extract L2 level properties (services)
   if (Array.isArray(data) && data.length > 0) {
     const l2Data: any[] = [];
     data.forEach(item => {
@@ -273,7 +248,6 @@ export const getTableColumns = (
     }
   }
 
-  // Extract L3 level properties (operations)
   if (Array.isArray(data) && data.length > 0) {
     const l3Data: any[] = [];
     data.forEach(item => {
@@ -306,21 +280,12 @@ export const getTableColumns = (
   };
 };
 
-/**
- * Helper function to create a specific column item with custom configuration
- * @param property - The property name
- * @param title - The column title
- * @param width - The column width
- * @param isNumber - Whether the column contains numeric data
- * @returns ColumnItem object
- */
 export const createCustomColumn = (
   property: string, 
   title: string, 
   width: number, 
   isNumber: boolean = false
 ): ColumnItem => {
-  // Helper function to get nested property value
   const getNestedValue = (obj: any, path: string): any => {
     return path.split('.').reduce((current, key) => current?.[key], obj);
   };
@@ -347,14 +312,7 @@ export const createCustomColumn = (
   };
 };
 
-/**
- * Utility helpers for column mutations without removing items from arrays
- */
 export const columns = {
-  /**
-   * Marks provided columns as hidden in the table (kept in array, visually hidden)
-   * Usage: columns.hideColumns(columns.RootColumns, ['id'])
-   */
   hideColumns: (cols: ColumnItem[], keysToHide: string[]): ColumnItem[] => {
     if (!Array.isArray(cols) || !Array.isArray(keysToHide) || keysToHide.length === 0) {
       return cols;
@@ -381,10 +339,8 @@ export const columns = {
           title: '',
           width: 0,
           className: [col.className, hiddenClass].filter(Boolean).join(' '),
-          // Force zero-sized cells
           onHeaderCell: () => ({ className: hiddenClass, style: { width: 0, padding: 0 } }),
           onCell: () => ({ className: hiddenClass, style: { width: 0, padding: 0 } }),
-          // Avoid content measuring increasing width
           render: () => null,
         });
       } else {
@@ -392,14 +348,9 @@ export const columns = {
       }
     });
 
-    // Append hidden columns to the end to keep them out of the main flow
     return [...visible, ...hidden];
   },
 
-  /**
-   * Apply default hidden rules for technical geometry fields.
-   * Hides: position.*, groupPosition.*, groupSize.*
-   */
   applyDefaultHidden: (cols: ColumnItem[]): ColumnItem[] => {
     if (!Array.isArray(cols) || cols.length === 0) return cols;
     const normalize = (s: any) => String(s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -407,7 +358,6 @@ export const columns = {
       const n = normalize(dataIndex);
       const isGeom = n.startsWith('position') || n.startsWith('groupposition') || n.startsWith('groupsize');
       const isStatus = n.startsWith('status');
-      // Hide all status.* except status.value and any *percentage*
       const isStatusPercentage = isStatus && n.includes('percentage');
       const isStatusValue = isStatus && (n === 'statusvalue' || n.endsWith('.value'.replace(/[^a-z0-9]/g,'')));
       const hideStatus = isStatus && !isStatusPercentage && !isStatusValue;
@@ -419,10 +369,6 @@ export const columns = {
     return columns.hideColumns(cols, keysToHide);
   },
 
-  /**
-   * Rename column titles by dataIndex/key/title match. Only the visual title is changed.
-   * Example: renameColumns(cols, { osversion: 'OS Version', ip: 'IP' })
-   */
   renameColumns: (cols: ColumnItem[], renameMap: Record<string, string>): ColumnItem[] => {
     if (!Array.isArray(cols) || !renameMap) return cols;
     const normalize = (s: any) => String(s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -436,10 +382,6 @@ export const columns = {
     });
   },
 
-  /**
-   * Reorder columns based on provided dataIndex/key/title order.
-   * Unknown columns are appended in their original order.
-   */
   reorderColumns: (cols: ColumnItem[], order: string[]): ColumnItem[] => {
     if (!Array.isArray(cols) || !Array.isArray(order) || order.length === 0) return cols;
     const normalize = (s: any) => String(s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');

@@ -38,7 +38,6 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
       const operationCount = operations.length;
       const totalCalls = data[0].metrics.callsCount;
       
-      // En yüksek maxLatencyMs değerine sahip operation'ı bul
       const maxLatencyOperation = operations.length > 0 
         ? operations.reduce((max: Operation, operation: Operation) => {
             const maxValue = max.metrics.maxDurationMs || 0;
@@ -48,7 +47,6 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
         : null;
       const maxLatencySpan = maxLatencyOperation?.name || '';
       
-      // En düşük minLatencyMs değerine sahip operation'ı bul
       const minLatencyOperation = operations.length > 0
         ? operations.reduce((min: Operation, operation: Operation) => {
             const minValue = min.metrics.minDurationMs ?? Infinity;
@@ -76,7 +74,6 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
         totalMin,
       });
     } catch (err) {
-      console.error('Metric fetch error', err);
     } finally {
       setLoading(false);
     }

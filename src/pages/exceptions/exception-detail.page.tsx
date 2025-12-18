@@ -13,12 +13,33 @@ import {
 } from '@ant-design/icons';
 import { css } from '@emotion/css';
 import { useNavigate, useParams } from 'react-router-dom';
-import { type ExceptionDetail, type ExceptionNavigation } from '../../api/exceptions';
 import pluginJson from '../../plugin.json';
 import { getExceptionsByType } from '../../api/service/exception.service';
 import { FilterParamsModel } from '../../api/service/query.service';
 
 const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
+
+export interface ExceptionDetail {
+  id: string;
+  eventId: string;
+  exceptionType: string;
+  errorMessage: string;
+  timestamp: string;
+  stacktrace: string;
+  keyValuePairs: Record<string, any>;
+  application: string;
+  serviceName?: string;
+  traceId?: string;
+  spanId?: string;
+  logId?: string;
+}
+
+export interface ExceptionNavigation {
+  hasOlder: boolean;
+  hasNewer: boolean;
+  currentIndex: number;
+  totalCount: number;
+}
 
 const getStyles = () => ({
   container: css`
@@ -259,7 +280,6 @@ const ExceptionDetailPage: React.FC = () => {
     
     setLoading(true);
     try {
-      // If we already have exceptions loaded, just navigate
       if (allExceptions.length > 0) {
         const currentException = allExceptions[index];
         setException(currentException);
@@ -274,16 +294,12 @@ const ExceptionDetailPage: React.FC = () => {
         return;
       }
 
-      // Load exceptions from API
       const traceData = await getExceptionsByType(groupId, new FilterParamsModel({
         from: String(new Date().getTime() - 1000 * 60 * 60 * 24),
         to: String(new Date().getTime()),
         option_interval: '5h',
       }));
 
-      console.log('Trace data:', traceData);
-
-      // Parse trace data to find exceptions
       const exceptions: any[] = [];
       
       traceData.forEach((trace: any) => {
@@ -296,7 +312,6 @@ const ExceptionDetailPage: React.FC = () => {
             scopeSpan.spans?.forEach((span: any) => {
               const spanAttrs = span.attributes || [];
               
-              // Find exception events
               span.events?.forEach((event: any, eventIdx: number) => {
                 if (event.name === 'exception') {
                   const eventAttrs = event.attributes || [];
@@ -308,7 +323,6 @@ const ExceptionDetailPage: React.FC = () => {
                   const traceIdHex = base64ToHex(span.traceId || '');
                   const spanIdBase64 = span.spanId || '';
                   
-                  // Build key-value pairs from span attributes and resource attributes
                   const keyValuePairs: any = {
                     serviceName,
                     'host.name': hostName,
@@ -317,19 +331,16 @@ const ExceptionDetailPage: React.FC = () => {
                     exceptionEscaped,
                   };
                   
-                  // Add span attributes
                   spanAttrs.forEach((attr: any) => {
                     const value = attr.value?.stringValue || attr.value?.intValue || attr.value?.boolValue || '';
                     keyValuePairs[attr.key] = String(value);
                   });
                   
-                  // Add resource attributes
                   resourceAttrs.forEach((attr: any) => {
                     const value = attr.value?.stringValue || attr.value?.intValue || attr.value?.boolValue || '';
                     keyValuePairs[`resource.${attr.key}`] = String(value);
                   });
                   
-                  // Convert timestamp from nanos to readable format
                   const timestampNanos = event.timeUnixNano || span.startTimeUnixNano;
                   const timestamp = new Date(Number(timestampNanos) / 1000000).toLocaleString();
                   
@@ -352,21 +363,16 @@ const ExceptionDetailPage: React.FC = () => {
         });
       });
 
-      console.log('Parsed exceptions:', exceptions);
-
       if (exceptions.length === 0) {
         message.error('No exceptions found');
         return;
       }
 
-      // Store all exceptions
       setAllExceptions(exceptions);
 
-      // Get the exception at the current index
       const currentException = exceptions[Math.min(index, exceptions.length - 1)];
       setException(currentException);
       
-      // Set navigation state
       setNavigation({
         hasOlder: index > 0,
         hasNewer: index < exceptions.length - 1,
@@ -376,7 +382,6 @@ const ExceptionDetailPage: React.FC = () => {
       
       setCurrentIndex(index);
     } catch (error) {
-      console.error('Error fetching exception detail:', error);
       message.error('Failed to fetch exception details');
     } finally {
       setLoading(false);
@@ -428,7 +433,6 @@ const ExceptionDetailPage: React.FC = () => {
       render: (value: any, record: { key: string }) => {
         const key = record.key.toLowerCase();
         
-        // Service link
         if (key.includes('servicename') && typeof value === 'string') {
           return (
             <Button
@@ -442,7 +446,6 @@ const ExceptionDetailPage: React.FC = () => {
           );
         }
         
-        // Trace link
         if ((key.includes('trace') || key.includes('traceid')) && typeof value === 'string') {
           return (
             <Button
@@ -456,7 +459,6 @@ const ExceptionDetailPage: React.FC = () => {
           );
         }
         
-        // Span link
         if ((key.includes('span') || key.includes('spanid')) && typeof value === 'string') {
           return (
             <Button
@@ -470,7 +472,6 @@ const ExceptionDetailPage: React.FC = () => {
           );
         }
         
-        // Log link
         if (key.includes('log') && typeof value === 'string') {
           return (
             <Button
@@ -484,7 +485,6 @@ const ExceptionDetailPage: React.FC = () => {
           );
         }
         
-        // Default value display
         if (typeof value === 'string' && (value.length > 50 || value.includes('http'))) {
           return <span className={styles.monospaceValue}>{value}</span>;
         }
@@ -521,7 +521,8 @@ const ExceptionDetailPage: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      {/* Back Button */}
+      {
+}
       <Button
         className={styles.backButton}
         icon={<ArrowLeftOutlined />}
@@ -530,7 +531,8 @@ const ExceptionDetailPage: React.FC = () => {
         Back to Exceptions
       </Button>
 
-      {/* Header */}
+      {
+}
       <div className={styles.header}>
         <div className={styles.exceptionInfo}>
           <h1 className={styles.exceptionType}>{exception.exceptionType}</h1>
@@ -562,9 +564,11 @@ const ExceptionDetailPage: React.FC = () => {
         </div>
       </div>
 
-{/* Action Cards */}
+{
+}
 <div className={styles.actionCardsContainer}>
-  {/* Service Card */}
+  {
+}
   <div className={styles.actionCard}>
     <div className={styles.actionCardText}>
       View service details and performance metrics for this error
@@ -579,7 +583,8 @@ const ExceptionDetailPage: React.FC = () => {
     </Button>
   </div>
 
-  {/* Trace Card */}
+  {
+}
   <div className={styles.actionCard}>
     <div className={styles.actionCardText}>
       See what happened before and after this error in a trace graph
@@ -594,7 +599,8 @@ const ExceptionDetailPage: React.FC = () => {
     </Button>
   </div>
 
-  {/* Span Card */}
+  {
+}
   <div className={styles.actionCard}>
     <div className={styles.actionCardText}>
       View specific span details and execution context
@@ -610,7 +616,8 @@ const ExceptionDetailPage: React.FC = () => {
   </div>
 </div>
 
-      {/* Key-Value Pairs */}
+      {
+}
       <div className={styles.keyValueCard}>
         <div className={styles.keyValueHeader}>Key-Value Pairs</div>
         <div className={styles.keyValueContent}>
@@ -625,7 +632,8 @@ const ExceptionDetailPage: React.FC = () => {
         </div>
       </div>
 
-{/* Stacktrace */}
+{
+}
 <div className={styles.stacktraceCard}>
   <div className={styles.stacktraceHeader}>Stacktrace</div>
   <div className={styles.stacktraceContent}>

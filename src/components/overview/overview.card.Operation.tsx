@@ -92,11 +92,9 @@ const OperationCard: React.FC<OperationCardProps> = ({
     return <UnorderedListOutlined style={{ fontSize: '18px', color: '#1890ff' }} />;
   };
 
-  // Sort operations: error > degraded > warning > healthy, then by avgLatency
   const sortedOperations = useMemo(() => {
     let filtered = operations;
     
-    // Filter by search query
     if (searchQuery && searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = operations.filter(operation => 
@@ -115,14 +113,13 @@ const OperationCard: React.FC<OperationCardProps> = ({
       
       const avgLatencyA = a.metrics?.avgDurationMs || 0;
       const avgLatencyB = b.metrics?.avgDurationMs || 0;
-      return avgLatencyB - avgLatencyA; // Higher latency first
+      return avgLatencyB - avgLatencyA;
     });
   }, [operations, searchQuery]);
 
   const displayOperations = expanded ? sortedOperations : sortedOperations.slice(0, 2);
   const hasMore = sortedOperations.length > 2;
 
-  // Don't show card if no operations match search
   if (sortedOperations.length === 0) {
     return null;
   }
@@ -288,4 +285,3 @@ const OperationCard: React.FC<OperationCardProps> = ({
 };
 
 export default OperationCard;
-

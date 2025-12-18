@@ -94,11 +94,9 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
     return <SettingOutlined style={{ fontSize: '20px', color: '#1890ff' }} />;
   };
 
-  // Sort services: error > degraded > warning > healthy, then by avgLatency
   const sortedServices = useMemo(() => {
     let filtered = services;
     
-    // Filter by search query
     if (searchQuery && searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = services.filter(service => 
@@ -117,14 +115,13 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
       
       const avgLatencyA = a.metrics?.avgDurationMs || 0;
       const avgLatencyB = b.metrics?.avgDurationMs || 0;
-      return avgLatencyB - avgLatencyA; // Higher latency first
+      return avgLatencyB - avgLatencyA;
     });
   }, [services, searchQuery]);
 
   const displayServices = expanded ? sortedServices : sortedServices.slice(0, 2);
   const hasMore = sortedServices.length > 2;
   
-  // Don't show card if no services match search
   if (sortedServices.length === 0) {
     return null;
   }
@@ -302,4 +299,3 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 };
 
 export default ServiceCard;
-

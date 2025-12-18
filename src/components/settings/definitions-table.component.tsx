@@ -1,6 +1,6 @@
 import React from 'react';
 import { InlineField, Input } from '@grafana/ui';
-import { Definitions } from '../../interfaces/options';
+import { Definitions } from '../../interfaces/utils/options';
 
 interface DefinitionsTableProps {
   value: Definitions;
@@ -303,4 +303,3 @@ const DefinitionsTable: React.FC<DefinitionsTableProps> = ({ value, onChange }) 
 };
 
 export default DefinitionsTable;
-

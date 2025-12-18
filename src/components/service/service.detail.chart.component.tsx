@@ -7,7 +7,6 @@ interface MsChartsProps {
   chartId?: string;
 }
 
-// Format time values intelligently
 const formatTimeValue = (val: number): string => {
   const absVal = Math.abs(val);
   
@@ -23,16 +22,13 @@ const MsCharts: React.FC<MsChartsProps> = ({ series, colors, chartId = 'default'
   const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Override ApexCharts touch event handling to make them passive
     const overrideTouchEvents = () => {
       if (chartRef.current) {
         const chartElements = chartRef.current.querySelectorAll('.apexcharts-canvas, .apexcharts-svg, .apexcharts-zoomable');
         chartElements.forEach((element) => {
-          // Remove existing event listeners and add passive ones
           const touchEvents = ['touchstart', 'touchmove', 'touchend', 'touchcancel'];
           touchEvents.forEach(eventType => {
             element.addEventListener(eventType, (e) => {
-              // Prevent default to avoid scroll blocking
               e.preventDefault();
             }, { passive: true, capture: true });
           });
@@ -40,14 +36,11 @@ const MsCharts: React.FC<MsChartsProps> = ({ series, colors, chartId = 'default'
       }
     };
 
-    // Force chart resize after initial render
     const forceResize = () => {
       if (chartRef.current) {
         const chartElement = chartRef.current.querySelector('.apexcharts-canvas');
         if (chartElement) {
-          // Trigger resize event
           window.dispatchEvent(new Event('resize'));
-          // Force ApexCharts to recalculate dimensions
           setTimeout(() => {
             const apexChart = (chartElement as any).__apexChart;
             if (apexChart && apexChart.resize) {
@@ -58,7 +51,6 @@ const MsCharts: React.FC<MsChartsProps> = ({ series, colors, chartId = 'default'
       }
     };
 
-    // Run after chart is rendered with multiple attempts
     const timer1 = setTimeout(overrideTouchEvents, 100);
     const timer2 = setTimeout(forceResize, 200);
     const timer3 = setTimeout(forceResize, 500);
@@ -137,14 +129,14 @@ const MsCharts: React.FC<MsChartsProps> = ({ series, colors, chartId = 'default'
       },
     },
     colors: colors ?? [
-      '#3b82f6', // blue
-      '#ef4444', // red  
-      '#10b981', // green
-      '#f59e0b', // amber
-      '#8b5cf6', // purple
-      '#ec4899', // pink
-      '#06b6d4', // cyan
-      '#f97316', // orange
+      '#3b82f6',
+      '#ef4444',
+      '#10b981',
+      '#f59e0b',
+      '#8b5cf6',
+      '#ec4899',
+      '#06b6d4',
+      '#f97316',
     ],
     stroke: {
       width: 2,
@@ -224,7 +216,6 @@ const MsCharts: React.FC<MsChartsProps> = ({ series, colors, chartId = 'default'
       offsetX: 0,
       offsetY: 0,
       formatter: function(seriesName: string) {
-        // Show full name, will scroll horizontally
         return seriesName;
       },
       labels: {

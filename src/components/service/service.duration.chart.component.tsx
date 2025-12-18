@@ -7,7 +7,6 @@ interface ServiceDurationChartProps {
   metric: string;
 }
 
-// Format time values intelligently
 const formatTimeValue = (val: number): string => {
   const absVal = Math.abs(val);
   
@@ -39,7 +38,7 @@ const ServiceDurationChart: React.FC<ServiceDurationChartProps> = ({ services, m
     
       const data = latencyItem
         ? latencyItem.data.map(p => ({
-            x: new Date(p.x),  // backend’den gelen zamanı kullan
+            x: new Date(p.x),
             y: p.y,
           }))
         : [];
@@ -138,4 +137,3 @@ const ServiceDurationChart: React.FC<ServiceDurationChartProps> = ({ services, m
 };
 
 export default ServiceDurationChart;
-

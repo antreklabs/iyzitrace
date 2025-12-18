@@ -97,5 +97,3 @@ const ServiceMetricsCard: React.FC<ServiceMetricsCardProps> = ({ service }) => {
 };
 
 export default ServiceMetricsCard;
-
-

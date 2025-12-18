@@ -100,4 +100,3 @@ const ServiceErrorChart: React.FC<{ services: Service[] }> = ({ services }) => {
 };
 
 export default ServiceErrorChart;
-

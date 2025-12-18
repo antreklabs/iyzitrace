@@ -16,7 +16,6 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, pageNa
   const navigate = useNavigate();
   const [range, setRange] = useState<[number, number]>([Date.now() - 60 * 15 * 1000, Date.now()]);
   
-  // URL'den from ve to değerlerini oku
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const fromParam = searchParams.get('from');
@@ -28,13 +27,6 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, pageNa
       
       if (!isNaN(fromTimestamp) && !isNaN(toTimestamp)) {
         setRange([fromTimestamp, toTimestamp]);
-        // console.log('Loaded time range from URL:', 
-        // {
-        //   from: new Date(fromTimestamp).toISOString(),
-        //   to: new Date(toTimestamp).toISOString(),
-        //   fromTimestamp,
-        //   toTimestamp
-        // });
       }
     }
   }, [location.search]);
@@ -52,14 +44,16 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, pageNa
         wrap={false}
         style={{width: '100%', height: 50 }}
       >
-        {/* Center: Title */}
+        {
+}
         {title && (
           <Col flex={1} style={{ display: 'flex', justifyContent: 'center' }}>
             <h3 style={{ margin: 0, fontSize: 20, textAlign: 'center' }}>{title}</h3>
           </Col>
         )}
 
-        {/* Right: Header actions */}
+        {
+}
         {showHeaderActions && (
         <Col flex="none">
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
@@ -72,7 +66,6 @@ const BaseContainerHeader: React.FC<BaseContainerHeaderProps> = ({ title, pageNa
               onApply={(start, end) => {
                 setRange([start, end]);
                 
-                // URL'i güncelle
                 const searchParams = new URLSearchParams(location.search);
                 searchParams.set('from', start.toString());
                 searchParams.set('to', end.toString());

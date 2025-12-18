@@ -1,7 +1,7 @@
 import { Operation, Service } from "./interface.service";
 import { getQueryData, getQueryRangeData } from "../provider/prometheus.provider";
 import { FilterParamsModel, QueryType, getQueryByType, getDefinitions } from "./query.service";
-import { Definitions } from "../../interfaces/options";
+import { Definitions } from "../../interfaces/utils/options";
 
 interface ResultItem {
   metric: {
@@ -85,7 +85,6 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
   const serviceQueryDataP99ByServiceInTime = await getServicesQueryDataInTime(QueryType.P99_BY_SERVICE_INTIME, filterParamsModel, definitions);
   const serviceQueryDataApdexByServiceInTime = await getServicesQueryDataInTime(QueryType.APDEX_BY_SERVICE_INTIME, filterParamsModel, definitions);
   
-  
   const serviceQueryDataCallsByServiceAndSpan = await getServicesQueryDataByType(QueryType.CALLS_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
   const serviceQueryDataP50ByServiceAndSpan = await getServicesQueryDataByType(QueryType.P50_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
   const serviceQueryDataP75ByServiceAndSpan = await getServicesQueryDataByType(QueryType.P75_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
@@ -105,10 +104,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
   const serviceQueryDataRateByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.RATE_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
   const serviceQueryDataTopKeyOperationsByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.TOP_KEY_OPERATIONS_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
 
-  // const serviceSpanRelation = await getServiceMapQueryDataByServiceSpanRelation(QueryType.SERVICE_SPAN_RELATION, filterParamsModel, definitions);
-  // console.log('serviceSpanRelation', serviceSpanRelation);
   const serviceRelation = await getServiceMapQueryDataByServiceSpanRelation(QueryType.SERVICE_RELATION, filterParamsModel, definitions);
-  // console.log('serviceRelation', serviceRelation);
   let servicesWithOperations: Service[] = [];
 
   const serviceSpanMap = new Map<string, Set<string>>();
@@ -213,29 +209,6 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
 
     return servicesWithOperations;
   });
-
-  // servicesWithOperations.forEach((service: Service) => {
-  //   service.operations.forEach((operation: Operation) => {
-  //     const serviceSpanRelationItem = serviceSpanRelation.find((item: any) => item.client_operation_name === operation.name);
-  //     if (serviceSpanRelationItem) {
-
-  //       const targetService = servicesWithOperations.find((s: Service) => 
-  //         s.operations.find((o: Operation) => o.name === serviceSpanRelationItem.server_operation_name));
-  //       if (targetService) {
-  //         operation.targetServiceId = targetService.id;
-  //       }
-  //     }
-  //   });
-  // });
-
-  // servicesWithOperations.forEach((service: Service) => {
-  //     const serviceRelationItem = serviceRelation.find((item: any) => item.client === service.name);
-  //     if (serviceRelationItem) {
-  //       if(!service.targetServiceIds.includes(serviceRelationItem.server)) {
-  //         service.targetServiceIds.push(serviceRelationItem.server);
-  //       }
-  //     }
-  //   });
 
   const serviceMap = new Map<string, Service>();
   servicesWithOperations.forEach(service => {
@@ -676,11 +649,8 @@ export const getServicesQueryDataInTime = async (
   const maxPoints = 60;
   const step = Math.max(Math.ceil((fixedEnd - fixedStart) / maxPoints), 60);
   const stepString = step + 's';
-  // console.log('stepString', stepString);
   const query = getQueryByType(queryType, filterParamsModel, definitions);
-  // console.log('query', query);
   const data = await getQueryRangeData(query, start, end, stepString);
-  // console.log('data in time', data);
 
   return data.result.map((result: ResultItem) => ({
     service_name: result.metric.service_name,

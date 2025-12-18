@@ -42,7 +42,6 @@ export const getServiceIconByName = (
     const cleanedName = serviceName.replace(/[^a-z]/gi, '');
     const parts = serviceName.split(/[-_\s]/g); 
 
-
     for (const { icon, keywords } of serviceIconMap) {
         if (keywords.some((kw) => serviceName.includes(kw))) {
             const iconName = 'Si' + icon.charAt(0).toUpperCase() + icon.slice(1);

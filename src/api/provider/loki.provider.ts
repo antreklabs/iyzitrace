@@ -1,7 +1,6 @@
-// Prometheus Provider - API calls to Prometheus for labels and values
 import { getDataSourceSrv } from '@grafana/runtime';
 import { getDefaultLokiUid } from '../service/settings.service';
-import { LokiReadRequestFactory } from '../../providers/api/loki/models/loki.read.request.model';
+import { LokiReadRequestFactory } from './models/loki.read.request.model';
 import { lastValueFrom, from, isObservable } from 'rxjs';
 
 export const getQueryData = async (query: string, start: number, end: number, limit: number, 

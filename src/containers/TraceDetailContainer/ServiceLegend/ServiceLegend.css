@@ -8,25 +8,21 @@
     font-size: 12px;
     gap: 16px;
   }
-
   .operation-type-filters {
     display: flex;
     flex-direction: column;
     gap: 8px;
   }
-
   .filter-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-
   .filter-label {
     font-weight: 600;
     color: #fff;
     font-size: 13px;
   }
-
   .clear-all-button {
     padding: 4px 8px;
     border: 1px solid #666;
@@ -37,19 +33,16 @@
     cursor: pointer;
     transition: all 0.2s ease;
   }
-
   .clear-all-button:hover {
     border-color: #888;
     background-color: #2a2a2a;
     color: #fff;
   }
-
   .operation-type-buttons {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
   }
-
   .operation-type-button {
     display: flex;
     align-items: center;
@@ -63,36 +56,29 @@
     cursor: pointer;
     transition: all 0.2s ease;
   }
-
   .operation-type-button:hover {
     border-color: #777;
     background-color: #2a2a2a;
   }
-
   .operation-type-button.selected {
     font-weight: 600;
   }
-
   .operation-icon {
     font-size: 14px;
   }
-
   .operation-type-name {
     font-weight: 500;
   }
-
   .service-legend-section {
     display: flex;
     flex-direction: column;
     gap: 8px;
   }
-
   .service-legend-rows {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
   }
-  
   .service-legend-row {
     display: flex;
     align-items: center;
@@ -100,7 +86,6 @@
     padding: 6px 10px;
     border-radius: 4px;
   }
-  
   .service-legend-color {
     width: 12px;
     height: 12px;
@@ -108,7 +93,6 @@
     margin-right: 8px;
     flex-shrink: 0;
   }
-  
   .service-legend-label {
     font-weight: bold;
     margin-right: 8px;
@@ -117,20 +101,16 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  
   .service-legend-duration {
     opacity: 0.6;
   }
-
   .service-legend-icon {
     width: 16px;
     height: 16px;
     margin-right: 8px;
     flex-shrink: 0;
   }
-
   .service-legend-name {
     font-weight: 500;
     color: #fff;
   }
-  

@@ -158,9 +158,9 @@ const getStyles = () => ({
     position: relative;
     
     display: flex;
-    flex-direction: column; /* alt alta */
+    flex-direction: column;
     justify-content: space-between;
-    gap: 8px; /* üst-alt boşluk */
+    gap: 8px;
   `,
   cardRow: css`
     display: flex;
@@ -188,10 +188,8 @@ const getStyles = () => ({
     line-height: 1.4;
   `,
   statusBadge: css`
-    /* Badge styling handled by Grafana UI */
   `,
   exploreButton: css`
-    /* Button styling handled by Grafana UI */
   `,
   stepsPanel: css`
     padding: 24px;
@@ -410,7 +408,8 @@ const MenuCard: React.FC<MenuCardProps> = ({ item, sectionStatuses }) => {
   
   return (
     <Card className={styles.menuCard}>
-      {/* First Row: Icon + Title | Explore Button + Status Badge */}
+      {
+}
       <div className={styles.cardRow}>
         <div className={styles.cardLeft}>
           <item.icon style={{ fontSize: 20, color: '#8c8c8c' }} />
@@ -432,7 +431,8 @@ const MenuCard: React.FC<MenuCardProps> = ({ item, sectionStatuses }) => {
         </div>
       </div>
       
-      {/* Second Row: Description */}
+      {
+}
       <div className={styles.cardDescription}>{item.description}</div>
     </Card>
   );
@@ -541,7 +541,6 @@ const LandingPage: React.FC = () => {
         
         setSectionStatuses(statuses);
         
-        // Create steps array based on new structure
         const setupSteps: SetupStep[] = [
           { 
             key: 'apiKey', 
@@ -611,7 +610,6 @@ const LandingPage: React.FC = () => {
         setSteps(setupSteps);
       } catch (err) {
         setError('Failed to load workspace data');
-        console.error('Error fetching data:', err);
       } finally {
         setLoading(false);
       }
@@ -682,12 +680,14 @@ const LandingPage: React.FC = () => {
         
         <div className={styles.rightColumn}>
           <Card className={styles.stepsPanel}>
-            {/* Title */}
+            {
+}
             <div className={styles.stepsTitle}>
               Build your observability base
             </div>
             
-            {/* Stepper */}
+            {
+}
             <div className={styles.stepperSection}>
               <div className={styles.progressText}>
                 Step {completedSteps}/{totalSteps}
@@ -700,7 +700,8 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
             
-            {/* Step List */}
+            {
+}
             <div className={styles.stepsList}>
               {steps.map((step) => (
                 <StepRow

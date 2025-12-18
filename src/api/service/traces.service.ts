@@ -68,10 +68,8 @@ function computeStartEndIso(startTimeUnixNano: any, durationMsInput: any): { sta
 }
 
 export const getTracesTableData = async (filterParamsModel: FilterParamsModel): Promise<Trace[]> => {
-  
 
   const query = await filterParamsModel.getTraceQueryAsync();
-  console.log('query', query);
   const data : ResultItem = await getQueryData(query, filterParamsModel.timeRange.from, filterParamsModel.timeRange.to, parseInt(filterParamsModel.options.limit || '1000'));
   const traces: Trace[] = data.traces.map((trace: any) => {
     const { startTime, endTime } = computeStartEndIso(trace.startTimeUnixNano, trace.durationMs);

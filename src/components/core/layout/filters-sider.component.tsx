@@ -26,7 +26,6 @@ const FiltersSider: React.FC<FiltersSiderProps> = ({
         background: '#1f1f1f', 
         padding: 10,
         top: 0,
-        // marginBottom: '16px',
         position: 'sticky',
         zIndex: 10,
       }} 
@@ -50,5 +49,3 @@ const FiltersSider: React.FC<FiltersSiderProps> = ({
 };
 
 export default FiltersSider;
-
-

@@ -139,4 +139,3 @@ const ApplicationsSidebar: React.FC<ApplicationsSidebarProps> = ({
 };
 
 export default ApplicationsSidebar;
-

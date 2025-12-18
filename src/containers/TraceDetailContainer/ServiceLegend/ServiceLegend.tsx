@@ -39,7 +39,8 @@ const ServiceLegendPanel: React.FC<ServiceLegendPanelProps> = ({ serviceMetaMap,
 
   return (
     <div className="service-legend-panel">
-      {/* Operation Type Filters */}
+      {
+}
       <div className="operation-type-filters">
         <div className="filter-header">
           <span className="filter-label">Filter by Operation Type:</span>
@@ -70,19 +71,10 @@ const ServiceLegendPanel: React.FC<ServiceLegendPanelProps> = ({ serviceMetaMap,
         </div>
       </div>
 
-      {/* Service Legend */}
-      {/* <div className="service-legend-section">
-        <span className="filter-label">Services:</span>
-        <div className="service-legend-rows">
-          {Object.entries(serviceMetaMap).map(([serviceName, meta]) => (
-            <div key={serviceName} className="service-legend-row">
-              <span className="service-legend-icon">{meta.icon}</span> 
-              <span className="service-legend-color" style={{ backgroundColor: meta.color }} />
-              <span className="service-legend-name">{serviceName}</span>
-            </div>
-          ))}
-        </div>
-      </div>*/}
+      {
+}
+      {
+}
     </div> 
   );
 };

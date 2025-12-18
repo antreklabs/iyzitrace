@@ -6,19 +6,16 @@
     height: 100%;
     overflow-y: auto;
   }
-  
   .selected-span-details-empty {
     padding: 16px;
     color: #888;
     font-style: italic;
   }
-  
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-  
   .meta-grid {
     display: grid;
     grid-template-columns: 120px 1fr;
@@ -26,31 +23,25 @@
     column-gap: 16px;
     margin-bottom: 16px;
   }
-  
   .meta-label {
     color: #999;
     text-transform: uppercase;
     font-size: 11px;
   }
-  
   .attributes-list {
     display: flex;
     flex-direction: column;
     gap: 6px;
   }
-  
   .attribute-row {
     display: flex;
     justify-content: space-between;
   }
-  
   .attribute-key {
     font-weight: 500;
   }
-  
   .attribute-value {
     max-width: 200px;
     text-align: right;
     word-break: break-all;
   }
-  

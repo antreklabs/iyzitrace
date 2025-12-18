@@ -6,50 +6,12 @@ import { FilterParamsModel } from '../../api/service/query.service';
 import BaseFilter from '../base.filter';
 import BaseTable from '../base.table';
 import { getLogsTableData } from '../../api/service/logs.service';
-import { LogItem } from '../../interfaces/pages/logs/logs.response.interface';
+import { LogItem } from '../../interfaces/logs/logs.response.interface';
 import LogExpandedRowComponent from '../../components/log/log.container.expanded-row.component';
 
 const LogContainer: React.FC = () => {
   const [data, setData] = useState<LogItem[]>([]);
   const [tableColumns, setTableColumns] = useState<TableColumn>();
-  
-  // const fetchModelData = async (filterModel: FilterParamsModel): Promise<FetchedModel> => {
-  //   let expr = '{service_namespace="opentelemetry-demo"} |= ``';
-    
-  //   // console.log('[LogContainer] Using LogQL expression from pageState:', expr);
-    
-  //   const limit = 100;
-  //   const intervalMs = 1000;
-  //   const interval = getIntervalLabel(intervalMs);
-  //   const orderBy = 'timestamp';
-  //   const orderDirection = 'desc';
-  //   const [rangeStart, rangeEnd] = [Date.now() - 15 * 60 * 1000, Date.now()];
-
-  //   const requestModel: LogsRequestModel = {
-  //     expr,
-  //     start: rangeStart,
-  //     end: rangeEnd,
-  //     limit: limit,
-  //     orderBy: orderBy,
-  //     orderDirection: orderDirection,
-  //     interval: interval,
-  //     intervalMs: intervalMs,
-  //     timezone: 'UTC',
-  //     maxDataPoints: 1000,
-  //   };
-
-  //   try {
-  //     console.log('[LogContainer] requestModel:', requestModel);
-  //     const apiResult = await lokiReadApi.query({...requestModel});
-  //     console.log('[LogContainer] lokiReadApi.query result:', apiResult);
-
-  //     return { data: apiResult.list, columns: columns };
-  //   } catch (e) {
-  //     console.error('[LogContainer] lokiReadApi.query error:', e);
-  //   }
-    
-  //   return { data: [], columns: { RootColumns: [] } };
-  // };
 
   const fetchModelData = async (filterModel: FilterParamsModel): Promise<FetchedModel> => {
     const data = await getLogsTableData(filterModel);
@@ -61,7 +23,6 @@ const LogContainer: React.FC = () => {
   };
 
   const buildColumns = (data: LogItem[]): TableColumn => {
-    // const cols = getTableColumns(data);
 
     return columns;
   };

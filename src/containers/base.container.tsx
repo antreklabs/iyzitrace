@@ -10,7 +10,6 @@ import AIChatbot from '../components/ai/ai-chatbot.component';
 
 const { Content } = Layout;
 
-
 export interface FetchedModel {
   data: any[];
   columns: TableColumn;
@@ -43,12 +42,10 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
   const [collapsed, setCollapsed] = useState(initialFilterCollapsed);
 
   const initializeUrlWithDefaults = () => {
-    // Check if URL has any parameters
     const urlParams = new URLSearchParams(location.search);
     const hasParams = Array.from(urlParams.keys()).length > 0;
     
     if (!hasParams) {
-      // URL is empty, set all default values
       const newSearch = getDefaultSearchQuery();
       navigate(`${location.pathname}?${newSearch}`, { replace: true });
     }
@@ -65,10 +62,7 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
       const fetchedModel = await onFetchData(filterModel);
       setModelData(fetchedModel.data);
       setAiModelData(fetchedModel.data);
-      console.log('modelData', modelData);
-      console.log('aiModelData', aiModelData);
     } catch (error) {
-      console.error('Error fetching data:', error);
       setModelData([]);
     } finally {
       setLoading(false);
@@ -116,4 +110,3 @@ const BaseContainerComponent: React.FC<BaseContainerProps> = ({
 };
 
 export default BaseContainerComponent;
-

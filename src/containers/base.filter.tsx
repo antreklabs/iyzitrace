@@ -4,7 +4,7 @@ import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../assets/styles/base/base.filter.css';
 import { DropdownOption, getPrometheusLabels, getPrometheusLabelValues, getPrometheusOperations, getPrometheusOperationTypes, getPrometheusServices, getPrometheusTraceStatuses, getPrometheusExceptionTypes } from '../api/service/list.service';
-import { TempoApi as TempoApiProvider } from '../providers/api/tempo/tempo.api';
+import { TempoApi as TempoApiProvider } from '../api/provider/tempo.provider';
 
 export const { Option } = Select;
 export const OPERATOR_OPTIONS = ['=', '!=', '>', '<', 'contains', 'regex'];
@@ -108,7 +108,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     
     const fieldNames = new Set<string>();
     columns.forEach(column => {
-      // Extract key from column
       if (column.title) {
         fieldNames.add(column.title);
       }
@@ -120,7 +119,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     }
   };
 
-  // Function to extract field values from grid data
   const extractFieldValuesFromData = (data: any[], fieldName: string) => {
     if (!data || data.length === 0) {
       return [];
@@ -130,7 +128,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     data.forEach(item => {
       let value = null;
       
-      // Check both attributes and direct properties
       if (item.attributes && item.attributes[fieldName]) {
         value = item.attributes[fieldName];
       } else if (item[fieldName] !== undefined) {
@@ -148,7 +145,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
   useEffect(() => {
     let alive = true;
     (async () => {
-      // timeSrv/DS sync için 1 frame beklet
       await new Promise(r => requestAnimationFrame(() => r(null)));
   
       if (alive && (hasServiceFilter || hasTypesFilter || hasLabelsFilter || hasOperationsFilter || hasStatusesFilter || hasTempoStatusesFilter || hasExceptionTypesFilter || hasTagsFilter)) {
@@ -158,17 +154,14 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     return () => { alive = false; };
   }, [fetchLists, hasServiceFilter, hasLabelsFilter, hasOperationsFilter, hasStatusesFilter, hasTypesFilter, hasExceptionTypesFilter, hasTagsFilter]);
 
-  // Extract fields from columns when columns change
   useEffect(() => {
     if (hasFieldsFilter && columns && Array.isArray(columns) && columns.length > 0) {
       extractFieldsFromColumns(columns);
     }
   }, [columns, hasFieldsFilter]);
       
-  // Update field values for existing field filters when data changes
   useEffect(() => {
     if (hasFieldsFilter && data && Array.isArray(data) && data.length > 0) {
-      // Update field values for existing field filters
       fieldFilters.forEach(filter => {
         if (filter.field) {
           const values = extractFieldValuesFromData(data, filter.field);
@@ -182,17 +175,14 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     }
   }, [data, hasFieldsFilter, fieldFilters]);
 
-  // Load filters from URL on mount and clear when URL changes
   useEffect(() => {
     const loadFiltersFromURL = () => {
       const searchParams = new URLSearchParams(location.search);
       const filters: any = {};
       
-      // Load time range
       const fromParam = searchParams.get('from');
       const toParam = searchParams.get('to');
       if (fromParam && toParam) {
-        // Convert long format (timestamp) to readable format
         const fromTimestamp = parseInt(fromParam);
         const toTimestamp = parseInt(toParam);
         
@@ -202,16 +192,13 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         };
       }
       
-      // Initialize filters object
       filters.filters = {};
       
-      // Load basic filters - only if they exist in URL
       if (searchParams.get('serviceName')) {
         const serviceName = searchParams.get('serviceName');
         filters.filters.serviceName = serviceName;
         filters.filters.serviceNameOperator = searchParams.get('serviceNameOperator') || '=';
         
-        // URL'den gelen service name'i services listesine ekle (eğer yoksa)
         if (serviceName && !services.some(item => item.value === serviceName)) {
           setServices(prev => [...prev, new DropdownOption(serviceName)]);
         }
@@ -225,7 +212,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         filters.filters.type = type;
         filters.filters.typeOperator = searchParams.get('typeOperator') || '=';
         
-        // URL'den gelen type'ı types listesine ekle (eğer yoksa)
         if (type && !types.some(item => item.value === type)) {
           setTypes(prev => [...prev, new DropdownOption(type)]);
         }
@@ -239,7 +225,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         filters.filters.operationName = operationName;
         filters.filters.operationNameOperator = searchParams.get('operationNameOperator') || '=';
         
-        // URL'den gelen operation name'i operations listesine ekle (eğer yoksa)
         if (operationName && !operations.some(item => item.value === operationName)) {
           setOperations(prev => [...prev, new DropdownOption(operationName)]);
         }
@@ -253,7 +238,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         filters.filters.status = status;
         filters.filters.statusOperator = searchParams.get('statusOperator') || '=';
         
-        // URL'den gelen status'u statuses listesine ekle (eğer yoksa)
         if (status && !statuses.some(item => item.value === status)) {
           setStatuses(prev => [...prev, new DropdownOption(status)]);
         }
@@ -267,7 +251,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         filters.filters.tempoStatus = tempoStatus;
         filters.filters.tempoStatusOperator = searchParams.get('tempoStatusOperator') || '=';
         
-        // URL'den gelen status'u statuses listesine ekle (eğer yoksa)
         if (tempoStatus && !tempoStatuses.some(item => item.value === tempoStatus)) {
           setTempoStatuses(prev => [...prev, new DropdownOption(tempoStatus)]);
         }
@@ -281,7 +264,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         filters.filters.exceptionType = exceptionType;
         filters.filters.exceptionTypeOperator = searchParams.get('exceptionTypeOperator') || '=';
         
-        // URL'den gelen exception type'ı exceptionTypes listesine ekle (eğer yoksa)
         if (exceptionType && !exceptionTypes.some(item => item.value === exceptionType)) {
           setExceptionTypes(prev => [...prev, new DropdownOption(exceptionType)]);
         }
@@ -328,7 +310,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         filters.filters.tagValue = undefined;
       }
       
-      // Load label filters
       const labelFilters: any = {};
       const labelFiltersArray: Array<{id: string, label: string, values: string[]}> = [];
       
@@ -343,7 +324,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
             value: labelValue ? (labelValue.includes(',') ? labelValue.split(',') : labelValue) : undefined
           };
           
-          // Add to labelFiltersArray for state
           labelFiltersArray.push({
             id,
             label: value,
@@ -356,11 +336,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         filters.labels = labelFilters;
         setLabelFilters(labelFiltersArray);
       } else {
-        // Clear label filters if no URL params
         setLabelFilters([]);
       }
       
-      // Load field filters
       const fieldFilters: any = {};
       const fieldFiltersArray: Array<{id: string, field: string, values: string[]}> = [];
       
@@ -375,7 +353,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
             value: fieldValue ? (fieldValue.includes(',') ? fieldValue.split(',') : fieldValue) : undefined
           };
           
-          // Add to fieldFiltersArray for state
           fieldFiltersArray.push({
             id,
             field: value,
@@ -388,11 +365,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         filters.fields = fieldFilters;
         setFieldFilters(fieldFiltersArray);
       } else {
-        // Clear field filters if no URL params
         setFieldFilters([]);
       }
       
-      // Load options - only if they exist in URL
       const options: any = {};
       searchParams.forEach((value, key) => {
         if (key.startsWith('option_')) {
@@ -405,10 +380,8 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         filters.options = options;
       }
       
-      // Always set form values - this will clear fields not in URL
       form.setFieldsValue(filters);
 
-      // Load tag names if tagScope is present
       const tagScope = searchParams.get('tagScope');
       if (tagScope) {
         (async () => {
@@ -424,16 +397,13 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
             }
             setTagNames(tags);
           } catch (error) {
-            console.error(`Error loading tags for scope ${tagScope} from URL:`, error);
           }
         })();
       } else {
-        // Clear tag names if no scope in URL
         setTagNames([]);
         setTagValues([]);
       }
 
-      // Load tag values if tagScope and tagKey are present
       const tagKey = searchParams.get('tagKey');
       if (tagScope && tagKey) {
         (async () => {
@@ -445,19 +415,15 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
             );
             setTagValues(valueOptions.map((item: any) => item.value));
           } catch (error) {
-            console.error(`Error loading tag values for ${tagKey} from URL:`, error);
           }
         })();
       } else if (tagScope && !tagKey) {
-        // Clear tag values if scope exists but no tag selected
         setTagValues([]);
       }
     };
     
     loadFiltersFromURL();
   }, [location.search, form]);
-
-  // localStorage kaldırıldı - sadece URL'den okuma
 
   const addLabelFilter = useCallback(() => {
     const newFilter = {
@@ -479,7 +445,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
 
   const removeLabelFilter = useCallback((id: string) => {
     setLabelFilters(prev => prev.filter(filter => filter.id !== id));
-    // Remove from form values
     const currentLabels = form.getFieldValue('labels') || {};
     delete currentLabels[id];
     form.setFieldsValue({ labels: currentLabels });
@@ -487,7 +452,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
 
   const removeFieldFilter = useCallback((id: string) => {
     setFieldFilters(prev => prev.filter(filter => filter.id !== id));
-    // Remove from form values
     const currentFields = form.getFieldValue('fields') || {};
     delete currentFields[id];
     form.setFieldsValue({ fields: currentFields });
@@ -499,12 +463,10 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         ? { ...filter, label: labelName, values: [] }
         : filter
     ));
-    // Reset values for this filter
     const currentLabels = form.getFieldValue('labels') || {};
     currentLabels[id] = { ...currentLabels[id], value: undefined };
     form.setFieldsValue({ labels: currentLabels });
 
-    // Fetch values for the selected label
     if (labelName) {
       try {
         const values = await getPrometheusLabelValues(labelName);
@@ -514,7 +476,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
             : filter
         ));
       } catch (error) {
-        console.error(`Error fetching label values for ${labelName}:`, error);
       }
     }
   }, [form]);
@@ -529,12 +490,9 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     currentFields[id] = { ...currentFields[id], value: undefined };
     form.setFieldsValue({ fields: currentFields });
 
-    // Field values will be populated when grid data is available
-    // No API call needed here
   }, [form]);
 
   const handleTagScopeChange = useCallback(async (scope: string) => {
-    // Reset tag name and tag value
     form.setFieldsValue({ 
       filters: { 
         ...form.getFieldValue('filters'),
@@ -550,7 +508,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       try {
         const response = await TempoApiProvider.getTagsByScope(scope);
         
-        // Try different possible response formats
         let tags = [];
         if (response?.scopes?.[0]?.tags) {
           tags = response.scopes[0].tags;
@@ -562,7 +519,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         
         setTagNames(tags);
       } catch (error) {
-        console.error(`Error fetching tags for scope ${scope}:`, error);
       } finally {
         setLoadingTagNames(false);
       }
@@ -570,7 +526,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
   }, [form]);
 
   const handleTagNameChange = useCallback(async (tagName: string) => {
-    // Reset tag value
     const currentScope = form.getFieldValue(['filters', 'tagScope']);
     form.setFieldsValue({ 
       filters: { 
@@ -591,7 +546,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       );
       setTagValues(valueOptions.map((item: any) => item.value));
       } catch (error) {
-        console.error(`Error fetching tag values for ${tagName}:`, error);
       } finally {
         setLoadingTagValues(false);
       }
@@ -606,9 +560,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
   const updateURLWithFilters = (filters: any) => {
     const searchParams = new URLSearchParams();
     
-    // Add timeRange
     if (filters.timeRange) {
-      // Convert to long format (timestamp)
       const fromTimestamp = typeof filters.timeRange.from === 'string' 
         ? new Date(filters.timeRange.from).getTime() 
         : filters.timeRange.from;
@@ -619,16 +571,8 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       searchParams.set('from', fromTimestamp.toString());
       searchParams.set('to', toTimestamp.toString());
       
-      // Console'a normal okunabilir format yazdır
-      // console.log('Time Range:', {
-      //   from: new Date(fromTimestamp).toISOString(),
-      //   to: new Date(toTimestamp).toISOString(),
-      //   fromTimestamp,
-      //   toTimestamp
-      // });
     }
     
-    // Add service filter
     if (filters.filters?.serviceName) {
       searchParams.set('serviceName', filters.filters.serviceName);
       if (filters.filters.serviceNameOperator) {
@@ -636,7 +580,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       }
     }
     
-    // Add type filter
     if (filters.filters?.type) {
       searchParams.set('type', filters.filters.type);
       if (filters.filters.typeOperator) {
@@ -644,7 +587,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       }
     }
     
-    // Add operation filter
     if (filters.filters?.operationName) {
       searchParams.set('operationName', filters.filters.operationName);
       if (filters.filters.operationNameOperator) {
@@ -652,7 +594,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       }
     }
     
-    // Add status filter
     if (filters.filters?.status) {
       searchParams.set('status', filters.filters.status);
       if (filters.filters.statusOperator) {
@@ -660,7 +601,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       }
     }
 
-    // Add tempo status filter
     if (filters.filters?.tempoStatus) {
       searchParams.set('tempoStatus', filters.filters.tempoStatus);
       if (filters.filters.tempoStatusOperator) {
@@ -668,7 +608,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       }
     }
 
-    // Add exception type filter
     if (filters.filters?.level) {
       searchParams.set('exceptionType', filters.filters.exceptionType);
       if (filters.filters.exceptionTypeOperator) {
@@ -676,7 +615,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       }
     }
     
-    // Add duration filters
     if (filters.filters?.durationScope) {
       searchParams.set('durationScope', filters.filters.durationScope);
     }
@@ -687,7 +625,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       searchParams.set('durationMax', filters.filters.durationMax);
     }
     
-    // Add tag filters
     if (filters.filters?.tagScope) {
       searchParams.set('tagScope', filters.filters.tagScope);
     }
@@ -701,7 +638,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       }
     }
     
-    // Add label filters
     if (filters.labels) {
       Object.entries(filters.labels).forEach(([id, labelFilter]: [string, any]) => {
         if (labelFilter && labelFilter.name && labelFilter.value) {
@@ -715,7 +651,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       });
     }
     
-    // Add field filters
     if (filters.fields) {
       Object.entries(filters.fields).forEach(([id, fieldFilter]: [string, any]) => {
         if (fieldFilter && fieldFilter.name && fieldFilter.value) {
@@ -729,7 +664,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       });
     }
     
-    // Add options
     if (filters.options) {
       Object.entries(filters.options).forEach(([key, value]: [string, any]) => {
         if (value !== undefined && value !== null) {
@@ -738,9 +672,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       });
     }
     
-    // Update URL without page reload
     const newURL = `${location.pathname}?${searchParams.toString()}`;
-    // console.log('Navigating to new URL:', newURL);
     navigate(newURL, { replace: true });
   };
 
@@ -1099,7 +1031,6 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 </Button>
               </Col>
             </Row>
-          
 
           {labelFilters.length > 0 && (
             <Row gutter={8} className="base-filter-remove-button-row">
@@ -1288,10 +1219,8 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
         </Button>
         <Button block className="base-filter-reset-button" onClick={() => {
           form.resetFields();
-          // Clear all filter states
           setLabelFilters([]);
           setFieldFilters([]);
-          // Clear URL parameters
           navigate(location.pathname, { replace: true });
         }}>
           Reset

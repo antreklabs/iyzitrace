@@ -72,7 +72,6 @@ const TraceContainer: React.FC = () => {
       return;
     }
 
-    // Filter out items with invalid durationMs
     const validData = data.filter(item => item && typeof item.durationMs === 'number' && !isNaN(item.durationMs));
     
     if (validData.length === 0) {
@@ -86,12 +85,10 @@ const TraceContainer: React.FC = () => {
     const totalSpanCount = validData.reduce((sum, curr) => sum + (curr.spanCount || 0), 0);
     const avgLatency = totalLatency / validData.length;
 
-    // Generate chart data for each metric (ordered by startTime)
     const ordered = validData
       .slice()
       .sort((a, b) => Number(a.startTimeUnixNano) - Number(b.startTimeUnixNano));
     
-    // Group data into max 50 buckets by time
     const groupSize = Math.max(1, Math.ceil(ordered.length / 50));
     const grouped = [];
     for (let i = 0; i < ordered.length; i += groupSize) {
@@ -99,12 +96,10 @@ const TraceContainer: React.FC = () => {
       grouped.push(group);
     }
     
-    // Aggregate span count data (sum)
     const spanCountChartData = grouped.map(group => 
       group.reduce((sum, item) => sum + (item.spanCount || 0), 0)
     );
     
-    // Aggregate latency data (min, max, avg)
     const latencyMinChartData = grouped.map(group => 
       Math.min(...group.map(item => item.durationMs || 0))
     );

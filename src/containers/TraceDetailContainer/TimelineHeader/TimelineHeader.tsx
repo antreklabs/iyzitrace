@@ -4,7 +4,7 @@ import './TimelineHeader.css';
 interface TimelineHeaderProps {
   startTime: number;
   endTime: number;
-  setGridWidth: (width: number) => void; // dışarıya grid genişliğini vermek için
+  setGridWidth: (width: number) => void;
 }
 
 const TimelineHeader: React.FC<TimelineHeaderProps> = ({ startTime, endTime, setGridWidth }) => {
@@ -12,7 +12,6 @@ const TimelineHeader: React.FC<TimelineHeaderProps> = ({ startTime, endTime, set
 
   useEffect(() => {
     if (timelineHeaderRef.current) {
-        // console.log('timelineHeaderRef.current.offsetWidth', timelineHeaderRef.current.offsetWidth)
       setGridWidth(timelineHeaderRef.current.offsetWidth);
     }
   }, []);

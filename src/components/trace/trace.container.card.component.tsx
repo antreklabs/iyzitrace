@@ -15,7 +15,6 @@ interface TraceMetricsCardProps {
 
 const TraceMetricsCard: React.FC<TraceMetricsCardProps> = ({ title, value, unit, chartData }) => {
   const formatValue = (numValue: number, unitStr: string): string => {
-    // If unit is "ms", use time formatting (ms, s, min, h, d)
     if (unitStr === 'ms') {
       const absVal = Math.abs(numValue);
       
@@ -27,7 +26,6 @@ const TraceMetricsCard: React.FC<TraceMetricsCardProps> = ({ title, value, unit,
       return `${(numValue / 86400000).toFixed(2)} d`;
     }
     
-    // For other units, use K/M formatting
     if (numValue >= 1000000) {
       return `${(numValue / 1000000).toFixed(2)} M ${unitStr}`;
     } else if (numValue >= 1000) {
@@ -59,16 +57,11 @@ const TraceMetricsCard: React.FC<TraceMetricsCardProps> = ({ title, value, unit,
         padding: '4px 0'
       }}>
         {chartData.slice(0,50).map((val, index) => {
-          // Eğer tüm değerler aynıysa (range === 0), her bar %100 yüksekliğinde olmalı
-          // Aksi halde normalize edilmiş yükseklik kullan
           let height: number;
           if (range === 0) {
-            // Tüm değerler aynı: barlar tam yükseklikte
             height = 100;
           } else {
-            // Değerler farklı: normalize et (min değer 0%, max değer 100%)
             height = ((val - minValue) / range) * 100;
-            // Minimum bar yüksekliği %5 (görünürlük için)
             height = Math.max(height, 5);
           }
           
@@ -129,29 +122,11 @@ const TraceMetricsCard: React.FC<TraceMetricsCardProps> = ({ title, value, unit,
           </div>
         </Flex>
         {chartBars}
-        {/* <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: 12 }}>
-          {traceID && (
-            <Button style={{ width: '100%' }} onClick={(e) => { 
-              e.stopPropagation(); 
-              navigate(`${PLUGIN_BASE_URL}/traces/${traceID}`); 
-            }}>
-              View Trace
-            </Button>
-          )}
-          {serviceName && (
-            <Button style={{ width: '100%' }} onClick={(e) => { 
-              e.stopPropagation(); 
-              navigate(`${PLUGIN_BASE_URL}/services/${serviceName}`); 
-            }}>
-              View {serviceName}
-            </Button>
-          )}
-        </div> */}
+        {
+}
       </Card>
     </div>
   );
 };
 
 export default TraceMetricsCard;
-
-

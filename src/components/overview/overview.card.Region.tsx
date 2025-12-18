@@ -55,4 +55,3 @@ const RegionCard: React.FC<RegionCardProps> = ({ region, onClick, isSelected }) 
 };
 
 export default RegionCard;
-

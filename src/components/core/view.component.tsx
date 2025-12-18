@@ -30,12 +30,10 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
   const [editingView, setEditingView] = useState<ViewData | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Load views from plugin settings or localStorage
   useEffect(() => {
     loadViews();
   }, []);
 
-  // Check if URL contains viewId parameter and select that view
   useEffect(() => {
     if (Array.isArray(views) && views.length > 0) {
       const searchParams = new URLSearchParams(location.search);
@@ -51,10 +49,8 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
     }
   }, [location.search, views]);
 
-  // Final guard: when views arrive but no selection yet, choose last or first
   useEffect(() => {
     if (!selectedView && Array.isArray(views) && views.length > 0) {
-      // Check URL first
       const searchParams = new URLSearchParams(location.search);
       const viewIdFromUrl = searchParams.get('viewId');
       
@@ -67,7 +63,6 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
         }
       }
       
-      // Fallback to last selected or first
       const last = safeReadLastSelected();
       const candidate = last && last.pageName === pageName
         ? views.find(v => v.id === last.viewId) || views[0]
@@ -82,7 +77,6 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
 
   const loadViews = async () => {
     try {
-      // Önce plugin settings'den yükle
       const settings = await getPluginSettings();
       const pageViews = settings.pageViews || [];
       const currentPageViews = pageViews.filter((view: ViewData) => view.page === pageName);
@@ -91,7 +85,6 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
         setViews(currentPageViews as ViewData[]);
         autoSelectView(currentPageViews as ViewData[]);
       } else {
-        // Plugin settings'de yoksa localStorage'dan yükle
         const localViews = localStorage.getItem(`iyzitrace-views-${pageName}`);
         const parsedViews = JSON.parse(localViews);
         if (parsedViews && parsedViews.length > 0) {
@@ -99,21 +92,18 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
           setViews(parsedViews as ViewData[]);
           autoSelectView(parsedViews as ViewData[]);
       } else {
-          // hiç kayıt yoksa default view oluştur
           const created = await ensureDefaultView();
           if (created) {
             setViews([created]);
             setSelectedView(created);
             writeLastSelected(created.id);
           } else {
-            // fallback: plugin settings kontrolü
             const refreshed = await getPluginSettings();
             const pageViewsAfter = (refreshed.pageViews || []).filter((v: ViewData) => v.page === pageName);
             if (pageViewsAfter.length > 0) {
               setViews(pageViewsAfter as ViewData[]);
               autoSelectView(pageViewsAfter as ViewData[]);
             } else {
-              // localStorage varsa kullan
               const local = JSON.parse(localStorage.getItem(`iyzitrace-views-${pageName}`) || '[]');
               if (Array.isArray(local) && local.length > 0) {
                 setViews(local);
@@ -124,8 +114,6 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
         }
       }
     } catch (error) {
-      console.error('Error loading views from plugin settings, trying localStorage:', error);
-      // Plugin settings başarısız olursa localStorage'dan yükle
       const localViews = localStorage.getItem(`iyzitrace-views-${pageName}`);
       if (localViews) {
         const parsedViews = JSON.parse(localViews);
@@ -162,7 +150,6 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
         return defaultView;
       }
     } catch {
-      // fallback to localStorage
       const localViews = JSON.parse(localStorage.getItem(`iyzitrace-views-${pageName}`) || '[]');
       if (!Array.isArray(localViews) || localViews.length === 0) {
         localStorage.setItem(`iyzitrace-views-${pageName}`, JSON.stringify([defaultView]));
@@ -182,7 +169,6 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
   const autoSelectView = (list: ViewData[]) => {
     if (!Array.isArray(list) || list.length === 0) return;
     
-    // Check if URL already has a viewId
     const searchParams = new URLSearchParams(location.search);
     const viewIdFromUrl = searchParams.get('viewId');
     
@@ -195,7 +181,6 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
       }
     }
     
-    // Otherwise, use last selected or first
     const last = safeReadLastSelected();
     const candidate = last && last.pageName === pageName
       ? list.find(v => v.id === last.viewId) || list[0]
@@ -204,7 +189,6 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
     writeLastSelected(candidate.id);
     
     if (candidate.query) {
-      // Add viewId parameter to the URL
       const queryString = candidate.query;
       const separator = queryString.includes('?') ? '&' : '?';
       const urlWithViewId = `${queryString}${separator}viewId=${candidate.id}`;
@@ -241,11 +225,9 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
 
   const handleClearView = () => {
     setSelectedView(null);
-    // Remove viewId from localStorage
     try {
       localStorage.removeItem(`lastSelectedPageView_${pageName}`);
     } catch {}
-    // Reset URL to default parameters (without viewId)
     const defaultQuery = getDefaultSearchQuery();
     navigate(`${location.pathname}?${defaultQuery}`, { replace: true });
   };
@@ -255,7 +237,6 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
       setLoading(true);
       const values = await form.validateFields();
       
-      // Get current query and remove viewId parameter if it exists
       let currentQuery = location.search;
       const searchParams = new URLSearchParams(currentQuery);
       searchParams.delete('viewId');
@@ -273,37 +254,30 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
       };
 
       try {
-        // Önce plugin settings'e kaydetmeyi dene
         const settings = await getPluginSettings();
         const pageViews = settings.pageViews || [];
         
         if (editingView) {
-          // Update existing view
           const updatedViews = pageViews.map((view: ViewData) => 
             view.id === editingView.id ? { ...view, query: currentQuery } : view
           );
           await savePluginSettings({ ...settings, pageViews: updatedViews });
         } else {
-          // Add new view
           const updatedViews = [...pageViews, viewData];
           await savePluginSettings({ ...settings, pageViews: updatedViews });
         }
         
         message.success('View saved successfully');
       } catch (pluginError) {
-        console.warn('Plugin settings failed, using localStorage:', pluginError);
         
-        // Plugin settings başarısız olursa localStorage'a kaydet
         const localViews = JSON.parse(localStorage.getItem(`iyzitrace-views-${pageName}`) || '[]');
         
         if (editingView) {
-          // Update existing view
           const updatedViews = localViews.map((view: ViewData) => 
             view.id === editingView.id ? { ...view, query: currentQuery } : view
           );
           localStorage.setItem(`iyzitrace-views-${pageName}`, JSON.stringify(updatedViews));
         } else {
-          // Add new view
           const updatedViews = [...localViews, viewData];
           localStorage.setItem(`iyzitrace-views-${pageName}`, JSON.stringify(updatedViews));
         }
@@ -316,7 +290,6 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
       setEditingView(null);
       form.resetFields();
     } catch (error) {
-      console.error('Error saving view:', error);
       message.error('Failed to save view');
     } finally {
       setLoading(false);
@@ -335,12 +308,10 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
       setSelectedView(view);
       writeLastSelected(view.id);
       
-      // Add viewId parameter to the URL
       const queryString = view.query || '';
       const separator = queryString.includes('?') ? '&' : '?';
       const urlWithViewId = `${queryString}${separator}viewId=${view.id}`;
       
-      // Navigate to the saved query with viewId
       navigate(`${location.pathname}${urlWithViewId}`, { replace: true });
     }
   };
@@ -348,30 +319,25 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
   const handleViewDelete = async (viewId: string) => {
     try {
       try {
-        // Önce plugin settings'den silmeyi dene
         const settings = await getPluginSettings();
         const pageViews = settings.pageViews || [];
         const updatedViews = pageViews.filter((view: ViewData) => view.id !== viewId);
         await savePluginSettings({ ...settings, pageViews: updatedViews });
         message.success('View deleted successfully');
       } catch (pluginError) {
-        console.warn('Plugin settings failed, using localStorage:', pluginError);
         
-        // Plugin settings başarısız olursa localStorage'dan sil
         const localViews = JSON.parse(localStorage.getItem(`iyzitrace-views-${pageName}`) || '[]');
         const updatedViews = localViews.filter((view: ViewData) => view.id !== viewId);
         localStorage.setItem(`iyzitrace-views-${pageName}`, JSON.stringify(updatedViews));
         message.success('View deleted from local storage');
       }
 
-      // Her iki durumda da, localStorage yedeğini de temizle (çifte kayıt kalmasın)
       try {
         const localViewsMirror = JSON.parse(localStorage.getItem(`iyzitrace-views-${pageName}`) || '[]');
         const localUpdated = localViewsMirror.filter((view: ViewData) => view.id !== viewId);
         localStorage.setItem(`iyzitrace-views-${pageName}`, JSON.stringify(localUpdated));
       } catch {}
       
-      // Eğer son seçilen bu view ise, kaydı temizle
       try {
         const lastRaw = localStorage.getItem(`lastSelectedPageView_${pageName}`);
         if (lastRaw) {
@@ -388,7 +354,6 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
       
       await loadViews();
     } catch (error) {
-      console.error('Error deleting view:', error);
       message.error('Failed to delete view');
     }
   };
@@ -460,7 +425,8 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {/* Only show dropdown for view selection */}
+        {
+}
         <Dropdown
           menu={{ items: dropdownItems }}
           trigger={['click']}

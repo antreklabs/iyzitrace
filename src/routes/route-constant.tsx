@@ -16,7 +16,6 @@ const ExceptionDetailPage = React.lazy(() => import('../pages/exceptions/excepti
 const TeamsPage = React.lazy(() => import('../pages/teams/teams.page'));
 const TeamsManagePage = React.lazy(() => import('../pages/teams/teams-manage.page'));
 const SettingsPage = React.lazy(() => import('../pages/settings/settings.page'));
-// const ComingSoonPage = React.lazy(() => import('../pages/core/coming-soon.page'));
 
 export const appRoutes: AppRoute[] = [
   {

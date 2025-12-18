@@ -29,7 +29,6 @@ const HorizontalScrollContainer: React.FC<HorizontalScrollContainerProps> = ({
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const [internalSearchQuery, setInternalSearchQuery] = useState('');
   
-  // Use external searchQuery if provided, otherwise use internal state
   const searchQuery = externalSearchQuery !== undefined ? externalSearchQuery : internalSearchQuery;
   
   const handleSearchChange = (value: string) => {
@@ -47,35 +46,30 @@ const HorizontalScrollContainer: React.FC<HorizontalScrollContainerProps> = ({
   };
 
   const filteredChildren = useMemo(() => {
-    // If no searchable or no query, show all children
     if (!searchable || !searchQuery) {
       return children;
     }
 
-    // If no getSearchableText function, show all children (card-level filtering is handled inside cards)
     if (!getSearchableText) {
       return children;
     }
 
-    // Card-level filtering (for Regions, Infrastructures)
     const childrenArray = React.Children.toArray(children);
     const query = searchQuery.toLowerCase();
 
     return childrenArray.filter((child) => {
-      // Only process ReactElement children
       if (!React.isValidElement(child)) {
-        return true; // Keep non-element children
+        return true;
       }
 
       try {
         const searchText = getSearchableText(child as ReactElement);
         if (!searchText || searchText.trim() === '') {
-          return false; // No searchable text, hide it when searching
+          return false;
         }
         return searchText.toLowerCase().includes(query);
       } catch (error) {
-        console.error('Error in getSearchableText:', error, child);
-        return true; // On error, show the item
+        return true;
       }
     });
   }, [children, searchQuery, searchable, getSearchableText]);
@@ -155,4 +149,3 @@ const HorizontalScrollContainer: React.FC<HorizontalScrollContainerProps> = ({
 };
 
 export default HorizontalScrollContainer;
-

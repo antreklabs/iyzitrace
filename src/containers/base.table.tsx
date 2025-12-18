@@ -12,20 +12,18 @@ export interface BaseTableProps {
   data: any[];
   columns: TableColumn | undefined;
   onExpandedRowRender?: (record: any) => React.ReactNode;
-  // onPageSizeChange: () => void;
   title?: string;
   showSearch?: boolean;
   searchPlaceholder?: string;
-  l1Key?: string; // first child collection key (default: applications)
-  l2Key?: string; // second child collection key (default: services)
-  l3Key?: string; // third child collection key (default: operations)
+  l1Key?: string;
+  l2Key?: string;
+  l3Key?: string;
 }
 
 const BaseTable: React.FC<BaseTableProps> = ({
   data,
   columns,
   onExpandedRowRender,
-  // onPageSizeChange,
   title = "Data Table",
   showSearch = true,
   searchPlaceholder = "Search...",
@@ -36,20 +34,16 @@ const BaseTable: React.FC<BaseTableProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Get search query and page count from URL
   const filterModel = getFilterParams();
   const urlQuery = filterModel.query;
   const pageCount = parseInt(filterModel.options.pageCount, 10);
 
-  // Local state for search input (prevents re-renders on every keystroke)
   const [searchValue, setSearchValue] = useState(urlQuery || '');
 
-  // Sync local state with URL when URL changes externally
   useEffect(() => {
     setSearchValue(urlQuery || '');
   }, [urlQuery]);
 
-  // Filter data based on search value (local state for real-time filtering without page refresh)
   const filteredData = searchValue
     ? data.filter((item: any) =>
         Object.values(item).some(value =>
@@ -59,7 +53,6 @@ const BaseTable: React.FC<BaseTableProps> = ({
     : data;
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Only update local state, don't navigate yet
     setSearchValue(e.target.value);
   };
 
@@ -106,7 +99,6 @@ const BaseTable: React.FC<BaseTableProps> = ({
     );
 
     if (level === 'L3') {
-      // Level 3 (Operations) - no further expansion
       return (
         <Table
           rowKey={(operationRecord: any) => 
@@ -121,7 +113,6 @@ const BaseTable: React.FC<BaseTableProps> = ({
       );
     }
 
-    // Level 1 and 2 - can expand further
     return (
       <Table
         rowKey={(record: any) => 
@@ -139,12 +130,10 @@ const BaseTable: React.FC<BaseTableProps> = ({
             return null;
           },
           expandIcon: ({ expanded, onExpand, record }) => {
-            // L1 ise L2 data'sı var mı kontrol et
             if (level === 'L1') {
               const hasL2 = Array.isArray(record?.[l2Key]) && record?.[l2Key].length > 0;
               if (!hasL2) return null;
             }
-            // L2 ise L3 data'sı var mı kontrol et
             if (level === 'L2') {
               const hasL3 = Array.isArray(record?.[l3Key]) && record?.[l3Key].length > 0;
               if (!hasL3) return null;
@@ -218,7 +207,6 @@ const BaseTable: React.FC<BaseTableProps> = ({
           showQuickJumper: false,
           showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
           onShowSizeChange: (current, size) => {
-            // Update URL with new page size
             const newSearch = updateUrlParams({ option_pageCount: size.toString() });
             navigate(`${location.pathname}?${newSearch}`, { replace: true });
           }

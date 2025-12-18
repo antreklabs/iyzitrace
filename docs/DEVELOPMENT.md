@@ -306,3 +306,17 @@ git push origin merged-feature/service-map
 git push origin --delete feature/service-map
 
 ```
+
+
+```bash
+   docker compose -f docker-compose.yaml down
+   docker compose -f configs/observability-platform/docker-compose.yml down
+   docker compose -f configs/opentelemetry-demo/docker-compose.yml down
+
+   docker compose -f docker-compose.yaml up -d
+   docker compose -f configs/observability-platform/docker-compose.yml up -d
+   docker compose -f configs/opentelemetry-demo/docker-compose.yml up -d
+
+   pnpm run dev     
+
+```

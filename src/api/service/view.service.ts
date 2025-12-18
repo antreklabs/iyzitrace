@@ -36,5 +36,3 @@ export const getSelectedViewData = async (pageName: string): Promise<any | null>
   } catch {}
   return null;
 };
-
-
