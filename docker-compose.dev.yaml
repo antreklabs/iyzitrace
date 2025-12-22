@@ -1,9 +1,7 @@
 networks:
   default:
     name: iyzitrace-network
-  observability-platform_otel:
-    external: true
-  opentelemetry-demo:
+  shared-network:
     external: true
 
 services:
@@ -28,8 +26,7 @@ services:
       - "3000:3000"
     networks:
       - default
-      - observability-platform_otel
-      - opentelemetry-demo
+      - shared-network
 
   iyzitrace-dev:
     platform: linux/amd64
@@ -37,7 +34,7 @@ services:
     container_name: iyzitrace-dev
     working_dir: /app
     environment:
-      - PNPM_STORE_DIR=/app/.pnpm-store   # store'u sabitle
+      - PNPM_STORE_DIR=/app/.pnpm-store # store'u sabitle
     command: >
       sh -lc "
         apk add --no-cache git &&
@@ -58,5 +55,4 @@ services:
     restart: unless-stopped
     networks:
       - default
-      - observability-platform_otel
-      - opentelemetry-demo
+      - shared-network
