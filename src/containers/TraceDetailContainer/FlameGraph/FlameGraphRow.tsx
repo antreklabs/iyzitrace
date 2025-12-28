@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './FlameGraph.css';
+import '../../../assets/styles/containers/trace-detail/flame-graph.css';
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
 
 interface SpanNode {
@@ -34,7 +34,7 @@ const LABEL_WIDTH = 350;
 
 const getOperationType = (span: SpanNode): string => {
   let type = span.tags?.['type'];
-  
+
   if (type === 'http') {
     return 'HTTP';
   }
@@ -111,10 +111,24 @@ const FlameGraphRow: React.FC<FlameGraphRowProps> = ({
   ];
   const spanIcon = OPERATION_TYPES.find((type) => type.type === operationType)?.icon || serviceMeta?.icon;
 
+  // Calculate depth-based padding
+  const depthAttribute = Math.min(depth, 10);
+
+  // Dynamic inline styles are necessary for computed values (position, width, color)
+  const barStyle: React.CSSProperties = {
+    left: `${leftPx}px`,
+    width: `${Math.max(2, widthPx)}px`,
+    backgroundColor: serviceMeta?.color || '#1890ff',
+  };
+
+  const labelStyle: React.CSSProperties = {
+    paddingLeft: `${8 + depth * 16}px`,
+  };
+
   return (
     <>
       <div className="flamegraph-row">
-        <div className="flamegraph-label" style={{ paddingLeft: `${depth * 16}px` }}>
+        <div className="flamegraph-label" style={labelStyle} data-depth={depthAttribute}>
           {span.children && span.children.length > 0 && (
             <span className="collapse-toggle" onClick={() => setCollapsed(!collapsed)}>
               {collapsed ? <FiChevronRight /> : <FiChevronDown />}
@@ -125,15 +139,7 @@ const FlameGraphRow: React.FC<FlameGraphRowProps> = ({
         <div className="flamegraph-bar-container">
           <div
             className={`flamegraph-bar ${isSelected ? 'selected' : ''}`}
-            style={{
-              left: `${leftPx}px`,
-              width: `${Math.max(2, widthPx)}px`,
-              backgroundColor: serviceMeta?.color || '#1890ff',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '0 6px',
-            }}
+            style={barStyle}
             onClick={() => onSpanSelect?.(span.id)}
           >
             {widthPx > 80 ? (

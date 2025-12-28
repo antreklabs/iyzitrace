@@ -20,9 +20,9 @@ const ServiceMapContainer: React.FC = () => {
 
   const fetchModelData = async (filterModel: FilterParamsModel): Promise<FetchedModel> => {
     const regions = await getRegions(filterModel);
-    
+
     const infrastructures = (regions || []).flatMap((r: Region) => r.infrastructures || []);
-    
+
     setMapLevelData({ regions: regions });
     setInfraLevelData(infrastructures);
     setColumnInDetail(infrastructures);
@@ -31,7 +31,7 @@ const ServiceMapContainer: React.FC = () => {
   };
 
   const setColumnInDetail = (data: Infrastructure[]) => {
-    if(columns) {
+    if (columns) {
       return;
     }
     const cols = getTableColumns(data, 'services', 'operations')
@@ -41,7 +41,7 @@ const ServiceMapContainer: React.FC = () => {
       cpupercentage: 'CPU Usage',
       memorypercentage: 'Memory Usage'
     });
-    root = columnUtils.reorderColumns(root, ['region','name', 'osversion', 'ip', 'type', 'status.value']);
+    root = columnUtils.reorderColumns(root, ['region', 'name', 'osversion', 'ip', 'type', 'status.value']);
     let l1 = columnUtils.renameColumns(cols.L1Columns ?? [], {
       metricsavgdurationms: 'Avg',
       metricsmindurationms: 'Min',
@@ -66,7 +66,7 @@ const ServiceMapContainer: React.FC = () => {
     const serviceNameColumn = l1.find((col: ColumnItem) => col.key === 'name');
     if (serviceNameColumn) {
       serviceNameColumn.render = (value: string) => {
-        return <span style={{ color: '#1890ff', cursor: 'pointer' }} onClick={() => navigate(`/a/iyzitrace-app/services/${value}`)}>{value}</span>;
+        return <span className="service-name-link" onClick={() => navigate(`/a/iyzitrace-app/services/${value}`)}>{value}</span>;
       };
     }
 
@@ -107,7 +107,7 @@ const ServiceMapContainer: React.FC = () => {
       initialFilterCollapsed={true}
       onFetchData={fetchModelData}
       filterComponent={
-        <BaseFilter 
+        <BaseFilter
           hasServiceFilter={true}
           hasOperationsFilter={true}
           hasStatusesFilter={true}
@@ -126,13 +126,13 @@ const ServiceMapContainer: React.FC = () => {
       <InfrastructureMap data={mapLevelData} />
       {columns && columns.RootColumns && columns.RootColumns.length > 0 && (
         <BaseTable
-        data={infraLevelData}
-        columns={columns}
+          data={infraLevelData}
+          columns={columns}
           title="Infrastructure Overview"
-        showSearch={true}
-        searchPlaceholder="Search..."
-        l1Key="services"
-        l2Key="operations"
+          showSearch={true}
+          searchPlaceholder="Search..."
+          l1Key="services"
+          l2Key="operations"
         />
       )}
     </BaseContainerComponent>

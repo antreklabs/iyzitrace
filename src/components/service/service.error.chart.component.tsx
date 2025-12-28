@@ -1,11 +1,12 @@
 import React, { useMemo } from 'react';
 import ApexCharts from 'react-apexcharts';
 import { Service } from '../../api/service/interface.service';
+import '../../assets/styles/components/service/service.css';
 
 const ServiceErrorChart: React.FC<{ services: Service[] }> = ({ services }) => {
   const chartData = useMemo(() => {
     const colors = ['#8B5CF6', '#3B82F6', '#F59E0B', '#6B7280', '#EC4899', '#10B981'];
-    
+
     return services.slice(0, 6).map((service, index) => ({
       name: service.name,
       data: Array.from({ length: 20 }, (_, i) => ({
@@ -27,14 +28,14 @@ const ServiceErrorChart: React.FC<{ services: Service[] }> = ({ services }) => {
     colors: chartData.map(d => d.color),
     stroke: { width: 1, curve: 'smooth' as const },
     markers: { size: 0, strokeWidth: 2, hover: { size: 6 } },
-    xaxis: { 
+    xaxis: {
       type: 'datetime' as const,
       labels: { style: { colors: '#8c8c8c' } },
       axisBorder: { show: false },
       axisTicks: { show: false },
     },
     yaxis: {
-      labels: { 
+      labels: {
         style: { colors: '#8c8c8c' },
         formatter: (val: number) => `${val.toFixed(0)}%`,
       },
@@ -63,37 +64,7 @@ const ServiceErrorChart: React.FC<{ services: Service[] }> = ({ services }) => {
   };
 
   return (
-    <div style={{ width: '100%', height: '200px', position: 'relative' }}>
-      <style>{`
-        .apexcharts-legend {
-          display: flex !important;
-          flex-wrap: nowrap !important;
-          overflow-x: auto !important;
-          overflow-y: hidden !important;
-          white-space: nowrap !important;
-          max-width: 100% !important;
-          scrollbar-width: thin;
-          scrollbar-color: #3f3f46 #18181b;
-        }
-        .apexcharts-legend::-webkit-scrollbar {
-          height: 6px;
-        }
-        .apexcharts-legend::-webkit-scrollbar-track {
-          background: #18181b;
-          border-radius: 3px;
-        }
-        .apexcharts-legend::-webkit-scrollbar-thumb {
-          background: #3f3f46;
-          border-radius: 3px;
-        }
-        .apexcharts-legend::-webkit-scrollbar-thumb:hover {
-          background: #52525b;
-        }
-        .apexcharts-legend-series {
-          display: inline-flex !important;
-          flex-shrink: 0 !important;
-        }
-      `}</style>
+    <div className="chart-container">
       <ApexCharts options={options} series={chartData} type="line" height={200} />
     </div>
   );

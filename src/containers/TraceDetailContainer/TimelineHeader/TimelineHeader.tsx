@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import './TimelineHeader.css';
+import '../../../assets/styles/containers/trace-detail/timeline-header.css';
 
 interface TimelineHeaderProps {
   startTime: number;
@@ -17,7 +17,7 @@ const TimelineHeader: React.FC<TimelineHeaderProps> = ({ startTime, endTime, set
   }, []);
 
   const totalDuration = endTime - startTime;
-  const intervals = 10; 
+  const intervals = 10;
   const step = totalDuration / intervals;
 
   const marks = Array.from({ length: intervals + 1 }).map((_, idx) => {

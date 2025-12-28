@@ -3,6 +3,7 @@ import { Card, Col, Flex, Row, Spin, Typography } from 'antd';
 import { Operation, Service } from '@/api/service/interface.service';
 import { FilterParamsModel } from '@/api/service/query.service';
 import { FundOutlined, ThunderboltOutlined, RiseOutlined, FallOutlined } from '@ant-design/icons';
+import '../../assets/styles/components/service/service.css';
 
 const formatDuration = (ms: number): string => {
   if (ms >= 1000) {
@@ -29,7 +30,7 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
     minDuration: 0,
     totalMin: '',
   });
-  
+
   const getMetrics = async () => {
     setLoading(true);
 
@@ -37,31 +38,31 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
       const operations = data[0]?.operations || [];
       const operationCount = operations.length;
       const totalCalls = data[0].metrics.callsCount;
-      
-      const maxLatencyOperation = operations.length > 0 
+
+      const maxLatencyOperation = operations.length > 0
         ? operations.reduce((max: Operation, operation: Operation) => {
-            const maxValue = max.metrics.maxDurationMs || 0;
-            const currentValue = operation.metrics.maxDurationMs || 0;
-            return currentValue > maxValue ? operation : max;
-          })
+          const maxValue = max.metrics.maxDurationMs || 0;
+          const currentValue = operation.metrics.maxDurationMs || 0;
+          return currentValue > maxValue ? operation : max;
+        })
         : null;
       const maxLatencySpan = maxLatencyOperation?.name || '';
-      
+
       const minLatencyOperation = operations.length > 0
         ? operations.reduce((min: Operation, operation: Operation) => {
-            const minValue = min.metrics.minDurationMs ?? Infinity;
-            const currentValue = operation.metrics.minDurationMs ?? Infinity;
-            return currentValue < minValue ? operation : min;
-          })
+          const minValue = min.metrics.minDurationMs ?? Infinity;
+          const currentValue = operation.metrics.minDurationMs ?? Infinity;
+          return currentValue < minValue ? operation : min;
+        })
         : null;
       const minLatencySpan = minLatencyOperation?.name || '';
-      
+
       const maxDuration = data[0].metrics.maxDurationMs;
       const minDuration = data[0].metrics.minDurationMs;
       const totalMin = filterModel?.options.interval;
       const totalCallsSpan = 'N/A';
       const operationCountSpan = 'N/A';
-      
+
       setSummaryData({
         operationCount,
         totalCalls,
@@ -85,15 +86,15 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+      <div className="service-summary-loading">
         <Spin size="large" />
-        <span style={{ marginLeft: '8px' }}>Loading metrics...</span>
+        <span className="service-summary-loading-text">Loading metrics...</span>
       </div>
     );
   }
 
   return (
-    <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+    <Row gutter={[16, 16]} className="row-mb-24">
       <Col span={6}>
         <Card
           hoverable
@@ -120,15 +121,15 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
           ) : (
             <Flex vertical gap={12}>
               <Flex justify="space-between" align="center">
-                <Text style={{ color: '#71717a', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <Text className="service-summary-label">
                   Operation Count
                 </Text>
-                <FundOutlined style={{ fontSize: '20px', color: '#3b82f6', opacity: 0.6 }} />
+                <FundOutlined className="service-summary-icon-blue" />
               </Flex>
-              <Text style={{ color: '#3b82f6', fontSize: '32px', fontWeight: 700, lineHeight: 1 }}>
+              <Text className="service-summary-value-blue">
                 {summaryData.operationCount}
               </Text>
-              <Text style={{ color: '#52525b', fontSize: '11px', fontWeight: 500 }}>
+              <Text className="service-summary-subtext">
                 in {summaryData.totalMin}
               </Text>
             </Flex>
@@ -161,15 +162,15 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
           ) : (
             <Flex vertical gap={12}>
               <Flex justify="space-between" align="center">
-                <Text style={{ color: '#71717a', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <Text className="service-summary-label">
                   Total Call Count
                 </Text>
-                <ThunderboltOutlined style={{ fontSize: '20px', color: '#10b981', opacity: 0.6 }} />
+                <ThunderboltOutlined className="service-summary-icon-green" />
               </Flex>
-              <Text style={{ color: '#10b981', fontSize: '32px', fontWeight: 700, lineHeight: 1 }}>
+              <Text className="service-summary-value-green">
                 {summaryData.totalCalls}
               </Text>
-              <Text style={{ color: '#52525b', fontSize: '11px', fontWeight: 500 }}>
+              <Text className="service-summary-subtext">
                 in {summaryData.totalMin}
               </Text>
             </Flex>
@@ -202,23 +203,16 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
           ) : (
             <Flex vertical gap={12}>
               <Flex justify="space-between" align="center">
-                <Text style={{ color: '#71717a', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <Text className="service-summary-label">
                   Max Latency Span
                 </Text>
-                <RiseOutlined style={{ fontSize: '20px', color: '#ef4444', opacity: 0.6 }} />
+                <RiseOutlined className="service-summary-icon-red" />
               </Flex>
-              <Text style={{ color: '#ef4444', fontSize: '32px', fontWeight: 700, lineHeight: 1 }}>
+              <Text className="service-summary-value-red">
                 {formatDuration(summaryData.maxDuration)}
               </Text>
-              <Text 
-                style={{ 
-                  color: '#52525b', 
-                  fontSize: '11px', 
-                  fontWeight: 500,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}
+              <Text
+                className="service-summary-subtext-ellipsis"
                 title={summaryData.maxLatencySpan}
               >
                 {summaryData.maxLatencySpan}
@@ -253,23 +247,16 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
           ) : (
             <Flex vertical gap={12}>
               <Flex justify="space-between" align="center">
-                <Text style={{ color: '#71717a', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <Text className="service-summary-label">
                   Min Latency Span
                 </Text>
-                <FallOutlined style={{ fontSize: '20px', color: '#f59e0b', opacity: 0.6 }} />
+                <FallOutlined className="service-summary-icon-orange" />
               </Flex>
-              <Text style={{ color: '#f59e0b', fontSize: '32px', fontWeight: 700, lineHeight: 1 }}>
+              <Text className="service-summary-value-orange">
                 {formatDuration(summaryData.minDuration)}
               </Text>
-              <Text 
-                style={{ 
-                  color: '#52525b', 
-                  fontSize: '11px', 
-                  fontWeight: 500,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}
+              <Text
+                className="service-summary-subtext-ellipsis"
                 title={summaryData.minLatencySpan}
               >
                 {summaryData.minLatencySpan}

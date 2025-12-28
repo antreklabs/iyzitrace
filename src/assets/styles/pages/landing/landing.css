@@ -1,0 +1,284 @@
+/* Landing Page Styles */
+
+.landing-container {
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.landing-header {
+    margin-bottom: 32px;
+}
+
+.landing-welcome-text {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.landing-description {
+    color: #8c8c8c;
+    margin-bottom: 16px;
+}
+
+.landing-workspace-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.landing-status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #52c41a;
+}
+
+.landing-main-content {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 32px;
+}
+
+@media (max-width: 1200px) {
+    .landing-main-content {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+}
+
+.landing-left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.landing-right-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.landing-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+@media (max-width: 768px) {
+    .landing-cards-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.landing-menu-card {
+    padding: 20px;
+    transition: all 0.2s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.landing-card-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.landing-card-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.landing-card-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.landing-card-title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.landing-card-description {
+    color: #8c8c8c;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.landing-card-icon {
+    font-size: 20px;
+    color: #8c8c8c;
+}
+
+.landing-steps-panel {
+    padding: 24px;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+}
+
+.landing-steps-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.landing-stepper-section {
+    margin-bottom: 24px;
+}
+
+.landing-progress-text {
+    font-size: 12px;
+    color: #8c8c8c;
+    margin-bottom: 8px;
+}
+
+.landing-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #2a2a2a;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.landing-progress-fill {
+    height: 100%;
+    background: #1890ff;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.landing-steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.landing-step-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    position: relative;
+}
+
+.landing-info-button-wrapper {
+    position: relative;
+}
+
+.landing-info-button {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #8c8c8c;
+    transition: all 0.2s ease;
+}
+
+.landing-info-button:hover {
+    color: #1890ff;
+    background: rgba(24, 144, 255, 0.1);
+}
+
+.landing-tooltip {
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: 12px;
+    background: #1f1f1f;
+    border: 1px solid #404040;
+    border-radius: 8px;
+    padding: 16px;
+    min-width: 320px;
+    max-width: 400px;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    pointer-events: auto;
+}
+
+.landing-tooltip::after {
+    content: '';
+    position: absolute;
+    right: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid #404040;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+}
+
+.landing-tooltip::before {
+    content: '';
+    position: absolute;
+    right: -7px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 7px solid #1f1f1f;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+}
+
+.landing-tooltip-description {
+    color: #8c8c8c;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+.landing-tooltip-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.landing-step-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #2a2a2a;
+    border: 2px solid #404040;
+}
+
+.landing-step-icon.done {
+    background: #52c41a;
+    border-color: #52c41a;
+    color: white;
+}
+
+.landing-step-icon.skipped {
+    background: #8c8c8c;
+    border-color: #8c8c8c;
+    color: white;
+}
+
+.landing-step-content {
+    flex: 1;
+}
+
+.landing-step-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.landing-info-icon {
+    font-size: 16px;
+}

@@ -6,6 +6,7 @@ import DefinitionsTable, { DEFAULT_DEFINITIONS } from './definitions-table.compo
 import GrafanaLikeRangePicker from '../core/graphanadatepicker';
 import dayjs from 'dayjs';
 import { KeyOutlined, DatabaseOutlined, FieldTimeOutlined, SaveOutlined, FileTextOutlined, RobotOutlined } from '@ant-design/icons';
+import '../../assets/styles/components/settings/settings.css';
 
 const PLUGIN_ID = 'iyzitrace-app';
 
@@ -64,7 +65,7 @@ const ConfigForm: React.FC = () => {
       if (settings?.jsonData) {
         setJsonData(settings.jsonData as PluginJsonData);
       }
-    } catch {}
+    } catch { }
   };
 
   const renderTabBar = () => (
@@ -107,54 +108,54 @@ const ConfigForm: React.FC = () => {
         color: '#9CA3AF',
         marginBottom: 16
       }}>
-      <div style={{
-        fontSize: 13,
-        color: '#9CA3AF',
-        background: 'rgba(255,255,255,0.04)',
-        borderRadius: 8,
-        padding: '18px 20px',
-        marginTop: 8,
-        lineHeight: 1.7,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-      }}>
-        <div style={{ margin: '8px 0 12px 0', color: '#a3a3a3', fontSize: 13 }}>
-          Below you can find important legal documents and policies regarding your use of IyziTrace. Please review these documents to understand your rights, responsibilities, and how your data is handled and protected.
+        <div style={{
+          fontSize: 13,
+          color: '#9CA3AF',
+          background: 'rgba(255,255,255,0.04)',
+          borderRadius: 8,
+          padding: '18px 20px',
+          marginTop: 8,
+          lineHeight: 1.7,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+        }}>
+          <div style={{ margin: '8px 0 12px 0', color: '#a3a3a3', fontSize: 13 }}>
+            Below you can find important legal documents and policies regarding your use of IyziTrace. Please review these documents to understand your rights, responsibilities, and how your data is handled and protected.
+          </div>
+          <ul style={{ margin: '0 0 0 18px', padding: 0, listStyle: 'disc' }}>
+            <li style={{ marginBottom: 8 }}>
+              <a href="https://beta.iyzitrace.com/legal/terms" target="_blank" rel="noopener noreferrer" style={{ color: '#34d399', fontWeight: 500 }}>
+                Terms and Conditions
+              </a>
+              <div style={{ fontSize: 12, color: '#bdbdbd', marginTop: 2 }}>
+                The main contract for using IyziTrace. Outlines your rights, obligations, and the rules for using our services.
+              </div>
+            </li>
+            <li style={{ marginBottom: 8 }}>
+              <a href="https://beta.iyzitrace.com/legal/privacy" target="_blank" rel="noopener noreferrer" style={{ color: '#34d399', fontWeight: 500 }}>
+                Privacy Policy
+              </a>
+              <div style={{ fontSize: 12, color: '#bdbdbd', marginTop: 2 }}>
+                Explains how we collect, use, store, and protect your personal data when you use IyziTrace.
+              </div>
+            </li>
+            <li style={{ marginBottom: 8 }}>
+              <a href="https://beta.iyzitrace.com/legal/dpa" target="_blank" rel="noopener noreferrer" style={{ color: '#34d399', fontWeight: 500 }}>
+                Data Processing Agreement (DPA)
+              </a>
+              <div style={{ fontSize: 12, color: '#bdbdbd', marginTop: 2 }}>
+                Details our commitments and your rights regarding data processing, especially for GDPR compliance.
+              </div>
+            </li>
+            <li style={{ marginBottom: 0 }}>
+              <a href="https://beta.iyzitrace.com/legal/vulnerability-disclosure" target="_blank" rel="noopener noreferrer" style={{ color: '#34d399', fontWeight: 500 }}>
+                Vulnerability Disclosure
+              </a>
+              <div style={{ fontSize: 12, color: '#bdbdbd', marginTop: 2 }}>
+                Learn how to report security vulnerabilities and help us keep IyziTrace safe for everyone.
+              </div>
+            </li>
+          </ul>
         </div>
-        <ul style={{ margin: '0 0 0 18px', padding: 0, listStyle: 'disc' }}>
-          <li style={{ marginBottom: 8 }}>
-            <a href="https://beta.iyzitrace.com/legal/terms" target="_blank" rel="noopener noreferrer" style={{ color: '#34d399', fontWeight: 500 }}>
-              Terms and Conditions
-            </a>
-            <div style={{ fontSize: 12, color: '#bdbdbd', marginTop: 2 }}>
-              The main contract for using IyziTrace. Outlines your rights, obligations, and the rules for using our services.
-            </div>
-          </li>
-          <li style={{ marginBottom: 8 }}>
-            <a href="https://beta.iyzitrace.com/legal/privacy" target="_blank" rel="noopener noreferrer" style={{ color: '#34d399', fontWeight: 500 }}>
-              Privacy Policy
-            </a>
-            <div style={{ fontSize: 12, color: '#bdbdbd', marginTop: 2 }}>
-              Explains how we collect, use, store, and protect your personal data when you use IyziTrace.
-            </div>
-          </li>
-          <li style={{ marginBottom: 8 }}>
-            <a href="https://beta.iyzitrace.com/legal/dpa" target="_blank" rel="noopener noreferrer" style={{ color: '#34d399', fontWeight: 500 }}>
-              Data Processing Agreement (DPA)
-            </a>
-            <div style={{ fontSize: 12, color: '#bdbdbd', marginTop: 2 }}>
-              Details our commitments and your rights regarding data processing, especially for GDPR compliance.
-            </div>
-          </li>
-          <li style={{ marginBottom: 0 }}>
-            <a href="https://beta.iyzitrace.com/legal/vulnerability-disclosure" target="_blank" rel="noopener noreferrer" style={{ color: '#34d399', fontWeight: 500 }}>
-              Vulnerability Disclosure
-            </a>
-            <div style={{ fontSize: 12, color: '#bdbdbd', marginTop: 2 }}>
-              Learn how to report security vulnerabilities and help us keep IyziTrace safe for everyone.
-            </div>
-          </li>
-        </ul>
-      </div>
       </div>
     </div>
   );
@@ -188,8 +189,10 @@ const ConfigForm: React.FC = () => {
                       <SecretInput
                         width={40}
                         isConfigured={serverConfigured}
-                        onReset={() => { setSecureJsonData({ ...(secureJsonData || {}), apiKey: '' });
-                        setSecureJsonFields({ ...(secureJsonFields || {}), apiKey: false }); }}
+                        onReset={() => {
+                          setSecureJsonData({ ...(secureJsonData || {}), apiKey: '' });
+                          setSecureJsonFields({ ...(secureJsonFields || {}), apiKey: false });
+                        }}
                         value={secureJsonData?.apiKey ?? ''}
                         onChange={(e) => setSecureJsonData({ ...(secureJsonData || {}), apiKey: e.currentTarget.value })}
                       />
@@ -211,7 +214,7 @@ const ConfigForm: React.FC = () => {
                         Paste
                       </Button>
                       {
-}
+                      }
                     </div>
                   </InlineField>
                 );
@@ -226,7 +229,7 @@ const ConfigForm: React.FC = () => {
       )}
       {activeTab === 'Defaults' && (
         <>
-          
+
           <div style={{
             marginBottom: 16,
             padding: 16,
@@ -340,12 +343,12 @@ const ConfigForm: React.FC = () => {
                   <Input
                     width={40}
                     value={jsonData.aiConfig?.apiKey ?? ''}
-                    onChange={(e) => setJsonData({ 
-                      ...jsonData, 
-                      aiConfig: { 
-                        ...jsonData.aiConfig, 
-                        apiKey: e.currentTarget.value 
-                      } 
+                    onChange={(e) => setJsonData({
+                      ...jsonData,
+                      aiConfig: {
+                        ...jsonData.aiConfig,
+                        apiKey: e.currentTarget.value
+                      }
                     })}
                     placeholder="sk-or-v1-..."
                   />
@@ -368,12 +371,12 @@ const ConfigForm: React.FC = () => {
                       { label: 'Llama 3.1 405B', value: 'meta-llama/llama-3.1-405b-instruct' },
                     ]}
                     value={jsonData.aiConfig?.model || 'deepseek/deepseek-chat'}
-                    onChange={(v) => setJsonData({ 
-                      ...jsonData, 
-                      aiConfig: { 
-                        ...jsonData.aiConfig, 
-                        model: v?.value 
-                      } 
+                    onChange={(v) => setJsonData({
+                      ...jsonData,
+                      aiConfig: {
+                        ...jsonData.aiConfig,
+                        model: v?.value
+                      }
                     })}
                   />
                 </InlineField>
@@ -390,12 +393,12 @@ const ConfigForm: React.FC = () => {
                     max={2}
                     step={0.1}
                     value={jsonData.aiConfig?.temperature ?? 0.7}
-                    onChange={(e) => setJsonData({ 
-                      ...jsonData, 
-                      aiConfig: { 
-                        ...jsonData.aiConfig, 
-                        temperature: parseFloat(e.currentTarget.value) 
-                      } 
+                    onChange={(e) => setJsonData({
+                      ...jsonData,
+                      aiConfig: {
+                        ...jsonData.aiConfig,
+                        temperature: parseFloat(e.currentTarget.value)
+                      }
                     })}
                   />
                 </InlineField>
@@ -412,12 +415,12 @@ const ConfigForm: React.FC = () => {
                     max={4000}
                     step={50}
                     value={jsonData.aiConfig?.maxTokens ?? 150}
-                    onChange={(e) => setJsonData({ 
-                      ...jsonData, 
-                      aiConfig: { 
-                        ...jsonData.aiConfig, 
-                        maxTokens: parseInt(e.currentTarget.value) 
-                      } 
+                    onChange={(e) => setJsonData({
+                      ...jsonData,
+                      aiConfig: {
+                        ...jsonData.aiConfig,
+                        maxTokens: parseInt(e.currentTarget.value)
+                      }
                     })}
                   />
                 </InlineField>
@@ -430,7 +433,7 @@ const ConfigForm: React.FC = () => {
         </>
       )}
       {
-}
+      }
       {activeTab === 'Definitions' && (
         <>
           <div style={{
@@ -447,9 +450,9 @@ const ConfigForm: React.FC = () => {
             <div style={{ marginBottom: 8, color: '#9CA3AF' }}>
               Configure label names and metric names used in Prometheus queries. These values are used throughout the application for querying service metrics.
             </div>
-            <DefinitionsTable 
-              value={jsonData.definitions || DEFAULT_DEFINITIONS} 
-              onChange={(next) => setJsonData((prev) => ({ ...(prev || {}), definitions: next }))} 
+            <DefinitionsTable
+              value={jsonData.definitions || DEFAULT_DEFINITIONS}
+              onChange={(next) => setJsonData((prev) => ({ ...(prev || {}), definitions: next }))}
             />
           </div>
         </>

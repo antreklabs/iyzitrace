@@ -19,177 +19,17 @@ import {
   EditOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { css } from '@emotion/css';
 import { useNavigate } from 'react-router-dom';
 import { api, type Team, type CreateTeamData } from '../../api/service/team.service';
 import pluginJson from '../../plugin.json';
 import { getTeams } from '../../api/service/team.service';
+import '../../assets/styles/pages/teams/teams.css';
 
 const { Search } = Input;
 const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
 
-const getStyles = () => ({
-  container: css`
-    padding: 24px;
-    background: #0f0f0f;
-    min-height: 100vh;
-  `,
-  header: css`
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 24px;
-  `,
-  headerLeft: css`
-    flex: 1;
-  `,
-  title: css`
-    font-size: 24px;
-    font-weight: 600;
-    color: #fff;
-    margin: 0 0 8px 0;
-  `,
-  description: css`
-    font-size: 14px;
-    color: #8c8c8c;
-    margin: 0;
-  `,
-  createButton: css`
-    background: #7c3aed;
-    border-color: #7c3aed;
-    
-    &:hover {
-      background: #6d28d9;
-      border-color: #6d28d9;
-    }
-  `,
-  searchBar: css`
-    margin-bottom: 24px;
-    
-    .ant-input {
-      background: #1f1f1f;
-      border-color: #404040;
-      color: #fff;
-      
-      &:focus {
-        border-color: #7c3aed;
-        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
-      }
-    }
-  `,
-  table: css`
-    .ant-table {
-      background: #1f1f1f;
-      border-radius: 8px;
-    }
-    
-    .ant-table-thead > tr > th {
-      background: #262626;
-      border-bottom: 1px solid #404040;
-      color: #fff;
-      font-weight: 600;
-    }
-    
-    .ant-table-tbody > tr > td {
-      background: #1f1f1f;
-      border-bottom: 1px solid #404040;
-      color: #fff;
-    }
-    
-    .ant-table-tbody > tr:hover > td {
-      background: #262626;
-    }
-  `,
-  teamIcon: css`
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    font-weight: 600;
-    color: #fff;
-    margin-right: 12px;
-  `,
-  teamName: css`
-    font-weight: 500;
-    color: #fff;
-  `,
-  manageButton: css`
-    background: transparent;
-    border: 1px solid #404040;
-    color: #fff;
-    
-    &:hover {
-      background: #262626;
-      border-color: #7c3aed;
-      color: #7c3aed;
-    }
-  `,
-  modal: css`
-    .ant-modal-content {
-      background: #1f1f1f;
-      border-radius: 8px;
-    }
-    
-    .ant-modal-header {
-      background: #1f1f1f;
-      border-bottom: 1px solid #404040;
-    }
-    
-    .ant-modal-title {
-      color: #fff;
-    }
-    
-    .ant-modal-body {
-      background: #1f1f1f;
-    }
-    
-    .ant-form-item-label > label {
-      color: #fff;
-    }
-    
-    .ant-input {
-      background: #262626;
-      border-color: #404040;
-      color: #fff;
-      
-      &:focus {
-        border-color: #7c3aed;
-        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
-      }
-    }
-  `,
-  iconPreview: css`
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    font-weight: 600;
-    color: #fff;
-    margin-right: 16px;
-    background: linear-gradient(135deg, #7c3aed, #a855f7);
-  `,
-  randomizeButton: css`
-    background: #262626;
-    border-color: #404040;
-    color: #fff;
-    
-    &:hover {
-      background: #404040;
-      border-color: #7c3aed;
-      color: #7c3aed;
-    }
-  `,
-});
-
 const TeamsPage: React.FC = () => {
   const navigate = useNavigate();
-  const styles = getStyles();
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
@@ -247,12 +87,11 @@ const TeamsPage: React.FC = () => {
       dataIndex: 'name',
       key: 'name',
       render: (text: string, record: Team) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div className={styles.teamIcon} style={{ background: `linear-gradient(135deg, #${Math.random().toString(16).substr(-6)}, #${Math.random().toString(16).substr(-6)})` }}>
-            
+        <div className="team-cell">
+          <div className="team-icon">
             <img src={record.icon} width={32} height={32} />
           </div>
-          <span className={styles.teamName}>{text}</span>
+          <span className="team-name">{text}</span>
         </div>
       ),
     },
@@ -263,20 +102,20 @@ const TeamsPage: React.FC = () => {
       render: (members: number | any[], record: Team) => {
         if (Array.isArray(members)) {
           return (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <div className="team-members-wrapper">
               {members.slice(0, 3).map((member: any) => (
-                <div key={member.id} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <div key={member.id} className="team-member-item">
                   <Avatar size="small" icon={<UserOutlined />} />
-                  <span style={{ fontSize: 12, color: '#8c8c8c' }}>{member.name}</span>
+                  <span className="team-member-name">{member.name}</span>
                 </div>
               ))}
               {members.length > 3 && (
-                <Badge count={`+${members.length - 3}`} style={{ backgroundColor: '#7c3aed' }} />
+                <Badge count={`+${members.length - 3}`} className="team-badge-purple" />
               )}
             </div>
           );
         }
-        return <Badge count={members} style={{ backgroundColor: '#7c3aed' }} />;
+        return <Badge count={members} className="team-badge-purple" />;
       },
     },
     {
@@ -285,7 +124,7 @@ const TeamsPage: React.FC = () => {
       align: 'right' as const,
       render: (text: any, record: Team) => (
         <Button
-          className={styles.manageButton}
+          className="team-manage-button"
           icon={<SettingOutlined />}
           onClick={() => handleManageTeam(record.id)}
         >
@@ -296,22 +135,22 @@ const TeamsPage: React.FC = () => {
   ];
 
   return (
-    <div className={styles.container}>
+    <div className="teams-page-container">
       {
-}
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <h1 className={styles.title}>Teams</h1>
-          <p className={styles.description}>
+      }
+      <div className="teams-page-header">
+        <div className="teams-page-header-left">
+          <h1 className="teams-page-title">Teams</h1>
+          <p className="teams-page-description">
             Manage existing teams in your organization.
           </p>
         </div>
-        
+
       </div>
 
       {
-}
-      <div className={styles.searchBar}>
+      }
+      <div className="teams-search-bar">
         <Search
           placeholder="Search teams by name..."
           allowClear
@@ -324,8 +163,8 @@ const TeamsPage: React.FC = () => {
       </div>
 
       {
-}
-      <Card className={styles.table}>
+      }
+      <Card className="teams-table-card">
         <Table
           columns={columns}
           dataSource={teams}
@@ -333,18 +172,18 @@ const TeamsPage: React.FC = () => {
           pagination={false}
           rowKey="id"
         />
-        
+
         {teams.length === 0 && !loading && (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#8c8c8c' }}>
+          <div className="teams-empty-state">
             No teams found in this organization
           </div>
         )}
       </Card>
 
       {
-}
+      }
       {teams.length > 0 && (
-        <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+        <div className="teams-pagination-wrapper">
           <Pagination
             current={currentPage}
             pageSize={pageSize}
@@ -361,13 +200,13 @@ const TeamsPage: React.FC = () => {
       )}
 
       {
-}
+      }
       <Modal
         title="Create new team"
         open={createModalVisible}
         onCancel={() => setCreateModalVisible(false)}
         footer={null}
-        className={styles.modal}
+        className="teams-modal"
         width={500}
       >
         <Form
@@ -376,12 +215,12 @@ const TeamsPage: React.FC = () => {
           onFinish={handleCreateTeam}
         >
           <Form.Item label="Icon">
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <div className={styles.iconPreview}>
+            <div className="teams-form-icon-wrapper">
+              <div className="team-icon-preview">
                 {'🔧'}
               </div>
               <Button
-                className={styles.randomizeButton}
+                className="team-randomize-button"
                 icon={<EditOutlined />}
                 onClick={generateRandomIcon}
               >
@@ -389,7 +228,7 @@ const TeamsPage: React.FC = () => {
               </Button>
             </div>
           </Form.Item>
-          
+
           <Form.Item
             name="name"
             label="Name"
@@ -397,17 +236,17 @@ const TeamsPage: React.FC = () => {
           >
             <AntInput placeholder="Engineering" />
           </Form.Item>
-          
+
           <Form.Item name="icon" hidden>
             <AntInput />
           </Form.Item>
-          
-          <div style={{ textAlign: 'right', marginTop: 24 }}>
+
+          <div className="teams-form-actions">
             <Space>
               <Button onClick={() => setCreateModalVisible(false)}>
                 Cancel
               </Button>
-              <Button type="primary" htmlType="submit" className={styles.createButton}>
+              <Button type="primary" htmlType="submit" className="teams-create-button">
                 Create Team
               </Button>
             </Space>

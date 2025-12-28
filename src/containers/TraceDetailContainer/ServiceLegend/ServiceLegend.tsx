@@ -1,5 +1,5 @@
 import React, { JSX, useState } from 'react';
-import './ServiceLegend.css';
+import '../../../assets/styles/containers/trace-detail/service-legend.css';
 
 interface ServiceMeta {
   color: string;
@@ -27,7 +27,7 @@ const ServiceLegendPanel: React.FC<ServiceLegendPanelProps> = ({ serviceMetaMap,
     const newSelection = selectedOperationTypes.includes(type)
       ? selectedOperationTypes.filter(t => t !== type)
       : [...selectedOperationTypes, type];
-    
+
     setSelectedOperationTypes(newSelection);
     onOperationTypeFilter?.(newSelection);
   };
@@ -37,15 +37,23 @@ const ServiceLegendPanel: React.FC<ServiceLegendPanelProps> = ({ serviceMetaMap,
     onOperationTypeFilter?.([]);
   };
 
+  const getButtonClassName = (type: string, color: string): string => {
+    const isSelected = selectedOperationTypes.includes(type);
+    if (!isSelected) {
+      return 'operation-type-button';
+    }
+    return `operation-type-button selected selected-${color}`;
+  };
+
   return (
     <div className="service-legend-panel">
       {
-}
+      }
       <div className="operation-type-filters">
         <div className="filter-header">
           <span className="filter-label">Filter by Operation Type:</span>
           {selectedOperationTypes.length > 0 && (
-            <button 
+            <button
               className="clear-all-button"
               onClick={handleClearAll}
             >
@@ -57,11 +65,7 @@ const ServiceLegendPanel: React.FC<ServiceLegendPanelProps> = ({ serviceMetaMap,
           {OPERATION_TYPES.map(({ type, color, icon }) => (
             <button
               key={type}
-              className={`operation-type-button ${selectedOperationTypes.includes(type) ? 'selected' : ''}`}
-              style={{ 
-                borderColor: selectedOperationTypes.includes(type) ? color : '#555',
-                backgroundColor: selectedOperationTypes.includes(type) ? `${color}20` : 'transparent'
-              }}
+              className={getButtonClassName(type, color)}
               onClick={() => handleOperationTypeToggle(type)}
             >
               <span className="operation-icon">{icon}</span>
@@ -72,10 +76,10 @@ const ServiceLegendPanel: React.FC<ServiceLegendPanelProps> = ({ serviceMetaMap,
       </div>
 
       {
-}
+      }
       {
-}
-    </div> 
+      }
+    </div>
   );
 };
 

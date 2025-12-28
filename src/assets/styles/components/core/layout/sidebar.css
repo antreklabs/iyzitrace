@@ -1,0 +1,42 @@
+/* Sidebar Component Styles */
+
+.sidebar-container {
+    min-height: 100vh;
+    background-color: #141414;
+    padding: 16px 0;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    margin-bottom: 24px;
+    justify-content: flex-end;
+}
+
+.sidebar-toggle-btn {
+    color: #ffffff;
+    background-color: #C75A2B;
+    width: 32px;
+    height: 32px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-toggle-icon {
+    font-size: 12px;
+    color: #ffffff;
+}
+
+.sidebar-menu-icon {
+    font-size: 16px;
+}
+
+.sidebar-menu {
+    border-right: 0;
+    background: transparent;
+}

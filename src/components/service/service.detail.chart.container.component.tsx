@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, Col, Row, Spin } from 'antd';
 import MsCharts from './service.detail.chart.component';
 import { Service } from '../../api/service/interface.service';
+import '../../assets/styles/components/service/service.css';
 
 interface CallMetricsProps {
   data?: Service[];
@@ -42,21 +43,21 @@ const CallMetrics: React.FC<CallMetricsProps> = ({ data, serviceBased }) => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+      <div className="service-summary-loading">
         <Spin size="large" />
-        <span style={{ marginLeft: '8px' }}>Loading Metrics...</span>
+        <span className="service-summary-loading-text">Loading Metrics...</span>
       </div>
     );
   }
 
   return (
     <Row gutter={[16, 16]}>
-      
+
       <Col span={12}>
-        <Card 
-          title={<span style={{ fontSize: '14px', fontWeight: 600 }}>Latency</span>}
+        <Card
+          title={<span className="service-chart-title-text">Latency</span>}
           loading={loading}
-          style={{ 
+          style={{
             height: '380px',
             background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%)',
             border: '1px solid rgba(59, 130, 246, 0.2)',
@@ -68,10 +69,10 @@ const CallMetrics: React.FC<CallMetricsProps> = ({ data, serviceBased }) => {
       </Col>
 
       <Col span={12}>
-        <Card 
-          title={<span style={{ fontSize: '14px', fontWeight: 600 }}>Operation Rate</span>}
+        <Card
+          title={<span className="service-chart-title-text">Operation Rate</span>}
           loading={loading}
-          style={{ 
+          style={{
             height: '380px',
             background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%)',
             border: '1px solid rgba(16, 185, 129, 0.2)',
@@ -83,10 +84,10 @@ const CallMetrics: React.FC<CallMetricsProps> = ({ data, serviceBased }) => {
       </Col>
 
       <Col span={12}>
-        <Card 
-          title={<span style={{ fontSize: '14px', fontWeight: 600 }}>Apdex Score</span>}
+        <Card
+          title={<span className="service-chart-title-text">Apdex Score</span>}
           loading={loading}
-          style={{ 
+          style={{
             height: '380px',
             background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%)',
             border: '1px solid rgba(245, 158, 11, 0.2)',
@@ -98,10 +99,10 @@ const CallMetrics: React.FC<CallMetricsProps> = ({ data, serviceBased }) => {
       </Col>
 
       <Col span={12}>
-        <Card 
-          title={<span style={{ fontSize: '14px', fontWeight: 600 }}>Key Operations</span>}
+        <Card
+          title={<span className="service-chart-title-text">Key Operations</span>}
           loading={loading}
-          style={{ 
+          style={{
             height: '380px',
             background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%)',
             border: '1px solid rgba(139, 92, 246, 0.2)',

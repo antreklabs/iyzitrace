@@ -11,6 +11,7 @@ import { Tag } from 'antd';
 import { Service } from '../../api/service/interface.service';
 import ServiceCardContainer from '../../components/service/service.card.container.component';
 import ServiceChartContainer from '../../components/service/service.chart.container.component';
+import '../../assets/styles/global.css';
 
 const ServiceContainer: React.FC = () => {
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ const ServiceContainer: React.FC = () => {
 
     const visibleColumns: TableColumn = {
       RootColumns: columnUtils.hideColumns(root, ['id', 'metricssumdurationms', 'metricsp50durationms', 'metricsp75durationms', 'metricsp90durationms', 'metricsp95durationms', 'metricsp99durationms']),
-      L1Columns: columnUtils.hideColumns(l1, ['id','serviceId'])
+      L1Columns: columnUtils.hideColumns(l1, ['id', 'serviceId'])
     };
 
     const typeColumn = visibleColumns.L1Columns.find((col: ColumnItem) => col.key === 'type');
@@ -75,8 +76,8 @@ const ServiceContainer: React.FC = () => {
     if (serviceNameColumn) {
       serviceNameColumn.render = (value: string) => {
         return (
-          <span 
-            style={{ color: '#1890ff', cursor: 'pointer' }} 
+          <span
+            className="service-name-link"
             onClick={() => navigate(`/a/iyzitrace-app/services/${value}`)}>
             {value}
           </span>
@@ -93,7 +94,7 @@ const ServiceContainer: React.FC = () => {
       initialFilterCollapsed={true}
       onFetchData={fetchModelData}
       filterComponent={
-        <BaseFilter 
+        <BaseFilter
           hasServiceFilter={true}
           hasOperationsFilter={true}
           hasStatusesFilter={true}
@@ -113,12 +114,12 @@ const ServiceContainer: React.FC = () => {
       <ServiceChartContainer services={data} />
       {tableColumns && tableColumns.RootColumns && tableColumns.RootColumns.length > 0 && (
         <BaseTable
-        data={data}
-        columns={tableColumns}
-        title="Services"
-        showSearch={true}
-        searchPlaceholder="Search..."
-        l1Key="operations"
+          data={data}
+          columns={tableColumns}
+          title="Services"
+          showSearch={true}
+          searchPlaceholder="Search..."
+          l1Key="operations"
         />
       )}
     </BaseContainerComponent>

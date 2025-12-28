@@ -1,5 +1,5 @@
 import React from 'react';
-import './SelectedSpanDetails.css';
+import '../../../assets/styles/containers/trace-detail/selected-span-details.css';
 import { Tag, Typography, Button, Tabs, Divider } from 'antd';
 import { CopyOutlined } from '@ant-design/icons';
 import GroupedAttributeList from './GroupedAttributeList';
@@ -36,12 +36,12 @@ const SelectedSpanDetails: React.FC<SelectedSpanDetailsProps> = ({ span }) => {
 
   return (
     <div className="selected-span-details">
-      <div className="header">
+      <div className="span-details-header">
         <Text strong>Span Details</Text>
         <Button size="small" icon={<CopyOutlined />} />
       </div>
 
-      <Divider style={{ margin: '8px 0' }} />
+      <Divider className="span-details-divider" />
 
       <div className="meta-grid">
         <div className="meta-label">SPAN NAME</div>
@@ -66,21 +66,21 @@ const SelectedSpanDetails: React.FC<SelectedSpanDetailsProps> = ({ span }) => {
         <Tag>{span.tags?.['http.status_code'] || 'Unset'}</Tag>
       </div>
 
-      <Divider style={{ margin: '8px 0' }} />
+      <Divider className="span-details-divider" />
 
-      <Tabs 
-        defaultActiveKey="attributes" 
+      <Tabs
+        defaultActiveKey="attributes"
         size="small"
         items={[
           {
             key: 'attributes',
             label: 'Attributes',
-            children: span.tags ? <GroupedAttributeList tags={span.tags} /> : <div style={{ color: '#aaa' }}>No attributes captured.</div>
+            children: span.tags ? <GroupedAttributeList tags={span.tags} /> : <div className="no-attributes-message">No attributes captured.</div>
           },
           {
             key: 'events',
             label: 'Events',
-            children: <div style={{ color: '#aaa' }}>No events captured.</div>
+            children: <div className="no-attributes-message">No events captured.</div>
           }
         ]}
       />

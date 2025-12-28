@@ -11,6 +11,7 @@ import { getOperationTypeColor } from '../../api/service/services.service';
 import CallMetrics from '../../components/service/service.detail.chart.container.component';
 import BasicSummary from '../../components/service/service.detail.card.container.component';
 import BaseTable from '../base.table';
+import '../../assets/styles/global.css';
 
 interface ServiceDetailContainerProps {
   serviceName: string;
@@ -23,7 +24,7 @@ const ServiceDetailContainer: React.FC<ServiceDetailContainerProps> = ({ service
   const [filter, setFilter] = useState<FilterParamsModel>();
 
   const fetchModelData = async (filterModel: FilterParamsModel): Promise<FetchedModel> => {
-    filterModel.options.interval = `${Math.floor((filterModel.timeRange.to - filterModel.timeRange.from)/60/1000)}m`;
+    filterModel.options.interval = `${Math.floor((filterModel.timeRange.to - filterModel.timeRange.from) / 60 / 1000)}m`;
     filterModel.service.name = serviceName;
     setFilter(filterModel);
     const data = await getServicesTableData(filterModel);
@@ -63,7 +64,7 @@ const ServiceDetailContainer: React.FC<ServiceDetailContainerProps> = ({ service
 
     const visibleColumns: TableColumn = {
       RootColumns: columnUtils.hideColumns(root, ['id', 'metricssumdurationms', 'metricsp50durationms', 'metricsp75durationms', 'metricsp90durationms', 'metricsp95durationms', 'metricsp99durationms']),
-      L1Columns: columnUtils.hideColumns(l1, ['id','serviceId'])
+      L1Columns: columnUtils.hideColumns(l1, ['id', 'serviceId'])
     };
 
     const typeColumn = visibleColumns.L1Columns.find((col: ColumnItem) => col.key === 'type');
@@ -83,8 +84,8 @@ const ServiceDetailContainer: React.FC<ServiceDetailContainerProps> = ({ service
     if (serviceNameColumn) {
       serviceNameColumn.render = (value: string) => {
         return (
-          <span 
-            style={{ color: '#1890ff', cursor: 'pointer' }} 
+          <span
+            className="service-name-link"
             onClick={() => navigate(`/a/iyzitrace-app/services/${value}`)}>
             {value}
           </span>
@@ -103,25 +104,25 @@ const ServiceDetailContainer: React.FC<ServiceDetailContainerProps> = ({ service
     >
       <BasicSummary data={data} filterModel={filter} />
       {filter && (
-      <Row gutter={[16, 16]}>
-        <Tabs
-          items={[
-            {
-              key: 'callmetric',
-              label: 'Call Metrics',
-              children: <CallMetrics data={data} serviceBased={true} />
-            },
-            {
-              key: 'operations',
-              label: 'Operations',
-              children: <CallMetrics data={data} serviceBased={false} />
-            }
+        <Row gutter={[16, 16]}>
+          <Tabs
+            items={[
+              {
+                key: 'callmetric',
+                label: 'Call Metrics',
+                children: <CallMetrics data={data} serviceBased={true} />
+              },
+              {
+                key: 'operations',
+                label: 'Operations',
+                children: <CallMetrics data={data} serviceBased={false} />
+              }
             ]}
           />
         </Row>
       )}
       {tableColumns && tableColumns.RootColumns && tableColumns.RootColumns.length > 0 && (
-        <div style={{ marginTop: '24px' }}>
+        <div className="mt-24">
           <BaseTable
             data={data}
             columns={tableColumns}

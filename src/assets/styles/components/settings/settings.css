@@ -1,0 +1,154 @@
+/* Settings Page Styles */
+
+/* Tab Bar */
+.settings-tab-bar {
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 16px;
+    padding-bottom: 4px;
+    overflow-x: auto;
+}
+
+.settings-tab-btn {
+    background: transparent;
+    color: #E5E7EB;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.settings-tab-btn.active {
+    background: rgba(255, 255, 255, 0.08);
+    border-bottom-color: #34d399;
+}
+
+/* Settings Section */
+.settings-section {
+    margin-bottom: 16px;
+    padding: 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.settings-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.settings-section-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.settings-section-content-lg {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.settings-description {
+    color: #9CA3AF;
+}
+
+.settings-description-mt {
+    color: #9CA3AF;
+    margin-top: 6px;
+}
+
+/* Settings Icons */
+.settings-icon-green {
+    color: #34d399;
+}
+
+.settings-icon-blue {
+    color: #60a5fa;
+}
+
+.settings-icon-orange {
+    color: #f59e0b;
+}
+
+.settings-icon-purple {
+    color: #a78bfa;
+}
+
+/* Placeholder Section */
+.settings-placeholder-wrapper {
+    padding: 16px 4px;
+}
+
+.settings-placeholder-content {
+    padding: 16px;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: #9CA3AF;
+    margin-bottom: 16px;
+}
+
+.settings-placeholder-info {
+    font-size: 13px;
+    color: #9CA3AF;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin-top: 8px;
+    line-height: 1.7;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.settings-placeholder-intro {
+    margin: 8px 0 12px 0;
+    color: #a3a3a3;
+    font-size: 13px;
+}
+
+.settings-link-list {
+    margin: 0 0 0 18px;
+    padding: 0;
+    list-style: disc;
+}
+
+.settings-link-item {
+    margin-bottom: 8px;
+}
+
+.settings-link-item:last-child {
+    margin-bottom: 0;
+}
+
+.settings-link {
+    color: #34d399;
+    font-weight: 500;
+}
+
+.settings-link-description {
+    font-size: 12px;
+    color: #bdbdbd;
+    margin-top: 2px;
+}
+
+/* Field Row */
+.settings-field-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Save Button Container */
+.settings-save-container {
+    position: sticky;
+    bottom: 0;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(6px);
+    display: flex;
+    justify-content: flex-end;
+}
