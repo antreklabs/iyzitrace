@@ -317,6 +317,5 @@ git push origin --delete feature/service-map
    docker compose -f configs/observability-platform/docker-compose.yml up -d
    docker compose -f configs/opentelemetry-demo/docker-compose.yml up -d
 
-   pnpm run dev     
-
+   pnpm run dev
 ```
