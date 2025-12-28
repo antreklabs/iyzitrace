@@ -1,6 +1,7 @@
 import React, { useRef, useState, useMemo, ReactElement } from 'react';
 import { Typography, Input } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
+import '../../assets/styles/components/core/core.css';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -16,9 +17,9 @@ interface HorizontalScrollContainerProps {
   onSearchChange?: (query: string) => void;
 }
 
-const HorizontalScrollContainer: React.FC<HorizontalScrollContainerProps> = ({ 
-  children, 
-  title, 
+const HorizontalScrollContainer: React.FC<HorizontalScrollContainerProps> = ({
+  children,
+  title,
   icon,
   searchable = false,
   searchPlaceholder = 'Search...',
@@ -28,9 +29,9 @@ const HorizontalScrollContainer: React.FC<HorizontalScrollContainerProps> = ({
 }) => {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const [internalSearchQuery, setInternalSearchQuery] = useState('');
-  
+
   const searchQuery = externalSearchQuery !== undefined ? externalSearchQuery : internalSearchQuery;
-  
+
   const handleSearchChange = (value: string) => {
     if (onSearchChange) {
       onSearchChange(value);
@@ -75,9 +76,9 @@ const HorizontalScrollContainer: React.FC<HorizontalScrollContainerProps> = ({
   }, [children, searchQuery, searchable, getSearchableText]);
 
   return (
-    <div style={{ marginBottom: '32px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <Title level={2} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <div className="horizontal-scroll-section">
+      <div className="horizontal-scroll-header">
+        <Title level={2} className="horizontal-scroll-title">
           {icon}
           {title}
         </Title>
@@ -89,57 +90,28 @@ const HorizontalScrollContainer: React.FC<HorizontalScrollContainerProps> = ({
             onSearch={(value) => handleSearchChange(value)}
             prefix={<SearchOutlined />}
             allowClear
-            style={{ width: '300px' }}
+            className="horizontal-scroll-search"
           />
         )}
       </div>
-      <div style={{ position: 'relative' }}>
+      <div className="horizontal-scroll-wrapper">
         <button
           onClick={() => scrollBy(-400)}
-          style={{ 
-            position: 'absolute', 
-            left: 0, 
-            top: '50%', 
-            transform: 'translateY(-50%)', 
-            zIndex: 1, 
-            background: '#1f1f1f', 
-            border: '1px solid #303030', 
-            color: '#d9d9d9', 
-            borderRadius: 6, 
-            padding: '4px 8px',
-            cursor: 'pointer'
-          }}
+          className="horizontal-scroll-btn horizontal-scroll-btn-left"
         >
           ◀
         </button>
-      <div
-        ref={scrollerRef}
-        style={{ 
-          overflowX: 'auto', 
-          overflowY: 'hidden', 
-          whiteSpace: 'nowrap', 
-          padding: '0 36px' 
-        }}
-      >
-        <div style={{ display: 'inline-flex', gap: 16 }}>
-          {filteredChildren}
+        <div
+          ref={scrollerRef}
+          className="horizontal-scroll-content"
+        >
+          <div className="horizontal-scroll-items">
+            {filteredChildren}
+          </div>
         </div>
-      </div>
         <button
           onClick={() => scrollBy(400)}
-          style={{ 
-            position: 'absolute', 
-            right: 0, 
-            top: '50%', 
-            transform: 'translateY(-50%)', 
-            zIndex: 1, 
-            background: '#1f1f1f', 
-            border: '1px solid #303030', 
-            color: '#d9d9d9', 
-            borderRadius: 6, 
-            padding: '4px 8px',
-            cursor: 'pointer'
-          }}
+          className="horizontal-scroll-btn horizontal-scroll-btn-right"
         >
           ▶
         </button>

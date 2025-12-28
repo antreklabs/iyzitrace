@@ -33,7 +33,7 @@ const BaseTable: React.FC<BaseTableProps> = ({
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   const filterModel = getFilterParams();
   const urlQuery = filterModel.query;
   const pageCount = parseInt(filterModel.options.pageCount, 10);
@@ -46,10 +46,10 @@ const BaseTable: React.FC<BaseTableProps> = ({
 
   const filteredData = searchValue
     ? data.filter((item: any) =>
-        Object.values(item).some(value =>
-          typeof value === 'string' && String(value).toLowerCase().includes(searchValue.toLowerCase())
-        )
+      Object.values(item).some(value =>
+        typeof value === 'string' && String(value).toLowerCase().includes(searchValue.toLowerCase())
       )
+    )
     : data;
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,28 +80,28 @@ const BaseTable: React.FC<BaseTableProps> = ({
   };
 
   const renderNestedTable = (record: any, level: 'L1' | 'L2' | 'L3') => {
-    const levelColumns = level === 'L1' ? columns?.L1Columns : 
-                        level === 'L2' ? columns?.L2Columns : 
-                        columns?.L3Columns;
-    
+    const levelColumns = level === 'L1' ? columns?.L1Columns :
+      level === 'L2' ? columns?.L2Columns :
+        columns?.L3Columns;
+
     const levelData = level === 'L1' ? record?.[l1Key] :
-                     level === 'L2' ? record?.[l2Key] :
-                     record?.[l3Key];
+      level === 'L2' ? record?.[l2Key] :
+        record?.[l3Key];
 
     if (!levelData || levelData.length === 0 || !levelColumns || levelColumns.length === 0) {
       return null;
     }
 
-    const filteredColumns = levelColumns.filter((c: any) => 
-      !(c.className || '').includes('column-hidden') && 
-      c.width !== 0 && 
+    const filteredColumns = levelColumns.filter((c: any) =>
+      !(c.className || '').includes('column-hidden') &&
+      c.width !== 0 &&
       c.title !== ''
     );
 
     if (level === 'L3') {
       return (
         <Table
-          rowKey={(operationRecord: any) => 
+          rowKey={(operationRecord: any) =>
             operationRecord.id ?? operationRecord.key ?? operationRecord.text ?? operationRecord.name ?? JSON.stringify(operationRecord)
           }
           dataSource={levelData}
@@ -115,7 +115,7 @@ const BaseTable: React.FC<BaseTableProps> = ({
 
     return (
       <Table
-        rowKey={(record: any) => 
+        rowKey={(record: any) =>
           record.id ?? record.key ?? record.text ?? record.name ?? JSON.stringify(record)
         }
         dataSource={levelData}
@@ -152,30 +152,30 @@ const BaseTable: React.FC<BaseTableProps> = ({
     return null;
   }
 
-  const filteredRootColumns = columns.RootColumns.filter((c: any) => 
-    !(c.className || '').includes('column-hidden') && 
-    c.width !== 0 && 
+  const filteredRootColumns = columns.RootColumns.filter((c: any) =>
+    !(c.className || '').includes('column-hidden') &&
+    c.width !== 0 &&
     c.title !== ''
   );
 
   return (
     <div className="base-table-container">
       {showSearch && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <Title level={4} style={{ margin: 0, color: '#ffffff' }}>{title}</Title>
+        <div className="base-table-header">
+          <Title level={4} className="base-table-title">{title}</Title>
           <Input.Search
             allowClear
             placeholder={searchPlaceholder}
-            style={{ maxWidth: 360 }}
+            className="base-table-search"
             value={searchValue}
             onChange={handleSearchChange}
             onSearch={handleSearch}
           />
         </div>
       )}
-      
+
       <Table
-        rowKey={(record: any) => 
+        rowKey={(record: any) =>
           record.id ?? record.key ?? record.text ?? record.name ?? JSON.stringify(record)
         }
         dataSource={filteredData}
@@ -195,7 +195,7 @@ const BaseTable: React.FC<BaseTableProps> = ({
           expandIcon: ({ expanded, onExpand, record }) => {
             const hasChildren = Array.isArray(record?.[l1Key]) && record?.[l1Key].length > 0;
             if (!hasChildren) return null;
-            
+
             return renderExpandIcon(expanded, onExpand, record);
           },
         }}
@@ -213,9 +213,7 @@ const BaseTable: React.FC<BaseTableProps> = ({
         }}
         size="middle"
         bordered={false}
-        style={{
-          backgroundColor: 'transparent'
-        }}
+        className="base-table-transparent"
       />
     </div>
   );

@@ -1,0 +1,285 @@
+/* Service Components Styles */
+
+/* Common Chart Container */
+.chart-container {
+    width: 100%;
+    height: 200px;
+    position: relative;
+}
+
+.chart-container-lg {
+    width: 100%;
+    height: 300px;
+    position: relative;
+}
+
+/* Loading States */
+.service-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.service-loading-text {
+    margin-left: 8px;
+}
+
+/* Service Card Container */
+.service-card-wrapper {
+    position: relative;
+}
+
+.service-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.service-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+}
+
+.service-card-actions {
+    display: inline-flex;
+    gap: 16px;
+}
+
+.service-card-metric-row {
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+/* Service Detail Card Container */
+.service-detail-card {
+    background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+.service-detail-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.service-metric-label {
+    color: #71717a;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.service-metric-value-primary {
+    color: #3b82f6;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.service-metric-value-success {
+    color: #10b981;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.service-metric-value-warning {
+    color: #eab308;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.service-metric-value-error {
+    color: #ef4444;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.service-metric-unit {
+    color: #52525b;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.service-metric-icon {
+    font-size: 20px;
+    opacity: 0.6;
+}
+
+.service-metric-icon-primary {
+    color: #3b82f6;
+}
+
+.service-metric-icon-success {
+    color: #10b981;
+}
+
+.service-metric-icon-warning {
+    color: #eab308;
+}
+
+.service-metric-icon-error {
+    color: #ef4444;
+}
+
+/* Service Detail Chart Container */
+.service-chart-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.service-chart-title {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Container Card */
+.service-container-card {
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.service-container-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.service-container-name {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.service-container-description {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+}
+
+/* Service Chart Component */
+.service-chart-wrapper {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.service-chart-wrapper:hover {
+    transform: translateY(-2px);
+}
+
+/* Row Margin Bottom */
+.row-mb-24 {
+    margin-bottom: 24px;
+}
+
+/* Service Summary Loading */
+.service-summary-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.service-summary-loading-text {
+    margin-left: 8px;
+}
+
+/* Summary Card Text Styles */
+.service-summary-label {
+    color: #71717a;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.service-summary-value-blue {
+    color: #3b82f6;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.service-summary-value-green {
+    color: #10b981;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.service-summary-value-red {
+    color: #ef4444;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.service-summary-value-orange {
+    color: #f59e0b;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.service-summary-subtext {
+    color: #52525b;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.service-summary-subtext-ellipsis {
+    color: #52525b;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.service-summary-icon-blue {
+    font-size: 20px;
+    color: #3b82f6;
+    opacity: 0.6;
+}
+
+.service-summary-icon-green {
+    font-size: 20px;
+    color: #10b981;
+    opacity: 0.6;
+}
+
+.service-summary-icon-red {
+    font-size: 20px;
+    color: #ef4444;
+    opacity: 0.6;
+}
+
+.service-summary-icon-orange {
+    font-size: 20px;
+    color: #f59e0b;
+    opacity: 0.6;
+}
+
+/* Chart Card Title */
+.service-chart-title-text {
+    font-size: 14px;
+    font-weight: 600;
+}

@@ -1,0 +1,9 @@
+/* Trace Detail Container - Main Entry Point */
+/* Import all trace detail related styles */
+
+@import './trace-detail.css';
+@import './flame-graph.css';
+@import './selected-span-details.css';
+@import './service-legend.css';
+@import './timeline-header.css';
+@import './trace-meta-header.css';

@@ -1,0 +1,79 @@
+/* View Component Styles */
+
+.view-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+}
+
+.view-dropdown-item-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.view-dropdown-item-right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.view-action-btn-edit {
+    color: #1890ff;
+    padding: 2px 4px;
+}
+
+.view-action-btn-delete {
+    color: #ff4d4f;
+    padding: 2px 4px;
+}
+
+.view-save-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+    color: green;
+}
+
+.view-save-icon {
+    margin-right: 8px;
+    font-size: 14px;
+    color: green;
+}
+
+.view-clear-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+    color: #ffd700;
+}
+
+.view-clear-icon {
+    margin-right: 8px;
+    font-size: 14px;
+    color: #ffd700;
+}
+
+.view-dropdown-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.view-dropdown-btn {
+    background-color: #404040;
+    border: 1px solid #555;
+    color: #ffffff;
+    border-radius: 6px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 160px;
+}
+
+.view-dropdown-btn-text {
+    flex: 1;
+    text-align: left;
+}

@@ -18,6 +18,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getStoredTeamPages } from '../../../api/service/team.service';
 import pluginJson from '../../../plugin.json';
+import '../../../assets/styles/components/core/layout/sidebar.css';
 
 export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
 const { Sider } = Layout;
@@ -34,17 +35,17 @@ const Sidebar: React.FC = () => {
   useEffect(() => {
     const fetchMenuItems = async () => {
       const allMenuItems = [
-        { key: 'landing', icon: <HomeOutlined style={{ fontSize: 16 }} />, label: 'Home' },
-        { key: 'overview', icon: <BuildOutlined style={{ fontSize: 16 }} />, label: 'Overview' },
-        { key: 'views', icon: <ClusterOutlined style={{ fontSize: 16 }} />, label: 'Views' },
-        { key: 'service-map', icon: <DeploymentUnitOutlined style={{ fontSize: 16 }} />, label: 'Service Map' },
-        { key: 'services', icon: <BarChartOutlined style={{ fontSize: 16 }} />, label: 'Services' },  
-        { key: 'traces', icon: <FileSearchOutlined style={{ fontSize: 16 }} />, label: 'Traces' },
-        { key: 'logs', icon: <ProfileOutlined style={{ fontSize: 16 }} />, label: 'Logs' },
-        { key: 'exceptions', icon: <RadarChartOutlined style={{ fontSize: 16 }} />, label: 'Exceptions' },
-        { key: 'ai', icon: <RobotOutlined style={{ fontSize: 16 }} />, label: 'AI Assistant' },
-        { key: 'teams', icon: <TeamOutlined style={{ fontSize: 16 }} />, label: 'Teams' },
-        { key: 'settings', icon: <SettingOutlined style={{ fontSize: 16 }} />, label: 'Settings' },
+        { key: 'landing', icon: <HomeOutlined className="sidebar-menu-icon" />, label: 'Home' },
+        { key: 'overview', icon: <BuildOutlined className="sidebar-menu-icon" />, label: 'Overview' },
+        { key: 'views', icon: <ClusterOutlined className="sidebar-menu-icon" />, label: 'Views' },
+        { key: 'service-map', icon: <DeploymentUnitOutlined className="sidebar-menu-icon" />, label: 'Service Map' },
+        { key: 'services', icon: <BarChartOutlined className="sidebar-menu-icon" />, label: 'Services' },
+        { key: 'traces', icon: <FileSearchOutlined className="sidebar-menu-icon" />, label: 'Traces' },
+        { key: 'logs', icon: <ProfileOutlined className="sidebar-menu-icon" />, label: 'Logs' },
+        { key: 'exceptions', icon: <RadarChartOutlined className="sidebar-menu-icon" />, label: 'Exceptions' },
+        { key: 'ai', icon: <RobotOutlined className="sidebar-menu-icon" />, label: 'AI Assistant' },
+        { key: 'teams', icon: <TeamOutlined className="sidebar-menu-icon" />, label: 'Teams' },
+        { key: 'settings', icon: <SettingOutlined className="sidebar-menu-icon" />, label: 'Settings' },
       ];
 
       if (user.role === 'admin') {
@@ -80,37 +81,14 @@ const Sidebar: React.FC = () => {
       collapsedWidth={80}
       collapsed={collapsed}
       onCollapse={setCollapsed}
-      style={{
-        minHeight: '100vh',
-        backgroundColor: '#141414',
-        padding: '16px 0',
-        boxShadow: '2px 0 8px rgba(0,0,0,0.15)',
-      }}
+      className="sidebar-container"
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '20px',
-          marginBottom: 24,
-          justifyContent: 'flex-end',
-        }}
-      >
+      <div className="sidebar-header">
         <Button
           type="default"
-          icon={<MenuOutlined style={{ fontSize: 12, color: '#ffffff' }} />}
+          icon={<MenuOutlined className="sidebar-toggle-icon" />}
           onClick={() => setCollapsed(!collapsed)}
-          style={{
-            color: '#ffffff',
-            backgroundColor: '#C75A2B',
-            width: 32,
-            height: 32,
-            borderRadius: 12,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.35)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
+          className="sidebar-toggle-btn"
         />
       </div>
 
@@ -119,10 +97,7 @@ const Sidebar: React.FC = () => {
         mode="inline"
         selectedKeys={[currentKey || 'landing']}
         onClick={handleMenuClick}
-        style={{
-          borderRight: 0,
-          background: 'transparent',
-        }}
+        className="sidebar-menu"
         items={menuItems}
       />
     </Sider>

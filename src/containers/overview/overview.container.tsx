@@ -2,9 +2,9 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Modal, Tag } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { 
-  CloudServerOutlined, 
-  SettingOutlined, 
+import {
+  CloudServerOutlined,
+  SettingOutlined,
   UnorderedListOutlined,
   CloudOutlined
 } from '@ant-design/icons';
@@ -22,6 +22,8 @@ import BaseFilter from '../base.filter';
 import BaseTable from '../base.table';
 import HorizontalScrollContainer from '../../components/core/horizontal-scroll-container.component';
 import { getOperationTypeColor } from '../../api/service/services.service';
+import '../../assets/styles/containers/containers.css';
+import '../../assets/styles/global.css';
 
 const OverviewContainer: React.FC = () => {
   const navigate = useNavigate();
@@ -60,7 +62,7 @@ const OverviewContainer: React.FC = () => {
   };
 
   const setColumnInDetail = (data: Infrastructure[]) => {
-    if(columns) {
+    if (columns) {
       return;
     }
     const cols = getTableColumns(data, 'services', 'operations')
@@ -70,7 +72,7 @@ const OverviewContainer: React.FC = () => {
       cpupercentage: 'CPU Usage',
       memorypercentage: 'Memory Usage'
     });
-    root = columnUtils.reorderColumns(root, ['region','name', 'osversion', 'ip', 'type', 'status.value']);
+    root = columnUtils.reorderColumns(root, ['region', 'name', 'osversion', 'ip', 'type', 'status.value']);
     let l1 = columnUtils.renameColumns(cols.L1Columns ?? [], {
       metricsavgdurationms: 'Avg',
       metricsmindurationms: 'Min',
@@ -149,7 +151,7 @@ const OverviewContainer: React.FC = () => {
   }, [allInfrastructures, selectedInfrastructureId]);
 
   const allApplications = useMemo(() => {
-    return regions.flatMap(region => 
+    return regions.flatMap(region =>
       region.infrastructures?.flatMap(infra => infra.applications || []) || []
     );
   }, [regions]);
@@ -177,10 +179,10 @@ const OverviewContainer: React.FC = () => {
 
   const servicesByInfrastructure = useMemo(() => {
     const groups: { [infraId: string]: { infrastructure: Infrastructure; services: Service[] } } = {};
-    
+
     filteredInfrastructures.forEach(infrastructure => {
       const infraServices = (infrastructure.services || []) as Service[];
-      
+
       if (infraServices.length > 0) {
         groups[infrastructure.id] = {
           infrastructure,
@@ -188,7 +190,7 @@ const OverviewContainer: React.FC = () => {
         };
       }
     });
-    
+
     return groups;
   }, [filteredInfrastructures]);
 
@@ -290,7 +292,7 @@ const OverviewContainer: React.FC = () => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX;
     const y = e.clientY;
-    
+
     if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
       setDropTargetId(null);
     }
@@ -299,10 +301,10 @@ const OverviewContainer: React.FC = () => {
   const handleInfrastructureDrop = async (infrastructure: Infrastructure, e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     setDropTargetId(null);
     setDroppingTargetId(infrastructure.id);
-    
+
     if (draggedService && draggedService.id) {
       try {
         await mapServiceToInfrastructure(draggedService.id, infrastructure.id);
@@ -310,7 +312,7 @@ const OverviewContainer: React.FC = () => {
       } catch (error) {
       }
     }
-    
+
     setDraggedService(null);
     setDroppingTargetId(null);
   };
@@ -348,7 +350,7 @@ const OverviewContainer: React.FC = () => {
       onFetchData={fetchModelData}
       refreshTrigger={refreshTrigger}
       filterComponent={
-        <BaseFilter 
+        <BaseFilter
           hasServiceFilter={true}
           hasOperationsFilter={true}
           hasStatusesFilter={true}
@@ -365,188 +367,188 @@ const OverviewContainer: React.FC = () => {
       }
     >
       <div style={{ padding: '24px', minHeight: '100vh' }}>
-      {
-}
-      <HorizontalScrollContainer 
-        title="Regions" 
-        icon={<CloudOutlined style={{ color: '#1890ff' }} />}
-        searchable={true}
-        searchPlaceholder=" Search regions..."
-        getSearchableText={(child) => {
-          const props = child.props as any;
-          let children = props?.children;
-          if (Array.isArray(children)) {
-            children = children.find((c: any) => React.isValidElement(c));
-          }
-          const regionCard = React.isValidElement(children) ? (children as any) : null;
-          const region = regionCard?.props?.region;
-          return region?.name || '';
-        }}
-      >
-        {regions.map((region) => (
-          <div key={region.id} style={{ display: 'inline-block', width: '280px' }}>
-            <RegionCard
-              region={region}
-              onClick={handleRegionClick}
-              isSelected={selectedRegionId === region.id}
-            />
-          </div>
-        ))}
-      </HorizontalScrollContainer>
-
-      {
-}
-      <HorizontalScrollContainer 
-        title="Infrastructures" 
-        icon={<CloudServerOutlined style={{ color: '#1890ff' }} />}
-        searchable={true}
-        searchPlaceholder=" Search infrastructures..."
-        getSearchableText={(child) => {
-          const props = child.props as any;
-          let children = props?.children;
-          if (Array.isArray(children)) {
-            children = children.find((c: any) => React.isValidElement(c));
-          }
-          const infraCard = React.isValidElement(children) ? (children as any) : null;
-          const infrastructure = infraCard?.props?.infrastructure;
-          return infrastructure?.name || '';
-        }}
-      >
-          {filteredInfrastructures.map((infrastructure) => (
-          <div key={infrastructure.id} style={{ display: 'inline-block', width: '300px' }}>
-              <InfrastructureCard
-                infrastructure={infrastructure}
-                onClick={handleInfrastructureClick}
-                isSelected={selectedInfrastructureId === infrastructure.id}
-              onApplicationsClick={handleApplicationsClick}
-              onDrop={handleInfrastructureDrop}
-              onDragOver={handleDragOver}
-              onDragEnter={handleInfrastructureDragEnter}
-              onDragLeave={handleInfrastructureDragLeave}
-              isDropTarget={dropTargetId === infrastructure.id}
-              isDropping={droppingTargetId === infrastructure.id}
-              />
-          </div>
-        ))}
-      </HorizontalScrollContainer>
-
-      {
-}
-      <ApplicationsSidebar
-        visible={sidebarVisible}
-        onClose={() => setSidebarVisible(false)}
-        applications={sidebarApplications}
-        selectedApplicationId={selectedApplicationId}
-      />
-
-      {
-}
-      {orphanServices.length > 0 && (
-        <HorizontalScrollContainer 
-          title="Orphan Services (Drag to Infrastructure)" 
-          icon={<SettingOutlined style={{ color: '#8c8c8c' }} />}
-          searchPlaceholder=" Search orphan services..."
+        {
+        }
+        <HorizontalScrollContainer
+          title="Regions"
+          icon={<CloudOutlined style={{ color: '#1890ff' }} />}
           searchable={true}
+          searchPlaceholder=" Search regions..."
           getSearchableText={(child) => {
             const props = child.props as any;
             let children = props?.children;
             if (Array.isArray(children)) {
               children = children.find((c: any) => React.isValidElement(c));
             }
-            const serviceCard = React.isValidElement(children) ? (children as any) : null;
-            const title = serviceCard?.props?.title;
-            return title || '';
+            const regionCard = React.isValidElement(children) ? (children as any) : null;
+            const region = regionCard?.props?.region;
+            return region?.name || '';
           }}
         >
-          {orphanServices.map((service) => (
-            <div 
-              key={service.id} 
-              style={{ 
-                display: 'inline-block', 
-                minWidth: '240px',
-                cursor: 'grab',
-                opacity: draggedService?.id === service.id ? 0.5 : 1,
-                transition: 'opacity 0.2s ease'
-              }}
-              draggable
-              onDragStart={() => handleServiceDragStart(service)}
-            >
-              <ServiceCard
-                services={[service]}
-                title={service.name}
-                icon={<SettingOutlined style={{ color: 'white' }} />}
-                gradient="linear-gradient(135deg, #6b7280 0%, #4b5563 100%)"
-                onClick={handleServiceClick}
-                selectedServiceId={selectedServiceId}
+          {regions.map((region) => (
+            <div key={region.id} style={{ display: 'inline-block', width: '280px' }}>
+              <RegionCard
+                region={region}
+                onClick={handleRegionClick}
+                isSelected={selectedRegionId === region.id}
               />
-      </div>
+            </div>
           ))}
         </HorizontalScrollContainer>
-      )}
 
-      {
-}
-      {Object.keys(servicesByInfrastructure).length > 0 && (
-        <HorizontalScrollContainer 
-          title="Services" 
-          icon={<SettingOutlined style={{ color: '#1890ff' }} />}
+        {
+        }
+        <HorizontalScrollContainer
+          title="Infrastructures"
+          icon={<CloudServerOutlined style={{ color: '#1890ff' }} />}
           searchable={true}
-          searchPlaceholder=" Search services..."
-          searchQuery={servicesSearchQuery}
-          onSearchChange={setServicesSearchQuery}
+          searchPlaceholder=" Search infrastructures..."
+          getSearchableText={(child) => {
+            const props = child.props as any;
+            let children = props?.children;
+            if (Array.isArray(children)) {
+              children = children.find((c: any) => React.isValidElement(c));
+            }
+            const infraCard = React.isValidElement(children) ? (children as any) : null;
+            const infrastructure = infraCard?.props?.infrastructure;
+            return infrastructure?.name || '';
+          }}
         >
-          {Object.entries(servicesByInfrastructure).map(([infraId, { infrastructure, services }]) => (
-            <div key={infraId} style={{ display: 'inline-block' }}>
+          {filteredInfrastructures.map((infrastructure) => (
+            <div key={infrastructure.id} style={{ display: 'inline-block', width: '300px' }}>
+              <InfrastructureCard
+                infrastructure={infrastructure}
+                onClick={handleInfrastructureClick}
+                isSelected={selectedInfrastructureId === infrastructure.id}
+                onApplicationsClick={handleApplicationsClick}
+                onDrop={handleInfrastructureDrop}
+                onDragOver={handleDragOver}
+                onDragEnter={handleInfrastructureDragEnter}
+                onDragLeave={handleInfrastructureDragLeave}
+                isDropTarget={dropTargetId === infrastructure.id}
+                isDropping={droppingTargetId === infrastructure.id}
+              />
+            </div>
+          ))}
+        </HorizontalScrollContainer>
+
+        {
+        }
+        <ApplicationsSidebar
+          visible={sidebarVisible}
+          onClose={() => setSidebarVisible(false)}
+          applications={sidebarApplications}
+          selectedApplicationId={selectedApplicationId}
+        />
+
+        {
+        }
+        {orphanServices.length > 0 && (
+          <HorizontalScrollContainer
+            title="Orphan Services (Drag to Infrastructure)"
+            icon={<SettingOutlined style={{ color: '#8c8c8c' }} />}
+            searchPlaceholder=" Search orphan services..."
+            searchable={true}
+            getSearchableText={(child) => {
+              const props = child.props as any;
+              let children = props?.children;
+              if (Array.isArray(children)) {
+                children = children.find((c: any) => React.isValidElement(c));
+              }
+              const serviceCard = React.isValidElement(children) ? (children as any) : null;
+              const title = serviceCard?.props?.title;
+              return title || '';
+            }}
+          >
+            {orphanServices.map((service) => (
+              <div
+                key={service.id}
+                style={{
+                  display: 'inline-block',
+                  minWidth: '240px',
+                  cursor: 'grab',
+                  opacity: draggedService?.id === service.id ? 0.5 : 1,
+                  transition: 'opacity 0.2s ease'
+                }}
+                draggable
+                onDragStart={() => handleServiceDragStart(service)}
+              >
                 <ServiceCard
-                services={services}
-                title={`${infrastructure.name}`}
-                icon={<SettingOutlined style={{ color: 'white' }} />}
+                  services={[service]}
+                  title={service.name}
+                  icon={<SettingOutlined style={{ color: 'white' }} />}
+                  gradient="linear-gradient(135deg, #6b7280 0%, #4b5563 100%)"
+                  onClick={handleServiceClick}
+                  selectedServiceId={selectedServiceId}
+                />
+              </div>
+            ))}
+          </HorizontalScrollContainer>
+        )}
+
+        {
+        }
+        {Object.keys(servicesByInfrastructure).length > 0 && (
+          <HorizontalScrollContainer
+            title="Services"
+            icon={<SettingOutlined style={{ color: '#1890ff' }} />}
+            searchable={true}
+            searchPlaceholder=" Search services..."
+            searchQuery={servicesSearchQuery}
+            onSearchChange={setServicesSearchQuery}
+          >
+            {Object.entries(servicesByInfrastructure).map(([infraId, { infrastructure, services }]) => (
+              <div key={infraId} style={{ display: 'inline-block' }}>
+                <ServiceCard
+                  services={services}
+                  title={`${infrastructure.name}`}
+                  icon={<SettingOutlined style={{ color: 'white' }} />}
                   gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
                   onClick={handleServiceClick}
-                onUnmap={handleUnmapService}
+                  onUnmap={handleUnmapService}
                   selectedServiceId={selectedServiceId}
-                showUnmap={true}
-                searchQuery={servicesSearchQuery}
+                  showUnmap={true}
+                  searchQuery={servicesSearchQuery}
                 />
-      </div>
-          ))}
-        </HorizontalScrollContainer>
-      )}
+              </div>
+            ))}
+          </HorizontalScrollContainer>
+        )}
 
-      {
-}
-      {Object.keys(operationsByService).length > 0 && (
-        <HorizontalScrollContainer 
-          title="Operations" 
-          icon={<UnorderedListOutlined style={{ color: '#1890ff' }} />}
-          searchable={true}
-          searchPlaceholder=" Search operations..."
-          searchQuery={operationsSearchQuery}
-          onSearchChange={setOperationsSearchQuery}
-        >
+        {
+        }
+        {Object.keys(operationsByService).length > 0 && (
+          <HorizontalScrollContainer
+            title="Operations"
+            icon={<UnorderedListOutlined style={{ color: '#1890ff' }} />}
+            searchable={true}
+            searchPlaceholder=" Search operations..."
+            searchQuery={operationsSearchQuery}
+            onSearchChange={setOperationsSearchQuery}
+          >
             {Object.entries(operationsByService).map(([serviceName, operations]) => (
-            <div key={serviceName} style={{ display: 'inline-block' }}>
+              <div key={serviceName} style={{ display: 'inline-block' }}>
                 <OperationCard
                   operations={operations}
-                title={`${serviceName}`}
+                  title={`${serviceName}`}
                   onClick={handleOperationClick}
                   selectedOperationId={selectedOperationId}
-                searchQuery={operationsSearchQuery}
+                  searchQuery={operationsSearchQuery}
                 />
-            </div>
+              </div>
             ))}
-        </HorizontalScrollContainer>
-      )}
-    </div>
-    {columns && columns.RootColumns && columns.RootColumns.length > 0 && (
+          </HorizontalScrollContainer>
+        )}
+      </div>
+      {columns && columns.RootColumns && columns.RootColumns.length > 0 && (
         <BaseTable
-        data={infraLevelData}
-        columns={columns}
-        title="Overview"
-        showSearch={true}
-        searchPlaceholder="Search..."
-        l1Key="services"
-        l2Key="operations"
+          data={infraLevelData}
+          columns={columns}
+          title="Overview"
+          showSearch={true}
+          searchPlaceholder="Search..."
+          l1Key="services"
+          l2Key="operations"
         />
       )}
       <Modal

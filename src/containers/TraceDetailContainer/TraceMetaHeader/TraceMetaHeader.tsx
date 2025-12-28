@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tag, Typography, Space } from 'antd';
 import { FiClock, FiCalendar } from 'react-icons/fi';
-import './TraceMetaHeader.css';
+import '../../../assets/styles/containers/trace-detail/trace-meta-header.css';
 
 const { Text } = Typography;
 
@@ -16,7 +16,7 @@ interface TraceMetaHeaderProps {
 }
 
 const formatDate = (nano?: number): string => {
-  if (!nano) {return '-';}
+  if (!nano) { return '-'; }
   const date = new Date(nano / 1e6);
   return date.toLocaleString();
 };
@@ -42,13 +42,13 @@ const TraceMetaHeader: React.FC<TraceMetaHeaderProps> = ({
           <Text className="service-name">{serviceName}</Text>
           {httpMethod && <Tag color="geekblue">{httpMethod}</Tag>}
           <span className="duration">
-            <FiClock style={{ marginRight: 4 }} />
+            <FiClock className="duration-icon" />
             {durationMs > 1000
               ? `${(durationMs / 1000).toFixed(2)} s`
               : `${durationMs.toFixed(2)} ms`}
           </span>
           <span className="timestamp">
-            <FiCalendar style={{ marginRight: 4 }} />
+            <FiCalendar className="timestamp-icon" />
             {formatDate(startTimeUnixNano)}
           </span>
         </Space>

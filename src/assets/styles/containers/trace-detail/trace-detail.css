@@ -1,0 +1,81 @@
+/* Trace Detail Container Styles */
+
+/* Main Container */
+.trace-detail-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #1f1f1f;
+  color: #fff;
+  font-family: sans-serif;
+}
+
+.trace-detail-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.trace-flamegraph {
+  flex: 1;
+  overflow: auto;
+  border-right: 1px solid #2a2a2a;
+}
+
+.trace-sidebar {
+  width: 300px;
+  background-color: #0b0c0e;
+  overflow: auto;
+  border-left: 1px solid #2a2a2a;
+  height: calc(100vh - 24px);
+}
+
+/* Loading and Error States */
+.trace-detail-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.trace-detail-loading-text {
+  margin-left: 8px;
+}
+
+.trace-detail-error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  flex-direction: column;
+}
+
+.trace-detail-error-title {
+  color: #ff4d4f;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.trace-detail-error-message {
+  color: #8c8c8c;
+  font-size: 14px;
+}
+
+.trace-detail-empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  flex-direction: column;
+}
+
+.trace-detail-empty-title {
+  color: #8c8c8c;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.trace-detail-empty-message {
+  color: #666;
+  font-size: 14px;
+}

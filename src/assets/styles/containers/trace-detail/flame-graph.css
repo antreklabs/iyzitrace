@@ -1,0 +1,129 @@
+/* FlameGraph Styles */
+
+.flamegraph-container {
+    background-color: #1f1f1f;
+    color: #fff;
+    font-size: 12px;
+    width: 100%;
+}
+
+.flamegraph-row {
+    display: flex;
+    align-items: center;
+    height: 42px;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.flamegraph-label {
+    flex: 0 0 300px;
+    padding-left: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Dynamic depth padding - use CSS custom properties */
+.flamegraph-label[data-depth="0"] {
+    padding-left: 8px;
+}
+
+.flamegraph-label[data-depth="1"] {
+    padding-left: 24px;
+}
+
+.flamegraph-label[data-depth="2"] {
+    padding-left: 40px;
+}
+
+.flamegraph-label[data-depth="3"] {
+    padding-left: 56px;
+}
+
+.flamegraph-label[data-depth="4"] {
+    padding-left: 72px;
+}
+
+.flamegraph-label[data-depth="5"] {
+    padding-left: 88px;
+}
+
+.flamegraph-label[data-depth="6"] {
+    padding-left: 104px;
+}
+
+.flamegraph-label[data-depth="7"] {
+    padding-left: 120px;
+}
+
+.flamegraph-label[data-depth="8"] {
+    padding-left: 136px;
+}
+
+.flamegraph-label[data-depth="9"] {
+    padding-left: 152px;
+}
+
+.flamegraph-label[data-depth="10"] {
+    padding-left: 168px;
+}
+
+.collapse-toggle {
+    display: inline-block;
+    width: 16px;
+    text-align: center;
+    cursor: pointer;
+    margin-right: 4px;
+}
+
+.flamegraph-bar-container {
+    flex: 1;
+    position: relative;
+}
+
+.flamegraph-bar {
+    position: absolute;
+    height: 20px;
+    background-color: #1890ff;
+    border-radius: 4px;
+    min-width: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+}
+
+.flamegraph-bar.selected {
+    border: 2px solid #ff4d4f;
+}
+
+.flamegraph-bar-start {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.duration-label {
+    white-space: nowrap;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
+}
+
+/* FlameGraph Loading State */
+.flamegraph-loading {
+    text-align: center;
+    padding: 20px;
+}
+
+.flamegraph-loading-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.flamegraph-loading-text {
+    margin-left: 8px;
+}

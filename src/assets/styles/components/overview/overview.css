@@ -1,0 +1,254 @@
+/* Overview Components Styles */
+
+/* Infrastructure Card */
+.overview-infra-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.overview-infra-delete-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    z-index: 10;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #ff4d4f;
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+}
+
+.overview-infra-delete-btn:hover {
+    background: #ff7875;
+    transform: scale(1.1);
+}
+
+.overview-infra-card {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #3a3a3a;
+    width: 100%;
+    min-width: 280px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.overview-infra-card:hover {
+    border-color: #4a4a4a;
+    transform: translateY(-2px);
+}
+
+.overview-infra-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.overview-infra-title {
+    color: white;
+    margin: 0;
+}
+
+.overview-infra-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.overview-infra-status {
+    width: 12px;
+    height: 12px;
+}
+
+.overview-infra-metric-section {
+    margin-bottom: 12px;
+}
+
+.overview-infra-metric-section-lg {
+    margin-bottom: 16px;
+}
+
+.overview-infra-metric-label {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+}
+
+.overview-infra-progress {
+    margin: 4px;
+    width: 50%;
+}
+
+.overview-infra-metric-value {
+    color: white;
+    font-size: 12px;
+}
+
+.overview-infra-collapse {
+    background: transparent;
+    border-radius: 12px;
+}
+
+/* Service Card */
+.overview-service-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.overview-service-title {
+    color: white;
+    margin: 0;
+}
+
+.overview-service-type {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.overview-service-metric {
+    margin-bottom: 8px;
+}
+
+.overview-service-metric-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+}
+
+.overview-service-metric-value {
+    color: #10b981;
+    font-size: 16px;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.overview-service-ops-title {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.overview-service-ops-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* Operation Card */
+.overview-operation-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.overview-operation-name {
+    color: white;
+    font-weight: 500;
+}
+
+.overview-operation-metrics {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.overview-operation-metric {
+    display: flex;
+    flex-direction: column;
+}
+
+.overview-operation-metric-label {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+}
+
+.overview-operation-metric-value {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+}
+
+/* Region Card */
+.overview-region-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.overview-region-title {
+    color: white;
+    margin: 0;
+}
+
+.overview-region-stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.overview-region-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.overview-region-stat-label {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+}
+
+.overview-region-stat-value {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* Applications Sidebar */
+.overview-apps-sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.overview-apps-sidebar-title {
+    color: white;
+    font-weight: 600;
+}
+
+.overview-apps-sidebar-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.overview-apps-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.overview-apps-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.overview-apps-item-name {
+    color: white;
+    font-weight: 500;
+}
+
+.overview-apps-item-count {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+}

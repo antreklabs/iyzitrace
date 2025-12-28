@@ -1,0 +1,73 @@
+/* Exception Pages Styles */
+
+.exception-detail-container {
+    padding: 24px;
+}
+
+.exception-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.exception-detail-title {
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.exception-detail-type {
+    color: #ff4d4f;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.exception-detail-meta {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.exception-detail-meta-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.exception-detail-meta-label {
+    color: #8c8c8c;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.exception-detail-meta-value {
+    color: white;
+    font-weight: 500;
+}
+
+.exception-detail-stacktrace {
+    background: #0d0d0d;
+    border-radius: 12px;
+    padding: 20px;
+    font-family: monospace;
+    font-size: 12px;
+    color: #e8e8e8;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #2a2a2a;
+}
+
+.exception-detail-section {
+    margin-bottom: 24px;
+}
+
+.exception-detail-section-title {
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}

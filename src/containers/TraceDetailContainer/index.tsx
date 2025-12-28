@@ -1,5 +1,5 @@
 import React, { JSX, useEffect, useMemo, useState } from 'react';
-import './TraceDetailContainer.css';
+import '../../assets/styles/containers/trace-detail/index.css';
 import TraceMetaHeader from './TraceMetaHeader/TraceMetaHeader';
 import TimelineHeader from './TimelineHeader/TimelineHeader';
 import FlameGraph from './FlameGraph/FlameGraph';
@@ -67,7 +67,7 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
 
   const getOperationType = (s: any): string => {
     let type = s.tags?.['type'];
-    
+
     if (type === 'http') {
       return 'HTTP';
     }
@@ -121,7 +121,7 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
       { type: 'DATABASE', color: 'green', icon: '🗄️' },
       { type: 'RPC', color: 'red', icon: '🔄' },
     ];
-    
+
     return OPERATION_TYPES.find((type) => type.type === operationType)?.icon || <FiBox />;
   };
 
@@ -130,7 +130,7 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
       try {
         setIsLoading(true);
         setHasError(false);
-        
+
         const trace = await TempoApi.getTrace(traceId);
 
         if (!trace || !trace.batches || trace.batches.length === 0) {
@@ -185,13 +185,13 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
                 ...s,
                 children: build(s.id),
               }));
-        
+
           return rootCandidates.map((s) => ({
             ...s,
             children: build(s.id),
           }));
         };
-        
+
         const result = buildTree(spans);
         setTraceData(result);
         setFilteredTraceData(result);
@@ -225,23 +225,23 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
 
     const filterSpans = (nodes: SpanNode[]): SpanNode[] => {
       const allMatchingSpans: SpanNode[] = [];
-      
+
       const collectMatchingSpans = (nodes: SpanNode[]) => {
         nodes.forEach(node => {
           const operationType = getOperationType(node);
           const matchesFilter = selectedOperationTypes.includes(operationType);
-          
+
           if (matchesFilter) {
             const { children, ...nodeWithoutChildren } = node;
             allMatchingSpans.push(nodeWithoutChildren as SpanNode);
           }
-          
+
           if (node.children && node.children.length > 0) {
             collectMatchingSpans(node.children);
           }
         });
       };
-      
+
       collectMatchingSpans(nodes);
       return allMatchingSpans;
     };
@@ -285,29 +285,29 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
         totalSpans={allSpans.length}
         errorSpans={allSpans.filter((s) => s.statusCode === 'ERROR').length}
       />
-      <ServiceLegendPanel 
-        serviceMetaMap={serviceMetaMap} 
+      <ServiceLegendPanel
+        serviceMetaMap={serviceMetaMap}
         onOperationTypeFilter={handleOperationTypeFilter}
       />
       <TimelineHeader startTime={minStartTime} endTime={maxEndTime} setGridWidth={setGridWidth} />
       <div className="trace-detail-body">
         <div className="trace-flamegraph">
           {isLoading ? (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+            <div className="trace-detail-loading">
               <Spin size="large" />
-              <span style={{ marginLeft: '8px' }}>Loading trace data...</span>
+              <span className="trace-detail-loading-text">Loading trace data...</span>
             </div>
           ) : hasError ? (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px', flexDirection: 'column' }}>
-              <div style={{ color: '#ff4d4f', fontSize: '16px', marginBottom: '8px' }}>Error loading trace</div>
-              <div style={{ color: '#8c8c8c', fontSize: '14px' }}>Unable to fetch trace data. Please try again.</div>
+            <div className="trace-detail-error">
+              <div className="trace-detail-error-title">Error loading trace</div>
+              <div className="trace-detail-error-message">Unable to fetch trace data. Please try again.</div>
             </div>
           ) : filteredTraceData.length === 0 ? (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px', flexDirection: 'column' }}>
-              <div style={{ color: '#8c8c8c', fontSize: '16px', marginBottom: '8px' }}>No trace data found</div>
-              <div style={{ color: '#666', fontSize: '14px' }}>
-                {selectedOperationTypes.length > 0 
-                  ? 'No spans match the selected operation types.' 
+            <div className="trace-detail-empty">
+              <div className="trace-detail-empty-title">No trace data found</div>
+              <div className="trace-detail-empty-message">
+                {selectedOperationTypes.length > 0
+                  ? 'No spans match the selected operation types.'
                   : 'This trace contains no spans or the trace ID is invalid.'
                 }
               </div>
@@ -321,9 +321,9 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
               serviceMetaMap={serviceMetaMap}
             />
           ) : (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+            <div className="trace-detail-loading">
               <Spin size="large" />
-              <span style={{ marginLeft: '8px' }}>Preparing flamegraph...</span>
+              <span className="trace-detail-loading-text">Preparing flamegraph...</span>
             </div>
           )}
         </div>

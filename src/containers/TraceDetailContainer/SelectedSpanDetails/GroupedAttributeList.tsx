@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import './GroupedAttributeList.css';
+import '../../../assets/styles/containers/trace-detail/selected-span-details.css';
 import { Collapse, Tag, Tooltip, TooltipProps } from 'antd';
 
 interface GroupedAttributeListProps {
@@ -11,7 +11,7 @@ const groupTagsByNamespace = (tags: Record<string, any>) => {
   Object.entries(tags).forEach(([key, value]) => {
     const [prefix, ...rest] = key.split('.');
     const subKey = rest.join('.');
-    if (!grouped[prefix]) {grouped[prefix] = {};}
+    if (!grouped[prefix]) { grouped[prefix] = {}; }
     grouped[prefix][subKey] = value;
   });
   return grouped;
@@ -61,10 +61,10 @@ const GroupedAttributeList: React.FC<GroupedAttributeListProps> = ({ tags }) => 
           return (
             <div key={subKey} className="tag-row">
               <Tag className="tag-key">{subKey}</Tag>
-              {String(value).length<=20?<span className="tag-value">{String(value)}</span> : 
-              <Tooltip placement="topLeft" title={String(value)} arrow={mergedArrow}>
-                 <span className="tag-value">{String(value).substring(0,20)+'...'}</span>
-              </Tooltip>}
+              {String(value).length <= 20 ? <span className="tag-value">{String(value)}</span> :
+                <Tooltip placement="topLeft" title={String(value)} arrow={mergedArrow}>
+                  <span className="tag-value">{String(value).substring(0, 20) + '...'}</span>
+                </Tooltip>}
             </div>
           );
         })}

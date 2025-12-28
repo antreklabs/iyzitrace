@@ -5,12 +5,15 @@ body,
 .ant-menu {
   font-family: 'Quicksand', sans-serif !important;
 }
+
 [class*="css-"][class*="page-header"] {
   display: none !important;
 }
+
 * {
   touch-action: manipulation;
 }
+
 .apexcharts-canvas,
 .apexcharts-svg,
 .apexcharts-zoomable,
@@ -19,10 +22,364 @@ body,
   touch-action: pan-x pan-y !important;
   pointer-events: auto !important;
 }
+
 .apexcharts-canvas *,
 .apexcharts-svg * {
   touch-action: pan-x pan-y !important;
 }
+
 .apexcharts-canvas {
   overscroll-behavior: contain;
+}
+
+/* =============================================
+   COMMON UTILITY CLASSES
+   ============================================= */
+
+/* Flex utilities */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-start {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.flex-end {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+/* Gap utilities */
+.gap-4 {
+  gap: 4px;
+}
+
+.gap-8 {
+  gap: 8px;
+}
+
+.gap-12 {
+  gap: 12px;
+}
+
+.gap-16 {
+  gap: 16px;
+}
+
+.gap-24 {
+  gap: 24px;
+}
+
+/* Text utilities */
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-muted {
+  color: #8c8c8c;
+}
+
+.text-secondary {
+  color: #595959;
+}
+
+.text-white {
+  color: #fff;
+}
+
+.text-primary {
+  color: #1890ff;
+}
+
+.text-error {
+  color: #ff4d4f;
+}
+
+.text-success {
+  color: #52c41a;
+}
+
+.font-mono {
+  font-family: monospace;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-xs {
+  font-size: 11px;
+}
+
+.text-sm {
+  font-size: 12px;
+}
+
+.text-base {
+  font-size: 14px;
+}
+
+.text-lg {
+  font-size: 16px;
+}
+
+.text-xl {
+  font-size: 18px;
+}
+
+.text-2xl {
+  font-size: 20px;
+}
+
+/* Padding utilities */
+.p-8 {
+  padding: 8px;
+}
+
+.p-12 {
+  padding: 12px;
+}
+
+.p-16 {
+  padding: 16px;
+}
+
+.p-24 {
+  padding: 24px;
+}
+
+.p-40 {
+  padding: 40px;
+}
+
+.py-8 {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.px-12 {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+/* Margin utilities */
+.m-0 {
+  margin: 0;
+}
+
+.mb-4 {
+  margin-bottom: 4px;
+}
+
+.mb-8 {
+  margin-bottom: 8px;
+}
+
+.mb-12 {
+  margin-bottom: 12px;
+}
+
+.mb-16 {
+  margin-bottom: 16px;
+}
+
+.mb-24 {
+  margin-bottom: 24px;
+}
+
+.mt-8 {
+  margin-top: 8px;
+}
+
+.mt-16 {
+  margin-top: 16px;
+}
+
+.mt-24 {
+  margin-top: 24px;
+}
+
+.mt-auto {
+  margin-top: auto;
+}
+
+.ml-8 {
+  margin-left: 8px;
+}
+
+.ml-12 {
+  margin-left: 12px;
+}
+
+.mr-4 {
+  margin-right: 4px;
+}
+
+.mr-8 {
+  margin-right: 8px;
+}
+
+.mr-12 {
+  margin-right: 12px;
+}
+
+/* Width utilities */
+.w-full {
+  width: 100%;
+}
+
+.min-h-200 {
+  min-height: 200px;
+}
+
+.max-h-400 {
+  max-height: 400px;
+}
+
+/* Overflow utilities */
+.overflow-auto {
+  overflow: auto;
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+/* Display utilities */
+.hidden {
+  display: none;
+}
+
+.block {
+  display: block;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+/* Cursor utilities */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
+
+/* Border utilities */
+.rounded-sm {
+  border-radius: 4px;
+}
+
+.rounded {
+  border-radius: 8px;
+}
+
+.rounded-lg {
+  border-radius: 12px;
+}
+
+.rounded-full {
+  border-radius: 50%;
+}
+
+/* Link style for clickable elements */
+.service-name-link {
+  color: #1890ff;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.service-name-link:hover {
+  color: #40a9ff;
+}
+
+/* Empty state styling */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #8c8c8c;
+}
+
+/* Icon sizes */
+.icon-sm {
+  font-size: 12px;
+}
+
+.icon-base {
+  font-size: 16px;
+}
+
+.icon-lg {
+  font-size: 20px;
+}
+
+.icon-xl {
+  font-size: 24px;
 }

@@ -1,7 +1,7 @@
 import React, { JSX } from 'react';
 import { Spin } from 'antd';
 import FlameGraphRow from './FlameGraphRow';
-import './FlameGraph.css';
+import '../../../assets/styles/containers/trace-detail/flame-graph.css';
 
 interface SpanNode {
   id: string;
@@ -25,16 +25,16 @@ interface FlameGraphProps {
 const flattenSpans = (nodes: SpanNode[]): SpanNode[] =>
   nodes.flatMap((node) => [node, ...(node.children ? flattenSpans(node.children) : [])]);
 
-const FlameGraph: React.FC<FlameGraphProps> = ({ data, selectedSpanId, onSpanSelect,gridWidth,serviceMetaMap }) => {
+const FlameGraph: React.FC<FlameGraphProps> = ({ data, selectedSpanId, onSpanSelect, gridWidth, serviceMetaMap }) => {
 
   const spans = flattenSpans(data);
 
   if (!spans.length) {
     return (
-      <div style={{ textAlign: 'center', padding: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+      <div className="flamegraph-loading">
+        <div className="flamegraph-loading-content">
           <Spin size="large" />
-          <span style={{ marginLeft: '8px' }}>Loading flamegraph...</span>
+          <span className="flamegraph-loading-text">Loading flamegraph...</span>
         </div>
       </div>
     );
