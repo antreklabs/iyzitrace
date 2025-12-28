@@ -1,61 +1,30 @@
 import { getPluginSettings, savePluginSettings } from './settings.service';
 import { getBackendSrv } from "@grafana/runtime";
+import type {
+  Team,
+  TeamWithMembers,
+  TeamMember,
+  TeamSettings,
+  AvailableMember,
+  TeamPage,
+  AvailablePage,
+  TeamPagesSettingsEntry,
+  CreateTeamData,
+  AddMembersData
+} from '../../interfaces/api';
 
-export interface Team {
-  id: string;
-  uid: string;
-  name: string;
-  icon: string;
-  members: number | TeamMember[];
-  createdAt: string;
-  settings?: TeamSettings;
-  pages?: TeamPage[];
-}
-
-export interface TeamWithMembers extends Team {
-  members: TeamMember[];
-}
-
-export interface TeamMember {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-  joinedAt: string;
-}
-
-export interface TeamSettings {
-  name: string;
-  icon: string;
-}
-
-export interface AvailableMember {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-}
-
-export interface TeamPage {
-  id: string;
-  name: string;
-  route: string;
-  description: string;
-  icon: string;
-  addedAt: string;
-}
-
-export interface AvailablePage {
-  id: string;
-  name: string;
-  route: string;
-  description: string;
-  icon: string;
-}
-
-interface TeamPagesSettingsEntry extends TeamPage {
-  teamId: string;
-}
+// Re-export for backwards compatibility
+export type {
+  Team,
+  TeamWithMembers,
+  TeamMember,
+  TeamSettings,
+  AvailableMember,
+  TeamPage,
+  AvailablePage,
+  CreateTeamData,
+  AddMembersData
+};
 
 const PLUGIN_PAGE_CATALOG: AvailablePage[] = [
   {
@@ -220,15 +189,6 @@ const removePageFromTeam = async (teamId: string, pageId: string) => {
   );
   await saveTeamPagesToSettings(updated);
 };
-
-export interface CreateTeamData {
-  name: string;
-  icon: string;
-}
-
-export interface AddMembersData {
-  memberIds: string[];
-}
 
 export const api = {
   async getTeams(): Promise<Team[]> {
@@ -416,7 +376,7 @@ export const getTeams = async (options?: {
     }
 
     const teamsResponse = await getBackendSrv().get<any>('/api/teams/search', params);
-    
+
     const teamsWithMembers = await Promise.all(
       teamsResponse.teams.map(async (team: any) => {
         try {
@@ -459,7 +419,7 @@ export const getTeamMembers = async (teamUid: string): Promise<any> => {
       email: member.email,
       avatar: member.avatarUrl,
     }));
-    
+
     return teamMembers || [];
   } catch (error: any) {
     throw error;

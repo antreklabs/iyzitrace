@@ -1,5 +1,9 @@
 
-import type { Region, Service, Infrastructure, Application } from './interface.service';
+import type { Region, Service, Infrastructure } from '../../interfaces/core';
+import type { AIConfig, AIMessage, AIResponse, AIInsightRequest, AIError } from '../../interfaces/api';
+
+// Re-export for backwards compatibility
+export type { AIConfig, AIMessage, AIResponse, AIInsightRequest, AIError };
 
 let AI_CONFIG = {
   apiKey: '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',
@@ -9,52 +13,6 @@ let AI_CONFIG = {
   maxTokens: 150,
   timeout: 10000,
 };
-
-export interface AIConfig {
-  apiKey: string;
-  model?: string;
-  baseUrl?: string;
-  temperature?: number;
-  maxTokens?: number;
-  timeout?: number;
-}
-
-export interface AIMessage {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-}
-
-export interface AIResponse {
-  content: string;
-  usage?: {
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-  };
-  model?: string;
-  finishReason?: string;
-}
-
-export interface AIInsightRequest {
-  prompt: string;
-  context?: {
-    regions?: Region[];
-    services?: Service[];
-    infrastructures?: Infrastructure[];
-    applications?: Application[];
-    timeRange?: { from: string; to: string };
-    customData?: Record<string, any>;
-  };
-  maxTokens?: number;
-  temperature?: number;
-}
-
-export interface AIError {
-  message: string;
-  code?: string;
-  status?: number;
-  details?: any;
-}
 
 let activeController: AbortController | null = null;
 
@@ -83,11 +41,11 @@ const estimateTokens = (text: string): number => {
 
 const optimizeRegionData = (regions: Region[], maxTokens: number = 5000): string => {
   const summary: any[] = [];
-  
+
   regions.forEach((region) => {
     const infraCount = region.infrastructures?.length || 0;
     const services: Service[] = [];
-    
+
     region.infrastructures?.forEach((infra: Infrastructure) => {
       if (infra.services) {
         services.push(...infra.services);
@@ -128,7 +86,7 @@ const optimizeRegionData = (regions: Region[], maxTokens: number = 5000): string
             latency: s.metrics?.avgDurationMs,
             errorRate: s.status?.metrics?.errorPercentage,
           }));
-        
+
         if (problematicServices.length > 0) {
           regionData.issues = problematicServices;
         }
@@ -186,7 +144,7 @@ const optimizeServiceData = (services: Service[], maxTokens: number = 5000): str
   });
 
   let result = JSON.stringify(summary, null, 2);
-  
+
   const stats = `\nTotal Services: ${services.length} | Showing: ${summary.length} (prioritized by issues)`;
   result = stats + '\n' + result;
 

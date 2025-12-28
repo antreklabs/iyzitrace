@@ -1,4 +1,7 @@
-export type Operation = {
+/* Service Map Specific Types */
+/* Note: These are simplified types used specifically for service map visualization */
+
+export type ServiceMapOperation = {
   name: string;
   method: string;
   path?: string;
@@ -7,7 +10,7 @@ export type Operation = {
   status?: 'ok' | 'warning' | 'error';
 };
 
-export type Service = {
+export type ServiceMapService = {
   name: string;
   kind: string;
   port: string;
@@ -15,15 +18,15 @@ export type Service = {
   replicas?: number;
   dependencies?: string[];
   metrics?: Record<string, number>;
-  operations?: Operation[];
+  operations?: ServiceMapOperation[];
 };
 
-export type Application = {
+export type ServiceMapApplication = {
   name: string;
   platform: string;
   version: string;
   status: 'running' | 'stopped' | 'warning';
-  services: Service[];
+  services: ServiceMapService[];
 };
 
 export type Host = {
@@ -37,11 +40,11 @@ export type Host = {
   memory: { used_gb: number; total_gb: number };
   status: 'healthy' | 'warning' | 'error' | 'degraded';
   tags?: string[];
-  applications: Application[];
-  position?: Position;
+  applications: ServiceMapApplication[];
+  position?: ServiceMapPosition;
 };
 
-export type Position = {
+export type ServiceMapPosition = {
   x: number;
   y: number;
 };

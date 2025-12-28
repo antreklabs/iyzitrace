@@ -1,27 +1,8 @@
 import React from 'react';
+import type { TableColumn, ColumnItem } from '../../interfaces/core';
 
-export interface TableColumn {
-  RootColumns: ColumnItem[];
-  L1Columns?: ColumnItem[];
-  L2Columns?: ColumnItem[];
-  L3Columns?: ColumnItem[];
-}
-
-export interface ColumnItem {
-  title: string;
-  dataIndex: string;
-  key: string;
-  width?: number;
-  align?: 'left' | 'right' | 'center';
-  className?: string;
-  onHeaderCell?: (column: any) => { className?: string } | undefined;
-  onCell?: (record: any, rowIndex?: number) => { className?: string } | undefined;
-  sorter?: (a: any, b: any) => number;
-  render?: (value: any, record?: any) => any;
-  filters?: { text: string; value: string }[];
-  onFilter?: (value: any, record: any) => boolean;
-  filterSearch?: boolean;
-}
+// Re-export for backwards compatibility
+export type { TableColumn, ColumnItem };
 
 export const getTableColumns = (
   data: any,
@@ -68,7 +49,7 @@ export const getTableColumns = (
         if (ctx) {
           return Math.ceil(ctx.measureText(text || '').width);
         }
-      } catch {}
+      } catch { }
       return estimateTextWidth(text);
     };
   })();
@@ -126,11 +107,11 @@ export const getTableColumns = (
       sorter: (a: any, b: any) => {
         const aVal = getNestedValue(a, property) ?? '';
         const bVal = getNestedValue(b, property) ?? '';
-        
+
         if (typeof aVal === 'number' && typeof bVal === 'number') {
           return aVal - bVal;
         }
-        
+
         return String(aVal).localeCompare(String(bVal));
       },
       render: (value: any, record: any) => {
@@ -173,16 +154,16 @@ export const getTableColumns = (
 
   const extractProperties = (dataArray: any[], level: number): string[] => {
     if (!Array.isArray(dataArray) || dataArray.length === 0) return [];
-    
+
     const properties = new Set<string>();
-    
+
     const extractNestedProperties = (obj: any, prefix: string = '') => {
       if (!obj || typeof obj !== 'object') return;
-      
+
       Object.keys(obj).forEach(key => {
         const fullKey = prefix ? `${prefix}.${key}` : key;
         const value = obj[key];
-        
+
         if (Array.isArray(value)) {
           return;
         } else if (value && typeof value === 'object') {
@@ -192,13 +173,13 @@ export const getTableColumns = (
         }
       });
     };
-    
+
     dataArray.forEach(item => {
       if (item && typeof item === 'object') {
         extractNestedProperties(item);
       }
     });
-    
+
     return Array.from(properties);
   };
 
@@ -217,10 +198,10 @@ export const getTableColumns = (
         l1Data.push(...item[L1ColumnProperty]);
       }
     });
-    
-    if(l1Columns) {
-    const l1Properties = extractProperties(l1Data, 1);
-    l1Properties.forEach(prop => {
+
+    if (l1Columns) {
+      const l1Properties = extractProperties(l1Data, 1);
+      l1Properties.forEach(prop => {
         l1Columns.push(createColumnItem(prop, prop, 220, l1Data));
       });
       l1Columns.splice(0, l1Columns.length, ...columns.applyDefaultHidden(l1Columns));
@@ -238,13 +219,13 @@ export const getTableColumns = (
         });
       }
     });
-    
-    if(l2Columns) {
-    const l2Properties = extractProperties(l2Data, 2);
-    l2Properties.forEach(prop => {
-      l2Columns.push(createColumnItem(prop, prop, 220, l2Data));
-    });
-    l2Columns.splice(0, l2Columns.length, ...columns.applyDefaultHidden(l2Columns));
+
+    if (l2Columns) {
+      const l2Properties = extractProperties(l2Data, 2);
+      l2Properties.forEach(prop => {
+        l2Columns.push(createColumnItem(prop, prop, 220, l2Data));
+      });
+      l2Columns.splice(0, l2Columns.length, ...columns.applyDefaultHidden(l2Columns));
     }
   }
 
@@ -263,12 +244,12 @@ export const getTableColumns = (
         });
       }
     });
-    if(l3Columns) {
-    const l3Properties = extractProperties(l3Data, 3);
-    l3Properties.forEach(prop => {
-      l3Columns.push(createColumnItem(prop, prop, 220, l3Data));
-    });
-    l3Columns.splice(0, l3Columns.length, ...columns.applyDefaultHidden(l3Columns));
+    if (l3Columns) {
+      const l3Properties = extractProperties(l3Data, 3);
+      l3Properties.forEach(prop => {
+        l3Columns.push(createColumnItem(prop, prop, 220, l3Data));
+      });
+      l3Columns.splice(0, l3Columns.length, ...columns.applyDefaultHidden(l3Columns));
     }
   }
 
@@ -281,9 +262,9 @@ export const getTableColumns = (
 };
 
 export const createCustomColumn = (
-  property: string, 
-  title: string, 
-  width: number, 
+  property: string,
+  title: string,
+  width: number,
   isNumber: boolean = false
 ): ColumnItem => {
   const getNestedValue = (obj: any, path: string): any => {
@@ -298,11 +279,11 @@ export const createCustomColumn = (
     sorter: (a: any, b: any) => {
       const aVal = getNestedValue(a, property) ?? (isNumber ? 0 : '');
       const bVal = getNestedValue(b, property) ?? (isNumber ? 0 : '');
-      
+
       if (isNumber) {
         return (aVal as number) - (bVal as number);
       }
-      
+
       return String(aVal).localeCompare(String(bVal));
     },
     render: isNumber ? (value: any, record: any) => {
@@ -359,7 +340,7 @@ export const columns = {
       const isGeom = n.startsWith('position') || n.startsWith('groupposition') || n.startsWith('groupsize');
       const isStatus = n.startsWith('status');
       const isStatusPercentage = isStatus && n.includes('percentage');
-      const isStatusValue = isStatus && (n === 'statusvalue' || n.endsWith('.value'.replace(/[^a-z0-9]/g,'')));
+      const isStatusValue = isStatus && (n === 'statusvalue' || n.endsWith('.value'.replace(/[^a-z0-9]/g, '')));
       const hideStatus = isStatus && !isStatusPercentage && !isStatusValue;
       return isGeom || hideStatus;
     };

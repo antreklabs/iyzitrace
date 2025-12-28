@@ -1,4 +1,8 @@
 import { getBackendSrv } from "@grafana/runtime";
+import type { TimeRange, AlertRule, FailedCheck, TimelineData } from '../../interfaces/api';
+
+// Re-export for backwards compatibility
+export type { TimeRange, AlertRule, FailedCheck, TimelineData };
 
 export const getAlertRules = async (): Promise<any> => {
   const promResponse = await getBackendSrv().get<any>('/api/prometheus/grafana/api/v1/rules');
@@ -6,40 +10,7 @@ export const getAlertRules = async (): Promise<any> => {
 };
 
 export const getFailedChecks = async (): Promise<any> => {
-    const response = await getBackendSrv().get<any>('/api/alertmanager/grafana/api/v2/alerts');
-    
-    return response;
+  const response = await getBackendSrv().get<any>('/api/alertmanager/grafana/api/v2/alerts');
+
+  return response;
 };
-
-export type TimeRange = '1h' | '6h' | '1d' | '7d';
-
-export interface AlertRule {
-  id: string;
-  name: string;
-  description: string;
-  expression: string;
-  enabled: boolean;
-  thresholds: {
-    critical?: number;
-    warning?: number;
-    degraded?: number;
-  };
-  category: string;
-  technology: string;
-}
-
-export interface FailedCheck {
-  id: string;
-  status: 'CRITICAL' | 'WARNING' | 'DEGRADED';
-  resource: string;
-  summary: string;
-  ruleName: string;
-  timestamp: string;
-  attributes: Record<string, any>;
-}
-
-export interface TimelineData {
-  time: string;
-  status: 'critical' | 'warning' | 'degraded' | 'healthy' | 'no-data';
-  count: number;
-}
