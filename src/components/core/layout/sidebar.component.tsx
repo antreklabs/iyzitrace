@@ -14,6 +14,7 @@ import {
   BuildOutlined,
   MenuOutlined,
   RobotOutlined,
+  ApiOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getStoredTeamPages } from '../../../api/service/team.service';
@@ -46,6 +47,12 @@ const Sidebar: React.FC = () => {
         { key: 'ai', icon: <RobotOutlined className="sidebar-menu-icon" />, label: 'AI Assistant' },
         { key: 'teams', icon: <TeamOutlined className="sidebar-menu-icon" />, label: 'Teams' },
         { key: 'settings', icon: <SettingOutlined className="sidebar-menu-icon" />, label: 'Settings' },
+        { type: 'divider' },
+        {
+          key: 'agent-manager',
+          icon: <ApiOutlined className="sidebar-menu-icon" />,
+          label: 'Agent Manager',
+        },
       ];
 
       if (user.role === 'admin') {
