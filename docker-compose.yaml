@@ -1,7 +1,6 @@
 networks:
-  default:
-    name: shared-network
-    external: true
+  iyzitrace-plugin:
+    driver: bridge
 
 services:
   grafana:

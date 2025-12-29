@@ -6,7 +6,7 @@ datasources:
     uid: tempo-platform
     access: proxy
     orgId: 1
-    url: http://tempo-platform:3200
+    url: http://host.docker.internal/datasource/traces
     basicAuth: false
     isDefault: false
     version: 1
@@ -16,5 +16,3 @@ datasources:
       httpMethod: GET
       serviceMap:
         datasourceUid: prometheus-platform
-      streamingEnabled:
-        search: true
