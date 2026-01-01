@@ -136,7 +136,7 @@ const config = async (env: Env): Promise<Configuration> => {
         },
         {
           test: /\.css$/,
-          use: ['style-loader', 'css-loader'],
+          use: ['style-loader', 'css-loader', 'postcss-loader'],
         },
         {
           test: /\.s[ac]ss$/,
@@ -243,20 +243,20 @@ const config = async (env: Env): Promise<Configuration> => {
       }),
       ...(env.development
         ? [
-            new LiveReloadPlugin(),
-            new ForkTsCheckerWebpackPlugin({
-              async: Boolean(env.development),
-              issue: {
-                include: [{ file: '**/*.{ts,tsx}' }],
-              },
-              typescript: { configFile: path.join(process.cwd(), 'tsconfig.json') },
-            }),
-            new ESLintPlugin({
-              extensions: ['.ts', '.tsx'],
-              lintDirtyModulesOnly: Boolean(env.development), // don't lint on start, only lint changed files
-              failOnError: Boolean(env.production),
-            }),
-          ]
+          new LiveReloadPlugin(),
+          new ForkTsCheckerWebpackPlugin({
+            async: Boolean(env.development),
+            issue: {
+              include: [{ file: '**/*.{ts,tsx}' }],
+            },
+            typescript: { configFile: path.join(process.cwd(), 'tsconfig.json') },
+          }),
+          new ESLintPlugin({
+            extensions: ['.ts', '.tsx'],
+            lintDirtyModulesOnly: Boolean(env.development), // don't lint on start, only lint changed files
+            failOnError: Boolean(env.production),
+          }),
+        ]
         : []),
     ],
 
@@ -265,6 +265,10 @@ const config = async (env: Env): Promise<Configuration> => {
       // handle resolving "rootDir" paths
       modules: [path.resolve(process.cwd(), 'src'), 'node_modules'],
       unsafeCache: true,
+      alias: {
+        '@': path.resolve(process.cwd(), 'src'),
+        '@agent-manager': path.resolve(process.cwd(), 'src/agent-manager'),
+      },
     },
   };
 

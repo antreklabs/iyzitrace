@@ -2,8 +2,15 @@
   "extends": "./.config/tsconfig.json",
   "compilerOptions": {
     "baseUrl": "./src",
+    "jsx": "react-jsx",
+    "noUnusedLocals": false,
     "paths": {
-      "@/*": ["*"]
+      "@/*": [
+        "*"
+      ],
+      "@agent-manager/*": [
+        "agent-manager/*"
+      ]
     },
     "forceConsistentCasingInFileNames": true,
     "strictNullChecks": false,

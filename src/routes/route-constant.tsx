@@ -7,7 +7,7 @@ const ServiceMapPage = React.lazy(() => import('../pages/service-map/service-map
 const ServicesPage = React.lazy(() => import('../pages/services/services.page'));
 const ServiveDetailPage = React.lazy(() => import('../pages/services/service-detail.page'));
 const TracesPage = React.lazy(() => import('../pages/traces/traces.page'));
-const TraceDetailPage = React.lazy(() => import('../pages/traces/trace-detail.page')); 
+const TraceDetailPage = React.lazy(() => import('../pages/traces/trace-detail.page'));
 const LogsPage = React.lazy(() => import('../pages/logs/logs.page'));
 const ViewsPage = React.lazy(() => import('../pages/views/view.page'));
 const AiPage = React.lazy(() => import('../pages/ai/ai.page'));
@@ -16,6 +16,7 @@ const ExceptionDetailPage = React.lazy(() => import('../pages/exceptions/excepti
 const TeamsPage = React.lazy(() => import('../pages/teams/teams.page'));
 const TeamsManagePage = React.lazy(() => import('../pages/teams/teams-manage.page'));
 const SettingsPage = React.lazy(() => import('../pages/settings/settings.page'));
+const AgentManagerRoutes = React.lazy(() => import('../agent-manager/AgentManagerRoutes'));
 
 export const appRoutes: AppRoute[] = [
   {
@@ -137,6 +138,13 @@ export const appRoutes: AppRoute[] = [
     name: 'settings',
     title: 'Settings',
     showInMenu: true,
+  },
+  {
+    path: '/agent-manager/*',
+    element: <AgentManagerRoutes />,
+    name: 'agentManager',
+    title: 'Agent Manager',
+    showInMenu: false,
   },
 ];
 
