@@ -1,6 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
-import Editor, { type OnMount } from "@monaco-editor/react";
-import type * as Monaco from "monaco-editor";
+import React, { useEffect, useState } from 'react';
 
 import { useTheme } from "../ThemeProvider";
 
@@ -15,7 +13,7 @@ import {
 interface ConfigYamlEditorWithMetricsProps {
   value: string;
   onChange: (value: string) => void;
-  metrics?: ComponentMetrics[]; // Optional metrics data
+  metrics?: ComponentMetrics[];
   readonly?: boolean;
 }
 
@@ -25,13 +23,7 @@ export function ConfigYamlEditorWithMetrics({
   metrics,
   readonly = false,
 }: ConfigYamlEditorWithMetricsProps) {
-  const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const monacoRef = useRef<any>(null);
-  const decorationsRef =
-    useRef<Monaco.editor.IEditorDecorationsCollection | null>(null);
   const [parsedComponents, setParsedComponents] = useState<YamlComponent[]>([]);
-
   const { theme } = useTheme();
 
   // Parse YAML to find components whenever value changes
@@ -42,100 +34,68 @@ export function ConfigYamlEditorWithMetrics({
     }
   }, [value]);
 
-  // Update decorations when metrics or parsed components change
-  useEffect(() => {
-    if (
-      !editorRef.current ||
-      !monacoRef.current ||
-      !metrics ||
-      metrics.length === 0
-    ) {
-      return;
+  // Calculate summary metrics for display
+  const metricsSummary = React.useMemo(() => {
+    if (!metrics || metrics.length === 0) {
+      return null;
     }
 
-    const editor = editorRef.current;
-    const monaco = monacoRef.current;
-    const model = editor.getModel();
-    if (!model) {
-      return;
-    }
+    const totalThroughput = metrics.reduce((sum, m) => sum + m.throughput, 0);
+    const totalErrors = metrics.reduce((sum, m) => sum + m.errors, 0);
+    const errorRate = totalThroughput > 0 ? (totalErrors / totalThroughput) * 100 : 0;
 
-    const newDecorations: Monaco.editor.IModelDeltaDecoration[] = [];
-
-    // Match parsed components with metrics
-    parsedComponents.forEach((component) => {
-      // Find matching metrics for this component
-      const componentMetrics = metrics.filter(
-        (m) =>
-          m.component_name === component.name &&
-          mapComponentType(m.component_type) === component.type,
-      );
-
-      if (componentMetrics.length === 0) {
-        return;
-      }
-
-      // Aggregate metrics across all pipeline types (traces, metrics, logs)
-      const aggregated = aggregateMetrics(componentMetrics);
-
-      // Create simple decoration with after content
-      const metricsText = formatMetricsTextCompact(aggregated);
-
-      // Find the end of the line to place the decoration
-      const lineLength = model.getLineMaxColumn(component.lineNumber);
-
-      // Try both before and after to see which works
-      newDecorations.push({
-        range: new monaco.Range(
-          component.lineNumber,
-          lineLength,
-          component.lineNumber,
-          lineLength,
-        ),
-        options: {
-          after: {
-            content: metricsText,
-          },
-        },
-      });
-    });
-
-    // Clear old decorations and create new ones
-    if (decorationsRef.current) {
-      decorationsRef.current.clear();
-    }
-
-    if (newDecorations.length > 0) {
-      decorationsRef.current =
-        editor.createDecorationsCollection(newDecorations);
-    }
+    return {
+      throughput: formatThroughput(totalThroughput),
+      errorRate: formatErrorRate(errorRate),
+      componentCount: parsedComponents.length,
+    };
   }, [metrics, parsedComponents]);
-
-  const handleEditorMount: OnMount = (editor, monaco) => {
-    editorRef.current = editor;
-    monacoRef.current = monaco;
-  };
 
   return (
     <div className="border rounded-lg overflow-hidden">
-      <Editor
-        height="60vh"
-        defaultLanguage="yaml"
-        value={value}
-        onMount={handleEditorMount}
-        onChange={(value) => !readonly && onChange(value || "")}
-        theme={theme === "dark" ? "vs-dark" : "vs-light"}
-        options={{
-          minimap: { enabled: false },
-          fontSize: 13,
-          lineNumbers: "on",
-          roundedSelection: false,
-          scrollBeyondLastLine: false,
-          readOnly: readonly,
-          automaticLayout: true,
-          glyphMargin: false, // No gutter decorations
-        }}
-      />
+      {/* Metrics Summary Bar */}
+      {metricsSummary && (
+        <div className="flex items-center gap-4 px-4 py-2 bg-muted/30 border-b text-sm">
+          <span className="text-muted-foreground">
+            Components: <span className="text-foreground font-medium">{metricsSummary.componentCount}</span>
+          </span>
+          <span className="text-muted-foreground">
+            Throughput: <span className="text-foreground font-medium">{metricsSummary.throughput}</span>
+          </span>
+          {parseFloat(metricsSummary.errorRate) > 0 && (
+            <span className="text-muted-foreground">
+              Error Rate: <span className="text-red-500 font-medium">{metricsSummary.errorRate}</span>
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* YAML Content Display */}
+      <div className="relative">
+        <textarea
+          value={value}
+          onChange={(e) => !readonly && onChange(e.target.value)}
+          readOnly={readonly}
+          className={`
+            w-full h-[60vh] p-4 font-mono text-sm resize-none
+            focus:outline-none focus:ring-0
+            ${theme === 'dark'
+              ? 'bg-[#1e1e1e] text-[#d4d4d4]'
+              : 'bg-white text-[#1e1e1e]'
+            }
+            ${readonly ? 'cursor-default' : 'cursor-text'}
+          `}
+          spellCheck={false}
+          placeholder="No configuration available"
+        />
+        {readonly && (
+          <div className="absolute top-2 right-2">
+            <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+              Read-only
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -146,7 +106,6 @@ export function ConfigYamlEditorWithMetrics({
 function mapComponentType(
   apiType: string,
 ): "receiver" | "processor" | "exporter" {
-  // API returns full type like "receiver", "processor", "exporter"
   if (apiType === "receiver") {
     return "receiver";
   }
@@ -156,7 +115,7 @@ function mapComponentType(
   if (apiType === "exporter") {
     return "exporter";
   }
-  return "receiver"; // fallback
+  return "receiver";
 }
 
 /**
@@ -191,7 +150,6 @@ function aggregateMetrics(metrics: ComponentMetrics[]): ComponentMetrics {
       (aggregated.send_failed || 0) + (m.send_failed || 0);
   });
 
-  // Recalculate error rate
   if (aggregated.throughput > 0) {
     aggregated.error_rate = (aggregated.errors / aggregated.throughput) * 100;
   }
@@ -200,18 +158,13 @@ function aggregateMetrics(metrics: ComponentMetrics[]): ComponentMetrics {
 }
 
 /**
- * Format metrics text for inline display (compact version for inline hints)
+ * Format metrics text for inline display
  */
 function formatMetricsTextCompact(metrics: ComponentMetrics): string {
   const parts: string[] = [];
-
-  // Always show throughput
   parts.push(`${formatThroughput(metrics.throughput)}`);
-
-  // Show error rate if > 0
   if (metrics.error_rate > 0) {
     parts.push(`err: ${formatErrorRate(metrics.error_rate)}`);
   }
-
   return parts.join(" • ");
 }

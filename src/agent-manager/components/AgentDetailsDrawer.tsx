@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from 'react';
 import {
   CheckCircle,
   XCircle,
@@ -6,7 +6,6 @@ import {
   Server,
   RotateCw,
 } from "lucide-react";
-import { useState } from 'react';
 import useSWR from "swr";
 
 import { restartAgent } from "@agent-manager/api/agents";
@@ -57,7 +56,9 @@ export function AgentDetailsDrawer({
     agent?.capabilities?.includes("accepts_restart_command") ?? false;
 
   const handleRestart = async () => {
-    if (!agentId) return;
+    if (!agentId) {
+      return;
+    }
 
     setIsRestarting(true);
     setRestartMessage(null);

@@ -4,7 +4,9 @@
   "name": "IyziTrace",
   "id": "iyzitrace-app",
   "info": {
-    "keywords": ["app"],
+    "keywords": [
+      "app"
+    ],
     "description": "",
     "author": {
       "name": "Easytrace"
@@ -82,6 +84,12 @@
       "type": "page",
       "name": "Settings",
       "path": "/a/iyzitrace-app/settings",
+      "addToNav": true
+    },
+    {
+      "type": "page",
+      "name": "Agent Manager",
+      "path": "/a/iyzitrace-app/agent-manager",
       "addToNav": true
     },
     {

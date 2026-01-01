@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useState, useCallback } from 'react';
 import { type Node } from "@xyflow/react";
 import { RefreshCw } from "lucide-react";
-import { useState, useCallback } from 'react';
 import useSWR from "swr";
 
 import { getTopology } from "@agent-manager/api/topology";
@@ -54,10 +53,12 @@ export default function TopologyPage() {
 
   const handleNodeSelect = (node: TopologyNode) => {
     if (node.type === "agent") {
-      setSelectedAgentId(node.id);
+      const agentId = node.id.replace("agent-", "");
+      setSelectedAgentId(agentId);
       setDrawerOpen(true);
     } else if (node.type === "group") {
-      setSelectedGroupId(node.id);
+      const groupId = node.id.replace("group-", "");
+      setSelectedGroupId(groupId);
       setGroupDrawerOpen(true);
     }
   };
