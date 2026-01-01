@@ -1,11 +1,9 @@
-import React, { useState, useRef } from 'react';
-import Editor, { type OnMount } from "@monaco-editor/react";
+import React, { useState } from 'react';
 import { AlertCircle, Workflow, Loader2, AlertTriangle } from "lucide-react";
-import type { editor } from "monaco-editor";
 
 import { CollectorPipelineView } from "@agent-manager/components/collector-pipeline/CollectorPipelineView";
-import { useTheme } from "@agent-manager/components/ThemeProvider";
 import { Badge } from "@agent-manager/components/ui/badge";
+import { PrismYamlEditor } from "@agent-manager/components/ui/prism-yaml-editor";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -25,50 +23,7 @@ export function ConfigEditorSideBySide({
 }: ConfigEditorSideBySideProps) {
   const [showPipeline] = useState(true);
   const { parseResult, isParsing } = useYamlParser(value, { debounceMs: 300 });
-  const { theme } = useTheme();
-  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-  const { validationResult, isValidating } = useYamlValidation(
-    value,
-    editorRef,
-  );
-
-  const handleEditorDidMount: OnMount = (editor) => {
-    editorRef.current = editor;
-
-    // Configure hover provider to show validation errors
-    const monaco = (
-      window as unknown as { monaco?: typeof import("monaco-editor") }
-    ).monaco;
-    if (monaco) {
-      monaco.languages.registerHoverProvider("yaml", {
-        provideHover: (model, position) => {
-          const markers = monaco.editor.getModelMarkers({
-            resource: model.uri,
-          });
-
-          const hoveredMarkers = markers.filter(
-            (marker) =>
-              marker.startLineNumber <= position.lineNumber &&
-              marker.endLineNumber >= position.lineNumber &&
-              marker.startColumn <= position.column &&
-              marker.endColumn >= position.column,
-          );
-
-          if (hoveredMarkers.length > 0) {
-            const contents = hoveredMarkers.map((marker) => ({
-              value: `**${marker.severity === 8 ? "Error" : "Warning"}**: ${marker.message}`,
-            }));
-
-            return {
-              contents,
-            };
-          }
-
-          return null;
-        },
-      });
-    }
-  };
+  const { validationResult, isValidating } = useYamlValidation(value);
 
   return (
     <div className="flex flex-col h-full">
@@ -169,30 +124,12 @@ export function ConfigEditorSideBySide({
                 </div>
               </div>
 
-              {/* Monaco Editor */}
+              {/* Prism YAML Editor */}
               <div className="flex-1 overflow-hidden">
-                <Editor
-                  height="100%"
-                  defaultLanguage="yaml"
+                <PrismYamlEditor
                   value={value}
-                  onChange={(value) => onChange(value || "")}
-                  onMount={handleEditorDidMount}
-                  theme={theme === "dark" ? "vs-dark" : "vs-light"}
-                  options={{
-                    minimap: { enabled: false },
-                    fontSize: 13,
-                    lineNumbers: "on",
-                    roundedSelection: false,
-                    scrollBeyondLastLine: false,
-                    readOnly: false,
-                    automaticLayout: true,
-                    wordWrap: "on",
-                    scrollbar: {
-                      verticalScrollbarSize: 8,
-                      horizontalScrollbarSize: 8,
-                    },
-                    padding: { top: 16, bottom: 16 },
-                  }}
+                  onChange={onChange}
+                  height="100%"
                 />
               </div>
             </div>
@@ -278,22 +215,10 @@ export function ConfigEditorSideBySide({
         </ResizablePanelGroup>
       ) : (
         <div className="flex-1 overflow-hidden">
-          <Editor
-            height="100%"
-            defaultLanguage="yaml"
+          <PrismYamlEditor
             value={value}
-            onChange={(value) => onChange(value || "")}
-            theme={theme === "dark" ? "vs-dark" : "vs-light"}
-            options={{
-              minimap: { enabled: false },
-              fontSize: 13,
-              lineNumbers: "on",
-              roundedSelection: false,
-              scrollBeyondLastLine: false,
-              readOnly: false,
-              automaticLayout: true,
-              wordWrap: "on",
-            }}
+            onChange={onChange}
+            height="100%"
           />
         </div>
       )}

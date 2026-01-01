@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import Prism from 'prismjs';
+import 'prismjs/components/prism-yaml';
 
 import { useTheme } from "../ThemeProvider";
 
@@ -9,6 +11,34 @@ import {
   formatErrorRate,
   type YamlComponent,
 } from "@agent-manager/utils/yaml-parser";
+
+// Prism dark theme styles (VS Code-like)
+const prismDarkStyles = `
+.token.comment { color: #6a9955; }
+.token.string { color: #ce9178; }
+.token.number { color: #b5cea8; }
+.token.boolean { color: #569cd6; }
+.token.null { color: #569cd6; }
+.token.keyword { color: #569cd6; }
+.token.key { color: #9cdcfe; }
+.token.punctuation { color: #d4d4d4; }
+.token.atrule { color: #c586c0; }
+.token.important { color: #569cd6; }
+`;
+
+// Prism light theme styles
+const prismLightStyles = `
+.token.comment { color: #008000; }
+.token.string { color: #a31515; }
+.token.number { color: #098658; }
+.token.boolean { color: #0000ff; }
+.token.null { color: #0000ff; }
+.token.keyword { color: #0000ff; }
+.token.key { color: #001080; }
+.token.punctuation { color: #000000; }
+.token.atrule { color: #af00db; }
+.token.important { color: #0000ff; }
+`;
 
 interface ConfigYamlEditorWithMetricsProps {
   value: string;
@@ -24,6 +54,9 @@ export function ConfigYamlEditorWithMetrics({
   readonly = false,
 }: ConfigYamlEditorWithMetricsProps) {
   const [parsedComponents, setParsedComponents] = useState<YamlComponent[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const preRef = useRef<HTMLPreElement>(null);
   const { theme } = useTheme();
 
   // Parse YAML to find components whenever value changes
@@ -31,6 +64,18 @@ export function ConfigYamlEditorWithMetrics({
     if (value) {
       const components = parseYamlComponents(value);
       setParsedComponents(components);
+    }
+  }, [value]);
+
+  // Highlight code
+  const highlightedCode = React.useMemo(() => {
+    if (!value) {
+      return '';
+    }
+    try {
+      return Prism.highlight(value, Prism.languages.yaml, 'yaml');
+    } catch {
+      return value;
     }
   }, [value]);
 
@@ -51,8 +96,27 @@ export function ConfigYamlEditorWithMetrics({
     };
   }, [metrics, parsedComponents]);
 
+  // Sync scroll between textarea and pre
+  const handleScroll = useCallback(() => {
+    if (textareaRef.current && preRef.current) {
+      preRef.current.scrollTop = textareaRef.current.scrollTop;
+      preRef.current.scrollLeft = textareaRef.current.scrollLeft;
+    }
+  }, []);
+
+  // Generate line numbers
+  const lineNumbers = React.useMemo(() => {
+    const lines = value.split('\n');
+    return lines.map((_, i) => i + 1);
+  }, [value]);
+
+  const isDark = theme === 'dark';
+
   return (
     <div className="border rounded-lg overflow-hidden">
+      {/* Inject Prism styles */}
+      <style>{isDark ? prismDarkStyles : prismLightStyles}</style>
+
       {/* Metrics Summary Bar */}
       {metricsSummary && (
         <div className="flex items-center gap-4 px-4 py-2 bg-muted/30 border-b text-sm">
@@ -70,27 +134,85 @@ export function ConfigYamlEditorWithMetrics({
         </div>
       )}
 
-      {/* YAML Content Display */}
-      <div className="relative">
-        <textarea
-          value={value}
-          onChange={(e) => !readonly && onChange(e.target.value)}
-          readOnly={readonly}
-          className={`
-            w-full h-[60vh] p-4 font-mono text-sm resize-none
-            focus:outline-none focus:ring-0
-            ${theme === 'dark'
-              ? 'bg-[#1e1e1e] text-[#d4d4d4]'
-              : 'bg-white text-[#1e1e1e]'
-            }
-            ${readonly ? 'cursor-default' : 'cursor-text'}
-          `}
-          spellCheck={false}
-          placeholder="No configuration available"
-        />
+      {/* Code Editor with Syntax Highlighting */}
+      <div
+        className="relative flex"
+        style={{
+          backgroundColor: isDark ? '#1e1e1e' : '#ffffff',
+          height: '60vh',
+        }}
+      >
+        {/* Line Numbers */}
+        <div
+          className="flex-shrink-0 select-none text-right pr-3 pt-4 pb-4 overflow-hidden"
+          style={{
+            color: isDark ? '#858585' : '#999999',
+            backgroundColor: isDark ? '#1e1e1e' : '#f5f5f5',
+            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+            fontSize: '13px',
+            lineHeight: '1.5',
+            width: '50px',
+            borderRight: `1px solid ${isDark ? '#333' : '#e0e0e0'}`,
+          }}
+        >
+          {lineNumbers.map((num) => (
+            <div key={num} style={{ height: '19.5px' }}>{num}</div>
+          ))}
+        </div>
+
+        {/* Editor Container */}
+        <div className="relative flex-1 overflow-hidden">
+          {/* Highlighted Code Display (background layer) */}
+          <pre
+            ref={preRef}
+            className="absolute inset-0 m-0 p-4 overflow-auto pointer-events-none"
+            style={{
+              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+              fontSize: '13px',
+              lineHeight: '1.5',
+              color: isDark ? '#d4d4d4' : '#1e1e1e',
+              whiteSpace: 'pre',
+              wordWrap: 'normal',
+            }}
+            dangerouslySetInnerHTML={{ __html: highlightedCode || '&nbsp;' }}
+          />
+
+          {/* Transparent Textarea (foreground layer for editing) */}
+          <textarea
+            ref={textareaRef}
+            value={value}
+            onChange={(e) => !readonly && onChange(e.target.value)}
+            onScroll={handleScroll}
+            onFocus={() => setIsEditing(true)}
+            onBlur={() => setIsEditing(false)}
+            readOnly={readonly}
+            className="absolute inset-0 m-0 p-4 resize-none border-0 outline-none"
+            style={{
+              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+              fontSize: '13px',
+              lineHeight: '1.5',
+              color: 'transparent',
+              caretColor: isDark ? '#d4d4d4' : '#1e1e1e',
+              backgroundColor: 'transparent',
+              whiteSpace: 'pre',
+              wordWrap: 'normal',
+              overflow: 'auto',
+            }}
+            spellCheck={false}
+            placeholder="No configuration available"
+          />
+        </div>
+
+        {/* Read-only Badge */}
         {readonly && (
-          <div className="absolute top-2 right-2">
-            <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+          <div className="absolute top-2 right-2 z-10">
+            <span
+              className="text-xs px-2 py-1 rounded"
+              style={{
+                backgroundColor: isDark ? '#333' : '#e0e0e0',
+                color: isDark ? '#999' : '#666',
+              }}
+            >
               Read-only
             </span>
           </div>
