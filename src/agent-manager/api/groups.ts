@@ -9,6 +9,9 @@ export interface Group {
   labels: Record<string, string>;
   agent_count: number;
   updated_at: string;
+  config_name?: string;
+  config_id?: string;
+  created_at: string;
   otlp_http_endpoint?: string;
   otlp_grpc_endpoint?: string;
 }

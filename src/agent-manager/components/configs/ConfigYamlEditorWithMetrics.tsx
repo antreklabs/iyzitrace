@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from 'react';
 import Editor, { type OnMount } from "@monaco-editor/react";
 import type * as Monaco from "monaco-editor";
-import { useEffect, useRef, useState } from 'react';
 
 import { useTheme } from "../ThemeProvider";
 
@@ -27,7 +26,8 @@ export function ConfigYamlEditorWithMetrics({
   readonly = false,
 }: ConfigYamlEditorWithMetricsProps) {
   const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
-  const monacoRef = useRef<typeof Monaco | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const monacoRef = useRef<any>(null);
   const decorationsRef =
     useRef<Monaco.editor.IEditorDecorationsCollection | null>(null);
   const [parsedComponents, setParsedComponents] = useState<YamlComponent[]>([]);
@@ -147,9 +147,15 @@ function mapComponentType(
   apiType: string,
 ): "receiver" | "processor" | "exporter" {
   // API returns full type like "receiver", "processor", "exporter"
-  if (apiType === "receiver") return "receiver";
-  if (apiType === "processor") return "processor";
-  if (apiType === "exporter") return "exporter";
+  if (apiType === "receiver") {
+    return "receiver";
+  }
+  if (apiType === "processor") {
+    return "processor";
+  }
+  if (apiType === "exporter") {
+    return "exporter";
+  }
   return "receiver"; // fallback
 }
 

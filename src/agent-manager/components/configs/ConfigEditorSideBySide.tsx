@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useState, useRef } from 'react';
 import Editor, { type OnMount } from "@monaco-editor/react";
 import { AlertCircle, Workflow, Loader2, AlertTriangle } from "lucide-react";
 import type { editor } from "monaco-editor";
-import { useState, useRef } from 'react';
 
 import { CollectorPipelineView } from "@agent-manager/components/collector-pipeline/CollectorPipelineView";
 import { useTheme } from "@agent-manager/components/ThemeProvider";
@@ -75,7 +74,7 @@ export function ConfigEditorSideBySide({
     <div className="flex flex-col h-full">
       {/* Main Editor Area */}
       {showPipeline ? (
-        <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
+        <ResizablePanelGroup orientation="horizontal" className="flex-1 min-h-0">
           {/* Left Panel - YAML Editor */}
           <ResizablePanel defaultSize={50} minSize={30}>
             <div className="h-full flex flex-col border-r">
@@ -127,20 +126,20 @@ export function ConfigEditorSideBySide({
                         {validationResult.errors.filter(
                           (e) => e.severity === "error",
                         ).length > 0 && (
-                          <>
-                            {
-                              validationResult.errors.filter(
+                            <>
+                              {
+                                validationResult.errors.filter(
+                                  (e) => e.severity === "error",
+                                ).length
+                              }{" "}
+                              error
+                              {validationResult.errors.filter(
                                 (e) => e.severity === "error",
-                              ).length
-                            }{" "}
-                            error
-                            {validationResult.errors.filter(
-                              (e) => e.severity === "error",
-                            ).length !== 1
-                              ? "s"
-                              : ""}
-                          </>
-                        )}
+                              ).length !== 1
+                                ? "s"
+                                : ""}
+                            </>
+                          )}
                         {validationResult.errors.filter(
                           (e) => e.severity === "error",
                         ).length > 0 &&
@@ -151,20 +150,20 @@ export function ConfigEditorSideBySide({
                         {validationResult.errors.filter(
                           (e) => e.severity === "warning",
                         ).length > 0 && (
-                          <>
-                            {
-                              validationResult.errors.filter(
+                            <>
+                              {
+                                validationResult.errors.filter(
+                                  (e) => e.severity === "warning",
+                                ).length
+                              }{" "}
+                              warning
+                              {validationResult.errors.filter(
                                 (e) => e.severity === "warning",
-                              ).length
-                            }{" "}
-                            warning
-                            {validationResult.errors.filter(
-                              (e) => e.severity === "warning",
-                            ).length !== 1
-                              ? "s"
-                              : ""}
-                          </>
-                        )}
+                              ).length !== 1
+                                ? "s"
+                                : ""}
+                            </>
+                          )}
                       </Badge>
                     )}
                 </div>
@@ -240,14 +239,14 @@ export function ConfigEditorSideBySide({
                       validationResult.errors.some(
                         (e) => e.severity === "error",
                       ))) && (
-                    <Badge
-                      variant="outline"
-                      className="text-xs bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800"
-                    >
-                      <AlertCircle className="h-3 w-3 mr-1" />
-                      Invalid
-                    </Badge>
-                  )}
+                      <Badge
+                        variant="outline"
+                        className="text-xs bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800"
+                      >
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        Invalid
+                      </Badge>
+                    )}
                 </div>
               </div>
 
