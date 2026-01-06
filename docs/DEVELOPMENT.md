@@ -309,13 +309,19 @@ git push origin --delete feature/service-map
 
 
 ```bash
-   docker compose -f docker-compose.yaml down
-   docker compose -f configs/observability-platform/docker-compose.yml down
-   docker compose -f configs/opentelemetry-demo/docker-compose.yml down
+   
+   # DOWN - Tüm projeler
+   docker compose -f /Users/gokhansipahi/projects/iyzitrace/iyzitrace-platform/iyzitrace/docker-compose.yaml down --volumes --remove-orphans && \
+   docker compose -f /Users/gokhansipahi/projects/iyzitrace/iyzitrace-platform/iyzitrace-observability-platform/docker-compose.yml down --volumes --remove-orphans && \
+   docker compose -f /Users/gokhansipahi/projects/iyzitrace/iyzitrace-platform/iyzitrace-opentelemetry-demo/docker-compose.yml down --volumes --remove-orphans && \
 
-   docker compose -f docker-compose.yaml up -d
-   docker compose -f configs/observability-platform/docker-compose.yml up -d
-   docker compose -f configs/opentelemetry-demo/docker-compose.yml up -d
+   # BUILD - Tüm projeler
+   docker compose -f /Users/gokhansipahi/projects/iyzitrace/iyzitrace-platform/iyzitrace-observability-platform/docker-compose.yml build -- lawrence && \
+   
+   # UP - Tüm projeler
+   docker compose -f /Users/gokhansipahi/projects/iyzitrace/iyzitrace-platform/iyzitrace/docker-compose.yaml up --force-recreate --detach && \
+   docker compose -f /Users/gokhansipahi/projects/iyzitrace/iyzitrace-platform/iyzitrace-observability-platform/docker-compose.yml up --force-recreate --detach && \
+   docker compose -f /Users/gokhansipahi/projects/iyzitrace/iyzitrace-platform/iyzitrace-opentelemetry-demo/docker-compose.yml up --force-recreate --detach
 
    pnpm run dev
 ```
