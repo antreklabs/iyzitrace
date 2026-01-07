@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
 import { FileText, X } from "lucide-react";
-import { useState } from 'react';
 import useSWR from "swr";
 
 import { queryLogs, type LogData } from "@agent-manager/api/telemetry";
@@ -56,17 +55,28 @@ export function TelemetryLogsView({
   const [logsData, setLogsData] = useState<LogData[]>([]);
   const [severityFilter, setSeverityFilter] = useState<string>("all");
   const [searchFilter, setSearchFilter] = useState<string>("");
+  const [timeRange, setTimeRange] = useState<"1h" | "6h" | "24h">("1h");
 
   const entityType = agentId ? "agent" : "group";
   const entityId = agentId || groupId;
   const displayTitle =
     title || `${entityType === "agent" ? "Agent" : "Group"} Logs`;
 
+  // Convert time range to milliseconds
+  const getTimeRangeMs = () => {
+    switch (timeRange) {
+      case "1h": return 60 * 60 * 1000;
+      case "6h": return 6 * 60 * 60 * 1000;
+      case "24h": return 24 * 60 * 60 * 1000;
+      default: return 60 * 60 * 1000;
+    }
+  };
+
   const { isLoading } = useSWR(
-    `${entityType}-logs-${entityId}-${severityFilter}-${searchFilter}`,
+    `${entityType}-logs-${entityId}-${severityFilter}-${searchFilter}-${timeRange}`,
     async () => {
       const endTime = new Date();
-      const startTime = new Date(endTime.getTime() - 60 * 60 * 1000); // Last hour
+      const startTime = new Date(endTime.getTime() - getTimeRangeMs());
 
       const result = await queryLogs({
         ...(agentId && { agent_id: agentId }),
@@ -75,7 +85,7 @@ export function TelemetryLogsView({
         ...(searchFilter && { search: searchFilter }),
         start_time: startTime.toISOString(),
         end_time: endTime.toISOString(),
-        limit: 100,
+        limit: 200,
       });
       setLogsData(result.logs || []);
       return result;
@@ -87,8 +97,9 @@ export function TelemetryLogsView({
   );
 
   const getSeverityColor = (severity?: string) => {
-    if (!severity)
+    if (!severity) {
       return "text-gray-600 bg-gray-50 dark:text-gray-400 dark:bg-gray-800";
+    }
     switch (severity.toUpperCase()) {
       case "ERROR":
       case "FATAL":
@@ -197,9 +208,24 @@ export function TelemetryLogsView({
                 Clear
               </Button>
             )}
+            {/* Time range toggle */}
+            <div className="flex rounded-lg border bg-muted p-0.5 ml-auto">
+              {(["1h", "6h", "24h"] as const).map((range) => (
+                <button
+                  key={range}
+                  onClick={() => setTimeRange(range)}
+                  className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${timeRange === range
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                    }`}
+                >
+                  {range}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-        <ScrollArea className="h-96">
+        <ScrollArea className="h-[calc(100vh-400px)] min-h-[300px]">
           {logsData.map((log, idx) => {
             const logDate = new Date(log.timestamp);
             const timeString = logDate.toLocaleTimeString("en-US", {
@@ -213,9 +239,33 @@ export function TelemetryLogsView({
               day: "numeric",
             });
 
+            // Parse log body to extract meaningful message
+            let logMessage = log.body;
+            let parsedBody: Record<string, unknown> | null = null;
+
+            try {
+              parsedBody = JSON.parse(log.body);
+              // Try to get the actual log message from common fields
+              if (typeof parsedBody === "object" && parsedBody !== null) {
+                logMessage =
+                  (parsedBody.body as string) ||
+                  (parsedBody.message as string) ||
+                  (parsedBody.msg as string) ||
+                  log.body;
+              }
+            } catch {
+              // Not JSON, use as-is
+            }
+
+            // Get source/component info
+            const source = parsedBody?.["instrumentation_scope.name"] as string ||
+              parsedBody?.scope_name as string ||
+              parsedBody?.source as string ||
+              "";
+
             return (
-              <div key={idx} className="py-1 border-b last:border-0">
-                <div className="flex items-start gap-1.5">
+              <div key={idx} className="py-2 border-b last:border-0">
+                <div className="flex items-start gap-2">
                   <Badge
                     className={`text-xs shrink-0 py-0 px-1.5 ${getSeverityColor(log.severity_text)}`}
                   >
@@ -224,27 +274,20 @@ export function TelemetryLogsView({
                   <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0 font-mono">
                     {dateString} {timeString}
                   </span>
-                  <div className="flex-1 text-sm min-w-0">
-                    <div className="font-mono text-xs whitespace-pre-wrap break-all">
-                      {log.body}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm">
+                      {logMessage}
                     </div>
-                    {showAgentId && log.agent_id && (
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        Agent: {log.agent_id}
+                    {source && (
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        <span className="opacity-70">Source:</span> {source}
                       </div>
                     )}
-                    {log.log_attributes &&
-                      Object.keys(log.log_attributes).length > 0 && (
-                        <div className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 font-mono">
-                          {Object.entries(log.log_attributes).map(
-                            ([key, value]) => (
-                              <span key={key} className="mr-2">
-                                {key}={String(value)}
-                              </span>
-                            ),
-                          )}
-                        </div>
-                      )}
+                    {showAgentId && log.agent_id && (
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        <span className="opacity-70">Agent:</span> {log.agent_id}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

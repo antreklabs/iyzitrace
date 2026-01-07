@@ -63,13 +63,13 @@ const getStatusConfig = (s?: string) => {
   };
 };
 
-export const InfrastructureDetailPanel: React.FC<InfrastructureDetailPanelProps> = ({ 
-  infrastructure, 
+export const InfrastructureDetailPanel: React.FC<InfrastructureDetailPanelProps> = ({
+  infrastructure,
   onClose,
-  onServicesClick 
+  onServicesClick
 }) => {
   const [hoveredSection, setHoveredSection] = useState<string | null>(null);
-  
+
   if (!infrastructure) return null;
 
   const statusConfig = getStatusConfig(infrastructure.status?.value);
@@ -208,8 +208,8 @@ export const InfrastructureDetailPanel: React.FC<InfrastructureDetailPanelProps>
     );
     padding: 20px;
     border-radius: 16px;
-    border: 1px solid ${hoveredSection === 'info' || hoveredSection === 'resources' 
-      ? `${statusConfig.color}60` 
+    border: 1px solid ${hoveredSection === 'info' || hoveredSection === 'resources'
+      ? `${statusConfig.color}60`
       : 'rgba(148, 163, 184, 0.2)'};
     transition: all 0.3s ease;
     position: relative;
@@ -436,7 +436,7 @@ export const InfrastructureDetailPanel: React.FC<InfrastructureDetailPanelProps>
       </div>
 
       <div className={gridStyle}>
-        <div 
+        <div
           className={sectionStyle}
           onMouseEnter={() => setHoveredSection('info')}
           onMouseLeave={() => setHoveredSection(null)}
@@ -459,7 +459,7 @@ export const InfrastructureDetailPanel: React.FC<InfrastructureDetailPanelProps>
           </div>
         </div>
 
-        <div 
+        <div
           className={sectionStyle}
           onMouseEnter={() => setHoveredSection('resources')}
           onMouseLeave={() => setHoveredSection(null)}
@@ -482,7 +482,7 @@ export const InfrastructureDetailPanel: React.FC<InfrastructureDetailPanelProps>
           <div className={dataRowStyle}>
             <strong>Usage</strong>
             <span>
-              {(infrastructure.memory?.percentage ? infrastructure.memory.percentage * 100 : 0).toFixed(1)}%
+              {(infrastructure.memory?.percentage ? infrastructure?.memory?.percentage * 100 : 0).toFixed(1)}%
             </span>
           </div>
         </div>
@@ -505,8 +505,8 @@ export const InfrastructureDetailPanel: React.FC<InfrastructureDetailPanelProps>
           </h4>
           <div className={listContainerStyle}>
             {infrastructure.applications.map((app, idx) => (
-              <div 
-                key={idx} 
+              <div
+                key={idx}
                 className={listItemStyle(idx === infrastructure.applications!.length - 1)}
               >
                 <div className={itemNameStyle}>
