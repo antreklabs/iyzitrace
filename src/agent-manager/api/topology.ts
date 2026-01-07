@@ -72,8 +72,10 @@ export const getTopology = (): Promise<TopologyResponse> => {
 // Get agent topology
 export const getAgentTopology = (
   agentId: string,
+  timeRange?: "1h" | "6h" | "24h",
 ): Promise<AgentTopologyResponse> => {
-  return apiGet<AgentTopologyResponse>(`/topology/agent/${agentId}`);
+  const params = timeRange ? `?time_range=${timeRange}` : "";
+  return apiGet<AgentTopologyResponse>(`/topology/agent/${agentId}${params}`);
 };
 
 // Get group topology

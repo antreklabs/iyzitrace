@@ -18,9 +18,9 @@ interface InfrastructureCardProps {
   isSelected: boolean;
 }
 
-const InfrastructureCard: React.FC<InfrastructureCardProps> = ({ 
-  infrastructure, 
-  onClick, 
+const InfrastructureCard: React.FC<InfrastructureCardProps> = ({
+  infrastructure,
+  onClick,
   onApplicationsClick,
   onDrop,
   onDragOver,
@@ -28,7 +28,7 @@ const InfrastructureCard: React.FC<InfrastructureCardProps> = ({
   onDragLeave,
   isDropTarget,
   isDropping,
-  isSelected 
+  isSelected
 }) => {
   const getStatusColor = (status?: string) => {
     switch (status) {
@@ -54,29 +54,29 @@ const InfrastructureCard: React.FC<InfrastructureCardProps> = ({
   const cpuPercentage = infrastructure.cpu?.percentage || 0;
   const memoryPercentage = infrastructure.memory?.percentage || 0;
   const status = infrastructure.status?.value || 'unknown';
-  
+
   const getGradientByOS = (type?: string, osVersion?: string) => {
     const osType = (type || osVersion || '').toLowerCase();
-    
+
     if (osType.includes('windows') || osType.includes('win')) {
       return 'linear-gradient(135deg, #1e293b 0%, #334155 100%)';
     }
-    
+
     if (osType.includes('linux') || osType.includes('ubuntu') || osType.includes('debian') || osType.includes('centos')) {
       return 'linear-gradient(135deg, #422006 0%, #713f12 100%)';
     }
-    
+
     if (osType.includes('mac') || osType.includes('darwin') || osType.includes('osx')) {
       return 'linear-gradient(135deg, #3b0764 0%, #581c87 100%)';
     }
-    
+
     if (osType.includes('docker') || osType.includes('container')) {
       return 'linear-gradient(135deg, #164e63 0%, #0e7490 100%)';
     }
-    
+
     return 'linear-gradient(135deg, #134e4a 0%, #115e59 100%)';
   };
-  
+
   const gradient = getGradientByOS(infrastructure.type, infrastructure.osVersion);
 
   const showDropEffect = isDropTarget || isDropping;
@@ -95,84 +95,84 @@ const InfrastructureCard: React.FC<InfrastructureCardProps> = ({
           animation: 'pulse 1.5s ease-in-out infinite',
         }} />
       )}
-    <Card
-      hoverable
-      onClick={() => onClick(infrastructure)}
+      <Card
+        hoverable
+        onClick={() => onClick(infrastructure)}
         onDrop={(e) => onDrop && onDrop(infrastructure, e)}
         onDragOver={(e) => onDragOver && onDragOver(e)}
         onDragEnter={(e) => onDragEnter && onDragEnter(infrastructure, e)}
         onDragLeave={(e) => onDragLeave && onDragLeave(infrastructure, e)}
-      style={{
-        borderRadius: '12px',
-        background: gradient,
-        color: 'white',
-        border: isSelected ? '2px solid #1890ff' : 'none',
-          boxShadow: isSelected 
-            ? '0 4px 16px rgba(24, 144, 255, 0.4)' 
-            : showDropEffect 
+        style={{
+          borderRadius: '12px',
+          background: gradient,
+          color: 'white',
+          border: isSelected ? '2px solid #1890ff' : 'none',
+          boxShadow: isSelected
+            ? '0 4px 16px rgba(24, 144, 255, 0.4)'
+            : showDropEffect
               ? '0 8px 24px rgba(82, 196, 26, 0.6), 0 0 0 4px rgba(82, 196, 26, 0.2)'
               : '0 4px 12px rgba(0,0,0,0.1)',
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
           width: '100%',
           transform: showDropEffect ? 'scale(1.05)' : 'scale(1)',
-      }}
-      bodyStyle={{ padding: '20px' }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-        <div>
-          <Title level={4} style={{ color: 'white', margin: 0 }}>{infrastructure.name}</Title>
-          <Text style={{ color: 'rgba(255,255,255,0.8)' }}>{infrastructure.type || infrastructure.osVersion}</Text>
-        </div>
-        <Badge 
-          color={getStatusColor(status)} 
-          style={{ width: '12px', height: '12px' }}
-        />
-      </div>
-      {infrastructure.cpu && (
-        <div style={{ marginBottom: '12px' }}>
-          <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: '14px' }}>CPU Usage</Text>
-          <Progress
-            percent={cpuPercentage}
-            strokeColor={getProgressColor(cpuPercentage)}
-            trailColor="rgba(255,255,255,0.3)"
-            showInfo={false}
-            style={{ margin: '4px', width: '50%' }}
-          />
-          <Text style={{ color: 'white', fontSize: '12px' }}>{cpuPercentage.toFixed(1)}%</Text>
-        </div>
-      )}
-      {infrastructure.memory && (
-        <div style={{ marginBottom: '16px' }}>
-          <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: '14px' }}>Memory</Text>
-          <Progress
-            percent={memoryPercentage}
-            strokeColor={getProgressColor(memoryPercentage)}
-            trailColor="rgba(255,255,255,0.3)"
-            showInfo={false}
-            style={{ margin: '4px', width: '50%' }}
-          />
-          <Text style={{ color: 'white', fontSize: '12px' }}>
-            {infrastructure.memory.usage.toFixed(1)}GB / {infrastructure.memory.capacity.toFixed(1)}GB
-          </Text>
-        </div>
-      )}
-      <Button
-        type="primary"
-        icon={<AppstoreOutlined />}
-        onClick={(e) => onApplicationsClick(infrastructure, e)}
-        style={{
-          width: '100%',
-          background: 'rgba(255,255,255,0.2)',
-          border: '1px solid rgba(255,255,255,0.3)',
-          color: 'white',
-          fontWeight: 600,
         }}
+        bodyStyle={{ padding: '20px' }}
       >
-        Applications
-      </Button>
-    </Card>
-    <style>{`
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+          <div>
+            <Title level={4} style={{ color: 'white', margin: 0 }}>{infrastructure.name}</Title>
+            <Text style={{ color: 'rgba(255,255,255,0.8)' }}>{infrastructure.type || infrastructure.osVersion}</Text>
+          </div>
+          <Badge
+            color={getStatusColor(status)}
+            style={{ width: '12px', height: '12px' }}
+          />
+        </div>
+        {infrastructure.cpu && (
+          <div style={{ marginBottom: '12px' }}>
+            <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: '14px' }}>CPU Usage</Text>
+            <Progress
+              percent={cpuPercentage}
+              strokeColor={getProgressColor(cpuPercentage)}
+              trailColor="rgba(255,255,255,0.3)"
+              showInfo={false}
+              style={{ margin: '4px', width: '50%' }}
+            />
+            <Text style={{ color: 'white', fontSize: '12px' }}>{cpuPercentage?.toFixed(1)}%</Text>
+          </div>
+        )}
+        {infrastructure.memory && (
+          <div style={{ marginBottom: '16px' }}>
+            <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: '14px' }}>Memory</Text>
+            <Progress
+              percent={memoryPercentage}
+              strokeColor={getProgressColor(memoryPercentage)}
+              trailColor="rgba(255,255,255,0.3)"
+              showInfo={false}
+              style={{ margin: '4px', width: '50%' }}
+            />
+            <Text style={{ color: 'white', fontSize: '12px' }}>
+              {infrastructure?.memory?.usage?.toFixed(1)}GB / {infrastructure?.memory?.capacity?.toFixed(1)}GB
+            </Text>
+          </div>
+        )}
+        <Button
+          type="primary"
+          icon={<AppstoreOutlined />}
+          onClick={(e) => onApplicationsClick(infrastructure, e)}
+          style={{
+            width: '100%',
+            background: 'rgba(255,255,255,0.2)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            color: 'white',
+            fontWeight: 600,
+          }}
+        >
+          Applications
+        </Button>
+      </Card>
+      <style>{`
       @keyframes pulse {
         0%, 100% {
           opacity: 1;

@@ -3,6 +3,7 @@ import {
   Activity,
   Database,
   Upload,
+  ChevronDown,
 } from "lucide-react";
 import useSWR from "swr";
 
@@ -16,7 +17,7 @@ import {
 } from "@agent-manager/components/ui/card";
 import { LoadingSpinner } from "@agent-manager/components/ui/loading-spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@agent-manager/components/ui/tabs";
-import { MetricsRateChart, SERIES_COLORS, STATUS_COLORS, METRIC_DESCRIPTIONS } from "./MetricsRateChart";
+import { MetricsRateChart, METRIC_DESCRIPTIONS } from "./MetricsRateChart";
 
 interface AgentMetricsProps {
   agentId: string;
@@ -45,8 +46,31 @@ interface GroupedChartData {
   series: SeriesConfig[];
 }
 
+// Grafana-style color palette - no duplicates when iterating
+const CHART_COLORS = [
+  "#73BF69", // Green
+  "#5794F2", // Blue
+  "#F2CC0C", // Yellow
+  "#B877D9", // Purple
+  "#36A2EB", // Light Blue
+  "#FF9830", // Orange
+  "#4ECDC4", // Teal
+  "#95E1D3", // Mint
+  "#FF6B6B", // Coral
+  "#A0D995", // Light Green
+];
+
+// Special colors for error states
+const STATUS_COLORS = {
+  Failed: "#FF5C5C",
+  Refused: "#FF9830",
+};
+
 export function AgentMetrics({ agentId }: AgentMetricsProps) {
   const [timeRange, setTimeRange] = useState<"1h" | "6h" | "24h">("1h");
+  const [selectedReceiver, setSelectedReceiver] = useState<string | null>(null);
+  const [selectedProcessor, setSelectedProcessor] = useState<string | null>(null);
+  const [selectedExporter, setSelectedExporter] = useState<string | null>(null);
 
   const { data: metricsData, isLoading } = useSWR(
     `agent-metrics-${agentId}-${timeRange}`,
@@ -127,6 +151,19 @@ export function AgentMetrics({ agentId }: AgentMetricsProps) {
     return { receivers, processors, exporters };
   }, [metricsData]);
 
+  // Auto-select "All" when data loads
+  useMemo(() => {
+    if (groupedMetrics.receivers.length > 0 && selectedReceiver === null) {
+      setSelectedReceiver("__all__");
+    }
+    if (groupedMetrics.processors.length > 0 && selectedProcessor === null) {
+      setSelectedProcessor("__all__");
+    }
+    if (groupedMetrics.exporters.length > 0 && selectedExporter === null) {
+      setSelectedExporter("__all__");
+    }
+  }, [groupedMetrics, selectedReceiver, selectedProcessor, selectedExporter]);
+
   // Prepare grouped rate chart data with multi-series support
   const rateChartData = useMemo(() => {
     const emptyResult = {
@@ -152,18 +189,29 @@ export function AgentMetrics({ agentId }: AgentMetricsProps) {
     const prepareGroupedTimeSeriesData = (
       metrics: MetricData[],
       metricNameFilter: string,
-      componentAttrName: string
+      componentAttrName: string,
+      selectedComponent: string | null
     ): GroupedChartData => {
-      const filtered = metrics.filter((m) =>
+      // Filter by component if selected (skip if "__all__")
+      let filtered = metrics.filter((m) =>
         m.metric_name.includes(metricNameFilter)
       );
+
+      if (selectedComponent && selectedComponent !== "__all__") {
+        filtered = filtered.filter((m) => {
+          const compName = (m.metric_attributes?.[componentAttrName] as string) || "";
+          return compName === selectedComponent;
+        });
+      }
 
       if (filtered.length === 0) {
         return { data: [], series: [] };
       }
 
-      const seriesMap = new Map<string, { name: string; color: string }>();
+      // Build unique series from data
+      const seriesMap = new Map<string, { name: string; color: string; totalValue: number }>();
       let colorIndex = 0;
+
 
       filtered.forEach((m) => {
         const componentName = (m.metric_attributes?.[componentAttrName] as string) || "unknown";
@@ -177,13 +225,15 @@ export function AgentMetrics({ agentId }: AgentMetricsProps) {
           } else if (status === "Refused") {
             color = STATUS_COLORS.Refused;
           } else {
-            color = SERIES_COLORS[colorIndex % SERIES_COLORS.length];
+            color = CHART_COLORS[colorIndex % CHART_COLORS.length];
             colorIndex++;
           }
-          seriesMap.set(seriesKey, { name: seriesKey, color });
+          seriesMap.set(seriesKey, { name: seriesKey, color, totalValue: 0 });
         }
+        seriesMap.get(seriesKey)!.totalValue += m.value;
       });
 
+      // Build time series data
       const timeMap = new Map<number, TimeSeriesPoint>();
 
       filtered.forEach((m) => {
@@ -205,11 +255,15 @@ export function AgentMetrics({ agentId }: AgentMetricsProps) {
       });
 
       const data = Array.from(timeMap.values()).sort((a, b) => a.timestamp - b.timestamp);
-      const series: SeriesConfig[] = Array.from(seriesMap.entries()).map(([key, val]) => ({
-        dataKey: key,
-        name: val.name,
-        color: val.color,
-      }));
+
+      // Filter out series with 0 total value
+      const series: SeriesConfig[] = Array.from(seriesMap.entries())
+        .filter(([, val]) => val.totalValue > 0)
+        .map(([key, val]) => ({
+          dataKey: key,
+          name: val.name,
+          color: val.color,
+        }));
 
       return { data, series };
     };
@@ -220,22 +274,33 @@ export function AgentMetrics({ agentId }: AgentMetricsProps) {
 
     return {
       receivers: {
-        logs: prepareGroupedTimeSeriesData(receiverMetrics, "log_records", "receiver"),
-        metrics: prepareGroupedTimeSeriesData(receiverMetrics, "metric_points", "receiver"),
-        spans: prepareGroupedTimeSeriesData(receiverMetrics, "spans", "receiver"),
+        logs: prepareGroupedTimeSeriesData(receiverMetrics, "log_records", "receiver", selectedReceiver),
+        metrics: prepareGroupedTimeSeriesData(receiverMetrics, "metric_points", "receiver", selectedReceiver),
+        spans: prepareGroupedTimeSeriesData(receiverMetrics, "spans", "receiver", selectedReceiver),
       },
       processors: {
-        logs: prepareGroupedTimeSeriesData(processorMetrics, "log_records", "processor"),
-        metrics: prepareGroupedTimeSeriesData(processorMetrics, "metric_points", "processor"),
-        spans: prepareGroupedTimeSeriesData(processorMetrics, "spans", "processor"),
+        logs: prepareGroupedTimeSeriesData(processorMetrics, "log_records", "processor", selectedProcessor),
+        metrics: prepareGroupedTimeSeriesData(processorMetrics, "metric_points", "processor", selectedProcessor),
+        spans: prepareGroupedTimeSeriesData(processorMetrics, "spans", "processor", selectedProcessor),
       },
       exporters: {
-        logs: prepareGroupedTimeSeriesData(exporterMetrics, "log_records", "exporter"),
-        metrics: prepareGroupedTimeSeriesData(exporterMetrics, "metric_points", "exporter"),
-        spans: prepareGroupedTimeSeriesData(exporterMetrics, "spans", "exporter"),
+        logs: prepareGroupedTimeSeriesData(exporterMetrics, "log_records", "exporter", selectedExporter),
+        metrics: prepareGroupedTimeSeriesData(exporterMetrics, "metric_points", "exporter", selectedExporter),
+        spans: prepareGroupedTimeSeriesData(exporterMetrics, "spans", "exporter", selectedExporter),
       },
     };
-  }, [metricsData]);
+  }, [metricsData, selectedReceiver, selectedProcessor, selectedExporter]);
+
+  // Get selected component data
+  const getSelectedComponent = (type: "receiver" | "processor" | "exporter"): ComponentMetrics | null => {
+    const components = type === "receiver" ? groupedMetrics.receivers :
+      type === "processor" ? groupedMetrics.processors :
+        groupedMetrics.exporters;
+    const selected = type === "receiver" ? selectedReceiver :
+      type === "processor" ? selectedProcessor :
+        selectedExporter;
+    return components.find(c => c.name === selected) || null;
+  };
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -292,13 +357,19 @@ export function AgentMetrics({ agentId }: AgentMetricsProps) {
         <TabsContent value="receivers" className="space-y-4">
           {groupedMetrics.receivers.length > 0 ? (
             <>
-              {groupedMetrics.receivers.map((component) => (
+              <ComponentSelector
+                components={groupedMetrics.receivers}
+                selected={selectedReceiver}
+                onSelect={setSelectedReceiver}
+                icon={<Database className="h-4 w-4" />}
+              />
+
+              {getSelectedComponent("receiver") && (
                 <ComponentSummaryCard
-                  key={component.name}
-                  component={component}
+                  component={getSelectedComponent("receiver")!}
                   icon={<Database className="h-4 w-4" />}
                 />
-              ))}
+              )}
 
               <div className="space-y-4">
                 <MetricsRateChart
@@ -334,13 +405,19 @@ export function AgentMetrics({ agentId }: AgentMetricsProps) {
         <TabsContent value="processors" className="space-y-4">
           {groupedMetrics.processors.length > 0 ? (
             <>
-              {groupedMetrics.processors.map((component) => (
+              <ComponentSelector
+                components={groupedMetrics.processors}
+                selected={selectedProcessor}
+                onSelect={setSelectedProcessor}
+                icon={<Activity className="h-4 w-4" />}
+              />
+
+              {getSelectedComponent("processor") && (
                 <ComponentSummaryCard
-                  key={component.name}
-                  component={component}
+                  component={getSelectedComponent("processor")!}
                   icon={<Activity className="h-4 w-4" />}
                 />
-              ))}
+              )}
 
               <div className="space-y-4">
                 <MetricsRateChart
@@ -376,13 +453,19 @@ export function AgentMetrics({ agentId }: AgentMetricsProps) {
         <TabsContent value="exporters" className="space-y-4">
           {groupedMetrics.exporters.length > 0 ? (
             <>
-              {groupedMetrics.exporters.map((component) => (
+              <ComponentSelector
+                components={groupedMetrics.exporters}
+                selected={selectedExporter}
+                onSelect={setSelectedExporter}
+                icon={<Upload className="h-4 w-4" />}
+              />
+
+              {getSelectedComponent("exporter") && (
                 <ComponentSummaryCard
-                  key={component.name}
-                  component={component}
+                  component={getSelectedComponent("exporter")!}
                   icon={<Upload className="h-4 w-4" />}
                 />
-              ))}
+              )}
 
               <div className="space-y-4">
                 <MetricsRateChart
@@ -418,6 +501,71 @@ export function AgentMetrics({ agentId }: AgentMetricsProps) {
   );
 }
 
+// Component Selector Dropdown
+interface ComponentSelectorProps {
+  components: ComponentMetrics[];
+  selected: string | null;
+  onSelect: (name: string) => void;
+  icon: React.ReactNode;
+}
+
+function ComponentSelector({ components, selected, onSelect, icon }: ComponentSelectorProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-4 py-3 bg-card border rounded-lg hover:bg-accent/50 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          {icon}
+          <span className="font-medium">{selected === "__all__" ? "All" : (selected || "Select component...")}</span>
+        </div>
+        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-10 w-full mt-1 bg-card border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+          {/* All option */}
+          <button
+            onClick={() => {
+              onSelect("__all__");
+              setIsOpen(false);
+            }}
+            className={`w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-accent/50 transition-colors ${selected === "__all__" ? "bg-accent" : ""
+              }`}
+          >
+            {icon}
+            <span className="font-medium">All</span>
+            <span className="ml-auto text-xs text-muted-foreground">
+              {components.reduce((sum, c) => sum + c.metrics.length, 0)} pts
+            </span>
+          </button>
+          {/* Individual components */}
+          {components.map((comp) => (
+            <button
+              key={comp.name}
+              onClick={() => {
+                onSelect(comp.name);
+                setIsOpen(false);
+              }}
+              className={`w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-accent/50 transition-colors ${selected === comp.name ? "bg-accent" : ""
+                }`}
+            >
+              {icon}
+              <span>{comp.name}</span>
+              <span className="ml-auto text-xs text-muted-foreground">
+                {comp.metrics.length} pts
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface ComponentSummaryCardProps {
   component: ComponentMetrics;
   icon: React.ReactNode;
@@ -435,7 +583,7 @@ function ComponentSummaryCard({ component, icon }: ComponentSummaryCardProps) {
     return map;
   }, [component.metrics]);
 
-  // Calculate all stats for 3x3 grid
+  // Calculate all stats for grid
   const stats = useMemo(() => {
     const getLatestValue = (filter: (name: string) => boolean): number => {
       let total = 0;
@@ -453,34 +601,27 @@ function ComponentSummaryCard({ component, icon }: ComponentSummaryCardProps) {
 
     if (component.type === "receiver") {
       return {
-        // Accepted (green)
         acceptedSpans: getLatestValue((n) => n.includes("accepted_spans")),
         acceptedLogs: getLatestValue((n) => n.includes("accepted_log_records")),
         acceptedMetrics: getLatestValue((n) => n.includes("accepted_metric_points")),
-        // Refused (orange)
         refusedSpans: getLatestValue((n) => n.includes("refused_spans")),
         refusedLogs: getLatestValue((n) => n.includes("refused_log_records")),
         refusedMetrics: getLatestValue((n) => n.includes("refused_metric_points")),
       };
     } else if (component.type === "processor") {
       return {
-        // Accepted/Incoming (blue)
         acceptedSpans: getLatestValue((n) => n.includes("accepted_spans") || n.includes("incoming_spans")),
         acceptedLogs: getLatestValue((n) => n.includes("accepted_log_records") || n.includes("incoming_log_records")),
         acceptedMetrics: getLatestValue((n) => n.includes("accepted_metric_points") || n.includes("incoming_metric_points")),
-        // Dropped (orange)
         droppedSpans: getLatestValue((n) => n.includes("dropped_spans") || n.includes("refused_spans")),
         droppedLogs: getLatestValue((n) => n.includes("dropped_log_records") || n.includes("refused_log_records")),
         droppedMetrics: getLatestValue((n) => n.includes("dropped_metric_points") || n.includes("refused_metric_points")),
       };
     } else {
-      // Exporter
       return {
-        // Sent (green)
         sentSpans: getLatestValue((n) => n.includes("sent_spans")),
         sentLogs: getLatestValue((n) => n.includes("sent_log_records")),
         sentMetrics: getLatestValue((n) => n.includes("sent_metric_points")),
-        // Failed (red)
         failedSpans: getLatestValue((n) => n.includes("failed") && n.includes("spans")),
         failedLogs: getLatestValue((n) => n.includes("failed") && n.includes("log_records")),
         failedMetrics: getLatestValue((n) => n.includes("failed") && n.includes("metric_points")),
@@ -488,47 +629,45 @@ function ComponentSummaryCard({ component, icon }: ComponentSummaryCardProps) {
     }
   }, [component.type, metricsByName]);
 
-  // 3x3 Grid for Receivers
-  const renderReceiverGrid = () => (
-    <div className="grid grid-cols-3 gap-2">
-      {/* Row headers - Accepted */}
-      <StatBadge label="Spans" sublabel="Accepted" value={stats.acceptedSpans} color="green" />
-      <StatBadge label="Logs" sublabel="Accepted" value={stats.acceptedLogs} color="green" />
-      <StatBadge label="Metrics" sublabel="Accepted" value={stats.acceptedMetrics} color="green" />
-      {/* Refused */}
-      <StatBadge label="Spans" sublabel="Refused" value={stats.refusedSpans} color="orange" />
-      <StatBadge label="Logs" sublabel="Refused" value={stats.refusedLogs} color="orange" />
-      <StatBadge label="Metrics" sublabel="Refused" value={stats.refusedMetrics} color="orange" />
-    </div>
-  );
+  // Render stats grid based on component type - only show non-zero values
+  const renderStats = () => {
+    const items: Array<{ label: string; value: number; color: "green" | "red" | "blue" | "orange" }> = [];
 
-  // 3x3 Grid for Processors
-  const renderProcessorGrid = () => (
-    <div className="grid grid-cols-3 gap-2">
-      {/* Accepted/Incoming */}
-      <StatBadge label="Spans" sublabel="Accepted" value={stats.acceptedSpans} color="blue" />
-      <StatBadge label="Logs" sublabel="Accepted" value={stats.acceptedLogs} color="blue" />
-      <StatBadge label="Metrics" sublabel="Accepted" value={stats.acceptedMetrics} color="blue" />
-      {/* Dropped */}
-      <StatBadge label="Spans" sublabel="Dropped" value={stats.droppedSpans} color="orange" />
-      <StatBadge label="Logs" sublabel="Dropped" value={stats.droppedLogs} color="orange" />
-      <StatBadge label="Metrics" sublabel="Dropped" value={stats.droppedMetrics} color="orange" />
-    </div>
-  );
+    if (component.type === "receiver") {
+      if (stats.acceptedSpans > 0) { items.push({ label: "Accepted Spans", value: stats.acceptedSpans, color: "green" }); }
+      if (stats.acceptedLogs > 0) { items.push({ label: "Accepted Logs", value: stats.acceptedLogs, color: "green" }); }
+      if (stats.acceptedMetrics > 0) { items.push({ label: "Accepted Metrics", value: stats.acceptedMetrics, color: "green" }); }
+      if (stats.refusedSpans > 0) { items.push({ label: "Refused Spans", value: stats.refusedSpans, color: "orange" }); }
+      if (stats.refusedLogs > 0) { items.push({ label: "Refused Logs", value: stats.refusedLogs, color: "orange" }); }
+      if (stats.refusedMetrics > 0) { items.push({ label: "Refused Metrics", value: stats.refusedMetrics, color: "orange" }); }
+    } else if (component.type === "processor") {
+      if (stats.acceptedSpans > 0) { items.push({ label: "Accepted Spans", value: stats.acceptedSpans, color: "blue" }); }
+      if (stats.acceptedLogs > 0) { items.push({ label: "Accepted Logs", value: stats.acceptedLogs, color: "blue" }); }
+      if (stats.acceptedMetrics > 0) { items.push({ label: "Accepted Metrics", value: stats.acceptedMetrics, color: "blue" }); }
+      if (stats.droppedSpans > 0) { items.push({ label: "Dropped Spans", value: stats.droppedSpans, color: "orange" }); }
+      if (stats.droppedLogs > 0) { items.push({ label: "Dropped Logs", value: stats.droppedLogs, color: "orange" }); }
+      if (stats.droppedMetrics > 0) { items.push({ label: "Dropped Metrics", value: stats.droppedMetrics, color: "orange" }); }
+    } else {
+      if (stats.sentSpans > 0) { items.push({ label: "Sent Spans", value: stats.sentSpans, color: "green" }); }
+      if (stats.sentLogs > 0) { items.push({ label: "Sent Logs", value: stats.sentLogs, color: "green" }); }
+      if (stats.sentMetrics > 0) { items.push({ label: "Sent Metrics", value: stats.sentMetrics, color: "green" }); }
+      if (stats.failedSpans > 0) { items.push({ label: "Failed Spans", value: stats.failedSpans, color: "red" }); }
+      if (stats.failedLogs > 0) { items.push({ label: "Failed Logs", value: stats.failedLogs, color: "red" }); }
+      if (stats.failedMetrics > 0) { items.push({ label: "Failed Metrics", value: stats.failedMetrics, color: "red" }); }
+    }
 
-  // 3x3 Grid for Exporters
-  const renderExporterGrid = () => (
-    <div className="grid grid-cols-3 gap-2">
-      {/* Sent */}
-      <StatBadge label="Spans" sublabel="Sent" value={stats.sentSpans} color="green" />
-      <StatBadge label="Logs" sublabel="Sent" value={stats.sentLogs} color="green" />
-      <StatBadge label="Metrics" sublabel="Sent" value={stats.sentMetrics} color="green" />
-      {/* Failed */}
-      <StatBadge label="Spans" sublabel="Failed" value={stats.failedSpans} color="red" />
-      <StatBadge label="Logs" sublabel="Failed" value={stats.failedLogs} color="red" />
-      <StatBadge label="Metrics" sublabel="Failed" value={stats.failedMetrics} color="red" />
-    </div>
-  );
+    if (items.length === 0) {
+      return <p className="text-muted-foreground text-sm">No data available</p>;
+    }
+
+    return (
+      <div className="flex flex-wrap gap-2">
+        {items.map((item) => (
+          <StatBadge key={item.label} label={item.label} value={item.value} color={item.color} />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <Card>
@@ -542,10 +681,7 @@ function ComponentSummaryCard({ component, icon }: ComponentSummaryCardProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {component.type === "receiver" && renderReceiverGrid()}
-        {component.type === "processor" && renderProcessorGrid()}
-        {component.type === "exporter" && renderExporterGrid()}
-
+        {renderStats()}
       </CardContent>
     </Card>
   );
@@ -553,25 +689,21 @@ function ComponentSummaryCard({ component, icon }: ComponentSummaryCardProps) {
 
 interface StatBadgeProps {
   label: string;
-  sublabel?: string;
   value: number;
-  color: "green" | "red" | "blue" | "orange" | "purple";
+  color: "green" | "red" | "blue" | "orange";
 }
 
-function StatBadge({ label, sublabel, value, color }: StatBadgeProps) {
+function StatBadge({ label, value, color }: StatBadgeProps) {
   const colorClasses = {
     green: "bg-green-500/10 text-green-600 dark:text-green-400",
     red: "bg-red-500/10 text-red-600 dark:text-red-400",
     blue: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
     orange: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
-    purple: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
   };
 
   return (
     <div className={`text-center px-3 py-2 rounded ${colorClasses[color]}`}>
-      <p className="text-xs text-muted-foreground">
-        {sublabel ? `${sublabel}` : ""} {label}
-      </p>
+      <p className="text-xs text-muted-foreground">{label}</p>
       <p className="text-sm font-semibold">{formatNumber(value)}</p>
     </div>
   );

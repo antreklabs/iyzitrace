@@ -42,10 +42,11 @@ export function AgentDetailsDrawer({
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [statsTimeRange, setStatsTimeRange] = useState<"1h" | "6h" | "24h">("1h");
 
   const { data: agentTopology, isLoading } = useSWR(
-    agentId && open ? `agent-topology-${agentId}` : null,
-    () => (agentId ? getAgentTopology(agentId) : null),
+    agentId && open ? `agent-topology-${agentId}-${statsTimeRange}` : null,
+    () => (agentId ? getAgentTopology(agentId, statsTimeRange) : null),
   );
 
   const agent = agentTopology?.agent;
@@ -150,7 +151,12 @@ export function AgentDetailsDrawer({
             </TabsList>
 
             <TabsContent value="overview" className="space-y-4 py-4">
-              <AgentOverview agent={agent} metrics={metrics} />
+              <AgentOverview
+                agent={agent}
+                metrics={metrics}
+                timeRange={statsTimeRange}
+                onTimeRangeChange={setStatsTimeRange}
+              />
             </TabsContent>
 
             <TabsContent value="config" className="space-y-4 py-4">
