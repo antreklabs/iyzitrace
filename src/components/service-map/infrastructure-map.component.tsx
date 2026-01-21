@@ -41,13 +41,12 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
   const [selectedKey, setSelectedKey] = useState('');
   const [isServiceMapOpen, setIsServiceMapOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const reactFlowInstance = useReactFlow();
 
   const { nodes: initialNodes, edges: initialEdges } = useMemo(() => {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
-    
+
     const regions = data?.regions || [];
 
     const INFRA_WIDTH = 180;
@@ -63,17 +62,17 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
     regions.forEach((region) => {
       const infrastructures = region.infrastructures || [];
       const infraCount = infrastructures.length;
-      
+
       const rows = Math.ceil(infraCount / INFRA_PER_ROW);
       const cols = Math.min(infraCount, INFRA_PER_ROW);
-      
+
       const groupWidth = cols * INFRA_WIDTH + (cols - 1) * INFRA_GAP_X + GROUP_PADDING * 2;
       const groupHeight = rows * INFRA_HEIGHT + (rows - 1) * INFRA_GAP_Y + GROUP_PADDING * 2;
 
       const groupNode: Node = {
         id: `group::${region.id}`,
         type: 'group',
-        data: { 
+        data: {
           region,
           groupSize: { width: groupWidth, height: groupHeight }
         },
@@ -85,14 +84,14 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
       infrastructures.forEach((infra, index) => {
         const row = Math.floor(index / INFRA_PER_ROW);
         const col = index % INFRA_PER_ROW;
-        
+
         const infraX = GROUP_PADDING + col * (INFRA_WIDTH + INFRA_GAP_X);
         const infraY = GROUP_PADDING + row * (INFRA_HEIGHT + INFRA_GAP_Y);
 
         const infraNode: Node = {
           id: infra.id,
           type: 'infrastructure',
-          data: { 
+          data: {
             infrastructure: infra,
             onNodeClick: (id: string) => setSelectedNodeId(id)
           },
@@ -141,16 +140,16 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
           source: sourceInfraId,
           target: targetInfraId,
           type: 'smoothstep',
-          animated: true,
+          animated: false,
           style: {
             stroke: '#60a5fa',
             strokeWidth: 2,
-            strokeDasharray: '5 5'
+            strokeDasharray: '8 4'
           }
         });
       });
     });
-    
+
     return { nodes, edges };
   }, [data]);
 
@@ -171,7 +170,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
           const last = JSON.parse(lastRaw);
           viewId = last?.viewId;
         }
-      } catch {}
+      } catch { }
 
       if (!viewId || !data?.regions) return;
 
@@ -191,7 +190,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
           if (view && (view as any).data?.items) {
             savedItems = (view as any).data.items;
           }
-        } catch {}
+        } catch { }
       }
 
       if (savedItems.length === 0) return;
@@ -218,36 +217,9 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
     loadPositions();
   }, [data]);
 
-  const getConnectedElements = useCallback((nodeId: string) => {
-    const connectedNodeIds = new Set<string>();
-    const connectedEdgeIds = new Set<string>();
-    
-    edges.forEach(edge => {
-      if (edge.source === nodeId || edge.target === nodeId) {
-        connectedEdgeIds.add(edge.id);
-        connectedNodeIds.add(edge.source);
-        connectedNodeIds.add(edge.target);
-      }
-    });
-    
-    return { connectedNodeIds, connectedEdgeIds };
-  }, [edges]);
-
-  const highlightedNodes = useMemo(() => {
-    if (!hoveredNodeId) return new Set<string>();
-    const { connectedNodeIds } = getConnectedElements(hoveredNodeId);
-    return connectedNodeIds;
-  }, [hoveredNodeId, getConnectedElements]);
-
-  const highlightedEdges = useMemo(() => {
-    if (!hoveredNodeId) return new Set<string>();
-    const { connectedEdgeIds } = getConnectedElements(hoveredNodeId);
-    return connectedEdgeIds;
-  }, [hoveredNodeId, getConnectedElements]);
-
   const selectedInfrastructure = useMemo(() => {
     if (!selectedNodeId) return null;
-    
+
     for (const region of (data?.regions || [])) {
       const infra = (region.infrastructures || []).find(i => i.id === selectedNodeId);
       if (infra) return infra;
@@ -257,7 +229,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
 
   const zoomToNode = useCallback((nodeId: string, isRegion: boolean = false) => {
     if (!reactFlowInstance) return;
-    
+
     if (!nodeId) {
       reactFlowInstance.fitView({ padding: 0.2, duration: 500 });
       return;
@@ -265,19 +237,19 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
 
     const targetNodeId = isRegion ? `group::${nodeId}` : nodeId;
     const node = nodes.find(n => n.id === targetNodeId);
-    
+
     if (!node) return;
 
     if (isRegion) {
       const groupData = node.data as any;
       const groupSize = groupData?.groupSize || { width: 560, height: 300 };
-      
+
       const padding = 100;
       const x = node.position.x - padding;
       const y = node.position.y - padding;
       const width = groupSize.width + padding * 2;
       const height = groupSize.height + padding * 2;
-      
+
       reactFlowInstance.fitBounds(
         { x, y, width, height },
         { padding: 0.1, duration: 500 }
@@ -286,7 +258,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
       const parentNode = nodes.find(n => n.id === node.parentNode);
       const absoluteX = (parentNode?.position.x || 0) + node.position.x;
       const absoluteY = (parentNode?.position.y || 0) + node.position.y;
-      
+
       reactFlowInstance.setCenter(
         absoluteX + 90,
         absoluteY + 120,
@@ -301,10 +273,10 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
 
   const handleTreeSelect = useCallback((key: string) => {
     setSelectedKey(key);
-    
+
     let nodeId = '';
     let isRegion = false;
-    
+
     if (key.startsWith('region-')) {
       nodeId = key.replace('region-', '');
       isRegion = true;
@@ -314,7 +286,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
       isRegion = false;
       setSelectedNodeId(nodeId);
     }
-    
+
     setTimeout(() => {
       zoomToNode(nodeId, isRegion);
     }, 100);
@@ -347,16 +319,16 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
 
     const items: any[] = [];
     data.regions.forEach((region: any) => {
-      items.push({ 
-        id: region.id, 
-        type: 'region', 
-        groupPosition: region.groupPosition 
+      items.push({
+        id: region.id,
+        type: 'region',
+        groupPosition: region.groupPosition
       });
       region.infrastructures?.forEach((infra: any) => {
-        items.push({ 
-          id: infra.id, 
-          type: 'infrastructure', 
-          position: infra.position 
+        items.push({
+          id: infra.id,
+          type: 'infrastructure',
+          position: infra.position
         });
       });
     });
@@ -370,14 +342,14 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
         const last = JSON.parse(lastRaw);
         viewId = last?.viewId;
       }
-    } catch {}
+    } catch { }
 
     if (!viewId) return;
 
     try {
       const settings = await getPluginSettings();
       const pageViews = settings.pageViews || [];
-      const updated = pageViews.map((v: any) => 
+      const updated = pageViews.map((v: any) =>
         v.id === viewId && v.page === 'service-map' ? { ...v, data: minimized } : v
       );
       await savePluginSettings({ ...settings, pageViews: updated });
@@ -389,7 +361,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
           v.id === viewId ? { ...v, data: minimized } : v
         );
         localStorage.setItem(key, JSON.stringify(updatedLocal));
-      } catch {}
+      } catch { }
     }
   }, [data]);
 
@@ -409,14 +381,14 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
       <style>{`
         .react-flow__node-group { width: auto !important; }
       `}</style>
-      
-      <Card 
-        style={{ background: '#0f172a', borderColor: '#1f2937', height: '80vh' }} 
+
+      <Card
+        style={{ background: '#0f172a', borderColor: '#1f2937', height: '80vh' }}
         styles={{ body: { padding: 0, height: '100%' } }}
       >
         <div style={{ position: 'relative', height: '100%' }}>
           {
-}
+          }
           <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 10, width: '180px' }}>
             <div
               style={{
@@ -438,7 +410,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
           </div>
 
           {
-}
+          }
           <div style={{ position: 'absolute', top: 12, right: 55, zIndex: 10 }}>
             <div
               style={{
@@ -459,9 +431,9 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
           </div>
 
           {
-}
+          }
           <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 10 }}>
-            <Dropdown 
+            <Dropdown
               dropdownRender={() => searchTreeContent}
               trigger={['click']}
               placement="bottomRight"
@@ -489,10 +461,10 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
           </div>
 
           {
-}
+          }
           {selectedInfrastructure && (
             <div style={{ position: 'absolute', left: 12, top: 100, zIndex: 1000 }}>
-              <InfrastructureDetailPanel 
+              <InfrastructureDetailPanel
                 infrastructure={selectedInfrastructure}
                 onClose={handleCloseDetailPanel}
                 onServicesClick={handleOpenServiceMap}
@@ -501,10 +473,10 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
           )}
 
           {
-}
-          <div 
-            style={{ 
-              position: isFullscreen ? 'fixed' : 'absolute', 
+          }
+          <div
+            style={{
+              position: isFullscreen ? 'fixed' : 'absolute',
               top: 0,
               left: 0,
               right: 0,
@@ -513,23 +485,8 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
             }}
           >
             <ReactFlow
-              nodes={nodes.map(n => ({
-                ...n,
-                style: {
-                  ...n.style,
-                  opacity: hoveredNodeId ? (n.id === hoveredNodeId || highlightedNodes.has(n.id) ? 1 : 0.3) : 1,
-                  transition: 'opacity 0.2s ease'
-                }
-              }))}
-              edges={edges.map(e => ({
-                ...e,
-                style: {
-                  ...e.style,
-                  opacity: hoveredNodeId ? (highlightedEdges.has(e.id) ? 1 : 0.2) : 1,
-                  strokeWidth: highlightedEdges.has(e.id) ? 3 : 2,
-                  transition: 'all 0.2s ease'
-                }
-              }))}
+              nodes={nodes}
+              edges={edges}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               nodeTypes={nodeTypes}
@@ -541,7 +498,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
               minZoom={0.1}
               maxZoom={2.5}
               onNodeDragStop={async (_, node) => {
-                
+
                 if (node.type === 'group') {
                   const regionId = node.id.replace('group::', '');
                   const region = data?.regions?.find((r: any) => r.id === regionId);
@@ -558,7 +515,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
                     }
                   }
                 }
-                
+
                 await savePositionsToView();
               }}
               onNodeClick={(_, node) => {
@@ -567,52 +524,28 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
                   if (groupChildren.length > 0) {
                     reactFlowInstance.fitView({
                       nodes: [node, ...groupChildren],
-                      padding: 0.3,
-                      duration: 800
+                      padding: 0.3
                     });
                   } else {
                     reactFlowInstance.fitView({
                       nodes: [node],
-                      padding: 0.3,
-                      duration: 800
+                      padding: 0.3
                     });
                   }
                 } else {
                   const nodeId = node.data?.infrastructure?.id || node.id;
                   if (nodeId) {
                     setSelectedNodeId(nodeId);
-                    setTimeout(() => {
-                      reactFlowInstance.fitView({
-                        nodes: [node],
-                        padding: 0.2,
-                        duration: 800
-                      });
-                    }, 50);
                   }
-                }
-              }}
-              onNodeMouseEnter={(_, node) => {
-                if (node.type !== 'group') {
-                  setHoveredNodeId(node.id);
-                }
-              }}
-              onNodeMouseLeave={(_, node) => {
-                if (node.type !== 'group') {
-                  setHoveredNodeId(null);
                 }
               }}
               onPaneClick={() => {
                 setSelectedNodeId('');
-                setHoveredNodeId(null);
-                reactFlowInstance.fitView({
-                  padding: 0.2,
-                  duration: 800
-                });
               }}
               proOptions={{ hideAttribution: true }}
             >
               <Background color="#1f2937" gap={20} />
-              <Controls 
+              <Controls
                 style={{
                   background: '#1f2937',
                   border: '1px solid #374151'
@@ -625,7 +558,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
                   {isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
                 </ControlButton>
               </Controls>
-              <MiniMap 
+              <MiniMap
                 style={{
                   background: '#1f2937',
                   border: '1px solid #374151'
@@ -640,16 +573,16 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
             </ReactFlow>
           </div>
         </div>
-      </Card>
+      </Card >
 
       {
-}
-      <ServiceMapBottomDrawer
+      }
+      < ServiceMapBottomDrawer
         infrastructure={selectedInfrastructure}
         isOpen={isServiceMapOpen}
         onClose={handleCloseServiceMap}
       />
-    </div>
+    </div >
   );
 });
 

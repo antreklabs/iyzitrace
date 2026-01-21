@@ -19,7 +19,7 @@ import { Infrastructure, Service, Operation } from '../../api/service/interface.
 import { getOperationTypeColor } from '../../api/service/services.service';
 import { useNavigate } from 'react-router-dom';
 import dagre from 'dagre';
-import { css, keyframes } from '@emotion/css';
+import { css } from '@emotion/css';
 
 interface ServiceMapBottomDrawerProps {
   infrastructure: Infrastructure | null;
@@ -27,23 +27,9 @@ interface ServiceMapBottomDrawerProps {
   onClose: () => void;
 }
 
-const pulse = keyframes`
-  0%, 100% { opacity: 1; box-shadow: 0 0 10px currentColor; }
-  50% { opacity: 0.6; box-shadow: 0 0 20px currentColor; }
-`;
 
-const shimmerAnim = keyframes`
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-`;
-
-const floatAnim = keyframes`
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-4px); }
-`;
-
-const ServiceNode: React.FC<{ data: Service; selected?: boolean }> = ({ data, selected }) => {
-  const [isHovered, setIsHovered] = useState(false);
+const ServiceNode: React.FC<{ data: Service; selected?: boolean }> = (props) => {
+  const { data, selected = false } = props;
   const getStatusConfig = (status?: string) => {
     const s = status?.toLowerCase();
     if (s === 'healthy' || s === 'ok') {
@@ -104,35 +90,12 @@ const ServiceNode: React.FC<{ data: Service; selected?: boolean }> = ({ data, se
     min-width: 220px;
     max-width: 260px;
     box-shadow: 
-      ${selected 
-        ? `0 0 40px ${statusConfig.glow}, 0 15px 50px rgba(0,0,0,0.6)` 
-        : `0 10px 40px rgba(0,0,0,0.5)`};
-    transform: ${selected || isHovered ? 'translateY(-8px) scale(1.05)' : 'translateY(0) scale(1)'};
-    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      ${selected
+      ? `0 0 40px ${statusConfig.glow}, 0 15px 50px rgba(0,0,0,0.6)`
+      : `0 10px 40px rgba(0,0,0,0.5)`};
     cursor: pointer;
     overflow: hidden;
     backdrop-filter: blur(20px);
-    animation: ${selected ? floatAnim : 'none'} 2s ease-in-out infinite;
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.15),
-        transparent
-      );
-      transition: left 0.7s ease;
-    }
-    
-    &:hover::before {
-      left: 100%;
-    }
     
     &::after {
       content: '';
@@ -159,7 +122,6 @@ const ServiceNode: React.FC<{ data: Service; selected?: boolean }> = ({ data, se
     box-shadow: 
       0 6px 16px ${statusConfig.glow},
       0 0 30px ${statusConfig.glow};
-    animation: ${pulse} 2.5s ease-in-out infinite;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -184,25 +146,8 @@ const ServiceNode: React.FC<{ data: Service; selected?: boolean }> = ({ data, se
       0 10px 30px ${statusConfig.glow},
       inset 0 2px 0 rgba(255,255,255,0.4),
       inset 0 -2px 0 rgba(0,0,0,0.3);
-    transition: all 0.4s ease;
     position: relative;
     overflow: hidden;
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(
-        45deg,
-        transparent 30%,
-        rgba(255, 255, 255, 0.4) 50%,
-        transparent 70%
-      );
-      animation: ${shimmerAnim} 3s infinite;
-    }
   `;
 
   const titleStyle = css`
@@ -276,23 +221,19 @@ const ServiceNode: React.FC<{ data: Service; selected?: boolean }> = ({ data, se
   `;
 
   return (
-    <div 
-      className={containerStyle}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className={containerStyle}>
       <div className={statusBadgeStyle}>
         ✓
       </div>
-      
+
       <div className={iconContainerStyle}>
         {getTypeIcon(safeType)}
       </div>
-      
+
       <div className={titleStyle}>
         {data?.name || 'Unknown Service'}
       </div>
-      
+
       {data?.metrics && (
         <div className={metricsContainerStyle}>
           <div className={metricItemStyle}>
@@ -313,55 +254,55 @@ const ServiceNode: React.FC<{ data: Service; selected?: boolean }> = ({ data, se
           </div>
         </div>
       )}
-      
+
       <div className={footerStyle}>
         <span className={typeTagStyle}>{safeType}</span>
         <span className={statusLabelStyle}>{statusConfig.label}</span>
       </div>
 
-      <Handle 
-        type="target" 
+      <Handle
+        type="target"
         position={Position.Top}
-        style={{ 
+        style={{
           background: statusConfig.color,
           width: 14,
           height: 14,
           border: `4px solid #0f172a`,
           boxShadow: `0 0 15px ${statusConfig.glow}`
-        }} 
+        }}
       />
-      <Handle 
-        type="source" 
+      <Handle
+        type="source"
         position={Position.Bottom}
-        style={{ 
+        style={{
           background: statusConfig.color,
           width: 14,
           height: 14,
           border: `4px solid #0f172a`,
           boxShadow: `0 0 15px ${statusConfig.glow}`
-        }} 
+        }}
       />
-      <Handle 
-        type="target" 
-        position={Position.Left} 
-        style={{ 
+      <Handle
+        type="target"
+        position={Position.Left}
+        style={{
           background: statusConfig.color,
           width: 14,
           height: 14,
           border: `4px solid #0f172a`,
           boxShadow: `0 0 15px ${statusConfig.glow}`
-        }} 
+        }}
       />
-      <Handle 
-        type="source" 
-        position={Position.Right} 
-        style={{ 
+      <Handle
+        type="source"
+        position={Position.Right}
+        style={{
           background: statusConfig.color,
           width: 14,
           height: 14,
           border: `4px solid #0f172a`,
           boxShadow: `0 0 15px ${statusConfig.glow}`
-        }} 
+        }}
       />
     </div>
   );
@@ -371,24 +312,13 @@ const nodeTypes = {
   service: ServiceNode
 };
 
-const slideIn = keyframes`
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-`;
 
-const ServiceDetailPanel: React.FC<{ 
+const ServiceDetailPanel: React.FC<{
   data: Service | null;
   onClose: () => void;
 }> = ({ data, onClose }) => {
   const navigate = useNavigate();
-  const [hoveredSection, setHoveredSection] = useState<string | null>(null);
-  
+
   if (!data) return null;
 
   const getStatusConfig = (status?: string) => {
@@ -442,26 +372,24 @@ const ServiceDetailPanel: React.FC<{
   const containerStyle = css`
     position: absolute;
     left: 12px;
-    top: 12px;
-    width: 480px;
+    top: 8px;
+    width: 340px;
     background: linear-gradient(
       145deg,
       rgba(15, 23, 42, 0.98) 0%,
       rgba(30, 41, 59, 0.98) 100%
     );
-    border: 2px solid ${statusConfig.color}40;
-    border-radius: 24px;
-    padding: 28px;
+    border: 1px solid ${statusConfig.color}40;
+    border-radius: 16px;
+    padding: 16px;
     color: #ffffff;
     box-shadow: 
-      0 20px 60px rgba(0, 0, 0, 0.6),
-      0 0 80px ${statusConfig.glow},
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(30px);
-    max-height: 750px;
+      0 10px 30px rgba(0, 0, 0, 0.5),
+      0 0 40px ${statusConfig.glow};
+    backdrop-filter: blur(20px);
+    max-height: calc(100% - 16px);
     overflow-y: auto;
     z-index: 1000;
-    animation: ${slideIn} 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     
     &::before {
       content: '';
@@ -503,9 +431,9 @@ const ServiceDetailPanel: React.FC<{
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 28px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid ${statusConfig.color}30;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid ${statusConfig.color}30;
     position: relative;
   `;
 
@@ -516,55 +444,45 @@ const ServiceDetailPanel: React.FC<{
   const titleStyle = css`
     color: #f1f5f9;
     margin: 0;
-    font-size: 24px;
-    font-weight: 900;
-    text-shadow: 0 2px 10px ${statusConfig.glow};
-    margin-bottom: 12px;
-    letter-spacing: -0.5px;
+    font-size: 16px;
+    font-weight: 700;
+    text-shadow: 0 1px 5px ${statusConfig.glow};
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
   `;
 
   const badgeStyle = css`
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 5px;
     background: ${statusConfig.gradient};
     color: white;
-    padding: 8px 16px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    box-shadow: 
-      0 4px 15px ${statusConfig.glow},
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    animation: ${pulse} 3s ease-in-out infinite;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px ${statusConfig.glow};
   `;
 
   const closeButtonStyle = css`
     background: rgba(239, 68, 68, 0.2);
-    border: 2px solid #ef4444;
-    border-radius: 12px;
-    width: 40px;
-    height: 40px;
+    border: 1px solid #ef4444;
+    border-radius: 8px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     color: #ef4444;
-    transition: all 0.3s ease;
-    
-    &:hover {
-      background: rgba(239, 68, 68, 0.4);
-      transform: rotate(90deg) scale(1.1);
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
-    }
   `;
 
   const gridStyle = css`
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 24px;
+    gap: 10px;
+    margin-bottom: 12px;
   `;
 
   const sectionStyle = css`
@@ -573,64 +491,36 @@ const ServiceDetailPanel: React.FC<{
       rgba(30, 41, 59, 0.5) 0%,
       rgba(51, 65, 85, 0.5) 100%
     );
-    padding: 20px;
-    border-radius: 16px;
-    border: 1px solid ${hoveredSection === 'info' || hoveredSection === 'metrics' 
-      ? `${statusConfig.color}60` 
-      : 'rgba(148, 163, 184, 0.2)'};
-    transition: all 0.3s ease;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.15);
     position: relative;
     overflow: hidden;
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.1),
-        transparent
-      );
-      transition: left 0.6s ease;
-    }
-    
-    &:hover::before {
-      left: 100%;
-    }
-    
-    &:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 24px ${statusConfig.glow};
-    }
   `;
 
   const sectionTitleStyle = css`
     color: #f1f5f9;
-    margin: 0 0 16px 0;
-    font-size: 14px;
-    font-weight: 700;
+    margin: 0 0 8px 0;
+    font-size: 11px;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 5px;
   `;
 
   const dataRowStyle = css`
     color: #cbd5e1;
-    font-size: 13px;
-    line-height: 2;
+    font-size: 11px;
+    line-height: 1.6;
     display: flex;
     justify-content: space-between;
-    padding: 4px 0;
+    padding: 2px 0;
     
     & > strong {
       color: #94a3b8;
-      font-weight: 600;
+      font-weight: 500;
     }
     
     & > span {
@@ -650,23 +540,6 @@ const ServiceDetailPanel: React.FC<{
       inset 0 2px 0 rgba(255, 255, 255, 0.3);
     position: relative;
     overflow: hidden;
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(
-        135deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.1) 50%,
-        transparent 100%
-      );
-      background-size: 200% 200%;
-      animation: ${shimmerAnim} 3s infinite;
-    }
   `;
 
   const statusLabelStyle = css`
@@ -711,11 +584,6 @@ const ServiceDetailPanel: React.FC<{
     border-bottom: ${isLast ? 'none' : '1px solid rgba(148, 163, 184, 0.2)'};
     padding-bottom: ${isLast ? 0 : '16px'};
     margin-bottom: ${isLast ? 0 : '16px'};
-    transition: all 0.2s ease;
-    
-    &:hover {
-      transform: translateX(4px);
-    }
   `;
 
   const operationHeaderStyle = css`
@@ -795,41 +663,9 @@ const ServiceDetailPanel: React.FC<{
     align-items: center;
     justify-content: center;
     gap: 8px;
-    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
     letter-spacing: 0.5px;
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.2),
-        transparent
-      );
-      transition: left 0.5s ease;
-    }
-    
-    &:hover {
-      background: ${hoverColor};
-      border-color: ${textColor}60;
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px ${textColor}30;
-    }
-    
-    &:hover::before {
-      left: 100%;
-    }
-    
-    &:active {
-      transform: translateY(-1px);
-    }
   `;
 
   return (
@@ -850,10 +686,8 @@ const ServiceDetailPanel: React.FC<{
       </div>
 
       <div className={gridStyle}>
-        <div 
+        <div
           className={sectionStyle}
-          onMouseEnter={() => setHoveredSection('info')}
-          onMouseLeave={() => setHoveredSection(null)}
         >
           <h4 className={sectionTitleStyle}>
             <DatabaseOutlined />
@@ -869,10 +703,8 @@ const ServiceDetailPanel: React.FC<{
           </div>
         </div>
 
-        <div 
+        <div
           className={sectionStyle}
-          onMouseEnter={() => setHoveredSection('metrics')}
-          onMouseLeave={() => setHoveredSection(null)}
         >
           <h4 className={sectionTitleStyle}>
             <BarChartOutlined />
@@ -912,15 +744,15 @@ const ServiceDetailPanel: React.FC<{
             {data.operations.map((op: Operation, idx: number) => {
               const typeColor = getOperationTypeColor(op.type || 'GENERAL');
               const bgColor = typeColor === 'blue' ? '#3b82f6' :
-                              typeColor === 'green' ? '#22c55e' :
-                              typeColor === 'orange' ? '#f59e0b' :
-                              typeColor === 'purple' ? '#a855f7' :
-                              typeColor === 'red' ? '#ef4444' :
-                              typeColor === 'yellow' ? '#eab308' :
-                              '#6b7280';
-              
+                typeColor === 'green' ? '#22c55e' :
+                  typeColor === 'orange' ? '#f59e0b' :
+                    typeColor === 'purple' ? '#a855f7' :
+                      typeColor === 'red' ? '#ef4444' :
+                        typeColor === 'yellow' ? '#eab308' :
+                          '#6b7280';
+
               return (
-                <div 
+                <div
                   key={idx}
                   className={operationItemStyle(idx === data.operations!.length - 1)}
                 >
@@ -955,21 +787,21 @@ const ServiceDetailPanel: React.FC<{
       )}
 
       <div className={buttonsRowStyle}>
-        <button 
+        <button
           onClick={handleNavigateToLogs}
           className={actionButtonStyle('rgba(59, 130, 246, 0.15)', 'rgba(59, 130, 246, 0.3)', '#60a5fa')}
         >
           <BarChartOutlined style={{ fontSize: '16px' }} />
           Logs
         </button>
-        <button 
+        <button
           onClick={handleNavigateToMetrics}
           className={actionButtonStyle('rgba(34, 197, 94, 0.15)', 'rgba(34, 197, 94, 0.3)', '#4ade80')}
         >
           <LineChartOutlined style={{ fontSize: '16px' }} />
           Metrics
         </button>
-        <button 
+        <button
           onClick={handleNavigateToTraces}
           className={actionButtonStyle('rgba(168, 85, 247, 0.15)', 'rgba(168, 85, 247, 0.3)', '#c084fc')}
         >
@@ -983,11 +815,11 @@ const ServiceDetailPanel: React.FC<{
 
 const getEdgeColor = (avgDurationMs: number, maxDuration: number): string => {
   if (maxDuration === 0) return '#6b7280';
-  
+
   const ratio = avgDurationMs / maxDuration;
-  
+
   const invertedRatio = 1 - ratio;
-  
+
   if (invertedRatio > 0.85) return '#059669';
   if (invertedRatio > 0.70) return '#10b981';
   if (invertedRatio > 0.60) return '#22c55e';
@@ -1002,9 +834,9 @@ const getEdgeColor = (avgDurationMs: number, maxDuration: number): string => {
 
 const getAnimationDuration = (avgDurationMs: number, maxDuration: number): number => {
   if (maxDuration === 0) return 3;
-  
+
   const ratio = avgDurationMs / maxDuration;
-  
+
   if (ratio < 0.1) return 0.3;
   if (ratio < 0.3) return 0.8;
   if (ratio < 0.5) return 2;
@@ -1023,7 +855,6 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const reactFlowInstance = useReactFlow();
 
   const { nodes: initialNodes, edges: initialEdges } = useMemo(() => {
@@ -1041,10 +872,7 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
       nodes.push({
         id: service.id,
         type: 'service',
-        data: { 
-          ...service,
-          selected: selectedService?.id === service.id 
-        },
+        data: service,
         position: { x: 0, y: 0 },
         sourcePosition: Position.Right,
         targetPosition: Position.Left
@@ -1067,13 +895,13 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
           const totalDuration = operations.reduce((acc: number, op: Operation) => acc + (op.metrics?.avgDurationMs || 0), 0);
           const operationsCount = operations.length || 1;
           const avgDuration = totalDuration / operationsCount;
-          
+
           const typeCounts: Record<string, number> = {};
           operations.forEach(op => {
             const t = op.type || 'HTTP';
             typeCounts[t] = (typeCounts[t] || 0) + 1;
           });
-          
+
           let type = 'HTTP';
           let maxCount = 0;
           Object.entries(typeCounts).forEach(([t, count]) => {
@@ -1085,26 +913,24 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
 
           const edgeColor = getEdgeColor(avgDuration, max);
           const animDuration = getAnimationDuration(avgDuration, max);
-          
+
           const typeColor = getOperationTypeColor(type);
           const labelColor = typeColor === 'blue' ? '#60a5fa' :
-                            typeColor === 'green' ? '#22c55e' :
-                            typeColor === 'orange' ? '#fb923c' :
-                            typeColor === 'purple' ? '#a78bfa' :
-                            typeColor === 'red' ? '#f87171' :
-                            typeColor === 'yellow' ? '#fbbf24' :
-                            '#a3a3a3';
+            typeColor === 'green' ? '#22c55e' :
+              typeColor === 'orange' ? '#fb923c' :
+                typeColor === 'purple' ? '#a78bfa' :
+                  typeColor === 'red' ? '#f87171' :
+                    typeColor === 'yellow' ? '#fbbf24' :
+                      '#a3a3a3';
 
           edges.push({
             id: `${service.id}-${targetServiceId}`,
             source: service.id,
             target: targetServiceId,
-            animated: true,
+            animated: false,
             style: {
               stroke: edgeColor,
-              strokeWidth: 2,
-              strokeDasharray: '5 5',
-              animation: `dashdraw ${animDuration}s linear infinite`
+              strokeWidth: 2
             },
             markerEnd: {
               type: MarkerType.ArrowClosed,
@@ -1132,7 +958,7 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
     });
 
     return { nodes, edges };
-  }, [infrastructure, selectedService]);
+  }, [infrastructure]);
 
   const layoutedNodes = useMemo(() => {
     if (initialNodes.length === 0) return initialNodes;
@@ -1144,7 +970,7 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
       if (saved) {
         savedPositions = JSON.parse(saved);
       }
-    } catch {}
+    } catch { }
 
     if (Object.keys(savedPositions).length > 0) {
       return initialNodes.map((node) => {
@@ -1185,37 +1011,11 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
+  // Only update when infrastructure changes, not on node selection
   useEffect(() => {
     setNodes(layoutedNodes);
     setEdges(initialEdges);
-  }, [layoutedNodes, initialEdges, setNodes, setEdges]);
-
-  const getConnectedElements = useCallback((nodeId: string) => {
-    const connectedNodeIds = new Set<string>();
-    const connectedEdgeIds = new Set<string>();
-    
-    edges.forEach(edge => {
-      if (edge.source === nodeId || edge.target === nodeId) {
-        connectedEdgeIds.add(edge.id);
-        connectedNodeIds.add(edge.source);
-        connectedNodeIds.add(edge.target);
-      }
-    });
-    
-    return { connectedNodeIds, connectedEdgeIds };
-  }, [edges]);
-
-  const highlightedNodes = useMemo(() => {
-    if (!hoveredNodeId) return new Set<string>();
-    const { connectedNodeIds } = getConnectedElements(hoveredNodeId);
-    return connectedNodeIds;
-  }, [hoveredNodeId, getConnectedElements]);
-
-  const highlightedEdges = useMemo(() => {
-    if (!hoveredNodeId) return new Set<string>();
-    const { connectedEdgeIds } = getConnectedElements(hoveredNodeId);
-    return connectedEdgeIds;
-  }, [hoveredNodeId, getConnectedElements]);
+  }, [infrastructure?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleMouseDown = useCallback(() => {
     setIsDragging(true);
@@ -1252,14 +1052,6 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
   return (
     <>
       <style>{`
-        @keyframes dashdraw {
-          from {
-            stroke-dashoffset: 10;
-          }
-          to {
-            stroke-dashoffset: 0;
-          }
-        }
         .react-flow__attribution {
           display: none !important;
         }
@@ -1280,7 +1072,7 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
         }}
       >
         {
-}
+        }
         <div
           onMouseDown={handleMouseDown}
           style={{
@@ -1293,16 +1085,16 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
             transition: 'background 0.2s ease'
           }}
         >
-          <div style={{ 
-            width: '40px', 
-            height: '4px', 
+          <div style={{
+            width: '40px',
+            height: '4px',
             background: isDragging ? '#60a5fa' : '#475569',
             borderRadius: '2px'
           }} />
         </div>
 
         {
-}
+        }
         <div
           style={{
             padding: '12px 20px',
@@ -1361,26 +1153,11 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
         </div>
 
         {
-}
+        }
         <div style={{ flex: 1, position: 'relative' }}>
           <ReactFlow
-            nodes={nodes.map(n => ({
-              ...n,
-              style: {
-                ...n.style,
-                opacity: hoveredNodeId ? (n.id === hoveredNodeId || highlightedNodes.has(n.id) ? 1 : 0.3) : 1,
-                transition: 'opacity 0.2s ease'
-              }
-            }))}
-            edges={edges.map(e => ({
-              ...e,
-              style: {
-                ...e.style,
-                opacity: hoveredNodeId ? (highlightedEdges.has(e.id) ? 1 : 0.2) : 1,
-                strokeWidth: highlightedEdges.has(e.id) ? 3 : 2,
-                transition: 'all 0.2s ease'
-              }
-            }))}
+            nodes={nodes}
+            edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             nodeTypes={nodeTypes}
@@ -1393,15 +1170,15 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
             maxZoom={2.5}
             onNodeDragStop={(_, node) => {
               if (!infrastructure?.id) return;
-              
+
               const positions: Record<string, { x: number; y: number }> = {};
               nodes.forEach(n => {
-                positions[n.id] = { 
-                  x: Math.round(n.position.x), 
-                  y: Math.round(n.position.y) 
+                positions[n.id] = {
+                  x: Math.round(n.position.x),
+                  y: Math.round(n.position.y)
                 };
               });
-              
+
               const key = `service-map-positions-${infrastructure.id}`;
               localStorage.setItem(key, JSON.stringify(positions));
             }}
@@ -1411,26 +1188,9 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
               if (service) {
                 setSelectedService(service);
               }
-              setTimeout(() => {
-                reactFlowInstance.fitView({
-                  nodes: [node],
-                  padding: 0.3,
-                  duration: 800
-                });
-              }, 50);
-            }}
-            onNodeMouseEnter={(_, node) => {
-              setHoveredNodeId(node.id);
-            }}
-            onNodeMouseLeave={() => {
-              setHoveredNodeId(null);
             }}
             onPaneClick={() => {
               setSelectedService(null);
-              setHoveredNodeId(null);
-              setTimeout(() => {
-                reactFlowInstance.fitView({ padding: 0.2, duration: 800 });
-              }, 50);
             }}
             proOptions={{ hideAttribution: true }}
           >
@@ -1442,11 +1202,11 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
               }}
             />
           </ReactFlow>
-          
+
           {
-}
+          }
           {selectedService && (
-            <ServiceDetailPanel 
+            <ServiceDetailPanel
               data={selectedService}
               onClose={() => setSelectedService(null)}
             />
