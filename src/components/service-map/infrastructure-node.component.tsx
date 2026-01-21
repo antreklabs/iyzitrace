@@ -47,19 +47,13 @@ const getStatusConfig = (status?: string) => {
 export const InfrastructureNode: React.FC<InfrastructureNodeProps> = ({ data }) => {
   const { infrastructure, onNodeClick } = data;
   const statusConfig = getStatusConfig(infrastructure.status?.value);
-  
+
   const containerStyle = css`
     position: relative;
     width: 200px;
     height: 200px;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     transform-style: preserve-3d;
-    
-    &:hover {
-      transform: translateY(-10px) scale(1.05);
-      filter: brightness(1.2);
-    }
   `;
 
   const cubeWrapperStyle = css`
@@ -79,29 +73,13 @@ export const InfrastructureNode: React.FC<InfrastructureNodeProps> = ({ data }) 
     height: 120px;
     background: ${statusConfig.gradient};
     border: 2px solid ${statusConfig.color};
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 48px;
     color: white;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -20%;
-      width: 20%;
-      height: 100%;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.3),
-        transparent
-      );
-      
-    }
+    text-shadow: 0 2px 6px rgba(0,0,0,0.3);
   `;
 
   const topFaceStyle = css`
@@ -134,18 +112,15 @@ export const InfrastructureNode: React.FC<InfrastructureNodeProps> = ({ data }) 
     transform: translateX(-50%);
     background: ${statusConfig.gradient};
     color: white;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 10px;
-    letter-spacing: 1px;
-    padding: 6px 16px;
-    border-radius: 20px;
-    box-shadow: 
-      0 4px 15px ${statusConfig.glow},
-      0 0 20px ${statusConfig.glow},
-      inset 0 1px 0 rgba(255,255,255,0.3);
+    letter-spacing: 0.5px;
+    padding: 5px 14px;
+    border-radius: 16px;
+    box-shadow: 0 3px 10px ${statusConfig.glow};
     border: 2px solid ${statusConfig.color};
     z-index: 10;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(8px);
   `;
 
   const titleStyle = css`
@@ -155,33 +130,22 @@ export const InfrastructureNode: React.FC<InfrastructureNodeProps> = ({ data }) 
     transform: translateX(-50%);
     color: #f1f5f9;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 14px;
     white-space: nowrap;
     text-align: center;
-    padding: 8px 20px;
-    border-radius: 12px;
+    padding: 6px 16px;
+    border-radius: 10px;
     background: linear-gradient(135deg, 
       rgba(30, 41, 59, 0.95) 0%, 
       rgba(51, 65, 85, 0.95) 100%
     );
-    border: 2px solid ${statusConfig.color}40;
-    box-shadow: 
-      0 4px 20px rgba(0,0,0,0.4),
-      0 0 0 1px rgba(255,255,255,0.1),
-      inset 0 1px 0 rgba(255,255,255,0.2);
-    backdrop-filter: blur(20px);
-    transition: all 0.3s ease;
+    border: 1px solid ${statusConfig.color}30;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    backdrop-filter: blur(12px);
+    transition: all 0.2s ease;
     
     &:hover {
-      background: linear-gradient(135deg, 
-        rgba(51, 65, 85, 0.98) 0%, 
-        rgba(71, 85, 105, 0.98) 100%
-      );
-      transform: translateX(-50%) translateY(-4px);
-      box-shadow: 
-        0 8px 30px rgba(0,0,0,0.6),
-        0 0 0 1px rgba(255,255,255,0.2),
-        inset 0 1px 0 rgba(255,255,255,0.3);
+      transform: translateX(-50%) translateY(-2px);
     }
   `;
 
@@ -192,14 +156,14 @@ export const InfrastructureNode: React.FC<InfrastructureNodeProps> = ({ data }) 
     transform: translateX(-50%);
     color: #94a3b8;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    padding: 4px 12px;
-    border-radius: 8px;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 6px;
     background: rgba(15, 23, 42, 0.8);
-    border: 1px solid rgba(148, 163, 184, 0.3);
-    backdrop-filter: blur(10px);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    backdrop-filter: blur(8px);
   `;
 
   const handleClick = () => {
@@ -219,28 +183,28 @@ export const InfrastructureNode: React.FC<InfrastructureNodeProps> = ({ data }) 
   };
 
   return (
-    <div 
+    <div
       className={containerStyle}
       onClick={handleClick}
     >
       <div className={badgeStyle}>
         {statusConfig.label}
       </div>
-      
+
       <div className={cubeWrapperStyle}>
         <div className={topFaceStyle} />
         <div className={frontFaceStyle}>{getIcon()}</div>
         <div className={rightFaceStyle} />
       </div>
-      
+
       <div className={titleStyle}>
         {infrastructure.name}
       </div>
-      
+
       <div className={typeTagStyle}>
         {infrastructure.type || 'server'}
       </div>
-      
+
       <Handle type="source" position={Position.Right} id="r" style={{ opacity: 0 }} />
       <Handle type="target" position={Position.Left} id="l" style={{ opacity: 0 }} />
     </div>

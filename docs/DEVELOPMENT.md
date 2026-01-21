@@ -315,13 +315,13 @@ git push origin --delete feature/service-map
    docker compose -f /Users/gokhansipahi/projects/iyzitrace/iyzitrace-platform/iyzitrace-observability-platform/docker-compose.yml down --volumes --remove-orphans && \
    docker compose -f /Users/gokhansipahi/projects/iyzitrace/iyzitrace-platform/iyzitrace-opentelemetry-demo/docker-compose.yml down --volumes --remove-orphans && \
 
-   # BUILD - Tüm projeler
-   docker compose -f /Users/gokhansipahi/projects/iyzitrace/iyzitrace-platform/iyzitrace-observability-platform/docker-compose.yml build -- lawrence && \
-   
    # UP - Tüm projeler
    docker compose -f /Users/gokhansipahi/projects/iyzitrace/iyzitrace-platform/iyzitrace/docker-compose.yaml up --force-recreate --detach && \
-   docker compose -f /Users/gokhansipahi/projects/iyzitrace/iyzitrace-platform/iyzitrace-observability-platform/docker-compose.yml up --force-recreate --detach && \
    docker compose -f /Users/gokhansipahi/projects/iyzitrace/iyzitrace-platform/iyzitrace-opentelemetry-demo/docker-compose.yml up --force-recreate --detach
-
+   
+   cd /Users/gokhansipahi/projects/iyzitrace/iyzitrace-platform/iyzitrace-observability-platform && \
+   make up && \
+   
+   cd /Users/gokhansipahi/projects/iyzitrace/iyzitrace-platform/iyzitrace && \
    pnpm run dev
 ```
