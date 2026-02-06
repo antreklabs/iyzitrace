@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Button, InlineField, Input, SecretInput, Select } from '@grafana/ui';
-import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
+import { getBackendSrv } from '@grafana/runtime';
 import type { PluginJsonData, PluginSecureJsonData } from '../../interfaces/utils/options';
 import DefinitionsTable, { DEFAULT_DEFINITIONS } from './definitions-table.component';
-import GrafanaLikeRangePicker from '../core/graphanadatepicker';
-import dayjs from 'dayjs';
-import { KeyOutlined, DatabaseOutlined, FieldTimeOutlined, SaveOutlined, FileTextOutlined, RobotOutlined, SettingOutlined } from '@ant-design/icons';
+import { KeyOutlined, SaveOutlined, FileTextOutlined, RobotOutlined, SettingOutlined } from '@ant-design/icons';
 import { configureAllDatasourcesAuth, removeAllDatasourcesAuth } from '../../api/service/observability-auth.service';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import '../../assets/styles/components/settings/settings.css';
 
 const PLUGIN_ID = 'iyzitrace-app';
 
 const TAB_ITEMS = [
-  { key: 'defaults', label: 'Defaults' },
   { key: 'ai', label: 'AI' },
   { key: 'definitions', label: 'Definitions' },
   { key: 'security', label: 'Security' },
@@ -27,14 +24,10 @@ const ConfigForm: React.FC = () => {
   const [jsonData, setJsonData] = useState<PluginJsonData>({});
   const [secureJsonData, setSecureJsonData] = useState<PluginSecureJsonData>({});
   const [secureJsonFields, setSecureJsonFields] = useState<Record<string, boolean>>({});
-  const [lokiOpts, setLokiOpts] = useState<Array<{ label: string; value: string }>>([]);
-  const [tempoOpts, setTempoOpts] = useState<Array<{ label: string; value: string }>>([]);
-  const [prometheusOpts, setPrometheusOpts] = useState<Array<{ label: string; value: string }>>([]);
-  const [absRange, setAbsRange] = useState<[number, number]>([Date.now() - 60 * 60 * 1000, Date.now()]);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Get active tab from URL, default to 'defaults'
-  const activeTab = (searchParams.get('tab') as TabKey) || 'defaults';
+  // Get active tab from URL, default to 'ai'
+  const activeTab = (searchParams.get('tab') as TabKey) || 'ai';
 
   const setActiveTab = (tab: TabKey) => {
     setSearchParams({ tab });
@@ -43,11 +36,6 @@ const ConfigForm: React.FC = () => {
   useEffect(() => {
     (async () => {
       try {
-        const list = (await (getDataSourceSrv() as any).getList?.()) ?? (await getBackendSrv().get('/api/datasources'));
-        const map = (x: any) => ({ label: x.name, value: x.uid });
-        setLokiOpts(list.filter((x: any) => x.type === 'loki').map(map));
-        setTempoOpts(list.filter((x: any) => x.type === 'tempo').map(map));
-        setPrometheusOpts(list.filter((x: any) => x.type === 'prometheus').map(map));
         const settings = await getBackendSrv().get(`/api/plugins/${PLUGIN_ID}/settings`);
         if (settings) {
           const jd = (settings.jsonData || {}) as PluginJsonData;
@@ -56,9 +44,6 @@ const ConfigForm: React.FC = () => {
           }
           setJsonData(jd);
           setSecureJsonFields(settings.secureJsonFields || {});
-          if (jd.defaultAbsoluteRange && Array.isArray(jd.defaultAbsoluteRange)) {
-            setAbsRange([Number(jd.defaultAbsoluteRange[0]), Number(jd.defaultAbsoluteRange[1])]);
-          }
         }
       } catch (e) {
       }
@@ -68,33 +53,65 @@ const ConfigForm: React.FC = () => {
   const save = async () => {
     setIsSaving(true);
     try {
-      // Get the API key before saving (it will be cleared from secureJsonData after save)
-      const apiKeyToSave = secureJsonData.apiKey?.trim();
+      // Build the data to save based on active tab
+      let dataToSave: Partial<PluginJsonData> = {};
+      let secureDataToSave: Partial<PluginSecureJsonData> = {};
+
+      // First get current settings to preserve other tabs' data
+      const currentSettings = await getBackendSrv().get(`/api/plugins/${PLUGIN_ID}/settings`);
+      const currentJsonData = (currentSettings?.jsonData || {}) as PluginJsonData;
+
+      switch (activeTab) {
+        case 'security':
+          // Only save API key
+          secureDataToSave = { apiKey: secureJsonData.apiKey };
+          dataToSave = currentJsonData; // Keep all other settings
+          break;
+        case 'ai':
+          // Only save AI config
+          dataToSave = {
+            ...currentJsonData,
+            aiConfig: jsonData.aiConfig,
+          };
+          break;
+        case 'definitions':
+          // Only save definitions
+          dataToSave = {
+            ...currentJsonData,
+            definitions: jsonData.definitions,
+          };
+          break;
+        default:
+          return; // Privacy tab - no save
+      }
 
       await getBackendSrv().post(`/api/plugins/${PLUGIN_ID}/settings`, {
-        jsonData,
-        secureJsonData,
+        jsonData: dataToSave,
+        secureJsonData: Object.keys(secureDataToSave).length > 0 ? secureDataToSave : undefined,
         enabled: true,
       });
 
-      // Configure or remove observability platform datasource auth
-      if (apiKeyToSave) {
-        try {
-          await configureAllDatasourcesAuth(apiKeyToSave);
-        } catch (err) {
-          console.warn('[ConfigForm] Failed to configure datasource auth:', err);
+      // Configure or remove observability platform datasource auth (only for security tab)
+      if (activeTab === 'security') {
+        const apiKeyToSave = secureJsonData.apiKey?.trim();
+        if (apiKeyToSave) {
+          try {
+            await configureAllDatasourcesAuth(apiKeyToSave);
+          } catch (err) {
+            console.warn('[ConfigForm] Failed to configure datasource auth:', err);
+          }
+        } else {
+          // API key was cleared - remove auth from datasources
+          try {
+            await removeAllDatasourcesAuth();
+          } catch (err) {
+            console.warn('[ConfigForm] Failed to remove datasource auth:', err);
+          }
         }
-      } else {
-        // API key was cleared - remove auth from datasources
-        try {
-          await removeAllDatasourcesAuth();
-        } catch (err) {
-          console.warn('[ConfigForm] Failed to remove datasource auth:', err);
-        }
+        setSecureJsonFields({ ...secureJsonFields, apiKey: !!apiKeyToSave });
       }
 
-      setSecureJsonFields({ ...secureJsonFields, apiKey: !!apiKeyToSave });
-
+      // Refresh settings from server
       try {
         const settings = await getBackendSrv().get(`/api/plugins/${PLUGIN_ID}/settings`);
         if (settings?.jsonData) {
@@ -300,8 +317,6 @@ const ConfigForm: React.FC = () => {
                         >
                           Paste
                         </Button>
-                        {
-                        }
                       </div>
                     </InlineField>
                   );
@@ -311,103 +326,9 @@ const ConfigForm: React.FC = () => {
                 </div>
               </div>
             </div>
-
           </>
         )}
-        {activeTab === 'defaults' && (
-          <>
 
-            <div style={{
-              marginBottom: 16,
-              padding: 16,
-              borderRadius: 12,
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.06)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <DatabaseOutlined style={{ color: '#60a5fa' }} />
-                <h3 className="page-heading" style={{ margin: 0 }}>Default Datasources</h3>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div>
-                  <InlineField label="Default Loki">
-                    <Select
-                      options={lokiOpts}
-                      value={lokiOpts.find((o) => o.value === jsonData.defaultLokiUid) ?? null}
-                      onChange={(v) => setJsonData({ ...jsonData, defaultLokiUid: v?.value })}
-                      width={40}
-                      placeholder="Select Loki datasource"
-                    />
-                  </InlineField>
-                  <div style={{ color: '#9CA3AF', marginTop: 6 }}>
-                    Loki is used for log queries and exceptions; selecting a default saves you clicks across pages.
-                  </div>
-                </div>
-                <div>
-                  <InlineField label="Default Tempo">
-                    <Select
-                      options={tempoOpts}
-                      value={tempoOpts.find((o) => o.value === jsonData.defaultTempoUid) ?? null}
-                      onChange={(v) => setJsonData({ ...jsonData, defaultTempoUid: v?.value })}
-                      width={40}
-                      placeholder="Select Tempo datasource"
-                    />
-                  </InlineField>
-                  <div style={{ color: '#9CA3AF', marginTop: 6 }}>
-                    Tempo powers distributed traces and dependencies; the default is used in trace and map views.
-                  </div>
-                </div>
-                <div>
-                  <InlineField label="Default Prometheus">
-                    <Select
-                      options={prometheusOpts}
-                      value={prometheusOpts.find((o) => o.value === jsonData.defaultPrometheusUid) ?? null}
-                      onChange={(v) => setJsonData({ ...jsonData, defaultPrometheusUid: v?.value })}
-                      width={40}
-                      placeholder="Select Prometheus datasource"
-                    />
-                  </InlineField>
-                  <div style={{ color: '#9CA3AF', marginTop: 6 }}>
-                    Prometheus is used for metrics queries and alerts; the default is used in metrics and alert views.
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div style={{
-              marginBottom: 16,
-              padding: 16,
-              borderRadius: 12,
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.06)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <FieldTimeOutlined style={{ color: '#f59e0b' }} />
-                <h3 className="page-heading" style={{ margin: 0 }}>Default Time Range</h3>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <InlineField label="Absolute Time Range">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <GrafanaLikeRangePicker
-                      value={absRange}
-                      onChange={(s, e) => setAbsRange([s, e])}
-                      onApply={(s, e) => {
-                        setAbsRange([s, e]);
-                        setJsonData({ ...jsonData, defaultAbsoluteRange: [s, e] });
-                      }}
-                      title="Absolute time range"
-                    />
-                    <Input readOnly width={60} value={`${dayjs(absRange[0]).format('YYYY-MM-DD HH:mm:ss')} → ${dayjs(absRange[1]).format('YYYY-MM-DD HH:mm:ss')}`} />
-                  </div>
-                </InlineField>
-                <div style={{ color: '#9CA3AF' }}>
-                  Sets the default absolute range when pages first load. Prevents empty data if a zero-width window is detected.
-                </div>
-              </div>
-            </div>
-
-          </>
-        )}
         {activeTab === 'ai' && (
           <>
             <div style={{
@@ -441,7 +362,7 @@ const ConfigForm: React.FC = () => {
                     />
                   </InlineField>
                   <div style={{ color: '#9CA3AF', marginTop: 6 }}>
-                    Your OpenRouter API key. Get one from https:
+                    Your OpenRouter API key. Get one from https://openrouter.ai
                   </div>
                 </div>
                 <div>
@@ -519,8 +440,7 @@ const ConfigForm: React.FC = () => {
             </div>
           </>
         )}
-        {
-        }
+
         {activeTab === 'definitions' && (
           <>
             <div style={{
@@ -547,9 +467,11 @@ const ConfigForm: React.FC = () => {
 
         {activeTab === 'privacy' && renderPlaceholder('Privacy')}
 
-        <div style={{ position: 'sticky', bottom: 0, paddingTop: 8, paddingBottom: 8, background: 'rgba(17,17,17,0.95)', backdropFilter: 'blur(6px)', display: 'flex', justifyContent: 'flex-end' }}>
-          <Button onClick={save} icon={<SaveOutlined />}>Save Settings</Button>
-        </div>
+        {activeTab !== 'privacy' && (
+          <div style={{ position: 'sticky', bottom: 0, paddingTop: 8, paddingBottom: 8, background: 'rgba(17,17,17,0.95)', backdropFilter: 'blur(6px)', display: 'flex', justifyContent: 'flex-end' }}>
+            <Button onClick={save} icon={<SaveOutlined />}>Save Settings</Button>
+          </div>
+        )}
       </div>
     </div>
   );
