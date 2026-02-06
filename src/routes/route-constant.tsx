@@ -17,6 +17,7 @@ const TeamsPage = React.lazy(() => import('../pages/teams/teams.page'));
 const TeamsManagePage = React.lazy(() => import('../pages/teams/teams-manage.page'));
 const SettingsPage = React.lazy(() => import('../pages/settings/settings.page'));
 const AgentManagerRoutes = React.lazy(() => import('../agent-manager/AgentManagerRoutes'));
+const InventoryManagerRoutes = React.lazy(() => import('../inventory-manager/InventoryManagerRoutes'));
 
 export const appRoutes: AppRoute[] = [
   {
@@ -145,6 +146,13 @@ export const appRoutes: AppRoute[] = [
     name: 'agentManager',
     title: 'Agent Manager',
     showInMenu: false,
+  },
+  {
+    path: '/inventory-manager/*',
+    element: <InventoryManagerRoutes />,
+    name: 'inventoryManager',
+    title: 'Inventory Manager',
+    showInMenu: true,
   },
 ];
 

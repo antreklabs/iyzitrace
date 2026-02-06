@@ -94,6 +94,12 @@
     },
     {
       "type": "page",
+      "name": "Inventory Manager",
+      "path": "/a/iyzitrace-app/inventory-manager",
+      "addToNav": true
+    },
+    {
+      "type": "page",
       "icon": "cog",
       "name": "Configuration",
       "path": "/plugins/iyzitrace-app",
