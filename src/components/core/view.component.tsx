@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Dropdown, Modal, Form, Input, message } from 'antd';
-import { SaveOutlined, EditOutlined, DeleteOutlined, CloseOutlined } from '@ant-design/icons';
+import { SaveOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getDefaultSearchQuery } from '../../api/service/query.service';
 import { getPluginSettings, savePluginSettings } from '../../api/service/settings.service';
 
 interface ViewData {
@@ -23,7 +22,7 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  
+
   const [selectedView, setSelectedView] = useState<ViewData | null>(null);
   const [views, setViews] = useState<ViewData[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -38,7 +37,7 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
     if (Array.isArray(views) && views.length > 0) {
       const searchParams = new URLSearchParams(location.search);
       const viewIdFromUrl = searchParams.get('viewId');
-      
+
       if (viewIdFromUrl) {
         const matchingView = views.find(v => v.id === viewIdFromUrl);
         if (matchingView && (!selectedView || selectedView.id !== matchingView.id)) {
@@ -53,7 +52,7 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
     if (!selectedView && Array.isArray(views) && views.length > 0) {
       const searchParams = new URLSearchParams(location.search);
       const viewIdFromUrl = searchParams.get('viewId');
-      
+
       if (viewIdFromUrl) {
         const matchingView = views.find(v => v.id === viewIdFromUrl);
         if (matchingView) {
@@ -62,7 +61,7 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
           return;
         }
       }
-      
+
       const last = safeReadLastSelected();
       const candidate = last && last.pageName === pageName
         ? views.find(v => v.id === last.viewId) || views[0]
@@ -80,7 +79,7 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
       const settings = await getPluginSettings();
       const pageViews = settings.pageViews || [];
       const currentPageViews = pageViews.filter((view: ViewData) => view.page === pageName);
-      
+
       if (currentPageViews.length > 0) {
         setViews(currentPageViews as ViewData[]);
         autoSelectView(currentPageViews as ViewData[]);
@@ -91,7 +90,7 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
           const parsedViews = JSON.parse(localViews);
           setViews(parsedViews as ViewData[]);
           autoSelectView(parsedViews as ViewData[]);
-      } else {
+        } else {
           const created = await ensureDefaultView();
           if (created) {
             setViews([created]);
@@ -163,15 +162,15 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
   const writeLastSelected = (viewId: string) => {
     try {
       localStorage.setItem(`lastSelectedPageView_${pageName}`, JSON.stringify({ pageName, viewId }));
-    } catch {}
+    } catch { }
   };
 
   const autoSelectView = (list: ViewData[]) => {
     if (!Array.isArray(list) || list.length === 0) return;
-    
+
     const searchParams = new URLSearchParams(location.search);
     const viewIdFromUrl = searchParams.get('viewId');
-    
+
     if (viewIdFromUrl) {
       const matchingView = list.find(v => v.id === viewIdFromUrl);
       if (matchingView) {
@@ -180,14 +179,14 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
         return;
       }
     }
-    
+
     const last = safeReadLastSelected();
     const candidate = last && last.pageName === pageName
       ? list.find(v => v.id === last.viewId) || list[0]
       : list[0];
     setSelectedView(candidate);
     writeLastSelected(candidate.id);
-    
+
     if (candidate.query) {
       const queryString = candidate.query;
       const separator = queryString.includes('?') ? '&' : '?';
@@ -223,26 +222,17 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
     }
   };
 
-  const handleClearView = () => {
-    setSelectedView(null);
-    try {
-      localStorage.removeItem(`lastSelectedPageView_${pageName}`);
-    } catch {}
-    const defaultQuery = getDefaultSearchQuery();
-    navigate(`${location.pathname}?${defaultQuery}`, { replace: true });
-  };
-
   const handleModalOk = async () => {
     try {
       setLoading(true);
       const values = await form.validateFields();
-      
+
       let currentQuery = location.search;
       const searchParams = new URLSearchParams(currentQuery);
       searchParams.delete('viewId');
       const cleanQuery = searchParams.toString();
       currentQuery = cleanQuery ? `?${cleanQuery}` : '';
-      
+
       const viewData: ViewData = {
         id: editingView?.id || `view-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
         title: values.title,
@@ -256,9 +246,9 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
       try {
         const settings = await getPluginSettings();
         const pageViews = settings.pageViews || [];
-        
+
         if (editingView) {
-          const updatedViews = pageViews.map((view: ViewData) => 
+          const updatedViews = pageViews.map((view: ViewData) =>
             view.id === editingView.id ? { ...view, query: currentQuery } : view
           );
           await savePluginSettings({ ...settings, pageViews: updatedViews });
@@ -266,14 +256,14 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
           const updatedViews = [...pageViews, viewData];
           await savePluginSettings({ ...settings, pageViews: updatedViews });
         }
-        
+
         message.success('View saved successfully');
       } catch (pluginError) {
-        
+
         const localViews = JSON.parse(localStorage.getItem(`iyzitrace-views-${pageName}`) || '[]');
-        
+
         if (editingView) {
-          const updatedViews = localViews.map((view: ViewData) => 
+          const updatedViews = localViews.map((view: ViewData) =>
             view.id === editingView.id ? { ...view, query: currentQuery } : view
           );
           localStorage.setItem(`iyzitrace-views-${pageName}`, JSON.stringify(updatedViews));
@@ -281,11 +271,21 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
           const updatedViews = [...localViews, viewData];
           localStorage.setItem(`iyzitrace-views-${pageName}`, JSON.stringify(updatedViews));
         }
-        
+
         message.success('View saved to local storage');
       }
 
       await loadViews();
+
+      // Select the newly created/updated view
+      if (!editingView) {
+        setSelectedView(viewData);
+        writeLastSelected(viewData.id);
+        const separator = viewData.query.includes('?') ? '&' : '?';
+        const urlWithViewId = `${viewData.query}${separator}viewId=${viewData.id}`;
+        navigate(`${location.pathname}${urlWithViewId}`, { replace: true });
+      }
+
       setModalVisible(false);
       setEditingView(null);
       form.resetFields();
@@ -307,16 +307,23 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
     if (view) {
       setSelectedView(view);
       writeLastSelected(view.id);
-      
+
       const queryString = view.query || '';
       const separator = queryString.includes('?') ? '&' : '?';
       const urlWithViewId = `${queryString}${separator}viewId=${view.id}`;
-      
+
       navigate(`${location.pathname}${urlWithViewId}`, { replace: true });
     }
   };
 
   const handleViewDelete = async (viewId: string) => {
+    // Find the view to check if it's default
+    const viewToDelete = views.find(v => v.id === viewId);
+    if (viewToDelete?.title === 'default') {
+      message.warning('Default view cannot be deleted');
+      return;
+    }
+
     try {
       try {
         const settings = await getPluginSettings();
@@ -325,7 +332,7 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
         await savePluginSettings({ ...settings, pageViews: updatedViews });
         message.success('View deleted successfully');
       } catch (pluginError) {
-        
+
         const localViews = JSON.parse(localStorage.getItem(`iyzitrace-views-${pageName}`) || '[]');
         const updatedViews = localViews.filter((view: ViewData) => view.id !== viewId);
         localStorage.setItem(`iyzitrace-views-${pageName}`, JSON.stringify(updatedViews));
@@ -336,8 +343,8 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
         const localViewsMirror = JSON.parse(localStorage.getItem(`iyzitrace-views-${pageName}`) || '[]');
         const localUpdated = localViewsMirror.filter((view: ViewData) => view.id !== viewId);
         localStorage.setItem(`iyzitrace-views-${pageName}`, JSON.stringify(localUpdated));
-      } catch {}
-      
+      } catch { }
+
       try {
         const lastRaw = localStorage.getItem(`lastSelectedPageView_${pageName}`);
         if (lastRaw) {
@@ -346,12 +353,23 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
             localStorage.removeItem(`lastSelectedPageView_${pageName}`);
           }
         }
-      } catch {}
-      
+      } catch { }
+
+      // If deleted view was selected, switch to default view
       if (selectedView?.id === viewId) {
-        setSelectedView(null);
+        const remainingViews = views.filter(v => v.id !== viewId);
+        const defaultView = remainingViews.find(v => v.title === 'default') || remainingViews[0];
+        if (defaultView) {
+          setSelectedView(defaultView);
+          writeLastSelected(defaultView.id);
+          const separator = defaultView.query?.includes('?') ? '&' : '?';
+          const urlWithViewId = `${defaultView.query || ''}${separator}viewId=${defaultView.id}`;
+          navigate(`${location.pathname}${urlWithViewId}`, { replace: true });
+        } else {
+          setSelectedView(null);
+        }
       }
-      
+
       await loadViews();
     } catch (error) {
       message.error('Failed to delete view');
@@ -359,43 +377,48 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
   };
 
   const dropdownItems = [
-    ...views.map(view => ({
-      key: view.id,
-      label: (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            
-            <span>{view.title}</span>
+    ...views.map(view => {
+      const isDefault = view.title === 'default';
+      return {
+        key: view.id,
+        label: (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+
+              <span>{view.title}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Button
+                type="text"
+                size="small"
+                icon={<EditOutlined />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedView(view);
+                  handleUpdateView();
+                }}
+                style={{ color: '#1890ff', padding: '2px 4px' }}
+                title="Update this view"
+              />
+              {!isDefault && (
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<DeleteOutlined />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleViewDelete(view.id);
+                  }}
+                  style={{ color: '#ff4d4f', padding: '2px 4px' }}
+                  title="Delete this view"
+                />
+              )}
+            </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Button
-              type="text"
-              size="small"
-              icon={<EditOutlined />}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedView(view);
-                handleUpdateView();
-              }}
-              style={{ color: '#1890ff', padding: '2px 4px' }}
-              title="Update this view"
-            />
-            <Button
-              type="text"
-              size="small"
-              icon={<DeleteOutlined />}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleViewDelete(view.id);
-              }}
-              style={{ color: '#ff4d4f', padding: '2px 4px' }}
-              title="Delete this view"
-            />
-          </div>
-        </div>
-      ),
-      onClick: () => handleViewSelect(view.id)
-    })),
+        ),
+        onClick: () => handleViewSelect(view.id)
+      };
+    }),
     ...(views.length > 0 ? [{
       key: 'divider',
       type: 'divider' as const
@@ -409,24 +432,14 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
         </div>
       ),
       onClick: handleSaveAsView
-    },
-    ...(selectedView ? [{
-      key: 'clear-view',
-      label: (
-        <div style={{ display: 'flex', alignItems: 'center', padding: '4px 0', color: '#ffd700' }}>
-          <CloseOutlined style={{ marginRight: 8, fontSize: '14px', color: '#ffd700' }} />
-          <span style={{ fontWeight: 500 }}>Clear selection</span>
-        </div>
-      ),
-      onClick: handleClearView
-    }] : [])
+    }
   ];
 
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {
-}
+        }
         <Dropdown
           menu={{ items: dropdownItems }}
           trigger={['click']}
@@ -487,7 +500,7 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
             label="Description"
             name="description"
           >
-            <Input.TextArea 
+            <Input.TextArea
               placeholder="Optional description for this view"
               rows={3}
             />
