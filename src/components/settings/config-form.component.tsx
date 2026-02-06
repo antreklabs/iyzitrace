@@ -6,6 +6,7 @@ import DefinitionsTable, { DEFAULT_DEFINITIONS } from './definitions-table.compo
 import GrafanaLikeRangePicker from '../core/graphanadatepicker';
 import dayjs from 'dayjs';
 import { KeyOutlined, DatabaseOutlined, FieldTimeOutlined, SaveOutlined, FileTextOutlined, RobotOutlined } from '@ant-design/icons';
+import { configureAllDatasourcesAuth } from '../../api/service/observability-auth.service';
 import '../../assets/styles/components/settings/settings.css';
 
 const PLUGIN_ID = 'iyzitrace-app';
@@ -27,6 +28,7 @@ const ConfigForm: React.FC = () => {
   const [prometheusOpts, setPrometheusOpts] = useState<Array<{ label: string; value: string }>>([]);
   const [absRange, setAbsRange] = useState<[number, number]>([Date.now() - 60 * 60 * 1000, Date.now()]);
   const [activeTab, setActiveTab] = useState<typeof TAB_ITEMS[number]>('Defaults');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -54,18 +56,36 @@ const ConfigForm: React.FC = () => {
   }, []);
 
   const save = async () => {
-    await getBackendSrv().post(`/api/plugins/${PLUGIN_ID}/settings`, {
-      jsonData,
-      secureJsonData,
-      enabled: true,
-    });
-    setSecureJsonFields({ ...secureJsonFields, apiKey: !!secureJsonData.apiKey });
+    setIsSaving(true);
     try {
-      const settings = await getBackendSrv().get(`/api/plugins/${PLUGIN_ID}/settings`);
-      if (settings?.jsonData) {
-        setJsonData(settings.jsonData as PluginJsonData);
+      // If API key is being set, configure datasources with authorization header
+      const apiKeyToSave = secureJsonData.apiKey;
+
+      await getBackendSrv().post(`/api/plugins/${PLUGIN_ID}/settings`, {
+        jsonData,
+        secureJsonData,
+        enabled: true,
+      });
+
+      // Configure datasources with the API key for observability platform auth
+      if (apiKeyToSave && apiKeyToSave.trim()) {
+        try {
+          await configureAllDatasourcesAuth(apiKeyToSave.trim());
+        } catch (err) {
+          console.warn('Failed to configure datasource auth headers:', err);
+        }
       }
-    } catch { }
+
+      setSecureJsonFields({ ...secureJsonFields, apiKey: !!secureJsonData.apiKey });
+      try {
+        const settings = await getBackendSrv().get(`/api/plugins/${PLUGIN_ID}/settings`);
+        if (settings?.jsonData) {
+          setJsonData(settings.jsonData as PluginJsonData);
+        }
+      } catch { }
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const renderTabBar = () => (
