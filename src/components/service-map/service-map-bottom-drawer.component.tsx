@@ -374,6 +374,8 @@ const ServiceDetailPanel: React.FC<{
     left: 12px;
     top: 8px;
     width: 340px;
+    display: flex;
+    flex-direction: column;
     background: linear-gradient(
       145deg,
       rgba(15, 23, 42, 0.98) 0%,
@@ -381,49 +383,33 @@ const ServiceDetailPanel: React.FC<{
     );
     border: 1px solid ${statusConfig.color}40;
     border-radius: 16px;
-    padding: 16px;
     color: #ffffff;
     box-shadow: 
       0 10px 30px rgba(0, 0, 0, 0.5),
       0 0 40px ${statusConfig.glow};
-    backdrop-filter: blur(20px);
     max-height: calc(100% - 16px);
-    overflow-y: auto;
+    overflow: hidden;
     z-index: 1000;
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 60%;
-      background: radial-gradient(
-        circle at 50% 0%,
-        ${statusConfig.glow},
-        transparent 70%
-      );
-      border-radius: 24px 24px 0 0;
-      pointer-events: none;
-    }
+  `;
+
+  const scrollableContentStyle = css`
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    padding-bottom: 10px;
     
     &::-webkit-scrollbar {
-      width: 8px;
+      width: 6px;
     }
     
     &::-webkit-scrollbar-track {
       background: rgba(15, 23, 42, 0.5);
-      border-radius: 4px;
+      border-radius: 3px;
     }
     
     &::-webkit-scrollbar-thumb {
-      background: ${statusConfig.color}60;
-      border-radius: 4px;
-      transition: background 0.2s;
-    }
-    
-    &::-webkit-scrollbar-thumb:hover {
-      background: ${statusConfig.color}80;
+      background: ${statusConfig.color}50;
+      border-radius: 3px;
     }
   `;
 
@@ -641,12 +627,19 @@ const ServiceDetailPanel: React.FC<{
     }
   `;
 
+  const buttonsContainerStyle = css`
+    padding: 12px 16px 16px;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(15, 23, 42, 0.95) 20%
+    );
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+  `;
+
   const buttonsRowStyle = css`
     display: flex;
     gap: 12px;
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(148, 163, 184, 0.2);
   `;
 
   const actionButtonStyle = (bgColor: string, hoverColor: string, textColor: string) => css`
@@ -670,144 +663,144 @@ const ServiceDetailPanel: React.FC<{
 
   return (
     <div className={containerStyle}>
-      <div className={headerStyle}>
-        <div className={titleContainerStyle}>
-          <h3 className={titleStyle}>
-            {data.name}
-          </h3>
-          <div className={badgeStyle}>
-            <CloudServerOutlined style={{ fontSize: '14px' }} />
-            SERVICE
+      <div className={scrollableContentStyle}>
+        <div className={headerStyle}>
+          <div className={titleContainerStyle}>
+            <h3 className={titleStyle}>
+              {data.name}
+            </h3>
+            <div className={badgeStyle}>
+              <CloudServerOutlined style={{ fontSize: '14px' }} />
+              SERVICE
+            </div>
           </div>
-        </div>
-        <button onClick={onClose} className={closeButtonStyle}>
-          <CloseOutlined style={{ fontSize: '16px', fontWeight: 'bold' }} />
-        </button>
-      </div>
-
-      <div className={gridStyle}>
-        <div
-          className={sectionStyle}
-        >
-          <h4 className={sectionTitleStyle}>
-            <DatabaseOutlined />
-            Service Info
-          </h4>
-          <div className={dataRowStyle}>
-            <strong>Name</strong>
-            <span>{data.name || 'N/A'}</span>
-          </div>
-          <div className={dataRowStyle}>
-            <strong>Type</strong>
-            <span>{data.type || 'UNKNOWN'}</span>
-          </div>
+          <button onClick={onClose} className={closeButtonStyle}>
+            <CloseOutlined style={{ fontSize: '16px', fontWeight: 'bold' }} />
+          </button>
         </div>
 
-        <div
-          className={sectionStyle}
-        >
-          <h4 className={sectionTitleStyle}>
-            <BarChartOutlined />
-            Metrics
-          </h4>
-          <div className={dataRowStyle}>
-            <strong>Avg Lat</strong>
-            <span>{data.metrics?.avgDurationMs?.toFixed(2) ?? '0.00'} ms</span>
+        <div className={gridStyle}>
+          <div className={sectionStyle}>
+            <h4 className={sectionTitleStyle}>
+              <DatabaseOutlined />
+              Service Info
+            </h4>
+            <div className={dataRowStyle}>
+              <strong>Name</strong>
+              <span>{data.name || 'N/A'}</span>
+            </div>
+            <div className={dataRowStyle}>
+              <strong>Type</strong>
+              <span>{data.type || 'UNKNOWN'}</span>
+            </div>
           </div>
-          <div className={dataRowStyle}>
-            <strong>Min Lat</strong>
-            <span>{data.metrics?.minDurationMs?.toFixed(2) ?? '0.00'} ms</span>
-          </div>
-          <div className={dataRowStyle}>
-            <strong>Max Lat</strong>
-            <span>{data.metrics?.maxDurationMs?.toFixed(2) ?? '0.00'} ms</span>
+
+          <div className={sectionStyle}>
+            <h4 className={sectionTitleStyle}>
+              <BarChartOutlined />
+              Metrics
+            </h4>
+            <div className={dataRowStyle}>
+              <strong>Avg Lat</strong>
+              <span>{data.metrics?.avgDurationMs?.toFixed(2) ?? '0.00'} ms</span>
+            </div>
+            <div className={dataRowStyle}>
+              <strong>Min Lat</strong>
+              <span>{data.metrics?.minDurationMs?.toFixed(2) ?? '0.00'} ms</span>
+            </div>
+            <div className={dataRowStyle}>
+              <strong>Max Lat</strong>
+              <span>{data.metrics?.maxDurationMs?.toFixed(2) ?? '0.00'} ms</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className={statusCardStyle}>
-        <div className={statusLabelStyle}>
-          {statusConfig.label}
+        <div className={statusCardStyle}>
+          <div className={statusLabelStyle}>
+            {statusConfig.label}
+          </div>
+          <div className={statusDescStyle}>
+            System status monitoring active
+          </div>
         </div>
-        <div className={statusDescStyle}>
-          System status monitoring active
-        </div>
-      </div>
 
-      {data.operations && data.operations.length > 0 && (
-        <div style={{ marginBottom: '24px' }}>
-          <h4 className={sectionTitleStyle}>
-            <ApartmentOutlined />
-            Operations ({data.operations.length})
-          </h4>
-          <div className={listContainerStyle}>
-            {data.operations.map((op: Operation, idx: number) => {
-              const typeColor = getOperationTypeColor(op.type || 'GENERAL');
-              const bgColor = typeColor === 'blue' ? '#3b82f6' :
-                typeColor === 'green' ? '#22c55e' :
-                  typeColor === 'orange' ? '#f59e0b' :
-                    typeColor === 'purple' ? '#a855f7' :
-                      typeColor === 'red' ? '#ef4444' :
-                        typeColor === 'yellow' ? '#eab308' :
-                          '#6b7280';
+        {data.operations && data.operations.length > 0 && (
+          <div style={{ marginBottom: '16px' }}>
+            <h4 className={sectionTitleStyle}>
+              <ApartmentOutlined />
+              Operations ({data.operations.length})
+            </h4>
+            <div className={listContainerStyle}>
+              {data.operations.map((op: Operation, idx: number) => {
+                const typeColor = getOperationTypeColor(op.type || 'GENERAL');
+                const bgColor = typeColor === 'blue' ? '#3b82f6' :
+                  typeColor === 'green' ? '#22c55e' :
+                    typeColor === 'orange' ? '#f59e0b' :
+                      typeColor === 'purple' ? '#a855f7' :
+                        typeColor === 'red' ? '#ef4444' :
+                          typeColor === 'yellow' ? '#eab308' :
+                            '#6b7280';
 
-              return (
-                <div
-                  key={idx}
-                  className={operationItemStyle(idx === data.operations!.length - 1)}
-                >
-                  <div className={operationHeaderStyle}>
-                    <span className={operationTypeTagStyle(bgColor)}>
-                      {op.type || 'GENERAL'}
-                    </span>
-                    {op.method && (
-                      <span className={operationMethodTagStyle}>
-                        {op.method}
+                return (
+                  <div
+                    key={idx}
+                    className={operationItemStyle(idx === data.operations!.length - 1)}
+                  >
+                    <div className={operationHeaderStyle}>
+                      <span className={operationTypeTagStyle(bgColor)}>
+                        {op.type || 'GENERAL'}
                       </span>
-                    )}
-                  </div>
-                  <div className={operationNameStyle}>
-                    {op.name}
-                  </div>
-                  <div className={operationMetricsStyle}>
-                    <div className={metricItemStyle}>
-                      <span>Avg Lat: </span>
-                      <span>{op.metrics?.avgDurationMs?.toFixed(2) ?? 0}ms</span>
+                      {op.method && (
+                        <span className={operationMethodTagStyle}>
+                          {op.method}
+                        </span>
+                      )}
                     </div>
-                    <div className={metricItemStyle}>
-                      <span>P95 Lat: </span>
-                      <span>{op.metrics?.p95DurationMs?.toFixed(2) ?? 0}ms</span>
+                    <div className={operationNameStyle}>
+                      {op.name}
+                    </div>
+                    <div className={operationMetricsStyle}>
+                      <div className={metricItemStyle}>
+                        <span>Avg Lat: </span>
+                        <span>{op.metrics?.avgDurationMs?.toFixed(2) ?? 0}ms</span>
+                      </div>
+                      <div className={metricItemStyle}>
+                        <span>P95 Lat: </span>
+                        <span>{op.metrics?.p95DurationMs?.toFixed(2) ?? 0}ms</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      <div className={buttonsRowStyle}>
-        <button
-          onClick={handleNavigateToLogs}
-          className={actionButtonStyle('rgba(59, 130, 246, 0.15)', 'rgba(59, 130, 246, 0.3)', '#60a5fa')}
-        >
-          <BarChartOutlined style={{ fontSize: '16px' }} />
-          Logs
-        </button>
-        <button
-          onClick={handleNavigateToMetrics}
-          className={actionButtonStyle('rgba(34, 197, 94, 0.15)', 'rgba(34, 197, 94, 0.3)', '#4ade80')}
-        >
-          <LineChartOutlined style={{ fontSize: '16px' }} />
-          Metrics
-        </button>
-        <button
-          onClick={handleNavigateToTraces}
-          className={actionButtonStyle('rgba(168, 85, 247, 0.15)', 'rgba(168, 85, 247, 0.3)', '#c084fc')}
-        >
-          <ApartmentOutlined style={{ fontSize: '16px' }} />
-          Traces
-        </button>
+      <div className={buttonsContainerStyle}>
+        <div className={buttonsRowStyle}>
+          <button
+            onClick={handleNavigateToLogs}
+            className={actionButtonStyle('rgba(59, 130, 246, 0.15)', 'rgba(59, 130, 246, 0.3)', '#60a5fa')}
+          >
+            <BarChartOutlined style={{ fontSize: '16px' }} />
+            Logs
+          </button>
+          <button
+            onClick={handleNavigateToMetrics}
+            className={actionButtonStyle('rgba(34, 197, 94, 0.15)', 'rgba(34, 197, 94, 0.3)', '#4ade80')}
+          >
+            <LineChartOutlined style={{ fontSize: '16px' }} />
+            Metrics
+          </button>
+          <button
+            onClick={handleNavigateToTraces}
+            className={actionButtonStyle('rgba(168, 85, 247, 0.15)', 'rgba(168, 85, 247, 0.3)', '#c084fc')}
+          >
+            <ApartmentOutlined style={{ fontSize: '16px' }} />
+            Traces
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -851,8 +844,7 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
   onClose
 }) => {
   const windowHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
-  const [height, setHeight] = useState(Math.floor(windowHeight * 0.75));
-  const [isDragging, setIsDragging] = useState(false);
+  const height = Math.floor(windowHeight * 0.75); // Fixed height, no drag
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const reactFlowInstance = useReactFlow();
@@ -1017,36 +1009,6 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
     setEdges(initialEdges);
   }, [infrastructure?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleMouseDown = useCallback(() => {
-    setIsDragging(true);
-  }, []);
-
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (isDragging) {
-        const newHeight = window.innerHeight - e.clientY;
-        setHeight(Math.max(200, Math.min(800, newHeight)));
-      }
-    },
-    [isDragging]
-  );
-
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  useEffect(() => {
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-    return undefined;
-  }, [isDragging, handleMouseMove, handleMouseUp]);
-
   if (!isOpen) return null;
 
   return (
@@ -1071,24 +1033,19 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
           flexDirection: 'column'
         }}
       >
-        {
-        }
         <div
-          onMouseDown={handleMouseDown}
           style={{
             height: '8px',
-            background: isDragging ? '#3b82f6' : '#334155',
-            cursor: 'ns-resize',
+            background: '#334155',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'background 0.2s ease'
+            justifyContent: 'center'
           }}
         >
           <div style={{
             width: '40px',
             height: '4px',
-            background: isDragging ? '#60a5fa' : '#475569',
+            background: '#475569',
             borderRadius: '2px'
           }} />
         </div>

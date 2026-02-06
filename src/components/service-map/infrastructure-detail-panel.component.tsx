@@ -56,6 +56,8 @@ export const InfrastructureDetailPanel: React.FC<InfrastructureDetailPanelProps>
   const containerStyle = css`
     position: absolute;
     width: 380px;
+    display: flex;
+    flex-direction: column;
     background: linear-gradient(
       145deg,
       rgba(15, 23, 42, 0.98) 0%,
@@ -63,32 +65,20 @@ export const InfrastructureDetailPanel: React.FC<InfrastructureDetailPanelProps>
     );
     border: 1px solid ${statusConfig.color}30;
     border-radius: 16px;
-    padding: 20px;
     color: #ffffff;
     box-shadow: 
       0 12px 40px rgba(0, 0, 0, 0.5),
       0 0 30px ${statusConfig.glow};
-    backdrop-filter: blur(16px);
     max-height: 600px;
-    overflow-y: auto;
+    overflow: hidden;
     z-index: 1000;
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 40%;
-      background: radial-gradient(
-        circle at 50% 0%,
-        ${statusConfig.glow},
-        transparent 60%
-      );
-      border-radius: 16px 16px 0 0;
-      pointer-events: none;
-      opacity: 0.4;
-    }
+  `;
+
+  const scrollableContentStyle = css`
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    padding-bottom: 10px;
     
     &::-webkit-scrollbar {
       width: 6px;
@@ -102,10 +92,6 @@ export const InfrastructureDetailPanel: React.FC<InfrastructureDetailPanelProps>
     &::-webkit-scrollbar-thumb {
       background: ${statusConfig.color}50;
       border-radius: 3px;
-    }
-    
-    &::-webkit-scrollbar-thumb:hover {
-      background: ${statusConfig.color}70;
     }
   `;
 
@@ -157,11 +143,9 @@ export const InfrastructureDetailPanel: React.FC<InfrastructureDetailPanelProps>
     justify-content: center;
     cursor: pointer;
     color: #ef4444;
-    transition: all 0.2s ease;
     
     &:hover {
       background: rgba(239, 68, 68, 0.3);
-      transform: scale(1.1);
     }
   `;
 
@@ -284,6 +268,16 @@ export const InfrastructureDetailPanel: React.FC<InfrastructureDetailPanelProps>
     font-weight: 600;
   `;
 
+  const servicesButtonContainerStyle = css`
+    padding: 12px 20px 20px;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(15, 23, 42, 0.95) 20%
+    );
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+  `;
+
   const servicesButtonStyle = css`
     width: 100%;
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
@@ -303,108 +297,112 @@ export const InfrastructureDetailPanel: React.FC<InfrastructureDetailPanelProps>
 
   return (
     <div className={containerStyle}>
-      <div className={headerStyle}>
-        <div className={titleContainerStyle}>
-          <h3 className={titleStyle}>
-            {infrastructure.name}
-          </h3>
-          <div className={badgeStyle}>
-            <CloudServerOutlined style={{ fontSize: '14px' }} />
-            INFRASTRUCTURE
+      <div className={scrollableContentStyle}>
+        <div className={headerStyle}>
+          <div className={titleContainerStyle}>
+            <h3 className={titleStyle}>
+              {infrastructure.name}
+            </h3>
+            <div className={badgeStyle}>
+              <CloudServerOutlined style={{ fontSize: '14px' }} />
+              INFRASTRUCTURE
+            </div>
+          </div>
+          {onClose && (
+            <button onClick={onClose} className={closeButtonStyle}>
+              <CloseOutlined style={{ fontSize: '16px', fontWeight: 'bold' }} />
+            </button>
+          )}
+        </div>
+
+        <div className={gridStyle}>
+          <div className={sectionStyle}>
+            <h4 className={sectionTitleStyle}>
+              <DatabaseOutlined />
+              Infrastructure
+            </h4>
+            <div className={dataRowStyle}>
+              <strong>IP Address</strong>
+              <span>{infrastructure.ip || 'N/A'}</span>
+            </div>
+            <div className={dataRowStyle}>
+              <strong>OS Version</strong>
+              <span>{infrastructure.osVersion || 'N/A'}</span>
+            </div>
+            <div className={dataRowStyle}>
+              <strong>Type</strong>
+              <span>{infrastructure.type || 'server'}</span>
+            </div>
+          </div>
+
+          <div className={sectionStyle}>
+            <h4 className={sectionTitleStyle}>
+              <BarChartOutlined />
+              Resources
+            </h4>
+            <div className={dataRowStyle}>
+              <strong>CPU</strong>
+              <span>{infrastructure.cpu?.percentage?.toFixed(1) ?? 0}%</span>
+            </div>
+            <div className={dataRowStyle}>
+              <strong>Memory</strong>
+              <span>
+                {infrastructure.memory?.usage?.toFixed(1) ?? 0}/
+                {infrastructure.memory?.capacity?.toFixed(1) ?? 0} GB
+              </span>
+            </div>
+            <div className={dataRowStyle}>
+              <strong>Usage</strong>
+              <span>
+                {(infrastructure.memory?.percentage ? infrastructure?.memory?.percentage * 100 : 0).toFixed(1)}%
+              </span>
+            </div>
           </div>
         </div>
-        {onClose && (
-          <button onClick={onClose} className={closeButtonStyle}>
-            <CloseOutlined style={{ fontSize: '16px', fontWeight: 'bold' }} />
-          </button>
+
+        <div className={statusCardStyle}>
+          <div className={statusLabelStyle}>
+            {statusConfig.label}
+          </div>
+          <div className={statusDescStyle}>
+            Infrastructure monitoring active
+          </div>
+        </div>
+
+        {infrastructure.applications && infrastructure.applications.length > 0 && (
+          <div style={{ marginBottom: '16px' }}>
+            <h4 className={sectionTitleStyle}>
+              <AppstoreOutlined />
+              Applications ({infrastructure.applications.length})
+            </h4>
+            <div className={listContainerStyle}>
+              {infrastructure.applications.map((app, idx) => (
+                <div
+                  key={idx}
+                  className={listItemStyle(idx === infrastructure.applications!.length - 1)}
+                >
+                  <div className={itemNameStyle}>
+                    {app.name}
+                  </div>
+                  <div className={itemMetaStyle}>
+                    <span>{app.platform}</span>
+                    <span>•</span>
+                    <span>v{app.version}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
 
-      <div className={gridStyle}>
-        <div className={sectionStyle}>
-          <h4 className={sectionTitleStyle}>
-            <DatabaseOutlined />
-            Infrastructure
-          </h4>
-          <div className={dataRowStyle}>
-            <strong>IP Address</strong>
-            <span>{infrastructure.ip || 'N/A'}</span>
-          </div>
-          <div className={dataRowStyle}>
-            <strong>OS Version</strong>
-            <span>{infrastructure.osVersion || 'N/A'}</span>
-          </div>
-          <div className={dataRowStyle}>
-            <strong>Type</strong>
-            <span>{infrastructure.type || 'server'}</span>
-          </div>
-        </div>
-
-        <div className={sectionStyle}>
-          <h4 className={sectionTitleStyle}>
-            <BarChartOutlined />
-            Resources
-          </h4>
-          <div className={dataRowStyle}>
-            <strong>CPU</strong>
-            <span>{infrastructure.cpu?.percentage?.toFixed(1) ?? 0}%</span>
-          </div>
-          <div className={dataRowStyle}>
-            <strong>Memory</strong>
-            <span>
-              {infrastructure.memory?.usage?.toFixed(1) ?? 0}/
-              {infrastructure.memory?.capacity?.toFixed(1) ?? 0} GB
-            </span>
-          </div>
-          <div className={dataRowStyle}>
-            <strong>Usage</strong>
-            <span>
-              {(infrastructure.memory?.percentage ? infrastructure?.memory?.percentage * 100 : 0).toFixed(1)}%
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className={statusCardStyle}>
-        <div className={statusLabelStyle}>
-          {statusConfig.label}
-        </div>
-        <div className={statusDescStyle}>
-          Infrastructure monitoring active
-        </div>
-      </div>
-
-      {infrastructure.applications && infrastructure.applications.length > 0 && (
-        <div style={{ marginBottom: '24px' }}>
-          <h4 className={sectionTitleStyle}>
-            <AppstoreOutlined />
-            Applications ({infrastructure.applications.length})
-          </h4>
-          <div className={listContainerStyle}>
-            {infrastructure.applications.map((app, idx) => (
-              <div
-                key={idx}
-                className={listItemStyle(idx === infrastructure.applications!.length - 1)}
-              >
-                <div className={itemNameStyle}>
-                  {app.name}
-                </div>
-                <div className={itemMetaStyle}>
-                  <span>{app.platform}</span>
-                  <span>•</span>
-                  <span>v{app.version}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {infrastructure.services && infrastructure.services.length > 0 && (
-        <button onClick={onServicesClick} className={servicesButtonStyle}>
-          <span>View Services Map ({infrastructure.services.length})</span>
-          <span style={{ fontSize: '24px' }}>→</span>
-        </button>
+        <div className={servicesButtonContainerStyle}>
+          <button onClick={onServicesClick} className={servicesButtonStyle}>
+            <span>View Services Map ({infrastructure.services.length})</span>
+            <span style={{ fontSize: '24px' }}>→</span>
+          </button>
+        </div>
       )}
     </div>
   );

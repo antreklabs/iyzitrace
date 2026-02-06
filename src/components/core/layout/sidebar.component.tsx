@@ -53,6 +53,11 @@ const Sidebar: React.FC = () => {
           icon: <ApiOutlined className="sidebar-menu-icon" />,
           label: 'Agent Manager',
         },
+        {
+          key: 'inventory-manager',
+          icon: <ClusterOutlined className="sidebar-menu-icon" />,
+          label: 'Inventory Manager',
+        },
       ];
 
       if (user.role === 'admin') {

@@ -1,15 +1,12 @@
 import React from 'react';
-import { Outlet, NavLink, useLocation } from "react-router-dom";
-import { Server, Network, Users, FileCode, BarChart3 } from "lucide-react";
-
-import { cn } from "@agent-manager/lib/utils";
+import { Outlet, Link, useLocation } from "react-router-dom";
+import { Server, Network, Users, FileCode } from "lucide-react";
 
 const navItems = [
   { name: "Agents", path: "agents", icon: Server },
   { name: "Topology", path: "topology", icon: Network },
   { name: "Groups", path: "groups", icon: Users },
   { name: "Configs", path: "configs", icon: FileCode },
-  { name: "Telemetry", path: "telemetry", icon: BarChart3 },
 ];
 
 export default function Layout() {
@@ -19,37 +16,87 @@ export default function Layout() {
   const currentPath = location.pathname.split('/').pop() || 'agents';
 
   return (
-    <div className="flex flex-col h-full w-full overflow-hidden">
-      {/* Tab Navigation */}
-      <div className="flex items-center gap-1 px-4 py-2 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <span className="text-sm font-semibold text-muted-foreground mr-4">Agent Manager</span>
-        <nav className="flex items-center gap-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentPath === item.path ||
-              (currentPath === 'agent-manager' && item.path === 'agents');
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', overflow: 'hidden' }}>
+      {/* Tab Navigation - Same style as Inventory Manager */}
+      <header style={{
+        background: '#1a1a1a',
+        borderBottom: '1px solid #2a2a2a',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+      }}>
+        <div style={{
+          maxWidth: '1600px',
+          margin: '0 auto',
+          padding: '0 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          height: '56px',
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            fontSize: '18px',
+            fontWeight: 700,
+            color: '#f1f5f9',
+          }}>
+            <Server style={{ width: '24px', height: '24px' }} />
+            <span>Agent Manager</span>
+          </div>
 
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {item.name}
-              </NavLink>
-            );
-          })}
-        </nav>
-      </div>
+          <nav style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+          }}>
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentPath === item.path ||
+                (currentPath === 'agent-manager' && item.path === 'agents');
+
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    textDecoration: 'none',
+                    transition: 'all 0.2s',
+                    background: isActive ? '#3b82f6' : 'transparent',
+                    color: isActive ? 'white' : '#888888',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.background = '#2a2a2a';
+                      e.currentTarget.style.color = '#f1f5f9';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.color = '#888888';
+                    }
+                  }}
+                >
+                  <Icon style={{ width: '16px', height: '16px' }} />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      </header>
 
       {/* Page Content */}
-      <div className="flex-1 overflow-auto">
+      <div style={{ flex: 1, overflow: 'auto', background: '#111111' }}>
         <Outlet />
       </div>
     </div>

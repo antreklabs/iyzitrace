@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FileText, X } from "lucide-react";
 import useSWR from "swr";
 
@@ -54,8 +54,17 @@ export function TelemetryLogsView({
 }: TelemetryLogsViewProps) {
   const [logsData, setLogsData] = useState<LogData[]>([]);
   const [severityFilter, setSeverityFilter] = useState<string>("all");
-  const [searchFilter, setSearchFilter] = useState<string>("");
+  const [searchInput, setSearchInput] = useState<string>(""); // User input (immediate)
+  const [searchFilter, setSearchFilter] = useState<string>(""); // Debounced value for query
   const [timeRange, setTimeRange] = useState<"1h" | "6h" | "24h">("1h");
+
+  // Debounce search input - only update searchFilter after user stops typing
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setSearchFilter(searchInput);
+    }, 500); // 500ms debounce
+    return () => clearTimeout(timeoutId);
+  }, [searchInput]);
 
   const entityType = agentId ? "agent" : "group";
   const entityId = agentId || groupId;
@@ -129,21 +138,20 @@ export function TelemetryLogsView({
     );
   };
 
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
-
   const logCountText =
     logsData.length > 0
-      ? `${logsData.length} logs in last hour`
-      : "No logs available";
+      ? `${logsData.length} logs in last ${timeRange}`
+      : isLoading
+        ? "Loading..."
+        : "No logs available";
 
   const handleClearFilters = () => {
     setSeverityFilter("all");
+    setSearchInput("");
     setSearchFilter("");
   };
 
-  const hasActiveFilters = severityFilter !== "all" || searchFilter !== "";
+  const hasActiveFilters = severityFilter !== "all" || searchInput !== "";
 
   return (
     <Card>
@@ -192,8 +200,8 @@ export function TelemetryLogsView({
             <div className="flex-1 min-w-[200px]">
               <Input
                 placeholder="Search logs..."
-                value={searchFilter}
-                onChange={(e) => setSearchFilter(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 className="w-full"
               />
             </div>
@@ -215,8 +223,8 @@ export function TelemetryLogsView({
                   key={range}
                   onClick={() => setTimeRange(range)}
                   className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${timeRange === range
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
                     }`}
                 >
                   {range}
@@ -293,9 +301,14 @@ export function TelemetryLogsView({
               </div>
             );
           })}
-          {logsData.length === 0 && (
+          {logsData.length === 0 && !isLoading && (
             <div className="text-center py-8 text-gray-500">
               No logs available
+            </div>
+          )}
+          {isLoading && logsData.length === 0 && (
+            <div className="flex justify-center py-8">
+              <LoadingSpinner />
             </div>
           )}
         </ScrollArea>

@@ -10,7 +10,6 @@ import '@agent-manager/styles/agent-manager.css';
 const AgentsPage = React.lazy(() => import('@agent-manager/pages/Agents'));
 const GroupsPage = React.lazy(() => import('@agent-manager/pages/Groups'));
 const ConfigsPage = React.lazy(() => import('@agent-manager/pages/Configs'));
-const TelemetryPage = React.lazy(() => import('@agent-manager/pages/Telemetry'));
 const TopologyPage = React.lazy(() => import('@agent-manager/pages/Topology'));
 
 const AgentManagerRoutes: React.FC = () => {
@@ -32,7 +31,6 @@ const AgentManagerRoutes: React.FC = () => {
                                     <Route path="configs" element={<ConfigsPage />} />
                                     <Route path="configs/new" element={<ConfigsPage mode="create" />} />
                                     <Route path="configs/:configId/edit" element={<ConfigsPage mode="edit" />} />
-                                    <Route path="telemetry" element={<TelemetryPage />} />
                                     <Route path="topology" element={<TopologyPage />} />
                                 </Route>
                             </Routes>

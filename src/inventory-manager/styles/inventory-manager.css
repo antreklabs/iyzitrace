@@ -1,0 +1,244 @@
+.inventory-manager-root {
+    min-height: 100vh;
+    background: #111111;
+    color: #f1f5f9;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Header */
+.inventory-header {
+    background: #1a1a1a;
+    border-bottom: 1px solid #2a2a2a;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.inventory-header-content {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+}
+
+.inventory-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #f1f5f9;
+}
+
+/* Navigation */
+.inventory-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.inventory-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #888888;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.inventory-nav-item:hover {
+    background: #2a2a2a;
+    color: #f1f5f9;
+}
+
+.inventory-nav-item.active {
+    background: #3b82f6;
+    color: white;
+}
+
+.inventory-refresh-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: #888888;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.inventory-refresh-btn:hover {
+    background: #2a2a2a;
+    color: #f1f5f9;
+}
+
+/* Main Content */
+.inventory-main {
+    min-height: calc(100vh - 56px);
+    background: #111111;
+}
+
+/* Loading State */
+.inventory-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: #111111;
+    color: #888888;
+}
+
+.inventory-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #2a2a2a;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Ant Design Overrides for Dark Theme */
+.inventory-manager-root .ant-table {
+    background: transparent !important;
+}
+
+.inventory-manager-root .ant-table-thead>tr>th {
+    background: #111111 !important;
+    color: #888888 !important;
+    border-bottom: 1px solid #2a2a2a !important;
+}
+
+.inventory-manager-root .ant-table-tbody>tr>td {
+    background: #1a1a1a !important;
+    color: #f1f5f9 !important;
+    border-bottom: 1px solid #2a2a2a !important;
+}
+
+.inventory-manager-root .ant-table-tbody>tr:hover>td {
+    background: #2a2a2a !important;
+}
+
+.inventory-manager-root .ant-input {
+    background: #1a1a1a !important;
+    border-color: #2a2a2a !important;
+    color: #f1f5f9 !important;
+}
+
+.inventory-manager-root .ant-input::placeholder {
+    color: #666666 !important;
+}
+
+.inventory-manager-root .ant-select-selector {
+    background: #1a1a1a !important;
+    border-color: #2a2a2a !important;
+    color: #f1f5f9 !important;
+}
+
+.inventory-manager-root .ant-select-dropdown {
+    background: #1a1a1a !important;
+}
+
+.inventory-manager-root .ant-select-item {
+    color: #f1f5f9 !important;
+}
+
+.inventory-manager-root .ant-select-item-option-selected {
+    background: #3b82f6 !important;
+}
+
+.inventory-manager-root .ant-pagination-item {
+    background: #1a1a1a !important;
+    border-color: #2a2a2a !important;
+}
+
+.inventory-manager-root .ant-pagination-item a {
+    color: #f1f5f9 !important;
+}
+
+.inventory-manager-root .ant-pagination-item-active {
+    background: #3b82f6 !important;
+    border-color: #3b82f6 !important;
+}
+
+.inventory-manager-root .ant-tree {
+    background: transparent !important;
+    color: #f1f5f9 !important;
+}
+
+.inventory-manager-root .ant-tree-switcher {
+    color: #666666 !important;
+}
+
+.inventory-manager-root .ant-tree-node-content-wrapper:hover {
+    background: #2a2a2a !important;
+}
+
+.inventory-manager-root .ant-drawer-header {
+    background: #1a1a1a !important;
+    border-bottom: 1px solid #2a2a2a !important;
+}
+
+.inventory-manager-root .ant-drawer-header-title {
+    color: #f1f5f9 !important;
+}
+
+.inventory-manager-root .ant-drawer-body {
+    background: #111111 !important;
+}
+
+.inventory-manager-root .ant-drawer-close {
+    color: #888888 !important;
+}
+
+.inventory-manager-root .ant-collapse {
+    background: transparent !important;
+    border: none !important;
+}
+
+.inventory-manager-root .ant-collapse>.ant-collapse-item {
+    border-bottom: 1px solid #2a2a2a !important;
+}
+
+.inventory-manager-root .ant-collapse>.ant-collapse-item>.ant-collapse-header {
+    color: #f1f5f9 !important;
+    background: #1a1a1a !important;
+}
+
+.inventory-manager-root .ant-collapse>.ant-collapse-item>.ant-collapse-header:hover {
+    background: #2a2a2a !important;
+}
+
+.inventory-manager-root .ant-collapse-content {
+    background: #111111 !important;
+    border-top: 1px solid #2a2a2a !important;
+}
+
+.inventory-manager-root .ant-segmented {
+    background: #1a1a1a !important;
+}
+
+.inventory-manager-root .ant-segmented-item {
+    color: #888888 !important;
+}
+
+.inventory-manager-root .ant-segmented-item-selected {
+    background: #3b82f6 !important;
+    color: white !important;
+}

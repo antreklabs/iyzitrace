@@ -48,11 +48,6 @@ export interface Definitions {
 }
 
 export interface PluginJsonData {
-    defaultLokiUid?: string;
-    defaultTempoUid?: string;
-    defaultPrometheusUid?: string;
-    defaultTimeRanges?: string[];
-    defaultAbsoluteRange?: [number, number];
     serviceMap?: ServiceMapItem[];
     definitions?: Definitions;
     aiConfig?: {
