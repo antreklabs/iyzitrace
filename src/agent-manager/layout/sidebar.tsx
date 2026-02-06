@@ -3,7 +3,6 @@ import {
   Server,
   Users,
   FileText,
-  BarChart3,
   GitBranch,
   Sparkle,
   ExternalLink,
@@ -61,12 +60,6 @@ export function AppSidebar() {
       title: "Configs",
       url: "configs",
       icon: FileText,
-    },
-    {
-      key: "telemetry",
-      title: "Telemetry",
-      url: "telemetry",
-      icon: BarChart3,
     },
   ];
 

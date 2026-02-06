@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, NavLink, useLocation } from "react-router-dom";
-import { Server, Network, Users, FileCode, BarChart3 } from "lucide-react";
+import { Server, Network, Users, FileCode } from "lucide-react";
 
 import { cn } from "@agent-manager/lib/utils";
 
@@ -9,7 +9,6 @@ const navItems = [
   { name: "Topology", path: "topology", icon: Network },
   { name: "Groups", path: "groups", icon: Users },
   { name: "Configs", path: "configs", icon: FileCode },
-  { name: "Telemetry", path: "telemetry", icon: BarChart3 },
 ];
 
 export default function Layout() {
