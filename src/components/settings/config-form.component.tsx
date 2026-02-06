@@ -29,6 +29,7 @@ const ConfigForm: React.FC = () => {
   const [absRange, setAbsRange] = useState<[number, number]>([Date.now() - 60 * 60 * 1000, Date.now()]);
   const [activeTab, setActiveTab] = useState<typeof TAB_ITEMS[number]>('Defaults');
   const [isSaving, setIsSaving] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     (async () => {
