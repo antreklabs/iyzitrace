@@ -31,13 +31,6 @@
 }
 
 /* Infrastructure Node */
-.infra-node {
-    transition: all 0.2s ease;
-}
-
-.infra-node:hover {
-    transform: scale(1.02);
-}
 
 .infra-node-card {
     background: #2a2a2a;

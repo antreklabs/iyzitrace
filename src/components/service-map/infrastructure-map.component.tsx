@@ -231,7 +231,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
     if (!reactFlowInstance) return;
 
     if (!nodeId) {
-      reactFlowInstance.fitView({ padding: 0.2, duration: 500 });
+      reactFlowInstance.fitView({ padding: 0.2 });
       return;
     }
 
@@ -252,7 +252,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
 
       reactFlowInstance.fitBounds(
         { x, y, width, height },
-        { padding: 0.1, duration: 500 }
+        { padding: 0.1 }
       );
     } else {
       const parentNode = nodes.find(n => n.id === node.parentNode);
@@ -262,7 +262,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
       reactFlowInstance.setCenter(
         absoluteX + 90,
         absoluteY + 120,
-        { zoom: 1.5, duration: 500 }
+        { zoom: 1.5 }
       );
     }
   }, [nodes, reactFlowInstance]);
@@ -490,49 +490,15 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               nodeTypes={nodeTypes}
-              nodesDraggable={true}
+              nodesDraggable={false}
               nodesConnectable={false}
               fitView
               fitViewOptions={{ padding: 0.2 }}
               style={{ background: '#0f172a' }}
               minZoom={0.1}
               maxZoom={2.5}
-              onNodeDragStop={async (_, node) => {
-
-                if (node.type === 'group') {
-                  const regionId = node.id.replace('group::', '');
-                  const region = data?.regions?.find((r: any) => r.id === regionId);
-                  if (region) {
-                    (region as any).groupPosition = { x: Math.round(node.position.x), y: Math.round(node.position.y) };
-                  }
-                } else {
-                  const infraId = node.id;
-                  for (const region of (data?.regions || [])) {
-                    const infra = region.infrastructures?.find((i: any) => i.id === infraId);
-                    if (infra) {
-                      (infra as any).position = { x: Math.round(node.position.x), y: Math.round(node.position.y) };
-                      break;
-                    }
-                  }
-                }
-
-                await savePositionsToView();
-              }}
               onNodeClick={(_, node) => {
-                if (node.type === 'group') {
-                  const groupChildren = nodes.filter(n => n.parentNode === node.id);
-                  if (groupChildren.length > 0) {
-                    reactFlowInstance.fitView({
-                      nodes: [node, ...groupChildren],
-                      padding: 0.3
-                    });
-                  } else {
-                    reactFlowInstance.fitView({
-                      nodes: [node],
-                      padding: 0.3
-                    });
-                  }
-                } else {
+                if (node.type !== 'group') {
                   const nodeId = node.data?.infrastructure?.id || node.id;
                   if (nodeId) {
                     setSelectedNodeId(nodeId);
