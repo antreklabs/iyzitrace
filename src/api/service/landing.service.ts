@@ -17,6 +17,29 @@ export const isApiKeySet = async (): Promise<boolean> => {
   }
 };
 
+export const isPlatformRunning = async (): Promise<boolean> => {
+  try {
+    // Check if the observability platform is running by hitting the inventory service health endpoint
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    try {
+      await fetch('http://localhost:8082/health', {
+        method: 'GET',
+        signal: controller.signal,
+        mode: 'no-cors',
+      });
+      clearTimeout(timeoutId);
+      return true;
+    } catch {
+      clearTimeout(timeoutId);
+      return false;
+    }
+  } catch (error) {
+    return false;
+  }
+};
+
 export const hasTempoDataSource = async (): Promise<boolean> => {
   try {
     const datasources = await getBackendSrv().get('/api/datasources');
@@ -81,7 +104,7 @@ export const hasOrphanServicesAssigned = async (): Promise<boolean> => {
       from: String(Date.now() - 86400000),
       to: String(Date.now()),
     });
-    
+
     const orphanServices = await getOrphanServices(filterModel);
     return orphanServices.length === 0;
   } catch (error) {
@@ -163,6 +186,7 @@ export const isSettingsActive = async (): Promise<boolean> => {
 };
 
 export const getSetupStepStatuses = async (): Promise<{
+  platform: boolean;
   apiKey: boolean;
   tempo: boolean;
   loki: boolean;
@@ -175,6 +199,7 @@ export const getSetupStepStatuses = async (): Promise<{
 }> => {
   try {
     const [
+      platform,
       apiKey,
       tempo,
       loki,
@@ -185,6 +210,7 @@ export const getSetupStepStatuses = async (): Promise<{
       orphanServices,
       ai,
     ] = await Promise.all([
+      isPlatformRunning(),
       isApiKeySet(),
       hasTempoDataSource(),
       hasLokiDataSource(),
@@ -197,6 +223,7 @@ export const getSetupStepStatuses = async (): Promise<{
     ]);
 
     return {
+      platform,
       apiKey,
       tempo,
       loki,
@@ -209,6 +236,7 @@ export const getSetupStepStatuses = async (): Promise<{
     };
   } catch (error) {
     return {
+      platform: false,
       apiKey: false,
       tempo: false,
       loki: false,

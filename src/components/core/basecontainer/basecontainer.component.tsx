@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 import '../../../assets/styles/base/basecontainer.component.css';
 import BaseContainerHeader from './basecontainerheader.component';
-import { areDatasourcesConfigured } from '../../../api/service/observability-auth.service';
+import { isApiKeySet } from '../../../api/service/landing.service';
 
 interface BaseConatinerProps {
   title: string;
@@ -21,7 +21,7 @@ const BaseContainer: React.FC<BaseConatinerProps> = ({ title, children, showHead
   useEffect(() => {
     const checkApiKey = async () => {
       try {
-        const configured = await areDatasourcesConfigured();
+        const configured = await isApiKeySet();
         setApiKeyMissing(!configured);
       } catch {
         setApiKeyMissing(true);

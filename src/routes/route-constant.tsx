@@ -15,7 +15,8 @@ const ExceptionsPage = React.lazy(() => import('../pages/exceptions/exceptions.p
 const ExceptionDetailPage = React.lazy(() => import('../pages/exceptions/exception-detail.page'));
 const TeamsPage = React.lazy(() => import('../pages/teams/teams.page'));
 const TeamsManagePage = React.lazy(() => import('../pages/teams/teams-manage.page'));
-const SettingsPage = React.lazy(() => import('../pages/settings/settings.page'));
+const InternalSettingsPage = React.lazy(() => import('../pages/settings/internal-settings.page'));
+const SetupWizardPage = React.lazy(() => import('../pages/wizard/wizard.page'));
 const AgentManagerRoutes = React.lazy(() => import('../agent-manager/AgentManagerRoutes'));
 const InventoryManagerRoutes = React.lazy(() => import('../inventory-manager/InventoryManagerRoutes'));
 
@@ -26,6 +27,13 @@ export const appRoutes: AppRoute[] = [
     name: 'landing',
     title: 'Home',
     showInMenu: true,
+  },
+  {
+    path: '/wizard',
+    element: <SetupWizardPage />,
+    name: 'wizard',
+    title: 'Setup Wizard',
+    showInMenu: false,
   },
   {
     path: '/landing',
@@ -135,7 +143,7 @@ export const appRoutes: AppRoute[] = [
   },
   {
     path: '/settings',
-    element: <SettingsPage />,
+    element: <InternalSettingsPage />,
     name: 'settings',
     title: 'Settings',
     showInMenu: true,
