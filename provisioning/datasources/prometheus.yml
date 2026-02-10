@@ -6,7 +6,7 @@ datasources:
     uid: prometheus-platform
     access: proxy
     orgId: 1
-    url: http://host.docker.internal/datasource/metrics
+    url: http://host.docker.internal/query/v1/metrics/
     basicAuth: false
     isDefault: false
     version: 1

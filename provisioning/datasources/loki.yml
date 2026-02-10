@@ -6,6 +6,6 @@ datasources:
     uid: loki-platform
     access: proxy
     orgId: 1
-    url: http://host.docker.internal/datasource/logs
+    url: http://host.docker.internal/query/v1/logs/
     isDefault: false
     editable: true
