@@ -54,45 +54,6 @@ interface SetupStep {
   done: boolean;
 }
 
-const STEPS_INFO: Record<string, { description: string; learnMoreUrl: string }> = {
-  apiKey: {
-    description: 'Configure your IyziTrace API key to enable secure communication between your services and the observability platform.',
-    learnMoreUrl: 'https://beta.iyzitrace.com/product',
-  },
-  tempo: {
-    description: 'Add Tempo datasource to collect and visualize distributed traces from your microservices.',
-    learnMoreUrl: 'https://beta.iyzitrace.com/product',
-  },
-  loki: {
-    description: 'Add Loki datasource to aggregate and query logs from all your applications and infrastructure.',
-    learnMoreUrl: 'https://beta.iyzitrace.com/product',
-  },
-  prometheus: {
-    description: 'Add Prometheus datasource to collect metrics and monitor the health and performance of your services.',
-    learnMoreUrl: 'https://beta.iyzitrace.com/product',
-  },
-  traces: {
-    description: 'Start sending distributed traces to track request flows across your microservices architecture.',
-    learnMoreUrl: 'https://beta.iyzitrace.com/product',
-  },
-  logs: {
-    description: 'Begin collecting logs from your applications to enable powerful search, filtering, and correlation with traces.',
-    learnMoreUrl: 'https://beta.iyzitrace.com/product',
-  },
-  metrics: {
-    description: 'Send metrics data to monitor service performance, resource usage, and system health in real-time.',
-    learnMoreUrl: 'https://beta.iyzitrace.com/product',
-  },
-  orphanServices: {
-    description: 'Map orphan services to their infrastructure hosts to get a complete view of your service topology.',
-    learnMoreUrl: 'https://beta.iyzitrace.com/product',
-  },
-  ai: {
-    description: 'Configure AI Assistant with your API key to get intelligent insights and optimization recommendations.',
-    learnMoreUrl: 'https://beta.iyzitrace.com/product',
-  },
-};
-
 interface MenuCardProps {
   item: typeof NAV_ITEMS[0];
   sectionStatuses: Record<SectionKey, boolean>;
@@ -157,8 +118,6 @@ const StepRow: React.FC<StepRowProps> = ({ step }) => {
     return '';
   };
 
-  const stepInfo = STEPS_INFO[step.key];
-
   const handleGetStarted = () => {
     if (step.route) {
       navigate(step.route);
@@ -176,36 +135,6 @@ const StepRow: React.FC<StepRowProps> = ({ step }) => {
           {step.title}
         </div>
       </div>
-
-      {!step.done && (
-        <div
-          className="landing-info-button-wrapper"
-          onMouseEnter={() => setShowTooltip(true)}
-          onMouseLeave={() => setShowTooltip(false)}
-        >
-          <button className="landing-info-button">
-            <InfoCircleOutlined className="landing-info-icon" />
-          </button>
-
-          {showTooltip && (
-            <div className="landing-tooltip">
-              <div className="landing-tooltip-description">
-                {stepInfo?.description}
-              </div>
-
-              <div className="landing-tooltip-actions">
-                <Button
-                  size="sm"
-                  variant="primary"
-                  onClick={handleGetStarted}
-                >
-                  Get Started
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };
@@ -241,6 +170,13 @@ const LandingPage: React.FC = () => {
         setSectionStatuses(statuses);
 
         const setupSteps: SetupStep[] = [
+          {
+            key: 'platform',
+            title: 'Install Observability Platform',
+            description: 'Run the platform with Docker Desktop',
+            route: '/a/iyzitrace-app/wizard',
+            done: stepStatuses.platform
+          },
           {
             key: 'apiKey',
             title: 'Set Api Key',
@@ -358,9 +294,6 @@ const LandingPage: React.FC = () => {
             <Icon name="check" />
             <Text>Your workspace is ready</Text>
           </div>
-          <Button onClick={handleConnectDataSource}>
-            Connect Data Source
-          </Button>
         </div>
       </div>
 
