@@ -7,9 +7,10 @@
     "keywords": [
       "app"
     ],
-    "description": "",
+    "description": "A comprehensive observability platform for distributed tracing, service map visualization, log analysis, exception tracking, and AI-powered insights.",
     "author": {
-      "name": "Easytrace"
+      "name": "Antrek Labs",
+      "url": "https://antreklabs.com"
     },
     "logos": {
       "small": "img/logo.svg",
