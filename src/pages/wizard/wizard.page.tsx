@@ -129,24 +129,6 @@ const SetupWizardPage: React.FC = () => {
         }
     }, [currentStep]);
 
-    // Load saved API key when entering Step 3
-    useEffect(() => {
-        if (currentStep === 'apikey' && !apiKeySaved) {
-            const loadSavedApiKey = async () => {
-                try {
-                    const settings = await getBackendSrv().get(`/api/plugins/${PLUGIN_ID}/settings`);
-                    // Check if secureJsonFields indicates apiKey is set
-                    if (settings?.secureJsonFields?.apiKey) {
-                        setApiKey('••••••••••••••••'); // Masked placeholder
-                        setApiKeySaved(true);
-                    }
-                } catch (err) {
-                    console.error('Failed to load API key status:', err);
-                }
-            };
-            loadSavedApiKey();
-        }
-    }, [currentStep, apiKeySaved]);
 
     const checkExistingDatasources = async () => {
         const types: Array<'prometheus' | 'loki' | 'tempo'> = ['prometheus', 'loki', 'tempo'];
