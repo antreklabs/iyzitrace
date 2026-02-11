@@ -26,7 +26,7 @@ const DATASOURCE_CONFIGS = {
         uid: 'prometheus-platform',
         access: 'proxy',
         orgId: 1,
-        url: 'http://host.docker.internal/datasource/metrics',
+        url: 'http://host.docker.internal/query/v1/metrics',
         basicAuth: false,
         isDefault: false,
         version: 1,
@@ -49,7 +49,7 @@ const DATASOURCE_CONFIGS = {
         uid: 'loki-platform',
         access: 'proxy',
         orgId: 1,
-        url: 'http://host.docker.internal/datasource/logs',
+        url: 'http://host.docker.internal/query/v1/logs',
         isDefault: false,
         editable: true,
     },
@@ -59,7 +59,7 @@ const DATASOURCE_CONFIGS = {
         uid: 'tempo-platform',
         access: 'proxy',
         orgId: 1,
-        url: 'http://host.docker.internal/datasource/traces',
+        url: 'http://host.docker.internal/query/v1/traces',
         basicAuth: false,
         isDefault: false,
         version: 1,
@@ -92,6 +92,7 @@ const SetupWizardPage: React.FC = () => {
     const [currentStep, setCurrentStep] = useState<WizardStep>('platform');
     const [copied, setCopied] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [skipping, setSkipping] = useState(false);
     const [platformStatus, setPlatformStatus] = useState<StepStatus>({
         checking: false,
         success: null,
@@ -411,6 +412,34 @@ const SetupWizardPage: React.FC = () => {
         }
     };
 
+    const handleSkipWizard = async () => {
+        setSkipping(true);
+        try {
+            const settings = await getBackendSrv().get(`/api/plugins/${PLUGIN_ID}/settings`);
+            const currentJsonData = settings?.jsonData || {};
+
+            await getBackendSrv().post(`/api/plugins/${PLUGIN_ID}/settings`, {
+                jsonData: {
+                    ...currentJsonData,
+                    wizardState: {
+                        completed: true,
+                        skipped: true,
+                        completedAt: new Date().toISOString(),
+                    },
+                },
+                enabled: true,
+            });
+
+            setWizardCompleted(true);
+            window.location.href = '/a/iyzitrace-app/landing';
+        } catch (err) {
+            console.error('Failed to save wizard state:', err);
+            window.location.href = '/a/iyzitrace-app/landing';
+        } finally {
+            setSkipping(false);
+        }
+    };
+
     const allDatasourcesReady =
         datasourceStatus.prometheus.success === true &&
         datasourceStatus.loki.success === true &&
@@ -427,6 +456,9 @@ const SetupWizardPage: React.FC = () => {
                         <p className="wizard-subtitle">
                             Set up and run your observability platform in a few steps
                         </p>
+                        <Button variant="secondary" size="sm" onClick={handleSkipWizard} disabled={skipping} className="wizard-skip-button">
+                            {skipping ? <><Spinner inline size="sm" /> Skipping...</> : 'Skip Setup'}
+                        </Button>
                     </div>
 
                     <div className="wizard-progress">
@@ -577,6 +609,9 @@ const SetupWizardPage: React.FC = () => {
                         <p className="wizard-subtitle">
                             Set up and run your observability platform in a few steps
                         </p>
+                        <Button variant="secondary" size="sm" onClick={handleSkipWizard} disabled={skipping} className="wizard-skip-button">
+                            {skipping ? <><Spinner inline size="sm" /> Skipping...</> : 'Skip Setup'}
+                        </Button>
                     </div>
 
                     <div className="wizard-progress">
@@ -705,6 +740,9 @@ const SetupWizardPage: React.FC = () => {
                         <p className="wizard-subtitle">
                             Set up and run your observability platform in a few steps
                         </p>
+                        <Button variant="secondary" size="sm" onClick={handleSkipWizard} disabled={skipping} className="wizard-skip-button">
+                            {skipping ? <><Spinner inline size="sm" /> Skipping...</> : 'Skip Setup'}
+                        </Button>
                     </div>
 
                     {/* Progress */}
@@ -820,6 +858,9 @@ const SetupWizardPage: React.FC = () => {
                     <p className="wizard-subtitle">
                         Set up and run your observability platform in a few steps
                     </p>
+                    <Button variant="secondary" size="sm" onClick={handleSkipWizard} disabled={skipping} className="wizard-skip-button">
+                        {skipping ? <><Spinner inline size="sm" /> Skipping...</> : 'Skip Setup'}
+                    </Button>
                 </div>
 
                 {/* Progress */}

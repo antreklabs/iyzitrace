@@ -37,6 +37,16 @@
   margin: 0;
 }
 
+.wizard-skip-button {
+  margin-top: 16px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.wizard-skip-button:hover {
+  opacity: 1;
+}
+
 /* Progress Steps */
 .wizard-progress {
   display: flex;
