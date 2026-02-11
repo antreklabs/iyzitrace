@@ -3,4 +3,4 @@
 
 export const BACKEND_HOSTNAME = "http://localhost";
 
-export const apiBaseUrl = `${BACKEND_HOSTNAME}/opamp/api/v1`;
+export const apiBaseUrl = `${BACKEND_HOSTNAME}/api/v1/platform/opamp`;

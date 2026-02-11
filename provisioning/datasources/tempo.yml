@@ -6,7 +6,7 @@ datasources:
     uid: tempo-platform
     access: proxy
     orgId: 1
-    url: http://host.docker.internal/datasource/traces
+    url: http://host.docker.internal/query/v1/traces/
     basicAuth: false
     isDefault: false
     version: 1
