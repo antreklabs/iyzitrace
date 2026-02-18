@@ -3,6 +3,12 @@ import { Spin } from 'antd';
 import FlameGraphRow from './FlameGraphRow';
 import '../../../assets/styles/containers/trace-detail/flame-graph.css';
 
+interface SpanEvent {
+  name: string;
+  timeUnixNano: number;
+  attributes: Record<string, any>;
+}
+
 interface SpanNode {
   id: string;
   parentId: string | null;
@@ -12,6 +18,9 @@ interface SpanNode {
   endTime: number;
   durationMs: number;
   children?: SpanNode[];
+  tags?: Record<string, any>;
+  resourceAttributes?: Record<string, any>;
+  events?: SpanEvent[];
 }
 
 interface FlameGraphProps {
@@ -20,12 +29,14 @@ interface FlameGraphProps {
   onSpanSelect?: (spanId: string) => void;
   gridWidth?: number;
   serviceMetaMap?: Record<string, { color: string; icon: JSX.Element }>;
+  eventColorMap?: Record<string, string>;
+  onEventClick?: (spanId: string, eventIndex: number) => void;
 }
 
 const flattenSpans = (nodes: SpanNode[]): SpanNode[] =>
   nodes.flatMap((node) => [node, ...(node.children ? flattenSpans(node.children) : [])]);
 
-const FlameGraph: React.FC<FlameGraphProps> = ({ data, selectedSpanId, onSpanSelect, gridWidth, serviceMetaMap }) => {
+const FlameGraph: React.FC<FlameGraphProps> = ({ data, selectedSpanId, onSpanSelect, gridWidth, serviceMetaMap, eventColorMap, onEventClick }) => {
 
   const spans = flattenSpans(data);
 
@@ -56,6 +67,8 @@ const FlameGraph: React.FC<FlameGraphProps> = ({ data, selectedSpanId, onSpanSel
           onSpanSelect={onSpanSelect}
           gridWidth={gridWidth}
           serviceMetaMap={serviceMetaMap}
+          eventColorMap={eventColorMap}
+          onEventClick={onEventClick}
         />
       ))}
     </div>

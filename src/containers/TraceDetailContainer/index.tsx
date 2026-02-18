@@ -34,6 +34,18 @@ const COLORS = [
   '#ffc069',
 ];
 
+const EVENT_COLORS = [
+  '#faad14', '#13c2c2', '#eb2f96', '#722ed1', '#52c41a',
+  '#f5222d', '#2f54eb', '#fa541c', '#a0d911', '#d4b106',
+  '#08979c', '#5cdbd3', '#b37feb', '#ff85c0', '#ffc069',
+];
+
+interface SpanEvent {
+  name: string;
+  timeUnixNano: number;
+  attributes: Record<string, any>;
+}
+
 interface SpanNode {
   id: string;
   parentId: string | null;
@@ -44,6 +56,8 @@ interface SpanNode {
   durationMs: number;
   statusCode?: string;
   tags?: Record<string, any>;
+  resourceAttributes?: Record<string, any>;
+  events?: SpanEvent[];
   children?: SpanNode[];
 }
 
@@ -58,6 +72,8 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
   const [selectedSpanId, setSelectedSpanId] = useState<string | null>(null);
   const [gridWidth, setGridWidth] = useState(0);
   const [selectedOperationTypes, setSelectedOperationTypes] = useState<string[]>([]);
+  const [activeDetailTab, setActiveDetailTab] = useState<string>('span_attributes');
+  const [expandedEventKey, setExpandedEventKey] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasError, setHasError] = useState<boolean>(false);
   const { selectedUid } = useAppSelector((state) => state.datasource);
@@ -140,18 +156,42 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
           return;
         }
 
+        const extractAttrValue = (attr: any): any => {
+          if (!attr?.value) return '';
+          const v = attr.value;
+          return v.stringValue ?? v.intValue ?? v.boolValue ?? v.doubleValue ?? JSON.stringify(v.arrayValue || v.kvlistValue || '') ?? '';
+        };
+
         const spans: SpanNode[] = trace.batches.flatMap((batch: any) =>
           batch.scopeSpans.flatMap((scopeSpan: any) =>
             scopeSpan.spans.map((span: any) => {
               const serviceName = batch.resource.attributes.find((attr: any) => attr.key === 'service.name')?.value
                 ?.stringValue;
-              const statusCode = span.attributes.find((attr: any) => attr.key === 'otel.status_code')?.value?.stringValue;
+              const statusCode = span.attributes?.find((attr: any) => attr.key === 'otel.status_code')?.value?.stringValue;
               const tags = Object.fromEntries(
-                span.attributes.map((attr: any) => [
+                (span.attributes || []).map((attr: any) => [
                   attr.key,
-                  attr.value.stringValue || attr.value.intValue || attr.value.boolValue || '',
+                  extractAttrValue(attr),
                 ])
               );
+
+              const resourceAttributes = Object.fromEntries(
+                (batch.resource.attributes || []).map((attr: any) => [
+                  attr.key,
+                  extractAttrValue(attr),
+                ])
+              );
+
+              const events: SpanEvent[] = (span.events || []).map((evt: any) => ({
+                name: evt.name || '',
+                timeUnixNano: Number(evt.timeUnixNano),
+                attributes: Object.fromEntries(
+                  (evt.attributes || []).map((attr: any) => [
+                    attr.key,
+                    extractAttrValue(attr),
+                  ])
+                ),
+              }));
 
               return {
                 id: span.spanId,
@@ -163,6 +203,8 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
                 durationMs: (Number(span.endTimeUnixNano) - Number(span.startTimeUnixNano)) / 1e6,
                 statusCode,
                 tags,
+                resourceAttributes,
+                events,
               };
             })
           )
@@ -270,8 +312,28 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
     return map;
   }, [allSpans]);
 
+  const eventColorMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    let colorIdx = 0;
+    allSpans.forEach((s) => {
+      (s.events || []).forEach((evt) => {
+        if (!map[evt.name]) {
+          map[evt.name] = EVENT_COLORS[colorIdx % EVENT_COLORS.length];
+          colorIdx++;
+        }
+      });
+    });
+    return map;
+  }, [allSpans]);
+
   const handleOperationTypeFilter = (selectedTypes: string[]) => {
     setSelectedOperationTypes(selectedTypes);
+  };
+
+  const handleEventClick = (spanId: string, eventIndex: number) => {
+    setSelectedSpanId(spanId);
+    setActiveDetailTab('events');
+    setExpandedEventKey(String(eventIndex));
   };
 
   return (
@@ -319,6 +381,8 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
               onSpanSelect={(id) => setSelectedSpanId(id)}
               gridWidth={gridWidth}
               serviceMetaMap={serviceMetaMap}
+              eventColorMap={eventColorMap}
+              onEventClick={handleEventClick}
             />
           ) : (
             <div className="trace-detail-loading">
@@ -328,7 +392,14 @@ const TraceDetailContainer: React.FC<TraceDetailContainerProps> = ({ traceId, in
           )}
         </div>
         <div className="trace-sidebar">
-          <SelectedSpanDetails span={selectedSpan} />
+          <SelectedSpanDetails
+            span={selectedSpan}
+            activeTab={activeDetailTab}
+            onTabChange={setActiveDetailTab}
+            expandedEventKey={expandedEventKey}
+            onExpandedEventChange={setExpandedEventKey}
+            eventColorMap={eventColorMap}
+          />
         </div>
       </div>
     </BaseContainer>

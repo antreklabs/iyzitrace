@@ -61,9 +61,9 @@ const GroupedAttributeList: React.FC<GroupedAttributeListProps> = ({ tags }) => 
           return (
             <div key={subKey} className="tag-row">
               <Tag className="tag-key">{subKey}</Tag>
-              {String(value).length <= 20 ? <span className="tag-value">{String(value)}</span> :
+              {String(value).length <= 40 ? <span className="tag-value">{String(value)}</span> :
                 <Tooltip placement="topLeft" title={String(value)} arrow={mergedArrow}>
-                  <span className="tag-value">{String(value).substring(0, 20) + '...'}</span>
+                  <span className="tag-value">{String(value).substring(0, 40) + '...'}</span>
                 </Tooltip>}
             </div>
           );

@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import '../../../assets/styles/containers/trace-detail/flame-graph.css';
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
+import { Tooltip } from 'antd';
+
+interface SpanEvent {
+  name: string;
+  timeUnixNano: number;
+  attributes: Record<string, any>;
+}
 
 interface SpanNode {
   id: string;
@@ -12,6 +19,7 @@ interface SpanNode {
   durationMs: number;
   children?: SpanNode[];
   tags?: Record<string, any>;
+  events?: SpanEvent[];
 }
 
 interface ServiceMeta {
@@ -28,6 +36,8 @@ interface FlameGraphRowProps {
   selectedSpanId?: string;
   onSpanSelect?: (spanId: string) => void;
   serviceMetaMap: Record<string, ServiceMeta>;
+  eventColorMap?: Record<string, string>;
+  onEventClick?: (spanId: string, eventIndex: number) => void;
 }
 
 const LABEL_WIDTH = 350;
@@ -87,6 +97,8 @@ const FlameGraphRow: React.FC<FlameGraphRowProps> = ({
   selectedSpanId,
   onSpanSelect,
   serviceMetaMap,
+  eventColorMap,
+  onEventClick,
 }) => {
   const [collapsed, setCollapsed] = useState(false);
 
@@ -94,9 +106,9 @@ const FlameGraphRow: React.FC<FlameGraphRowProps> = ({
   const spanStartMs = (span.startTime - minTime) / 1e6;
   const spanDurationMs = span.durationMs;
 
-  const timelineWidth = gridWidth - LABEL_WIDTH;
-  const leftPx = (spanStartMs / totalDurationMs) * timelineWidth + 75;
-  const widthPx = (spanDurationMs / totalDurationMs) * timelineWidth;
+  const leftPercent = totalDurationMs > 0 ? (spanStartMs / totalDurationMs) * 100 : 0;
+  const widthPercent = totalDurationMs > 0 ? (spanDurationMs / totalDurationMs) * 100 : 0;
+  const widthPx = (spanDurationMs / totalDurationMs) * (gridWidth || 800);
 
   const isSelected = span.id === selectedSpanId;
 
@@ -116,14 +128,26 @@ const FlameGraphRow: React.FC<FlameGraphRowProps> = ({
 
   // Dynamic inline styles are necessary for computed values (position, width, color)
   const barStyle: React.CSSProperties = {
-    left: `${leftPx}px`,
-    width: `${Math.max(2, widthPx)}px`,
+    left: `${leftPercent}%`,
+    width: `${Math.max(0.3, widthPercent)}%`,
     backgroundColor: serviceMeta?.color || '#1890ff',
   };
 
   const labelStyle: React.CSSProperties = {
-    paddingLeft: `${8 + depth * 16}px`,
+    paddingLeft: `${8 + depth * 12}px`,
   };
+
+  const fullLabel = `${span.serviceName} → ${span.name}`;
+
+  // Event markers on the bar — colored by event name
+  const eventMarkers = (span.events || []).map((evt, i) => {
+    const evtTimeMs = (evt.timeUnixNano - minTime) / 1e6;
+    const evtRelMs = evtTimeMs - spanStartMs;
+    const evtPosPercent = spanDurationMs > 0 ? (evtRelMs / spanDurationMs) * 100 : 0;
+    const clampedPercent = Math.max(0, Math.min(100, evtPosPercent));
+    const color = eventColorMap?.[evt.name] || '#faad14';
+    return { ...evt, posPercent: clampedPercent, index: i, color };
+  });
 
   return (
     <>
@@ -134,7 +158,11 @@ const FlameGraphRow: React.FC<FlameGraphRowProps> = ({
               {collapsed ? <FiChevronRight /> : <FiChevronDown />}
             </span>
           )}
-          {spanIcon} {span.serviceName} → {span.name}
+          <Tooltip title={fullLabel} placement="topLeft" mouseEnterDelay={0.4}>
+            <span className="flamegraph-label-text">
+              {spanIcon} {fullLabel}
+            </span>
+          </Tooltip>
         </div>
         <div className="flamegraph-bar-container">
           <div
@@ -159,6 +187,27 @@ const FlameGraphRow: React.FC<FlameGraphRowProps> = ({
                 {spanDurationMs > 1000 ? `${(spanDurationMs / 1000).toFixed(2)} s` : `${spanDurationMs.toFixed(2)} ms`}
               </span>
             )}
+            {/* Event markers — colored by event name */}
+            {eventMarkers.map((evt) => (
+              <Tooltip
+                key={evt.index}
+                title={`${evt.name} (${((evt.timeUnixNano - minTime) / 1e6).toFixed(2)} ms)`}
+                placement="top"
+              >
+                <span
+                  className="event-marker"
+                  style={{
+                    left: `${evt.posPercent}%`,
+                    backgroundColor: evt.color,
+                    borderColor: evt.color,
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEventClick?.(span.id, evt.index);
+                  }}
+                />
+              </Tooltip>
+            ))}
           </div>
         </div>
       </div>
@@ -175,6 +224,8 @@ const FlameGraphRow: React.FC<FlameGraphRowProps> = ({
             selectedSpanId={selectedSpanId}
             onSpanSelect={onSpanSelect}
             serviceMetaMap={serviceMetaMap}
+            eventColorMap={eventColorMap}
+            onEventClick={onEventClick}
           />
         ))}
     </>

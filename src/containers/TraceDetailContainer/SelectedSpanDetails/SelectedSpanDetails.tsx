@@ -1,10 +1,16 @@
 import React from 'react';
 import '../../../assets/styles/containers/trace-detail/selected-span-details.css';
-import { Tag, Typography, Button, Tabs, Divider } from 'antd';
-import { CopyOutlined } from '@ant-design/icons';
+import { Tag, Typography, Button, Tabs, Divider, Collapse, Tooltip } from 'antd';
+import { CopyOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import GroupedAttributeList from './GroupedAttributeList';
 
 const { Text } = Typography;
+
+interface SpanEvent {
+  name: string;
+  timeUnixNano: number;
+  attributes: Record<string, any>;
+}
 
 interface SpanNode {
   id: string;
@@ -15,17 +21,37 @@ interface SpanNode {
   durationMs: number;
   statusCode?: string;
   tags?: Record<string, any>;
+  resourceAttributes?: Record<string, any>;
+  events?: SpanEvent[];
 }
 
 interface SelectedSpanDetailsProps {
   span?: SpanNode;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
+  expandedEventKey?: string | null;
+  onExpandedEventChange?: (key: string | null) => void;
+  eventColorMap?: Record<string, string>;
 }
 
 const formatDate = (nano: number): string => {
   return new Date(nano / 1e6).toLocaleString();
 };
 
-const SelectedSpanDetails: React.FC<SelectedSpanDetailsProps> = ({ span }) => {
+const formatRelativeMs = (nano: number, baseNano: number): string => {
+  const ms = (nano - baseNano) / 1e6;
+  if (ms > 1000) return `${(ms / 1000).toFixed(2)}s`;
+  return `${ms.toFixed(2)}ms`;
+};
+
+const SelectedSpanDetails: React.FC<SelectedSpanDetailsProps> = ({
+  span,
+  activeTab = 'span_attributes',
+  onTabChange,
+  expandedEventKey,
+  onExpandedEventChange,
+  eventColorMap,
+}) => {
   if (!span) {
     return (
       <div className="selected-span-details-empty">
@@ -33,6 +59,10 @@ const SelectedSpanDetails: React.FC<SelectedSpanDetailsProps> = ({ span }) => {
       </div>
     );
   }
+
+  const events = span.events || [];
+  const spanAttrsCount = Object.keys(span.tags || {}).length;
+  const resourceAttrsCount = Object.keys(span.resourceAttributes || {}).length;
 
   return (
     <div className="selected-span-details">
@@ -45,7 +75,9 @@ const SelectedSpanDetails: React.FC<SelectedSpanDetailsProps> = ({ span }) => {
 
       <div className="meta-grid">
         <div className="meta-label">SPAN NAME</div>
-        <Tag>{span.name}</Tag>
+        <Tooltip title={span.name} placement="topLeft">
+          <Tag style={{ maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{span.name}</Tag>
+        </Tooltip>
 
         <div className="meta-label">SPAN ID</div>
         <Tag>{span.id}</Tag>
@@ -69,22 +101,106 @@ const SelectedSpanDetails: React.FC<SelectedSpanDetailsProps> = ({ span }) => {
       <Divider className="span-details-divider" />
 
       <Tabs
-        defaultActiveKey="attributes"
+        activeKey={activeTab}
+        onChange={(key) => onTabChange?.(key)}
         size="small"
         items={[
           {
-            key: 'attributes',
-            label: 'Attributes',
-            children: span.tags ? <GroupedAttributeList tags={span.tags} /> : <div className="no-attributes-message">No attributes captured.</div>
+            key: 'span_attributes',
+            label: `Span Attrs (${spanAttrsCount})`,
+            children: span.tags && spanAttrsCount > 0
+              ? <GroupedAttributeList tags={span.tags} />
+              : <div className="no-attributes-message">No span attributes captured.</div>
+          },
+          {
+            key: 'resource_attributes',
+            label: `Resource (${resourceAttrsCount})`,
+            children: span.resourceAttributes && resourceAttrsCount > 0
+              ? <GroupedAttributeList tags={span.resourceAttributes} />
+              : <div className="no-attributes-message">No resource attributes captured.</div>
           },
           {
             key: 'events',
-            label: 'Events',
-            children: <div className="no-attributes-message">No events captured.</div>
+            label: `Events (${events.length})`,
+            children: events.length > 0
+              ? <EventsList
+                events={events}
+                spanStartTime={span.startTime}
+                expandedKey={expandedEventKey}
+                onExpandedChange={onExpandedEventChange}
+                eventColorMap={eventColorMap}
+              />
+              : <div className="no-attributes-message">No events captured.</div>
           }
         ]}
       />
     </div>
+  );
+};
+
+// Events list component
+const EventsList: React.FC<{
+  events: SpanEvent[];
+  spanStartTime: number;
+  expandedKey?: string | null;
+  onExpandedChange?: (key: string | null) => void;
+  eventColorMap?: Record<string, string>;
+}> = ({ events, spanStartTime, expandedKey, onExpandedChange, eventColorMap }) => {
+  const sortedEvents = [...events].sort((a, b) => a.timeUnixNano - b.timeUnixNano);
+
+  const collapseItems = sortedEvents.map((event, index) => {
+    const color = eventColorMap?.[event.name] || '#faad14';
+    return {
+      key: String(index),
+      label: (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+          <span style={{ width: '8px', height: '8px', backgroundColor: color, transform: 'rotate(45deg)', flexShrink: 0 }} />
+          <span style={{ color: '#94a3b8', fontSize: '12px', flexShrink: 0 }}>
+            {formatRelativeMs(event.timeUnixNano, spanStartTime)}
+          </span>
+          <span style={{ color: '#f1f5f9', fontSize: '13px', fontWeight: 500 }}>
+            ({event.name})
+          </span>
+        </div>
+      ),
+      children: (
+        <div>
+          {Object.keys(event.attributes).length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {Object.entries(event.attributes).map(([key, value]) => (
+                <div key={key} className="tag-row">
+                  <Tag className="tag-key" style={{ fontSize: '12px' }}>{key}</Tag>
+                  <span className="tag-value" style={{
+                    fontFamily: 'monospace',
+                    fontSize: '12px',
+                    color: '#22c55e',
+                  }}>
+                    "{String(value)}"
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="no-attributes-message">No attributes for this event.</div>
+          )}
+        </div>
+      ),
+    };
+  });
+
+  const activeKeys = expandedKey ? [expandedKey] : [];
+
+  return (
+    <Collapse
+      bordered={false}
+      ghost
+      activeKey={activeKeys}
+      onChange={(keys) => {
+        const keyArr = Array.isArray(keys) ? keys : [keys];
+        onExpandedChange?.(keyArr.length > 0 ? String(keyArr[keyArr.length - 1]) : null);
+      }}
+      items={collapseItems}
+    />
   );
 };
 
