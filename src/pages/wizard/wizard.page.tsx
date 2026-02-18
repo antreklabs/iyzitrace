@@ -1,76 +1,115 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Alert, Spinner, Icon } from '@grafana/ui';
+import { Button, Alert, Spinner } from '@grafana/ui';
 import { getBackendSrv } from '@grafana/runtime';
 import {
     CheckCircleOutlined,
     CloseCircleOutlined,
-    CopyOutlined,
     RocketOutlined,
     DesktopOutlined,
-    CodeOutlined,
     ArrowRightOutlined,
+    ArrowLeftOutlined,
     AppstoreOutlined,
     DatabaseOutlined,
     LoadingOutlined,
+    KeyOutlined,
+    LinkOutlined,
+    SafetyOutlined,
+    UnlockOutlined,
+    LockOutlined,
 } from '@ant-design/icons';
 import { useWizardContext } from './wizard-layout.component';
 import '../../assets/styles/pages/wizard/wizard.css';
 
 const PLUGIN_ID = 'iyzitrace-app';
 
-// Datasource configurations - must match provisioning/datasources/*.yml
-const DATASOURCE_CONFIGS = {
-    prometheus: {
-        name: 'Prometheus (Observability Platform)',
-        type: 'prometheus',
-        uid: 'prometheus-platform',
-        access: 'proxy',
-        orgId: 1,
-        url: 'http://host.docker.internal/query/v1/metrics',
-        basicAuth: false,
-        isDefault: false,
-        version: 1,
-        editable: true,
-        jsonData: {
-            httpMethod: 'GET',
-            promRegistryOverrides: {
-                metrics: {
-                    traces_spanmetrics_calls_total: 'iyzitrace_span_metrics_calls_total',
-                    traces_spanmetrics_latency_sum: 'iyzitrace_span_metrics_duration_milliseconds_sum',
-                    traces_spanmetrics_latency_count: 'iyzitrace_span_metrics_duration_milliseconds_count',
-                    traces_spanmetrics_latency_bucket: 'iyzitrace_span_metrics_duration_milliseconds_bucket',
+// Datasource URL paths - appended to the platform base URL
+// Must match nginx location directives (trailing slash required)
+const DATASOURCE_PATHS = {
+    prometheus: '/query/v1/metrics/',
+    loki: '/query/v1/logs/',
+    tempo: '/query/v1/traces/',
+};
+
+// Convert browser-facing URL to Docker-internal URL for Grafana datasource proxy
+// Grafana runs inside Docker, so 'localhost' or '127.0.0.1' from the browser
+// won't work — those resolve to Grafana's own container, not the host machine.
+// We convert them to 'host.docker.internal' which Docker routes to the host.
+const toDatasourceUrl = (browserUrl: string): string => {
+    return browserUrl
+        .replace(/localhost(:\d+)?/i, 'host.docker.internal')
+        .replace(/127\.0\.0\.1(:\d+)?/i, 'host.docker.internal');
+};
+
+// Build datasource configurations dynamically based on platform URL and auth settings
+const getDatasourceConfigs = (baseUrl: string, auth: 'open' | 'apikey', apiKey: string) => {
+    const normalizedUrl = toDatasourceUrl(baseUrl.replace(/\/$/, ''));
+    const hasApiKey = auth === 'apikey' && apiKey.trim();
+
+    // Auth headers for Grafana datasource API (httpHeaderName1 + secureJsonData pattern)
+    const authJsonData = hasApiKey ? { httpHeaderName1: 'Authorization' } : {};
+    const authSecureJsonFields = hasApiKey
+        ? { secureJsonData: { httpHeaderValue1: `Bearer ${apiKey.trim()}` } }
+        : {};
+
+    return {
+        prometheus: {
+            name: 'Prometheus (Observability Platform)',
+            type: 'prometheus',
+            uid: 'prometheus-platform',
+            access: 'proxy',
+            orgId: 1,
+            url: `${normalizedUrl}${DATASOURCE_PATHS.prometheus}`,
+            basicAuth: false,
+            isDefault: false,
+            version: 1,
+            editable: true,
+            jsonData: {
+                httpMethod: 'GET',
+                ...authJsonData,
+                promRegistryOverrides: {
+                    metrics: {
+                        traces_spanmetrics_calls_total: 'iyzitrace_span_metrics_calls_total',
+                        traces_spanmetrics_latency_sum: 'iyzitrace_span_metrics_duration_milliseconds_sum',
+                        traces_spanmetrics_latency_count: 'iyzitrace_span_metrics_duration_milliseconds_count',
+                        traces_spanmetrics_latency_bucket: 'iyzitrace_span_metrics_duration_milliseconds_bucket',
+                    },
                 },
             },
+            ...authSecureJsonFields,
         },
-    },
-    loki: {
-        name: 'Loki (Observability Platform)',
-        type: 'loki',
-        uid: 'loki-platform',
-        access: 'proxy',
-        orgId: 1,
-        url: 'http://host.docker.internal/query/v1/logs',
-        isDefault: false,
-        editable: true,
-    },
-    tempo: {
-        name: 'Tempo (Observability Platform)',
-        type: 'tempo',
-        uid: 'tempo-platform',
-        access: 'proxy',
-        orgId: 1,
-        url: 'http://host.docker.internal/query/v1/traces',
-        basicAuth: false,
-        isDefault: false,
-        version: 1,
-        editable: true,
-        jsonData: {
-            httpMethod: 'GET',
-            serviceMap: {
-                datasourceUid: 'prometheus-platform',
+        loki: {
+            name: 'Loki (Observability Platform)',
+            type: 'loki',
+            uid: 'loki-platform',
+            access: 'proxy',
+            orgId: 1,
+            url: `${normalizedUrl}${DATASOURCE_PATHS.loki}`,
+            isDefault: false,
+            editable: true,
+            ...(hasApiKey ? { jsonData: { ...authJsonData } } : {}),
+            ...authSecureJsonFields,
+        },
+        tempo: {
+            name: 'Tempo (Observability Platform)',
+            type: 'tempo',
+            uid: 'tempo-platform',
+            access: 'proxy',
+            orgId: 1,
+            url: `${normalizedUrl}${DATASOURCE_PATHS.tempo}`,
+            basicAuth: false,
+            isDefault: false,
+            version: 1,
+            editable: true,
+            jsonData: {
+                httpMethod: 'GET',
+                ...authJsonData,
+                serviceMap: {
+                    datasourceUid: 'prometheus-platform',
+                },
             },
+            ...authSecureJsonFields,
         },
-    },
+    };
 };
 
 interface StepStatus {
@@ -85,14 +124,34 @@ interface DatasourceStatus {
     tempo: StepStatus;
 }
 
-type WizardStep = 'platform' | 'datasources' | 'apikey' | 'verification';
+interface PlatformComponentStatus {
+    name: string;
+    status: string;
+    latency: string;
+    details: {
+        version?: string;
+        uptime?: string;
+        Upsince?: string;
+        [key: string]: any;
+    };
+}
+
+interface PlatformStatusResponse {
+    status: string;
+    components: PlatformComponentStatus[];
+    updated_at: string;
+}
+
+type WizardStep = 'platform' | 'datasources' | 'verification';
 
 const SetupWizardPage: React.FC = () => {
     const { setWizardCompleted } = useWizardContext();
     const [currentStep, setCurrentStep] = useState<WizardStep>('platform');
-    const [copied, setCopied] = useState(false);
     const [saving, setSaving] = useState(false);
     const [skipping, setSkipping] = useState(false);
+    const [platformUrl, setPlatformUrl] = useState('http://localhost');
+    const [authType, setAuthType] = useState<'open' | 'apikey'>('open');
+    const [platformApiKey, setPlatformApiKey] = useState('');
     const [platformStatus, setPlatformStatus] = useState<StepStatus>({
         checking: false,
         success: null,
@@ -105,21 +164,11 @@ const SetupWizardPage: React.FC = () => {
     });
     const [provisioning, setProvisioning] = useState(false);
     const [initialCheckDone, setInitialCheckDone] = useState(false);
-    const [apiKey, setApiKey] = useState('');
-    const [apiKeySaved, setApiKeySaved] = useState(false);
-    const [savingApiKey, setSavingApiKey] = useState(false);
-    const [apiKeyError, setApiKeyError] = useState<string | null>(null);
 
-    // Step 4: Service health check states
-    const [serviceHealth, setServiceHealth] = useState<{
-        prometheus: StepStatus;
-        loki: StepStatus;
-        tempo: StepStatus;
-    }>({
-        prometheus: { checking: false, success: null, error: null },
-        loki: { checking: false, success: null, error: null },
-        tempo: { checking: false, success: null, error: null },
-    });
+    // Step 3: Service health check states
+    const [statusResponse, setStatusResponse] = useState<PlatformStatusResponse | null>(null);
+    const [verificationChecking, setVerificationChecking] = useState(false);
+    const [verificationError, setVerificationError] = useState<string | null>(null);
     const [verificationStarted, setVerificationStarted] = useState(false);
 
     // Check datasources when entering Step 2
@@ -142,8 +191,8 @@ const SetupWizardPage: React.FC = () => {
 
         for (const type of types) {
             try {
-                const config = DATASOURCE_CONFIGS[type];
-                const exists = await checkDatasourceExists(config.uid);
+                const configs = getDatasourceConfigs(platformUrl, authType, platformApiKey);
+                const exists = await checkDatasourceExists(configs[type].uid);
                 setDatasourceStatus(prev => ({
                     ...prev,
                     [type]: { checking: false, success: exists, error: null },
@@ -159,32 +208,53 @@ const SetupWizardPage: React.FC = () => {
         setInitialCheckDone(true);
     };
 
-    const dockerCommand = `docker compose -f /path/to/iyzitrace-observability-platform/docker-compose.yml up --force-recreate --detach`;
-
-    const handleCopyCommand = async () => {
-        try {
-            await navigator.clipboard.writeText(dockerCommand);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        } catch (err) {
-            console.error('Failed to copy:', err);
-        }
-    };
-
     const checkPlatformHealth = async () => {
+        if (!platformUrl.trim()) {
+            setPlatformStatus({ checking: false, success: false, error: 'Please enter a Platform URL.' });
+            return;
+        }
+        if (authType === 'apikey' && !platformApiKey.trim()) {
+            setPlatformStatus({ checking: false, success: false, error: 'Please enter an API Key.' });
+            return;
+        }
+
         setPlatformStatus({ checking: true, success: null, error: null });
 
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+            const url = `${platformUrl.replace(/\/$/, '')}/api/v1/platform/system/status`;
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/json',
+            };
+            if (authType === 'apikey') {
+                headers['Authorization'] = `Bearer ${platformApiKey.trim()}`;
+            }
 
             try {
-                await fetch('http://localhost:8082/health', {
-                    mode: 'no-cors',
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers,
                     signal: controller.signal,
                 });
                 clearTimeout(timeoutId);
-                setPlatformStatus({ checking: false, success: true, error: null });
+
+                if (response.ok) {
+                    setPlatformStatus({ checking: false, success: true, error: null });
+                } else if (response.status === 401) {
+                    setPlatformStatus({
+                        checking: false,
+                        success: false,
+                        error: 'Authentication failed. Please check your API Key or switch to Open Access.',
+                    });
+                } else {
+                    setPlatformStatus({
+                        checking: false,
+                        success: false,
+                        error: `Platform returned status ${response.status}. Please check the URL.`,
+                    });
+                }
             } catch (fetchError: any) {
                 clearTimeout(timeoutId);
                 if (fetchError.name === 'AbortError') {
@@ -197,7 +267,7 @@ const SetupWizardPage: React.FC = () => {
                     setPlatformStatus({
                         checking: false,
                         success: false,
-                        error: 'Could not connect to platform. Make sure Docker Desktop is running.',
+                        error: 'Could not connect to platform. Please verify the URL and ensure the platform is running.',
                     });
                 }
             }
@@ -222,8 +292,10 @@ const SetupWizardPage: React.FC = () => {
 
     // Create datasource
     const createDatasource = async (type: 'prometheus' | 'loki' | 'tempo'): Promise<void> => {
-        const config = DATASOURCE_CONFIGS[type];
-        await getBackendSrv().post('/api/datasources', config);
+        const configs = getDatasourceConfigs(platformUrl, authType, platformApiKey);
+        console.log(`[Wizard] Creating ${type} datasource:`, JSON.stringify(configs[type], null, 2));
+        console.log(`[Wizard] authType=${authType}, hasApiKey=${!!platformApiKey.trim()}`);
+        await getBackendSrv().post('/api/datasources', configs[type]);
         // Small delay to ensure Grafana processes the datasource
         await new Promise(resolve => setTimeout(resolve, 500));
     };
@@ -242,8 +314,8 @@ const SetupWizardPage: React.FC = () => {
             }));
 
             try {
-                const config = DATASOURCE_CONFIGS[type];
-                const exists = await checkDatasourceExists(config.uid);
+                const configs = getDatasourceConfigs(platformUrl, authType, platformApiKey);
+                const exists = await checkDatasourceExists(configs[type].uid);
 
                 if (!exists) {
                     // Create the datasource
@@ -274,97 +346,75 @@ const SetupWizardPage: React.FC = () => {
         setProvisioning(false);
     };
 
-    const handleContinueToStep2 = () => {
-        setCurrentStep('datasources');
-    };
-
-    const handleContinueToStep3 = () => {
-        setCurrentStep('apikey');
-    };
-
-    const handleSaveApiKey = async () => {
-        if (!apiKey.trim()) {
-            setApiKeyError('Please enter an API key');
-            return;
-        }
-
-        setSavingApiKey(true);
-        setApiKeyError(null);
-
+    const handleContinueToStep2 = async () => {
+        // Save platform URL and auth settings to plugin jsonData for later steps
         try {
             const settings = await getBackendSrv().get(`/api/plugins/${PLUGIN_ID}/settings`);
             const currentJsonData = settings?.jsonData || {};
-            const currentSecureJsonData = settings?.secureJsonData || {};
 
             await getBackendSrv().post(`/api/plugins/${PLUGIN_ID}/settings`, {
-                jsonData: currentJsonData,
-                secureJsonData: {
-                    ...currentSecureJsonData,
-                    apiKey: apiKey.trim(),
+                jsonData: {
+                    ...currentJsonData,
+                    platformUrl: platformUrl.replace(/\/$/, ''),
+                    authType,
                 },
                 enabled: true,
             });
-
-            setApiKeySaved(true);
-        } catch (err: any) {
-            setApiKeyError(err.message || 'Failed to save API key');
-        } finally {
-            setSavingApiKey(false);
+        } catch (err) {
+            console.error('Failed to save platform settings:', err);
         }
-    };
-
-    const handlePasteApiKey = async () => {
-        try {
-            const txt = await navigator.clipboard.readText();
-            if (!txt) {
-                setApiKeyError('Clipboard is empty or not accessible.');
-                return;
-            }
-            setApiKey(txt.trim());
-            setApiKeyError(null);
-        } catch (e) {
-            setApiKeyError('Paste failed. Grant clipboard permission and try again.');
-        }
-    };
-
-    // Step 4: Run health checks for all services
-    const runServiceHealthChecks = async () => {
-        setVerificationStarted(true);
-
-        const services = [
-            { key: 'prometheus', name: 'Prometheus', endpoint: '/api/datasources/proxy/uid/prometheus-platform/api/v1/status/buildinfo' },
-            { key: 'loki', name: 'Loki', endpoint: '/api/datasources/proxy/uid/loki-platform/loki/api/v1/status/buildinfo' },
-            { key: 'tempo', name: 'Tempo', endpoint: '/api/datasources/proxy/uid/tempo-platform/api/status/buildinfo' },
-        ] as const;
-
-        for (const service of services) {
-            setServiceHealth(prev => ({
-                ...prev,
-                [service.key]: { checking: true, success: null, error: null },
-            }));
-
-            try {
-                // Use getBackendSrv for all services - proxies through Grafana backend
-                await getBackendSrv().get(service.endpoint);
-
-                setServiceHealth(prev => ({
-                    ...prev,
-                    [service.key]: { checking: false, success: true, error: null },
-                }));
-            } catch (err: any) {
-                setServiceHealth(prev => ({
-                    ...prev,
-                    [service.key]: { checking: false, success: false, error: err.message || 'Failed' },
-                }));
-            }
-
-            // Small delay between checks
-            await new Promise(resolve => setTimeout(resolve, 300));
-        }
+        setCurrentStep('datasources');
     };
 
     const handleContinueToVerification = () => {
         setCurrentStep('verification');
+    };
+
+    const handleBackToStep1 = () => {
+        setCurrentStep('platform');
+    };
+
+    const handleBackToStep2 = () => {
+        setCurrentStep('datasources');
+    };
+
+    // Step 3: Run health checks via platform status API
+    const runServiceHealthChecks = async () => {
+        setVerificationStarted(true);
+        setVerificationChecking(true);
+        setVerificationError(null);
+        setStatusResponse(null);
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+            const url = `${platformUrl.replace(/\/$/, '')}/api/v1/platform/system/status`;
+            const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+            if (authType === 'apikey') {
+                headers['Authorization'] = `Bearer ${platformApiKey.trim()}`;
+            }
+
+            const response = await fetch(url, { method: 'GET', headers, signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                setVerificationError(`Platform returned status ${response.status}.`);
+                setVerificationChecking(false);
+                return;
+            }
+
+            const data: PlatformStatusResponse = await response.json();
+            setStatusResponse(data);
+        } catch (err: any) {
+            if (err.name === 'AbortError') {
+                setVerificationError('Connection timed out. Platform may not be running.');
+            } else {
+                setVerificationError('Could not connect to platform. Please verify the URL and ensure the platform is running.');
+            }
+        } finally {
+            setVerificationChecking(false);
+        }
     };
 
     const handleExplorePages = async () => {
@@ -427,159 +477,11 @@ const SetupWizardPage: React.FC = () => {
         datasourceStatus.loki.success === true &&
         datasourceStatus.tempo.success === true;
 
-    // Step 3: API Key Configuration
-    if (currentStep === 'apikey') {
-        return (
-            <div className="wizard-container">
-                <div className="wizard-content">
-                    <div className="wizard-header">
-                        <RocketOutlined className="wizard-header-icon" />
-                        <h1 className="wizard-title">IyziTrace Setup Wizard</h1>
-                        <p className="wizard-subtitle">
-                            Set up and run your observability platform in a few steps
-                        </p>
-                        <Button variant="secondary" size="sm" onClick={handleSkipWizard} disabled={skipping} className="wizard-skip-button">
-                            {skipping ? <><Spinner inline size="sm" /> Skipping...</> : 'Skip Setup'}
-                        </Button>
-                    </div>
-
-                    <div className="wizard-progress">
-                        <div className="wizard-progress-step completed">
-                            <div className="wizard-step-number"><CheckCircleOutlined /></div>
-                            <span>Platform Setup</span>
-                        </div>
-                        <div className="wizard-progress-line completed"></div>
-                        <div className="wizard-progress-step completed">
-                            <div className="wizard-step-number"><CheckCircleOutlined /></div>
-                            <span>Data Sources</span>
-                        </div>
-                        <div className="wizard-progress-line completed"></div>
-                        <div className="wizard-progress-step active">
-                            <div className="wizard-step-number">3</div>
-                            <span>API Key</span>
-                        </div>
-                        <div className="wizard-progress-line" />
-                        <div className="wizard-progress-step">
-                            <div className="wizard-step-number">4</div>
-                            <span>Verification</span>
-                        </div>
-                    </div>
-
-                    <div className="wizard-step-card">
-                        <div className="wizard-step-header">
-                            <DatabaseOutlined className="wizard-step-icon" />
-                            <div>
-                                <h2 className="wizard-step-title">Step 3: Configure API Key</h2>
-                                <p className="wizard-step-description">
-                                    Connect Grafana to your observability platform securely
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="wizard-step-content">
-                            <div className="wizard-prerequisites">
-                                <h3 className="wizard-section-title">
-                                    <DesktopOutlined /> Instructions
-                                </h3>
-                                <ol style={{ color: '#94a3b8', marginLeft: 16, lineHeight: 2 }}>
-                                    <li>
-                                        Open the{' '}
-                                        <a
-                                            href="http://localhost/dashboard"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            style={{ color: '#3b82f6' }}
-                                        >
-                                            Observability Dashboard
-                                        </a>
-                                        {' '}in a new tab
-                                    </li>
-                                    <li>Login with your credentials (or create a new account)</li>
-                                    <li>Enable <strong>Global Security</strong> toggle</li>
-                                    <li>Click <strong>Generate New Key</strong> button in API Keys section</li>
-                                    <li>Copy the generated API key and paste it below</li>
-                                </ol>
-                            </div>
-
-                            <div className="wizard-command-section" style={{ marginTop: 24 }}>
-                                <h3 className="wizard-section-title">
-                                    <CodeOutlined /> API Key
-                                </h3>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 12 }}>
-                                    <input
-                                        type="password"
-                                        value={apiKey}
-                                        onChange={(e) => {
-                                            setApiKey(e.target.value);
-                                            setApiKeyError(null);
-                                        }}
-                                        placeholder="sk-xxxxxxxxxxxxxxxxxxxx"
-                                        style={{
-                                            flex: 1,
-                                            padding: '12px 16px',
-                                            borderRadius: 8,
-                                            border: '1px solid rgba(71, 85, 105, 0.5)',
-                                            background: 'rgba(15, 23, 42, 0.8)',
-                                            color: '#e2e8f0',
-                                            fontSize: 14,
-                                        }}
-                                    />
-                                    <Button variant="secondary" onClick={handlePasteApiKey}>
-                                        Paste
-                                    </Button>
-                                    <Button
-                                        variant="primary"
-                                        onClick={handleSaveApiKey}
-                                        disabled={savingApiKey || apiKeySaved}
-                                    >
-                                        {savingApiKey ? (
-                                            <>
-                                                <Spinner inline size="sm" /> Saving...
-                                            </>
-                                        ) : apiKeySaved ? (
-                                            <>
-                                                <CheckCircleOutlined /> Saved
-                                            </>
-                                        ) : (
-                                            'Save API Key'
-                                        )}
-                                    </Button>
-                                </div>
-
-                                {apiKeyError && (
-                                    <Alert title="Error" severity="error" style={{ marginTop: 16 }}>
-                                        {apiKeyError}
-                                    </Alert>
-                                )}
-
-                                {apiKeySaved && (
-                                    <Alert title="Success" severity="success" style={{ marginTop: 16 }}>
-                                        API key saved successfully! You can now continue to explore the platform.
-                                    </Alert>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="wizard-step-actions">
-                            <Button
-                                variant="primary"
-                                onClick={handleContinueToVerification}
-                                disabled={!apiKeySaved}
-                            >
-                                Continue <ArrowRightOutlined />
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    // Step 4: Verification - Service Health Checks
-    const allServicesHealthy =
-        serviceHealth.prometheus.success === true &&
-        serviceHealth.loki.success === true &&
-        serviceHealth.tempo.success === true;
+    // Step 3: Verification - Service Health Checks
+    const allServicesHealthy = statusResponse?.status === 'healthy' &&
+        statusResponse.components.every(c => c.status === 'online');
+    const someServicesDown = statusResponse !== null &&
+        statusResponse.components.some(c => c.status !== 'online');
 
     if (currentStep === 'verification') {
         return (
@@ -607,13 +509,8 @@ const SetupWizardPage: React.FC = () => {
                             <span>Data Sources</span>
                         </div>
                         <div className="wizard-progress-line completed" />
-                        <div className="wizard-progress-step completed">
-                            <div className="wizard-step-number"><CheckCircleOutlined /></div>
-                            <span>API Key</span>
-                        </div>
-                        <div className="wizard-progress-line completed" />
                         <div className="wizard-progress-step active">
-                            <div className="wizard-step-number">4</div>
+                            <div className="wizard-step-number">3</div>
                             <span>Verification</span>
                         </div>
                     </div>
@@ -622,59 +519,92 @@ const SetupWizardPage: React.FC = () => {
                         <div className="wizard-step-header">
                             <CheckCircleOutlined className="wizard-step-icon" />
                             <div>
-                                <h2 className="wizard-step-title">Step 4: Service Verification</h2>
+                                <h2 className="wizard-step-title">Step 3: Service Verification</h2>
                                 <p className="wizard-step-description">
-                                    Verify all services are running correctly
+                                    Verify all platform services are running correctly
                                 </p>
                             </div>
                         </div>
 
                         <div className="wizard-step-content">
                             <p style={{ marginBottom: 24, color: '#94a3b8' }}>
-                                Click the button below to verify all services are running and healthy.
+                                Click the button below to check the health status of all platform services.
                             </p>
 
-                            <div className="wizard-datasource-list">
-                                {[
-                                    { key: 'prometheus', name: 'Prometheus', desc: 'Metrics Backend' },
-                                    { key: 'loki', name: 'Loki', desc: 'Logs Backend' },
-                                    { key: 'tempo', name: 'Tempo', desc: 'Traces Backend' },
-                                ].map((service) => {
-                                    const status = serviceHealth[service.key as keyof typeof serviceHealth];
-                                    return (
-                                        <div key={service.key} className="wizard-datasource-item">
-                                            <div className="wizard-datasource-info">
-                                                <strong>{service.name}</strong>
-                                                <span style={{ color: '#64748b', fontSize: 13 }}>{service.desc}</span>
-                                            </div>
-                                            <div className="wizard-datasource-status">
-                                                {status.checking && <LoadingOutlined style={{ color: '#3b82f6' }} />}
-                                                {status.success === true && <CheckCircleOutlined style={{ color: '#22c55e' }} />}
-                                                {status.success === false && <CloseCircleOutlined style={{ color: '#ef4444' }} />}
-                                                {status.success === null && !status.checking && <span style={{ color: '#64748b' }}>—</span>}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
-                            <div style={{ marginTop: 24 }}>
+                            <div style={{ marginBottom: 24 }}>
                                 <Button
-                                    variant="secondary"
+                                    variant="primary"
                                     onClick={runServiceHealthChecks}
-                                    disabled={verificationStarted && !allServicesHealthy && Object.values(serviceHealth).some(s => s.checking)}
+                                    disabled={verificationChecking}
                                 >
-                                    {Object.values(serviceHealth).some(s => s.checking) ? (
-                                        <>
-                                            <Spinner inline size="sm" /> Checking...
-                                        </>
+                                    {verificationChecking ? (
+                                        <><Spinner inline size="sm" /> Checking...</>
+                                    ) : verificationStarted ? (
+                                        'Re-run Health Check'
                                     ) : (
                                         'Run Health Check'
                                     )}
                                 </Button>
                             </div>
 
-                            {verificationStarted && !allServicesHealthy && !Object.values(serviceHealth).some(s => s.checking) && (
+                            {verificationChecking && (
+                                <div className="wizard-verification-loading">
+                                    <LoadingOutlined style={{ fontSize: 24, color: '#3b82f6' }} />
+                                    <span style={{ color: '#94a3b8', marginLeft: 12 }}>Fetching platform status...</span>
+                                </div>
+                            )}
+
+                            {verificationError && (
+                                <Alert title="Connection Error" severity="error" style={{ marginTop: 16 }}>
+                                    {verificationError}
+                                </Alert>
+                            )}
+
+                            {statusResponse && (
+                                <>
+                                    {/* Overall status badge */}
+                                    <div className="wizard-platform-status-badge" data-status={statusResponse.status}>
+                                        {statusResponse.status === 'healthy' ? (
+                                            <CheckCircleOutlined style={{ color: '#22c55e', fontSize: 18 }} />
+                                        ) : (
+                                            <CloseCircleOutlined style={{ color: '#ef4444', fontSize: 18 }} />
+                                        )}
+                                        <span>Platform Status: <strong>{statusResponse.status.toUpperCase()}</strong></span>
+                                        <span className="wizard-status-updated">Updated: {new Date(statusResponse.updated_at).toLocaleTimeString()}</span>
+                                    </div>
+
+                                    {/* Component list */}
+                                    <div className="wizard-service-grid">
+                                        {statusResponse.components.map((component) => (
+                                            <div key={component.name} className={`wizard-service-card ${component.status === 'online' ? 'online' : 'offline'}`}>
+                                                <div className="wizard-service-card-header">
+                                                    <div className="wizard-service-card-name">
+                                                        {component.status === 'online' ? (
+                                                            <CheckCircleOutlined style={{ color: '#22c55e' }} />
+                                                        ) : (
+                                                            <CloseCircleOutlined style={{ color: '#ef4444' }} />
+                                                        )}
+                                                        <strong>{component.name}</strong>
+                                                    </div>
+                                                    <span className={`wizard-service-latency ${component.status === 'online' ? 'good' : 'bad'}`}>
+                                                        {component.latency}
+                                                    </span>
+                                                </div>
+                                                <div className="wizard-service-card-details">
+                                                    {component.details.version && (
+                                                        <span>{component.details.version.startsWith('v') ? component.details.version : `v${component.details.version}`}</span>
+                                                    )}
+                                                    {component.details.uptime && (
+                                                        <span>Uptime: {component.details.uptime}</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
+
+                            {someServicesDown && (
                                 <Alert title="Some services are not responding" severity="warning" style={{ marginTop: 16 }}>
                                     Please ensure all services are running and try again.
                                 </Alert>
@@ -682,12 +612,18 @@ const SetupWizardPage: React.FC = () => {
 
                             {allServicesHealthy && (
                                 <Alert title="All Services Healthy!" severity="success" style={{ marginTop: 16 }}>
-                                    All services are running correctly. You're ready to explore the platform!
+                                    All {statusResponse!.components.length} services are running correctly. You're ready to explore the platform!
                                 </Alert>
                             )}
                         </div>
 
                         <div className="wizard-step-actions">
+                            <Button
+                                variant="secondary"
+                                onClick={handleBackToStep2}
+                            >
+                                <ArrowLeftOutlined /> Back
+                            </Button>
                             <Button
                                 variant="primary"
                                 onClick={handleExplorePages}
@@ -741,11 +677,6 @@ const SetupWizardPage: React.FC = () => {
                         <div className="wizard-progress-line" />
                         <div className="wizard-progress-step">
                             <div className="wizard-step-number">3</div>
-                            <span>API Key</span>
-                        </div>
-                        <div className="wizard-progress-line" />
-                        <div className="wizard-progress-step">
-                            <div className="wizard-step-number">4</div>
                             <span>Verification</span>
                         </div>
                     </div>
@@ -770,7 +701,8 @@ const SetupWizardPage: React.FC = () => {
                             <div className="wizard-datasource-list">
                                 {(['prometheus', 'loki', 'tempo'] as const).map((type) => {
                                     const status = datasourceStatus[type];
-                                    const config = DATASOURCE_CONFIGS[type];
+                                    const configs = getDatasourceConfigs(platformUrl, authType, platformApiKey);
+                                    const config = configs[type];
                                     return (
                                         <div key={type} className="wizard-datasource-item">
                                             <div className="wizard-datasource-info">
@@ -817,8 +749,14 @@ const SetupWizardPage: React.FC = () => {
 
                         <div className="wizard-step-actions">
                             <Button
+                                variant="secondary"
+                                onClick={handleBackToStep1}
+                            >
+                                <ArrowLeftOutlined /> Back
+                            </Button>
+                            <Button
                                 variant="primary"
-                                onClick={handleContinueToStep3}
+                                onClick={handleContinueToVerification}
                                 disabled={!allDatasourcesReady}
                             >
                                 Continue <ArrowRightOutlined />
@@ -830,7 +768,7 @@ const SetupWizardPage: React.FC = () => {
         );
     }
 
-    // Step 1: Platform Setup
+    // Step 1: Platform Connection
     return (
         <div className="wizard-container">
             <div className="wizard-content">
@@ -859,79 +797,102 @@ const SetupWizardPage: React.FC = () => {
                     <div className="wizard-progress-line" />
                     <div className="wizard-progress-step">
                         <div className="wizard-step-number">3</div>
-                        <span>API Key</span>
-                    </div>
-                    <div className="wizard-progress-line" />
-                    <div className="wizard-progress-step">
-                        <div className="wizard-step-number">4</div>
                         <span>Verification</span>
                     </div>
                 </div>
 
                 <div className="wizard-step-card">
                     <div className="wizard-step-header">
-                        <DesktopOutlined className="wizard-step-icon" />
+                        <LinkOutlined className="wizard-step-icon" />
                         <div>
-                            <h2 className="wizard-step-title">Step 1: Observability Platform Setup</h2>
+                            <h2 className="wizard-step-title">Step 1: Platform Connection</h2>
                             <p className="wizard-step-description">
-                                Run IyziTrace Observability Platform on Docker Desktop
+                                Connect to your IyziTrace Observability Platform
                             </p>
                         </div>
                     </div>
 
                     <div className="wizard-step-content">
-                        <div className="wizard-prerequisite">
-                            <h3 className="wizard-section-title">
-                                <Icon name="docker" /> Prerequisite
-                            </h3>
-                            <p>
-                                Before continuing, make sure{' '}
-                                <a
-                                    href="https://www.docker.com/products/docker-desktop/"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    Docker Desktop
-                                </a>
-                                {' '}is installed and running.
-                            </p>
+                        {/* Platform URL */}
+                        <div className="wizard-form-group">
+                            <label className="wizard-form-label">
+                                <LinkOutlined /> Platform URL
+                            </label>
+                            <input
+                                type="text"
+                                value={platformUrl}
+                                onChange={(e) => {
+                                    setPlatformUrl(e.target.value);
+                                    setPlatformStatus({ checking: false, success: null, error: null });
+                                }}
+                                placeholder="http://localhost"
+                                className="wizard-input"
+                            />
+                            <span className="wizard-form-hint">
+                                Enter the base URL of your running IyziTrace Observability Platform
+                            </span>
                         </div>
 
-                        <div className="wizard-command-section">
-                            <h3 className="wizard-section-title">
-                                <CodeOutlined /> Terminal Command
-                            </h3>
-                            <p className="wizard-command-description">
-                                Run the following command in your terminal to start the platform:
-                            </p>
-                            <div className="wizard-command-box">
-                                <code className="wizard-command-text">{dockerCommand}</code>
-                                <Button
-                                    variant="secondary"
-                                    size="sm"
-                                    onClick={handleCopyCommand}
-                                    className="wizard-copy-button"
+                        {/* Authentication Type */}
+                        <div className="wizard-form-group">
+                            <label className="wizard-form-label">
+                                <SafetyOutlined /> Authentication Type
+                            </label>
+                            <div className="wizard-auth-toggle">
+                                <button
+                                    type="button"
+                                    className={`wizard-auth-toggle-option ${authType === 'open' ? 'active' : ''}`}
+                                    onClick={() => {
+                                        setAuthType('open');
+                                        setPlatformStatus({ checking: false, success: null, error: null });
+                                    }}
                                 >
-                                    {copied ? (
-                                        <>
-                                            <CheckCircleOutlined /> Copied
-                                        </>
-                                    ) : (
-                                        <>
-                                            <CopyOutlined /> Copy
-                                        </>
-                                    )}
-                                </Button>
+                                    <UnlockOutlined />
+                                    <div className="wizard-auth-toggle-text">
+                                        <strong>Open Access</strong>
+                                        <span>No API Key required</span>
+                                    </div>
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`wizard-auth-toggle-option ${authType === 'apikey' ? 'active' : ''}`}
+                                    onClick={() => {
+                                        setAuthType('apikey');
+                                        setPlatformStatus({ checking: false, success: null, error: null });
+                                    }}
+                                >
+                                    <LockOutlined />
+                                    <div className="wizard-auth-toggle-text">
+                                        <strong>API Key Protected</strong>
+                                        <span>Requires API Key for access</span>
+                                    </div>
+                                </button>
                             </div>
-                            <p className="wizard-command-note">
-                                <strong>Note:</strong> This command may take a few minutes on first run.
-                                Wait for all containers to be downloaded and started.
-                            </p>
                         </div>
 
+                        {/* API Key Input (conditional) */}
+                        {authType === 'apikey' && (
+                            <div className="wizard-form-group wizard-form-group-animated">
+                                <label className="wizard-form-label">
+                                    <KeyOutlined /> API Key
+                                </label>
+                                <input
+                                    type="password"
+                                    value={platformApiKey}
+                                    onChange={(e) => {
+                                        setPlatformApiKey(e.target.value);
+                                        setPlatformStatus({ checking: false, success: null, error: null });
+                                    }}
+                                    placeholder="Enter your platform API key"
+                                    className="wizard-input"
+                                />
+                            </div>
+                        )}
+
+                        {/* Verify Section */}
                         <div className="wizard-check-section">
-                            <h3 className="wizard-section-title">Platform Check</h3>
-                            <p>Verify that the platform is running successfully:</p>
+                            <h3 className="wizard-section-title">Connection Verification</h3>
+                            <p>Verify that the platform is running and accessible:</p>
 
                             <div className="wizard-check-actions">
                                 <Button
@@ -941,17 +902,21 @@ const SetupWizardPage: React.FC = () => {
                                 >
                                     {platformStatus.checking ? (
                                         <>
-                                            <Spinner inline size="sm" /> Checking...
+                                            <Spinner inline size="sm" /> Verifying...
+                                        </>
+                                    ) : platformStatus.success === true ? (
+                                        <>
+                                            <CheckCircleOutlined /> Verified
                                         </>
                                     ) : (
-                                        'Verify'
+                                        'Verify Connection'
                                     )}
                                 </Button>
 
                                 {platformStatus.success === true && (
                                     <div className="wizard-check-result success">
                                         <CheckCircleOutlined />
-                                        <span>Platform is running successfully!</span>
+                                        <span>Platform is connected successfully!</span>
                                     </div>
                                 )}
 
@@ -965,18 +930,15 @@ const SetupWizardPage: React.FC = () => {
 
                             {platformStatus.success === false && (
                                 <Alert
-                                    title="Platform not found"
+                                    title="Connection failed"
                                     severity="warning"
                                     className="wizard-alert"
                                 >
                                     <ul>
-                                        <li>Make sure Docker Desktop is running</li>
-                                        <li>Make sure you ran the command above</li>
-                                        <li>Wait a few minutes for containers to start</li>
-                                        <li>
-                                            Check the <code>observability-platform</code> container
-                                            group in Docker Desktop
-                                        </li>
+                                        <li>Make sure the platform is running and accessible</li>
+                                        <li>Verify the Platform URL is correct</li>
+                                        {authType === 'apikey' && <li>Check that your API Key is valid</li>}
+                                        <li>Ensure there are no firewall or network issues</li>
                                     </ul>
                                 </Alert>
                             )}
