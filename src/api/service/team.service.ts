@@ -42,13 +42,6 @@ const PLUGIN_PAGE_CATALOG: AvailablePage[] = [
     icon: '🧱',
   },
   {
-    id: 'views',
-    name: 'Views',
-    route: '/views',
-    description: 'Custom visualizations',
-    icon: '🧩',
-  },
-  {
     id: 'service-map',
     name: 'Service Map',
     route: '/service-map',

@@ -3,7 +3,7 @@ import { getQueryData as getPrometheusQueryData } from '../provider/prometheus.p
 import { getLabels } from '../provider/prometheus.provider';
 import { getQueryData as getTempoQueryData } from '../provider/tempo.provider';
 import { getQueryData as getLokiQueryData } from '../provider/loki.provider';
-import { getPluginSettings, getSecurePluginSettings } from './settings.service';
+import { getPluginSettings, getSecurePluginSettings, savePluginSettings } from './settings.service';
 import { getTeams } from './team.service';
 import { getOrphanServices } from './service-map.service';
 import { FilterParamsModel } from './query.service';
@@ -114,8 +114,29 @@ export const hasOrphanServicesAssigned = async (): Promise<boolean> => {
 
 export const isAIConfigured = async (): Promise<boolean> => {
   try {
+    // Use the same API key/base URL as ai.service.ts
     const settings = await getPluginSettings();
-    return !!(settings?.aiConfig?.apiKey);
+    const apiKey = settings?.aiConfig?.apiKey || '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';
+    const baseUrl = 'https://openrouter.ai/api/v1';
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+    try {
+      // Use the models endpoint as a lightweight health check
+      const response = await fetch(`${baseUrl}/models?supported_parameters=temperature`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      return response.ok;
+    } catch {
+      clearTimeout(timeoutId);
+      return false;
+    }
   } catch (error) {
     return false;
   }
@@ -176,77 +197,58 @@ export const isTeamsActive = async (): Promise<boolean> => {
   }
 };
 
-export const isSettingsActive = async (): Promise<boolean> => {
+export const isAgentManagerActive = async (): Promise<boolean> => {
   try {
-    const settings = await getSecurePluginSettings();
-    return !!(settings?.apiKey);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    try {
+      const response = await fetch('http://localhost/api/v1/platform/opamp/agents/stats', {
+        method: 'GET',
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        return false;
+      }
+
+      const data = await response.json();
+      return data?.totalAgents > 0;
+    } catch {
+      clearTimeout(timeoutId);
+      return false;
+    }
   } catch (error) {
     return false;
   }
 };
 
-export const getSetupStepStatuses = async (): Promise<{
-  platform: boolean;
-  apiKey: boolean;
-  tempo: boolean;
-  loki: boolean;
-  prometheus: boolean;
-  traces: boolean;
-  logs: boolean;
-  metrics: boolean;
-  orphanServices: boolean;
-  ai: boolean;
-}> => {
+export const isInventoryManagerActive = async (): Promise<boolean> => {
   try {
-    const [
-      platform,
-      apiKey,
-      tempo,
-      loki,
-      prometheus,
-      traces,
-      logs,
-      metrics,
-      orphanServices,
-      ai,
-    ] = await Promise.all([
-      isPlatformRunning(),
-      isApiKeySet(),
-      hasTempoDataSource(),
-      hasLokiDataSource(),
-      hasPrometheusDataSource(),
-      isTracesActive(),
-      isLogsActive(),
-      hasMetrics(),
-      hasOrphanServicesAssigned(),
-      isAIConfigured(),
-    ]);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-    return {
-      platform,
-      apiKey,
-      tempo,
-      loki,
-      prometheus,
-      traces,
-      logs,
-      metrics,
-      orphanServices,
-      ai,
-    };
+    try {
+      const response = await fetch('http://localhost:80/inventory/api/v1/stats', {
+        method: 'GET',
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        return false;
+      }
+
+      const data = await response.json();
+      // API returns EntityCount (capital E)
+      return data?.EntityCount > 0;
+    } catch {
+      clearTimeout(timeoutId);
+      return false;
+    }
   } catch (error) {
-    return {
-      platform: false,
-      apiKey: false,
-      tempo: false,
-      loki: false,
-      prometheus: false,
-      traces: false,
-      logs: false,
-      metrics: false,
-      orphanServices: false,
-      ai: false,
-    };
+    return false;
   }
 };
 
@@ -259,8 +261,9 @@ export const getAllSectionStatuses = async (): Promise<{
   views: boolean;
   exceptions: boolean;
   teams: boolean;
-  settings: boolean;
   ai: boolean;
+  agentManager: boolean;
+  inventoryManager: boolean;
 }> => {
   try {
     const [
@@ -272,8 +275,9 @@ export const getAllSectionStatuses = async (): Promise<{
       views,
       exceptions,
       teams,
-      settings,
       ai,
+      agentManager,
+      inventoryManager,
     ] = await Promise.all([
       isOverviewActive(),
       isServiceMapActive(),
@@ -283,8 +287,9 @@ export const getAllSectionStatuses = async (): Promise<{
       isViewsActive(),
       isExceptionsActive(),
       isTeamsActive(),
-      isSettingsActive(),
       isAIConfigured(),
+      isAgentManagerActive(),
+      isInventoryManagerActive(),
     ]);
 
     return {
@@ -296,8 +301,9 @@ export const getAllSectionStatuses = async (): Promise<{
       views,
       exceptions,
       teams,
-      settings,
       ai,
+      agentManager,
+      inventoryManager,
     };
   } catch (error) {
     return {
@@ -309,8 +315,52 @@ export const getAllSectionStatuses = async (): Promise<{
       views: false,
       exceptions: false,
       teams: false,
-      settings: false,
       ai: false,
+      agentManager: false,
+      inventoryManager: false,
     };
+  }
+};
+
+// Pages that use ViewComponent (via BaseContainerComponent)
+const VIEW_ENABLED_PAGES = [
+  'overview',
+  'services',
+  'traces',
+  'logs',
+  'exceptions',
+  'service-map',
+];
+
+export const ensureAllDefaultViews = async (): Promise<void> => {
+  try {
+    const settings = await getPluginSettings();
+    const pageViews = settings.pageViews || [];
+
+    // Find pages that don't have any view yet
+    const existingPages = new Set(pageViews.map((v: any) => v.page));
+    const missingPages = VIEW_ENABLED_PAGES.filter(page => !existingPages.has(page));
+
+    if (missingPages.length === 0) {
+      return; // All default views already exist
+    }
+
+    // Create default views for missing pages
+    const newViews = missingPages.map(page => ({
+      id: `view-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      title: 'default',
+      description: '',
+      page,
+      query: '',
+      data: {},
+      createdAt: new Date().toISOString(),
+    }));
+
+    await savePluginSettings({
+      ...settings,
+      pageViews: [...pageViews, ...newViews],
+    });
+  } catch (error) {
+    // Silently fail — views will be created when pages are visited
   }
 };

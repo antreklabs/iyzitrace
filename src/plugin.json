@@ -35,12 +35,6 @@
     },
     {
       "type": "page",
-      "name": "Views",
-      "path": "/a/iyzitrace-app/views",
-      "addToNav": true
-    },
-    {
-      "type": "page",
       "name": "Service Map",
       "path": "/a/iyzitrace-app/service-map",
       "addToNav": true

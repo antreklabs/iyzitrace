@@ -38,7 +38,6 @@ const Sidebar: React.FC = () => {
       const allMenuItems = [
         { key: 'landing', icon: <HomeOutlined className="sidebar-menu-icon" />, label: 'Home' },
         { key: 'overview', icon: <BuildOutlined className="sidebar-menu-icon" />, label: 'Overview' },
-        { key: 'views', icon: <ClusterOutlined className="sidebar-menu-icon" />, label: 'Views' },
         { key: 'service-map', icon: <DeploymentUnitOutlined className="sidebar-menu-icon" />, label: 'Service Map' },
         { key: 'services', icon: <BarChartOutlined className="sidebar-menu-icon" />, label: 'Services' },
         { key: 'traces', icon: <FileSearchOutlined className="sidebar-menu-icon" />, label: 'Traces' },

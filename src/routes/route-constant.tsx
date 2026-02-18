@@ -9,7 +9,6 @@ const ServiveDetailPage = React.lazy(() => import('../pages/services/service-det
 const TracesPage = React.lazy(() => import('../pages/traces/traces.page'));
 const TraceDetailPage = React.lazy(() => import('../pages/traces/trace-detail.page'));
 const LogsPage = React.lazy(() => import('../pages/logs/logs.page'));
-const ViewsPage = React.lazy(() => import('../pages/views/view.page'));
 const AiPage = React.lazy(() => import('../pages/ai/ai.page'));
 const ExceptionsPage = React.lazy(() => import('../pages/exceptions/exceptions.page'));
 const ExceptionDetailPage = React.lazy(() => import('../pages/exceptions/exception-detail.page'));
@@ -96,13 +95,6 @@ export const appRoutes: AppRoute[] = [
     name: 'logs',
     title: 'Logs',
     icon: 'search',
-    showInMenu: true,
-  },
-  {
-    path: '/views',
-    element: <ViewsPage />,
-    name: 'views',
-    title: 'Views',
     showInMenu: true,
   },
   {
