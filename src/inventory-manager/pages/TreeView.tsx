@@ -17,15 +17,15 @@ import { ENTITY_CATEGORIES, ENTITY_COLORS } from '../types/inventory';
 
 type ViewMode = 'category' | 'tree';
 
+const HIDDEN_TYPES = new Set(['process']);
+
 const GROUPABLE_TYPES: Record<string, string> = {
-    process: 'group.processes',
     container: 'group.containers',
     service: 'group.services',
     'k8s.pod': 'group.pods',
 };
 
 const GROUP_INFO: Record<string, { label: string; color: string }> = {
-    'group.processes': { label: 'Processes', color: '#6366f1' },
     'group.containers': { label: 'Containers', color: '#8b5cf6' },
     'group.services': { label: 'Services', color: '#ec4899' },
     'group.pods': { label: 'Pods', color: '#22d3d1' },
@@ -197,8 +197,9 @@ const TreeView: React.FC = () => {
 
     const filteredEntities = useMemo(() => {
         if (!entitiesData?.entities) return [];
-        if (!searchValue) return entitiesData.entities;
-        return entitiesData.entities.filter(e => e.name.toLowerCase().includes(searchValue.toLowerCase()));
+        const entities = entitiesData.entities.filter(e => !HIDDEN_TYPES.has(e.type));
+        if (!searchValue) return entities;
+        return entities.filter(e => e.name.toLowerCase().includes(searchValue.toLowerCase()));
     }, [entitiesData, searchValue]);
 
     const categoryData = useMemo(() => {
@@ -221,7 +222,13 @@ const TreeView: React.FC = () => {
 
     const hierarchyTree = useMemo(() => {
         if (!topology) return [];
-        return buildTree(topology.nodes, topology.edges);
+        const filteredNodes = topology.nodes.filter(n => !HIDDEN_TYPES.has(n.type));
+        const filteredEdges = topology.edges.filter(e => {
+            const fromNode = topology.nodes.find(n => n.id === e.from);
+            const toNode = topology.nodes.find(n => n.id === e.to);
+            return fromNode && toNode && !HIDDEN_TYPES.has(fromNode.type) && !HIDDEN_TYPES.has(toNode.type);
+        });
+        return buildTree(filteredNodes, filteredEdges);
     }, [topology]);
 
     const filteredTree = useMemo(() => {

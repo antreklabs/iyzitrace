@@ -8,7 +8,7 @@ import {
   UnorderedListOutlined,
   CloudOutlined
 } from '@ant-design/icons';
-import { getRegions, getOrphanServices, mapServiceToInfrastructure, unmapServiceFromInfrastructure } from '../../api/service/service-map.service';
+import { getOverviewData, mapServiceToInfrastructure, unmapServiceFromInfrastructure } from '../../api/service/service-map.service';
 import { Infrastructure, Service, Operation, Region } from '../../api/service/interface.service';
 import RegionCard from '../../components/overview/overview.card.Region';
 import InfrastructureCard from '../../components/overview/overview.card.Infrastructure';
@@ -48,10 +48,7 @@ const OverviewContainer: React.FC = () => {
   const [operationsSearchQuery, setOperationsSearchQuery] = useState('');
 
   const fetchModelData = async (filterModel: FilterParamsModel): Promise<FetchedModel> => {
-    const [regions, orphans] = await Promise.all([
-      getRegions(filterModel),
-      getOrphanServices(filterModel)
-    ]);
+    const { regions, orphanServices: orphans } = await getOverviewData(filterModel);
     setRegions(regions);
     setOrphanServices(orphans);
     const infrastructures = (regions || []).flatMap((r: Region) => r.infrastructures || []);

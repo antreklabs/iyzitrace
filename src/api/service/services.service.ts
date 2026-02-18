@@ -42,69 +42,108 @@ interface ServiceMapQueryData {
 }
 
 const setSpanAdditionalDimensions = (item: ServiceQueryData, operation: Operation, service: Service) => {
-  if(item.type !== undefined && operation.type !== item.type) {
+  if (item.type !== undefined && operation.type !== item.type) {
     operation.type = item.type.toUpperCase()
   }
 
-  if(item.type !== undefined && service.type !== item.type) {
+  if (item.type !== undefined && service.type !== item.type) {
     service.type = item.type.toUpperCase();
   }
 
-  if(item.http_method !== undefined && operation.method !== item.http_method) {
+  if (item.http_method !== undefined && operation.method !== item.http_method) {
     operation.method = item.http_method.toUpperCase();
   }
 
-  if(item.http_url !== undefined && operation.path !== item.http_url) {
+  if (item.http_url !== undefined && operation.path !== item.http_url) {
     operation.path = item.http_url;
   }
-  
-  if(item.net_host_port !== undefined && service.port !== item.net_host_port) {
+
+  if (item.net_host_port !== undefined && service.port !== item.net_host_port) {
     service.port = item.net_host_port;
   }
 }
 
 export const getServicesTableData = async (filterParamsModel: FilterParamsModel): Promise<Service[]> => {
   await filterParamsModel.setLabelFiltersAsync();
-  
-  const definitions = await getDefinitions();
-  const serviceQueryDataCallsByService = await getServicesQueryDataByType(QueryType.CALLS_BY_SERVICE, filterParamsModel, definitions);
-  const serviceQueryDataAvgDurationByService = await getServicesQueryDataByType(QueryType.AVG_DURATION_BY_SERVICE, filterParamsModel, definitions);
-  const serviceQueryDataSumDurationByService = await getServicesQueryDataByType(QueryType.SUM_DURATION_BY_SERVICE, filterParamsModel, definitions);
-  const serviceQueryDataMinDurationByService = await getServicesQueryDataByType(QueryType.MIN_DURATION_BY_SERVICE, filterParamsModel, definitions);
-  const serviceQueryDataMaxDurationByService = await getServicesQueryDataByType(QueryType.MAX_DURATION_BY_SERVICE, filterParamsModel, definitions);
-  const serviceQueryDataP50ByService = await getServicesQueryDataByType(QueryType.P50_BY_SERVICE, filterParamsModel, definitions);
-  const serviceQueryDataP75ByService = await getServicesQueryDataByType(QueryType.P75_BY_SERVICE, filterParamsModel, definitions);
-  const serviceQueryDataP90ByService = await getServicesQueryDataByType(QueryType.P90_BY_SERVICE, filterParamsModel, definitions);
-  const serviceQueryDataP95ByService = await getServicesQueryDataByType(QueryType.P95_BY_SERVICE, filterParamsModel, definitions);
-  const serviceQueryDataP99ByService = await getServicesQueryDataByType(QueryType.P99_BY_SERVICE, filterParamsModel, definitions);
-  const serviceQueryDataErrorPercentageByService = await getServicesQueryDataByType(QueryType.ERROR_PERCENTAGE_BY_SERVICE, filterParamsModel, definitions);
-  const serviceQueryDataP50ByServiceInTime = await getServicesQueryDataInTime(QueryType.P50_BY_SERVICE_INTIME, filterParamsModel, definitions);
-  const serviceQueryDataP75ByServiceInTime = await getServicesQueryDataInTime(QueryType.P75_BY_SERVICE_INTIME, filterParamsModel, definitions);
-  const serviceQueryDataP90ByServiceInTime = await getServicesQueryDataInTime(QueryType.P90_BY_SERVICE_INTIME, filterParamsModel, definitions);
-  const serviceQueryDataP95ByServiceInTime = await getServicesQueryDataInTime(QueryType.P95_BY_SERVICE_INTIME, filterParamsModel, definitions);
-  const serviceQueryDataP99ByServiceInTime = await getServicesQueryDataInTime(QueryType.P99_BY_SERVICE_INTIME, filterParamsModel, definitions);
-  const serviceQueryDataApdexByServiceInTime = await getServicesQueryDataInTime(QueryType.APDEX_BY_SERVICE_INTIME, filterParamsModel, definitions);
-  
-  const serviceQueryDataCallsByServiceAndSpan = await getServicesQueryDataByType(QueryType.CALLS_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
-  const serviceQueryDataP50ByServiceAndSpan = await getServicesQueryDataByType(QueryType.P50_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
-  const serviceQueryDataP75ByServiceAndSpan = await getServicesQueryDataByType(QueryType.P75_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
-  const serviceQueryDataP90ByServiceAndSpan = await getServicesQueryDataByType(QueryType.P90_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
-  const serviceQueryDataP95ByServiceAndSpan = await getServicesQueryDataByType(QueryType.P95_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
-  const serviceQueryDataP99ByServiceAndSpan = await getServicesQueryDataByType(QueryType.P99_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
-  const serviceQueryDataAvgDurationByServiceAndSpan = await getServicesQueryDataByType(QueryType.AVG_DURATION_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
-  const serviceQueryDataMinDurationByServiceAndSpan = await getServicesQueryDataByType(QueryType.MIN_DURATION_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
-  const serviceQueryDataMaxDurationByServiceAndSpan = await getServicesQueryDataByType(QueryType.MAX_DURATION_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
-  const serviceQueryDataErrorPercentageByServiceAndSpan = await getServicesQueryDataByType(QueryType.ERROR_PERCENTAGE_BY_SERVICE_AND_SPAN, filterParamsModel, definitions);
-  const serviceQueryDataP50ByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.P50_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
-  const serviceQueryDataP75ByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.P75_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
-  const serviceQueryDataP90ByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.P90_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
-  const serviceQueryDataP95ByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.P95_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
-  const serviceQueryDataP99ByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.P99_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
-  const serviceQueryDataApdexByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.APDEX_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
-  const serviceQueryDataRateByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.RATE_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
-  const serviceQueryDataTopKeyOperationsByServiceAndSpanInTime = await getServicesQueryDataInTime(QueryType.TOP_KEY_OPERATIONS_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions);
 
-  const serviceRelation = await getServiceMapQueryDataByServiceSpanRelation(QueryType.SERVICE_RELATION, filterParamsModel, definitions);
+  const definitions = await getDefinitions();
+
+  // Fire ALL queries in parallel instead of sequentially
+  const [
+    serviceQueryDataCallsByService,
+    serviceQueryDataAvgDurationByService,
+    serviceQueryDataSumDurationByService,
+    serviceQueryDataMinDurationByService,
+    serviceQueryDataMaxDurationByService,
+    serviceQueryDataP50ByService,
+    serviceQueryDataP75ByService,
+    serviceQueryDataP90ByService,
+    serviceQueryDataP95ByService,
+    serviceQueryDataP99ByService,
+    serviceQueryDataErrorPercentageByService,
+    serviceQueryDataP50ByServiceInTime,
+    serviceQueryDataP75ByServiceInTime,
+    serviceQueryDataP90ByServiceInTime,
+    serviceQueryDataP95ByServiceInTime,
+    serviceQueryDataP99ByServiceInTime,
+    serviceQueryDataApdexByServiceInTime,
+    serviceQueryDataCallsByServiceAndSpan,
+    serviceQueryDataP50ByServiceAndSpan,
+    serviceQueryDataP75ByServiceAndSpan,
+    serviceQueryDataP90ByServiceAndSpan,
+    serviceQueryDataP95ByServiceAndSpan,
+    serviceQueryDataP99ByServiceAndSpan,
+    serviceQueryDataAvgDurationByServiceAndSpan,
+    serviceQueryDataMinDurationByServiceAndSpan,
+    serviceQueryDataMaxDurationByServiceAndSpan,
+    serviceQueryDataErrorPercentageByServiceAndSpan,
+    serviceQueryDataP50ByServiceAndSpanInTime,
+    serviceQueryDataP75ByServiceAndSpanInTime,
+    serviceQueryDataP90ByServiceAndSpanInTime,
+    serviceQueryDataP95ByServiceAndSpanInTime,
+    serviceQueryDataP99ByServiceAndSpanInTime,
+    serviceQueryDataApdexByServiceAndSpanInTime,
+    serviceQueryDataRateByServiceAndSpanInTime,
+    serviceQueryDataTopKeyOperationsByServiceAndSpanInTime,
+    serviceRelation,
+  ] = await Promise.all([
+    getServicesQueryDataByType(QueryType.CALLS_BY_SERVICE, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.AVG_DURATION_BY_SERVICE, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.SUM_DURATION_BY_SERVICE, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.MIN_DURATION_BY_SERVICE, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.MAX_DURATION_BY_SERVICE, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.P50_BY_SERVICE, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.P75_BY_SERVICE, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.P90_BY_SERVICE, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.P95_BY_SERVICE, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.P99_BY_SERVICE, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.ERROR_PERCENTAGE_BY_SERVICE, filterParamsModel, definitions),
+    getServicesQueryDataInTime(QueryType.P50_BY_SERVICE_INTIME, filterParamsModel, definitions),
+    getServicesQueryDataInTime(QueryType.P75_BY_SERVICE_INTIME, filterParamsModel, definitions),
+    getServicesQueryDataInTime(QueryType.P90_BY_SERVICE_INTIME, filterParamsModel, definitions),
+    getServicesQueryDataInTime(QueryType.P95_BY_SERVICE_INTIME, filterParamsModel, definitions),
+    getServicesQueryDataInTime(QueryType.P99_BY_SERVICE_INTIME, filterParamsModel, definitions),
+    getServicesQueryDataInTime(QueryType.APDEX_BY_SERVICE_INTIME, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.CALLS_BY_SERVICE_AND_SPAN, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.P50_BY_SERVICE_AND_SPAN, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.P75_BY_SERVICE_AND_SPAN, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.P90_BY_SERVICE_AND_SPAN, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.P95_BY_SERVICE_AND_SPAN, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.P99_BY_SERVICE_AND_SPAN, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.AVG_DURATION_BY_SERVICE_AND_SPAN, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.MIN_DURATION_BY_SERVICE_AND_SPAN, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.MAX_DURATION_BY_SERVICE_AND_SPAN, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.ERROR_PERCENTAGE_BY_SERVICE_AND_SPAN, filterParamsModel, definitions),
+    getServicesQueryDataInTime(QueryType.P50_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions),
+    getServicesQueryDataInTime(QueryType.P75_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions),
+    getServicesQueryDataInTime(QueryType.P90_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions),
+    getServicesQueryDataInTime(QueryType.P95_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions),
+    getServicesQueryDataInTime(QueryType.P99_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions),
+    getServicesQueryDataInTime(QueryType.APDEX_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions),
+    getServicesQueryDataInTime(QueryType.RATE_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions),
+    getServicesQueryDataInTime(QueryType.TOP_KEY_OPERATIONS_BY_SERVICE_AND_SPAN_INTIME, filterParamsModel, definitions),
+    getServiceMapQueryDataByServiceSpanRelation(QueryType.SERVICE_RELATION, filterParamsModel, definitions),
+  ]);
   let servicesWithOperations: Service[] = [];
 
   const serviceSpanMap = new Map<string, Set<string>>();
@@ -186,12 +225,12 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
         operationCounts: operations.length,
       },
       rangeMetrics: {
-          latency: [],
-          apdex: [],
-          rateByOperation: [],
-          keyopsByOperation: [],
-          apdexByOperation: [],
-          latencyByOperation: [],
+        latency: [],
+        apdex: [],
+        rateByOperation: [],
+        keyopsByOperation: [],
+        apdexByOperation: [],
+        latencyByOperation: [],
       },
       status: {
         value: 'healthy',
@@ -214,7 +253,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
   servicesWithOperations.forEach(service => {
     serviceMap.set(service.id, service);
   });
-  
+
   serviceRelation.forEach((item: ServiceMapQueryData) => {
     const service = serviceMap.get(item.client);
     const targetService = serviceMap.get(item.server);
@@ -303,7 +342,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
       });
     }
   });
-  
+
   serviceQueryDataP75ByServiceInTime.forEach((item: ServiceQueryData) => {
     const service = serviceMap.get(item.service_name);
     if (service) {
@@ -461,7 +500,7 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
           name: `${operation.name} P99`,
           data: item.values ?? [],
         });
-          setSpanAdditionalDimensions(item, operation, service);
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -514,8 +553,8 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
     if (service && service.operations) {
       const operation = service.operations.find((op: any) => op.name === item.span_name);
       if (operation) {
-          operation.metrics.p50DurationMs = item.value;
-          setSpanAdditionalDimensions(item, operation, service);
+        operation.metrics.p50DurationMs = item.value;
+        setSpanAdditionalDimensions(item, operation, service);
       }
     }
   });
@@ -590,20 +629,20 @@ export const getServicesTableData = async (filterParamsModel: FilterParamsModel)
   });
 
   servicesWithOperations.forEach((service: Service) => {
-    if(service.type === undefined) {
+    if (service.type === undefined) {
       service.type = 'GENERAL';
     }
-    if(service.port === undefined) {
+    if (service.port === undefined) {
       service.port = 'N/A';
     }
     service.operations.forEach((operation: Operation) => {
-      if(operation.type === undefined) {
+      if (operation.type === undefined) {
         operation.type = 'GENERAL';
       }
-      if(operation.method === undefined) {
+      if (operation.method === undefined) {
         operation.method = 'N/A';
       }
-      if(operation.path === undefined) {
+      if (operation.path === undefined) {
         operation.path = 'N/A';
       }
     });
@@ -666,7 +705,7 @@ export const getServicesQueryDataByType = async (
   definitions: Definitions
 ): Promise<ServiceQueryData[]> => {
   const query = getQueryByType(queryType, filterParamsModel, definitions);
-  
+
   return await getServicesQueryData(filterParamsModel, query);
 }
 
@@ -705,3 +744,125 @@ const mapMetric = (result: any) =>
     x: new Date(ts * 1000),
     y: val !== undefined && val !== 'NaN' ? parseFloat(val) * 1000 : 0,
   }));
+
+/**
+ * Lightweight version for overview cards.
+ * Only fetches 5 queries instead of 40: calls, avg duration, sum duration, error%, and span-level calls.
+ * Returns the same Service[] shape but with only the fields needed for cards.
+ */
+export const getServicesOverviewData = async (filterParamsModel: FilterParamsModel): Promise<Service[]> => {
+  await filterParamsModel.setLabelFiltersAsync();
+  const definitions = await getDefinitions();
+
+  const [
+    callsByService,
+    avgDurationByService,
+    sumDurationByService,
+    errorPercentageByService,
+    callsByServiceAndSpan,
+    serviceRelation,
+  ] = await Promise.all([
+    getServicesQueryDataByType(QueryType.CALLS_BY_SERVICE, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.AVG_DURATION_BY_SERVICE, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.SUM_DURATION_BY_SERVICE, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.ERROR_PERCENTAGE_BY_SERVICE, filterParamsModel, definitions),
+    getServicesQueryDataByType(QueryType.CALLS_BY_SERVICE_AND_SPAN, filterParamsModel, definitions),
+    getServiceMapQueryDataByServiceSpanRelation(QueryType.SERVICE_RELATION, filterParamsModel, definitions),
+  ]);
+
+  // Build service → span names map from span-level calls
+  const serviceSpanMap = new Map<string, Set<string>>();
+  callsByServiceAndSpan.forEach((item: ServiceQueryData) => {
+    if (!serviceSpanMap.has(item.service_name)) {
+      serviceSpanMap.set(item.service_name, new Set());
+    }
+    serviceSpanMap.get(item.service_name)!.add(item.span_name);
+  });
+
+  const servicesWithOperations: Service[] = [];
+
+  serviceSpanMap.forEach((spanNames, serviceName) => {
+    const operations = Array.from(spanNames).map(spanName => ({
+      id: `${serviceName}-${spanName}`,
+      serviceId: serviceName,
+      name: spanName,
+      metrics: { avgDurationMs: 0, minDurationMs: 0, maxDurationMs: 0, p50DurationMs: 0, p75DurationMs: 0, p90DurationMs: 0, p95DurationMs: 0, p99DurationMs: 0, callsCount: 0 },
+      status: { value: 'healthy', metrics: { errorCount: 0, errorPercentage: 0, warningCount: 0, warningPercentage: 0, degradedCount: 0, degradedPercentage: 0, totalCount: 0 } },
+    }));
+
+    servicesWithOperations.push({
+      id: serviceName,
+      name: serviceName,
+      operations: operations as Operation[],
+      targetServiceIds: [],
+      metrics: { sumDurationMs: 0, avgDurationMs: 0, minDurationMs: 0, maxDurationMs: 0, p50DurationMs: 0, p75DurationMs: 0, p90DurationMs: 0, p95DurationMs: 0, p99DurationMs: 0, callsCount: 0, callsPerSecond: 0, operationCounts: operations.length },
+      rangeMetrics: { latency: [], apdex: [], rateByOperation: [], keyopsByOperation: [], apdexByOperation: [], latencyByOperation: [] },
+      status: { value: 'healthy', metrics: { errorCount: 0, errorPercentage: 0, warningCount: 0, warningPercentage: 0, degradedCount: 0, degradedPercentage: 0, totalCount: 0 } },
+    });
+  });
+
+  const serviceMap = new Map<string, Service>();
+  servicesWithOperations.forEach(s => serviceMap.set(s.id, s));
+
+  // Populate essential metrics
+  serviceRelation.forEach((item: ServiceMapQueryData) => {
+    const service = serviceMap.get(item.client);
+    const target = serviceMap.get(item.server);
+    if (service && target && !service.targetServiceIds.includes(target.id)) {
+      service.targetServiceIds.push(target.id);
+    }
+  });
+
+  sumDurationByService.forEach((item: ServiceQueryData) => {
+    const service = serviceMap.get(item.service_name);
+    if (service) service.metrics.sumDurationMs = item.value;
+  });
+
+  avgDurationByService.forEach((item: ServiceQueryData) => {
+    const service = serviceMap.get(item.service_name);
+    if (service) service.metrics.avgDurationMs = item.value;
+  });
+
+  callsByService.forEach((item: ServiceQueryData) => {
+    const service = serviceMap.get(item.service_name);
+    if (service) {
+      service.metrics.callsCount = parseInt(item.value.toString());
+      service.metrics.callsPerSecond = service.metrics.callsCount / (service.metrics.sumDurationMs / 1000);
+    }
+  });
+
+  errorPercentageByService.forEach((item: ServiceQueryData) => {
+    const service = serviceMap.get(item.service_name);
+    if (service) {
+      service.status.metrics.errorCount = parseInt(item.value.toString());
+      service.status.metrics.totalCount = service.metrics.callsCount;
+      service.status.metrics.errorPercentage = (service.status.metrics.errorCount / service.status.metrics.totalCount) * 100;
+      service.status.value = service.status.metrics.errorPercentage > 0 ? 'error' : 'healthy';
+    }
+  });
+
+  // Set type from span-level data
+  callsByServiceAndSpan.forEach((item: ServiceQueryData) => {
+    const service = serviceMap.get(item.service_name);
+    if (service && item.type) {
+      service.type = item.type.toUpperCase();
+      if (item.span_name) {
+        const ops = (service.operations || []) as Operation[];
+        const op = ops.find(o => o.name === item.span_name);
+        if (op) op.type = item.type.toUpperCase();
+      }
+    }
+  });
+
+  servicesWithOperations.forEach((service: Service) => {
+    if (service.type === undefined) service.type = 'GENERAL';
+    if (service.port === undefined) service.port = 'N/A';
+    service.operations.forEach((op: Operation) => {
+      if (op.type === undefined) op.type = 'GENERAL';
+      if (op.method === undefined) op.method = 'N/A';
+      if (op.path === undefined) op.path = 'N/A';
+    });
+  });
+
+  return servicesWithOperations;
+};

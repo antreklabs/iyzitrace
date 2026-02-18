@@ -1,7 +1,7 @@
 import { Infrastructure, Application, Service, Region, ServiceInfrastructureMapping } from './interface.service';
 import { getSelectedViewData } from './view.service';
 import { getQueryData } from '../provider/prometheus.provider';
-import { getServicesTableData } from './services.service';
+import { getServicesOverviewData } from './services.service';
 import { FilterParamsModel } from './query.service';
 import { HealthValue } from './interface.service';
 import { getPluginSettings, savePluginSettings } from './settings.service';
@@ -15,6 +15,27 @@ type PromQueryResponse = {
   resultType: 'vector' | 'matrix';
   result: PromVectorSample[];
 };
+
+// ── Simple in-memory cache ──────────────────────────────────────────────
+const queryCache = new Map<string, { data: any; ts: number }>();
+const CACHE_TTL_MS = 30_000; // 30 seconds
+
+function cachedPromQuery(query: string): Promise<PromQueryResponse> {
+  const key = query.trim();
+  const cached = queryCache.get(key);
+  if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
+    return Promise.resolve(cached.data);
+  }
+  return getQueryData(query).then((data) => {
+    queryCache.set(key, { data, ts: Date.now() });
+    return data;
+  });
+}
+
+export function clearQueryCache() {
+  queryCache.clear();
+}
+// ─────────────────────────────────────────────────────────────────────────
 
 const makeKey = (m: Record<string, string>) =>
   `${m.cloud_region}::${m.host_name}`;
@@ -32,37 +53,13 @@ const parseValue = (s?: PromVectorSample) =>
   s ? Number(s.value[1]) : undefined;
 
 export const getInventoryHosts = async () => {
-  const statusPromise = getQueryData(`
-    inventory_process_status
-  `);
-
-  const inventoryBasePromise = getQueryData(`
-    __inv_base
-  `);
-
-  const targetInfoPromise = getQueryData(`
-    target_info
-  `);
-
-  const cpuPromise = getQueryData(`
-    inventory_machine_cpu_usage_percent
-  `);
-
-  const memUsedPromise = getQueryData(`
-    inventory_machine_memory_used_gb
-  `);
-
-  const memTotalPromise = getQueryData(`
-    inventory_machine_memory_total_gb
-  `);
-
   const [statusData, cpuData, memUsedData, memTotalData, inventoryBaseData, targetInfoData] = await Promise.all([
-    statusPromise,
-    cpuPromise,
-    memUsedPromise,
-    memTotalPromise,
-    inventoryBasePromise,
-    targetInfoPromise,
+    cachedPromQuery(`inventory_process_status`),
+    cachedPromQuery(`inventory_machine_cpu_usage_percent`),
+    cachedPromQuery(`inventory_machine_memory_used_gb`),
+    cachedPromQuery(`inventory_machine_memory_total_gb`),
+    cachedPromQuery(`__inv_base`),
+    cachedPromQuery(`target_info`),
   ]);
 
   const cpuMap = buildMap(cpuData);
@@ -149,31 +146,6 @@ export const getInventoryHosts = async () => {
   return rows;
 };
 
-export const getOrphanServices = async (filterModel: FilterParamsModel): Promise<Service[]> => {
-  try {
-    const selected = await getSelectedViewData('service-map');
-    const data = await getInventoryHosts();
-    const regionMap = new Map<string, any[]>();
-    if (data && Array.isArray(data)) {
-      data.forEach((item: any) => {
-        const cloudRegion = item?.cloud_region || 'unknown';
-        if (!regionMap.has(cloudRegion)) {
-          regionMap.set(cloudRegion, []);
-        }
-        regionMap.get(cloudRegion)!.push(item);
-      });
-    }
-
-    const allServices = await getServicesWithInfrastructure(filterModel, selected, regionMap);
-
-    const orphanServices = allServices.filter(srv => srv.infrastructureId === undefined);
-
-    return orphanServices;
-  } catch (error) {
-    return [];
-  }
-};
-
 export const mapServiceToInfrastructure = async (serviceId: string, infrastructureId: string): Promise<void> => {
   try {
     const pluginData = await getPluginSettings();
@@ -213,18 +185,28 @@ const findItem = (selected: any, id: string, type?: string) => {
 };
 
 export const getServiceInfrastructureMapping = async (): Promise<any[]> => {
-  const serviceInfrastructureMappingPromise = getQueryData(`
+  const serviceInfrastructureMappingData = await cachedPromQuery(`
     sum by(host_name, service_name, server) (iyzitrace_span_metrics_calls_total)
   `);
-  const serviceInfrastructureMappingData = await serviceInfrastructureMappingPromise;
   return serviceInfrastructureMappingData.result.map((item: any) => ({
     host_name: item.metric.host_name,
     service_name: item.metric.service_name,
   }));
 };
 
-const getServicesWithInfrastructure = async (filterModel: FilterParamsModel, selected: any, regionMap: Map<string, any[]>): Promise<Service[]> => {
-  const pluginData = await getPluginSettings();
+/**
+ * Assigns infrastructureId to each service based on metric mapping + plugin settings.
+ * Now accepts pre-fetched data to avoid duplicate calls.
+ */
+const assignInfrastructureToServices = async (
+  allServices: Service[],
+  selected: any,
+  regionMap: Map<string, any[]>,
+): Promise<Service[]> => {
+  const [pluginData, serviceInfraMap] = await Promise.all([
+    getPluginSettings(),
+    getServiceInfrastructureMapping(),
+  ]);
   const serviceMapping: ServiceInfrastructureMapping = pluginData?.serviceInfrastructureMapping || {};
 
   const infraLookup = new Map<string, { id: string; hostName: string; regionName: string }>();
@@ -238,9 +220,6 @@ const getServicesWithInfrastructure = async (filterModel: FilterParamsModel, sel
       }
     });
   }
-
-  const allServices = await getServicesTableData(filterModel);
-  const serviceInfraMap = await getServiceInfrastructureMapping();
 
   allServices.forEach((srv: Service) => {
     const selSrv = findItem(selected, srv.id, 'service');
@@ -266,14 +245,16 @@ const getServicesWithInfrastructure = async (filterModel: FilterParamsModel, sel
   return allServices;
 };
 
-export const getRegions = async (filterModel: FilterParamsModel): Promise<Region[]> => {
-
-  const regions: Region[] = [];
-  const selected = await getSelectedViewData('service-map');
-  const data = await getInventoryHosts();
-
+/**
+ * Builds region + infrastructure hierarchy from pre-fetched hosts and services.
+ * Called ONCE, not per-region.
+ */
+const buildRegions = (
+  data: any[],
+  allServices: Service[],
+  selected: any,
+): Region[] => {
   const regionMap = new Map<string, any[]>();
-
   if (data && Array.isArray(data)) {
     data.forEach((item: any) => {
       const cloudRegion = item?.cloud_region || 'unknown';
@@ -283,6 +264,8 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
       regionMap.get(cloudRegion)!.push(item);
     });
   }
+
+  const regions: Region[] = [];
 
   for (const [cloudRegion, items] of regionMap.entries()) {
     const regionId = `region|${cloudRegion}`.toLowerCase();
@@ -296,13 +279,6 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
       }
       infraMap.get(hostName)!.push(item);
     });
-
-    let allServices: Service[] = [];
-    try {
-      allServices = await getServicesWithInfrastructure(filterModel, selected, regionMap);
-    } catch (error) {
-      allServices = [];
-    }
 
     const infrastructures: Infrastructure[] = [];
 
@@ -417,11 +393,11 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
               'healthy',
         metrics: {
           errorCount: infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'error').length,
-          errorPercentage: infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'error').length / infrastructures.length * 100,
+          errorPercentage: infrastructures.length > 0 ? infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'error').length / infrastructures.length * 100 : 0,
           warningCount: infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'warning').length,
-          warningPercentage: infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'warning').length / infrastructures.length * 100,
+          warningPercentage: infrastructures.length > 0 ? infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'warning').length / infrastructures.length * 100 : 0,
           degradedCount: infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'degraded').length,
-          degradedPercentage: infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'degraded').length / infrastructures.length * 100,
+          degradedPercentage: infrastructures.length > 0 ? infrastructures.filter((infra: Infrastructure) => infra.status?.value === 'degraded').length / infrastructures.length * 100 : 0,
           totalCount: infrastructures.length,
         },
       },
@@ -434,5 +410,53 @@ export const getRegions = async (filterModel: FilterParamsModel): Promise<Region
   return regions;
 };
 
+/**
+ * Single entry point for overview data.
+ * Calls getInventoryHosts() and getServicesTableData() ONCE each,
+ * returns both regions and orphan services.
+ */
+export const getOverviewData = async (filterModel: FilterParamsModel): Promise<{
+  regions: Region[];
+  orphanServices: Service[];
+}> => {
+  // Fetch everything in parallel — ONE call each
+  const [selected, data, allServices] = await Promise.all([
+    getSelectedViewData('service-map'),
+    getInventoryHosts(),
+    getServicesOverviewData(filterModel),
+  ]);
 
+  // Build region map from host data
+  const regionMap = new Map<string, any[]>();
+  if (data && Array.isArray(data)) {
+    data.forEach((item: any) => {
+      const cloudRegion = item?.cloud_region || 'unknown';
+      if (!regionMap.has(cloudRegion)) {
+        regionMap.set(cloudRegion, []);
+      }
+      regionMap.get(cloudRegion)!.push(item);
+    });
+  }
 
+  // Assign infrastructure to services — ONCE
+  await assignInfrastructureToServices(allServices, selected, regionMap);
+
+  // Build region hierarchy using the already-fetched data
+  const regions = buildRegions(data, allServices, selected);
+
+  // Orphans = services without infrastructure assignment
+  const orphanServices = allServices.filter(srv => srv.infrastructureId === undefined);
+
+  return { regions, orphanServices };
+};
+
+// Keep legacy exports for backward compatibility with other pages
+export const getRegions = async (filterModel: FilterParamsModel): Promise<Region[]> => {
+  const { regions } = await getOverviewData(filterModel);
+  return regions;
+};
+
+export const getOrphanServices = async (filterModel: FilterParamsModel): Promise<Service[]> => {
+  const { orphanServices } = await getOverviewData(filterModel);
+  return orphanServices;
+};
