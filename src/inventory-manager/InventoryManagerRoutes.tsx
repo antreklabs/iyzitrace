@@ -13,13 +13,11 @@ import './styles/inventory-manager.css';
 
 // Lazy load pages
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
-const TopologyView = React.lazy(() => import('./pages/TopologyView'));
 const TreeView = React.lazy(() => import('./pages/TreeView'));
 const TableView = React.lazy(() => import('./pages/TableView'));
 
 const navItems = [
     { path: 'dashboard', label: 'Dashboard', icon: <DashboardOutlined /> },
-    { path: 'topology', label: 'Topology', icon: <PartitionOutlined /> },
     { path: 'tree', label: 'Tree View', icon: <ApartmentOutlined /> },
     { path: 'table', label: 'Table View', icon: <TableOutlined /> },
 ];
@@ -77,7 +75,6 @@ const InventoryManagerRoutes: React.FC = () => {
                     <Routes>
                         <Route index element={<Navigate to="dashboard" replace />} />
                         <Route path="dashboard" element={<Dashboard />} />
-                        <Route path="topology" element={<TopologyView />} />
                         <Route path="tree" element={<TreeView />} />
                         <Route path="table" element={<TableView />} />
                     </Routes>

@@ -27,7 +27,7 @@ import type { EntityType, EntityStatus } from '../types/inventory';
 import { ENTITY_COLORS, STATUS_INFO } from '../types/inventory';
 
 interface EntityIconProps {
-    type: EntityType;
+    type: EntityType | string;
     size?: number;
     className?: string;
 }
@@ -70,7 +70,7 @@ export const EntityIcon: React.FC<EntityIconProps> = ({ type, size = 16, classNa
     );
 };
 
-export const EntityBadge: React.FC<{ type: EntityType }> = ({ type }) => {
+export const EntityBadge: React.FC<{ type: EntityType | string }> = ({ type }) => {
     const color = ENTITY_COLORS[type] || '#64748b';
 
     return (
@@ -78,16 +78,18 @@ export const EntityBadge: React.FC<{ type: EntityType }> = ({ type }) => {
             style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px',
-                padding: '2px 8px',
-                borderRadius: '12px',
+                gap: '5px',
+                padding: '3px 10px',
+                borderRadius: '14px',
                 fontSize: '12px',
-                fontWeight: 500,
-                backgroundColor: `${color}15`,
+                fontWeight: 600,
+                backgroundColor: `${color}20`,
                 color: color,
+                border: `1px solid ${color}30`,
+                whiteSpace: 'nowrap',
             }}
         >
-            <EntityIcon type={type} size={12} />
+            <EntityIcon type={type as EntityType} size={12} />
             {type}
         </span>
     );
@@ -100,14 +102,15 @@ export const StatusBadge: React.FC<{ status: EntityStatus }> = ({ status }) => {
             style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                padding: '2px 8px',
+                padding: '3px 10px',
                 fontSize: '10px',
                 fontWeight: 700,
-                borderRadius: '12px',
+                borderRadius: '14px',
                 border: `1px solid ${info.color}30`,
-                backgroundColor: `${info.bgColor}15`,
+                backgroundColor: `${info.color}15`,
                 color: info.color,
                 textTransform: 'uppercase',
+                letterSpacing: '0.5px',
             }}
         >
             {info.label}

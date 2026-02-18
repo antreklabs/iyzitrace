@@ -1,47 +1,206 @@
 import React, { useMemo, useState, useCallback } from 'react';
-import { Tree, Input, Empty, Button, Segmented, Tooltip, Collapse } from 'antd';
+import { Tree, Input, Empty, Button, Segmented } from 'antd';
 import type { DataNode } from 'antd/es/tree';
 import {
     SearchOutlined,
-    DesktopOutlined,
-    ContainerOutlined,
-    ApiOutlined,
-    DatabaseOutlined,
-    CloudOutlined,
-    AppstoreOutlined,
     FolderOutlined,
     UnorderedListOutlined,
-    ExpandAltOutlined,
-    ShrinkOutlined,
-    ReloadOutlined,
     DownOutlined,
 } from '@ant-design/icons';
-import { useEntities } from '../hooks/useInventory';
+import { useEntities, useTopology } from '../hooks/useInventory';
 import { useNavigation } from '../components/NavigationContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import { EntityIcon } from '../components/EntityIcon';
-import type { Entity, EntityType } from '../types/inventory';
+import type { Entity, EntityType, TopologyNode, TopologyEdge } from '../types/inventory';
 import { ENTITY_CATEGORIES, ENTITY_COLORS } from '../types/inventory';
 
 type ViewMode = 'category' | 'tree';
 
+const GROUPABLE_TYPES: Record<string, string> = {
+    process: 'group.processes',
+    container: 'group.containers',
+    service: 'group.services',
+    'k8s.pod': 'group.pods',
+};
+
+const GROUP_INFO: Record<string, { label: string; color: string }> = {
+    'group.processes': { label: 'Processes', color: '#6366f1' },
+    'group.containers': { label: 'Containers', color: '#8b5cf6' },
+    'group.services': { label: 'Services', color: '#ec4899' },
+    'group.pods': { label: 'Pods', color: '#22d3d1' },
+};
+
+interface HierarchyNode {
+    id: string;
+    name: string;
+    type: string;
+    entity?: TopologyNode;
+    children: HierarchyNode[];
+    level: number;
+    isGroup?: boolean;
+    count?: number;
+}
+
+function buildTree(nodes: TopologyNode[], edges: TopologyEdge[]): HierarchyNode[] {
+    const childrenMap = new Map<string, string[]>();
+    const hasParent = new Set<string>();
+
+    edges.forEach(edge => {
+        if (['part_of', 'runs_on', 'runs_in', 'located_in', 'belongs_to', 'managed_by'].includes(edge.type)) {
+            if (!childrenMap.has(edge.to)) {
+                childrenMap.set(edge.to, []);
+            }
+            childrenMap.get(edge.to)!.push(edge.from);
+            hasParent.add(edge.from);
+        }
+    });
+
+    const roots = nodes.filter(n => !hasParent.has(n.id));
+    const nodeMap = new Map(nodes.map(n => [n.id, n]));
+
+    function buildNode(entity: TopologyNode, level: number, visited: Set<string>): HierarchyNode {
+        if (visited.has(entity.id)) {
+            return { id: entity.id, name: entity.name, type: entity.type, entity, children: [], level };
+        }
+        visited.add(entity.id);
+
+        const childIds = childrenMap.get(entity.id) || [];
+        const childEntities = childIds
+            .map(id => nodeMap.get(id))
+            .filter((n): n is TopologyNode => n !== undefined);
+
+        const groupedChildren: Record<string, TopologyNode[]> = {};
+        const ungroupedChildren: TopologyNode[] = [];
+
+        childEntities.forEach(child => {
+            const groupType = GROUPABLE_TYPES[child.type];
+            if (groupType) {
+                if (!groupedChildren[groupType]) groupedChildren[groupType] = [];
+                groupedChildren[groupType].push(child);
+            } else {
+                ungroupedChildren.push(child);
+            }
+        });
+
+        const children: HierarchyNode[] = [];
+
+        Object.entries(groupedChildren).forEach(([groupType, groupNodes]) => {
+            const groupInfo = GROUP_INFO[groupType];
+            children.push({
+                id: `${entity.id}-${groupType}`,
+                name: groupInfo.label,
+                type: groupType,
+                children: groupNodes.map(n => buildNode(n, level + 2, visited)),
+                level: level + 1,
+                isGroup: true,
+                count: groupNodes.length,
+            });
+        });
+
+        ungroupedChildren.forEach(child => {
+            children.push(buildNode(child, level + 1, visited));
+        });
+
+        return { id: entity.id, name: entity.name, type: entity.type, entity, children, level };
+    }
+
+    return roots.map(r => buildNode(r, 0, new Set()));
+}
+
+function toDataNodes(nodes: HierarchyNode[], selectEntity: (id: string) => void): DataNode[] {
+    return nodes.map(node => {
+        const isGroup = node.isGroup;
+        const groupInfo = isGroup ? GROUP_INFO[node.type] : null;
+        const color = isGroup ? groupInfo?.color : ENTITY_COLORS[node.type] || '#64748b';
+
+        return {
+            title: (
+                <span
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                    onClick={(e) => {
+                        if (node.entity && node.children.length === 0) {
+                            e.stopPropagation();
+                            selectEntity(node.entity.id);
+                        }
+                    }}
+                >
+                    <EntityIcon type={node.type as EntityType} size={16} />
+                    <span style={{ color: '#f1f5f9', fontWeight: isGroup ? 600 : 500, fontSize: '14px' }}>
+                        {node.name}
+                    </span>
+                    {isGroup && node.count !== undefined && (
+                        <span style={{
+                            padding: '1px 8px',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            borderRadius: '10px',
+                            backgroundColor: `${color}20`,
+                            color: color,
+                        }}>
+                            {node.count}
+                        </span>
+                    )}
+                    {!isGroup && (
+                        <span style={{ fontSize: '12px', color: '#64748b', marginLeft: 'auto' }}>
+                            {node.type}
+                        </span>
+                    )}
+                </span>
+            ),
+            key: node.id,
+            isLeaf: node.children.length === 0,
+            children: node.children.length > 0 ? toDataNodes(node.children, selectEntity) : undefined,
+        };
+    });
+}
+
+function collectAllKeys(nodes: HierarchyNode[]): React.Key[] {
+    const keys: React.Key[] = [];
+    function walk(list: HierarchyNode[]) {
+        list.forEach(n => {
+            if (n.children.length > 0) {
+                keys.push(n.id);
+                walk(n.children);
+            }
+        });
+    }
+    walk(nodes);
+    return keys;
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+    infrastructure: 'Infrastructure',
+    kubernetes: 'Kubernetes',
+    services: 'Services',
+    databases: 'Databases & Cache',
+    messaging: 'Messaging',
+    mobile: 'Mobile',
+};
+
 const TreeView: React.FC = () => {
-    const { data, loading, error, refresh } = useEntities({ limit: 5000 });
+    const { data: entitiesData, loading: entitiesLoading, error: entitiesError, refresh: refreshEntities } = useEntities({ limit: 5000 });
+    const { topology, loading: topoLoading, error: topoError, refresh: refreshTopology } = useTopology();
     const { selectEntity } = useNavigation();
     const [searchValue, setSearchValue] = useState('');
     const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
-    const [viewMode, setViewMode] = useState<ViewMode>('category');
-    const [activePanels, setActivePanels] = useState<string[]>(['infrastructure', 'kubernetes', 'services', 'databases', 'messaging', 'mobile']);
+    const [viewMode, setViewMode] = useState<ViewMode>('tree');
+    const [activePanels, setActivePanels] = useState<string[]>([]);
 
-    // Filter entities by search
+    const loading = viewMode === 'tree' ? topoLoading : entitiesLoading;
+    const error = viewMode === 'tree' ? topoError : entitiesError;
+
+    const refresh = useCallback(() => {
+        refreshTopology();
+        refreshEntities();
+    }, [refreshTopology, refreshEntities]);
+
     const filteredEntities = useMemo(() => {
-        if (!data?.entities) return [];
-        if (!searchValue) return data.entities;
-        return data.entities.filter(e => e.name.toLowerCase().includes(searchValue.toLowerCase()));
-    }, [data, searchValue]);
+        if (!entitiesData?.entities) return [];
+        if (!searchValue) return entitiesData.entities;
+        return entitiesData.entities.filter(e => e.name.toLowerCase().includes(searchValue.toLowerCase()));
+    }, [entitiesData, searchValue]);
 
-    // Group entities by category and type for Category View
     const categoryData = useMemo(() => {
         const result: Record<string, { types: Map<EntityType, Entity[]>; total: number }> = {};
 
@@ -50,9 +209,7 @@ const TreeView: React.FC = () => {
             if (categoryEntities.length > 0) {
                 const typeGroups = new Map<EntityType, Entity[]>();
                 categoryEntities.forEach(entity => {
-                    if (!typeGroups.has(entity.type)) {
-                        typeGroups.set(entity.type, []);
-                    }
+                    if (!typeGroups.has(entity.type)) typeGroups.set(entity.type, []);
                     typeGroups.get(entity.type)!.push(entity);
                 });
                 result[category] = { types: typeGroups, total: categoryEntities.length };
@@ -62,58 +219,37 @@ const TreeView: React.FC = () => {
         return result;
     }, [filteredEntities]);
 
-    // Get all possible keys for expand/collapse (tree mode)
-    const allKeys = useMemo((): React.Key[] => {
-        if (!data?.entities) return [];
-        const keys: React.Key[] = [];
-        const typeGroups = new Set(data.entities.map(e => e.type));
-        typeGroups.forEach(type => keys.push(type));
-        return keys;
-    }, [data]);
+    const hierarchyTree = useMemo(() => {
+        if (!topology) return [];
+        return buildTree(topology.nodes, topology.edges);
+    }, [topology]);
 
-    // Build tree data for Tree View mode
-    const treeData = useMemo((): DataNode[] => {
-        if (!filteredEntities.length) return [];
+    const filteredTree = useMemo(() => {
+        if (!searchValue) return hierarchyTree;
+        const term = searchValue.toLowerCase();
 
-        const typeGroups = new Map<EntityType, Entity[]>();
-        filteredEntities.forEach(entity => {
-            if (!typeGroups.has(entity.type)) {
-                typeGroups.set(entity.type, []);
+        function filterNode(node: HierarchyNode): HierarchyNode | null {
+            const matchesSelf = node.name.toLowerCase().includes(term) || node.type.toLowerCase().includes(term);
+            const childMatches = node.children.map(c => filterNode(c)).filter((c): c is HierarchyNode => c !== null);
+            if (matchesSelf || childMatches.length > 0) {
+                return { ...node, children: matchesSelf ? node.children : childMatches };
             }
-            typeGroups.get(entity.type)!.push(entity);
-        });
+            return null;
+        }
 
-        return Array.from(typeGroups.entries())
-            .sort(([, a], [, b]) => b.length - a.length)
-            .map(([type, typeEntities]) => ({
-                title: (
-                    <span style={{ color: ENTITY_COLORS[type] || '#94a3b8', fontWeight: 600 }}>
-                        {type} ({typeEntities.length})
-                    </span>
-                ),
-                key: type,
-                children: typeEntities.map(entity => ({
-                    title: (
-                        <span
-                            style={{ cursor: 'pointer', color: '#f1f5f9' }}
-                            onClick={() => selectEntity(entity.id)}
-                        >
-                            {entity.name}
-                        </span>
-                    ),
-                    key: entity.id,
-                    isLeaf: true,
-                })),
-            }));
-    }, [filteredEntities, selectEntity]);
+        return hierarchyTree.map(n => filterNode(n)).filter((n): n is HierarchyNode => n !== null);
+    }, [hierarchyTree, searchValue]);
+
+    const treeData = useMemo((): DataNode[] => toDataNodes(filteredTree, selectEntity), [filteredTree, selectEntity]);
+    const allTreeKeys = useMemo(() => collectAllKeys(filteredTree), [filteredTree]);
 
     const handleExpandAll = useCallback(() => {
         if (viewMode === 'category') {
             setActivePanels(Object.keys(categoryData));
         } else {
-            setExpandedKeys(allKeys);
+            setExpandedKeys(allTreeKeys);
         }
-    }, [allKeys, categoryData, viewMode]);
+    }, [allTreeKeys, categoryData, viewMode]);
 
     const handleCollapseAll = useCallback(() => {
         if (viewMode === 'category') {
@@ -125,80 +261,15 @@ const TreeView: React.FC = () => {
 
     React.useEffect(() => {
         if (searchValue && viewMode === 'tree') {
-            setExpandedKeys(allKeys);
+            setExpandedKeys(allTreeKeys);
         }
-    }, [searchValue, allKeys, viewMode]);
+    }, [searchValue, allTreeKeys, viewMode]);
 
-    if (loading) {
-        return <LoadingSpinner tip="Loading entities..." />;
-    }
-
-    if (error) {
-        return <ErrorMessage message={error.message} onRetry={refresh} />;
-    }
-
-    // Entity Card component - Dark theme
-    const EntityCard = ({ entity }: { entity: Entity }) => (
-        <div
-            onClick={() => selectEntity(entity.id)}
-            style={{
-                background: '#1a1a1a',
-                border: '1px solid #2a2a2a',
-                borderRadius: '8px',
-                padding: '12px 16px',
-                cursor: 'pointer',
-                color: '#e2e8f0',
-                fontSize: '14px',
-                fontWeight: 500,
-                transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#2a2a2a';
-                e.currentTarget.style.borderColor = '#475569';
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#1a1a1a';
-                e.currentTarget.style.borderColor = '#2a2a2a';
-            }}
-        >
-            {entity.name}
-        </div>
-    );
-
-    // Type Section component for Category View
-    const TypeSection = ({ type, entities }: { type: EntityType; entities: Entity[] }) => (
-        <div style={{ marginBottom: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                <EntityIcon type={type} size={18} />
-                <span style={{ fontWeight: 600, color: ENTITY_COLORS[type] || '#94a3b8' }}>{type}</span>
-                <span style={{ color: '#60a5fa', fontWeight: 500 }}>{entities.length}</span>
-            </div>
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: '12px',
-                paddingLeft: '4px',
-            }}>
-                {entities.map(entity => (
-                    <EntityCard key={entity.id} entity={entity} />
-                ))}
-            </div>
-        </div>
-    );
-
-    // Category Panel component
-    const CategoryPanel = ({ category, types }: { category: string; types: Map<EntityType, Entity[]> }) => (
-        <div style={{ padding: '16px 0' }}>
-            {Array.from(types.entries())
-                .sort(([, a], [, b]) => b.length - a.length)
-                .map(([type, entities]) => (
-                    <TypeSection key={type} type={type} entities={entities} />
-                ))}
-        </div>
-    );
+    if (loading) return <LoadingSpinner tip="Loading entities..." />;
+    if (error) return <ErrorMessage message={error.message} onRetry={refresh} />;
 
     return (
-        <div style={{ padding: '24px', background: '#111111', minHeight: 'calc(100vh - 64px)' }}>
+        <div style={{ padding: '24px 32px', minHeight: 'calc(100vh - 64px)' }}>
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
                 <div>
@@ -207,98 +278,158 @@ const TreeView: React.FC = () => {
                         Hierarchical view of infrastructure entities
                     </p>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Segmented
-                        value={viewMode}
-                        onChange={(value) => setViewMode(value as ViewMode)}
-                        options={[
-                            { value: 'category', icon: <FolderOutlined />, label: 'Category View' },
-                            { value: 'tree', icon: <UnorderedListOutlined />, label: 'Tree View' },
-                        ]}
-                        style={{ background: '#2a2a2a' }}
-                    />
-                    <Tooltip title="Refresh">
-                        <Button
-                            icon={<ReloadOutlined />}
-                            onClick={refresh}
-                            style={{ background: '#2a2a2a', border: 'none', color: '#94a3b8' }}
-                        />
-                    </Tooltip>
-                </div>
+                <Segmented
+                    value={viewMode}
+                    onChange={(value) => setViewMode(value as ViewMode)}
+                    options={[
+                        { value: 'tree', icon: <UnorderedListOutlined />, label: 'Tree View' },
+                        { value: 'category', icon: <FolderOutlined />, label: 'Category View' },
+                    ]}
+                    style={{ background: '#2a2a2a' }}
+                />
             </div>
 
             {/* Search and Controls */}
-            <div style={{ display: 'flex', gap: '16px', marginBottom: '16px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', alignItems: 'center' }}>
                 <Input
                     placeholder="Search entities..."
                     prefix={<SearchOutlined style={{ color: '#64748b' }} />}
                     value={searchValue}
                     onChange={e => setSearchValue(e.target.value)}
-                    style={{
-                        flex: 1,
-                        background: '#1a1a1a',
-                        border: '1px solid #2a2a2a',
-                        color: '#f1f5f9',
-                    }}
+                    style={{ flex: 1, background: '#1a1a1a', border: '1px solid #2a2a2a' }}
+                    size="large"
                 />
-                <Button
-                    icon={<ExpandAltOutlined />}
-                    onClick={handleExpandAll}
-                    style={{ background: '#2a2a2a', border: 'none', color: '#94a3b8' }}
-                >
+                <Button onClick={handleExpandAll} style={{ color: '#94a3b8', flexShrink: 0 }}>
                     Expand All
                 </Button>
-                <Button
-                    icon={<ShrinkOutlined />}
-                    onClick={handleCollapseAll}
-                    style={{ background: '#2a2a2a', border: 'none', color: '#94a3b8' }}
-                >
+                <Button onClick={handleCollapseAll} style={{ color: '#94a3b8', flexShrink: 0 }}>
                     Collapse All
                 </Button>
             </div>
 
             {/* Content */}
             <div style={{
-                background: '#111111',
-                borderRadius: '12px',
+                background: '#1a1a1a',
+                borderRadius: '16px',
                 border: '1px solid #2a2a2a',
                 minHeight: '400px',
                 overflow: 'hidden',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
             }}>
                 {viewMode === 'category' ? (
-                    // Category View with collapsible panels and grid layout
                     Object.keys(categoryData).length > 0 ? (
-                        <Collapse
-                            activeKey={activePanels}
-                            onChange={(keys) => setActivePanels(keys as string[])}
-                            expandIcon={({ isActive }) => <DownOutlined rotate={isActive ? 0 : -90} style={{ color: '#94a3b8' }} />}
-                            style={{ background: 'transparent', border: 'none' }}
-                            items={Object.entries(categoryData).map(([category, { types, total }]) => ({
-                                key: category,
-                                label: (
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <span style={{ fontSize: '16px', fontWeight: 700, color: '#f1f5f9', textTransform: 'capitalize' }}>
-                                            {category}
+                        <div style={{ padding: '8px' }}>
+                            {Object.entries(categoryData).map(([category, { types, total }]) => (
+                                <div
+                                    key={category}
+                                    style={{
+                                        background: '#1a1a1a',
+                                        borderRadius: '12px',
+                                        border: '1px solid #2a2a2a',
+                                        marginBottom: '8px',
+                                        overflow: 'hidden',
+                                    }}
+                                >
+                                    <button
+                                        onClick={() => {
+                                            setActivePanels(prev =>
+                                                prev.includes(category)
+                                                    ? prev.filter(p => p !== category)
+                                                    : [...prev, category]
+                                            );
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '12px',
+                                            padding: '16px 20px',
+                                            background: 'transparent',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            textAlign: 'left',
+                                        }}
+                                    >
+                                        <DownOutlined
+                                            style={{
+                                                fontSize: '12px',
+                                                color: '#64748b',
+                                                transform: activePanels.includes(category) ? 'rotate(0deg)' : 'rotate(-90deg)',
+                                                transition: 'transform 0.2s',
+                                            }}
+                                        />
+                                        <span style={{ fontSize: '16px', fontWeight: 600, color: '#f1f5f9' }}>
+                                            {CATEGORY_LABELS[category] || category}
                                         </span>
-                                        <span style={{ fontSize: '14px', color: '#60a5fa', fontWeight: 600 }}>{total}</span>
-                                    </div>
-                                ),
-                                children: <CategoryPanel category={category} types={types} />,
-                                style: {
-                                    background: '#111111',
-                                    borderBottom: '1px solid #2a2a2a',
-                                    borderRadius: 0,
-                                },
-                            }))}
-                        />
+                                        <span style={{
+                                            fontSize: '13px',
+                                            fontWeight: 500,
+                                            color: '#60a5fa',
+                                        }}>
+                                            {total}
+                                        </span>
+                                    </button>
+                                    {activePanels.includes(category) && (
+                                        <div style={{ padding: '0 20px 16px' }}>
+                                            {Array.from(types.entries())
+                                                .sort(([, a], [, b]) => b.length - a.length)
+                                                .map(([type, entities]) => (
+                                                    <div key={type} style={{ marginBottom: '20px' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                                                            <EntityIcon type={type} size={16} />
+                                                            <span style={{ fontWeight: 600, color: ENTITY_COLORS[type] || '#64748b', fontSize: '13px' }}>{type}</span>
+                                                            <span style={{
+                                                                fontSize: '12px',
+                                                                fontWeight: 500,
+                                                                color: '#60a5fa',
+                                                                padding: '1px 8px',
+                                                                borderRadius: '10px',
+                                                                background: '#3b82f620',
+                                                            }}>
+                                                                {entities.length}
+                                                            </span>
+                                                        </div>
+                                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', paddingLeft: '4px' }}>
+                                                            {entities.map(entity => (
+                                                                <button
+                                                                    key={entity.id}
+                                                                    onClick={() => selectEntity(entity.id)}
+                                                                    style={{
+                                                                        background: '#222222',
+                                                                        border: '1px solid #2a2a2a',
+                                                                        borderRadius: '8px',
+                                                                        padding: '10px 14px',
+                                                                        cursor: 'pointer',
+                                                                        color: '#f1f5f9',
+                                                                        fontSize: '13px',
+                                                                        fontWeight: 500,
+                                                                        textAlign: 'left',
+                                                                        transition: 'all 0.15s',
+                                                                    }}
+                                                                    onMouseEnter={(e) => {
+                                                                        e.currentTarget.style.background = '#2a2a3a';
+                                                                        e.currentTarget.style.borderColor = '#3b82f650';
+                                                                    }}
+                                                                    onMouseLeave={(e) => {
+                                                                        e.currentTarget.style.background = '#222222';
+                                                                        e.currentTarget.style.borderColor = '#2a2a2a';
+                                                                    }}
+                                                                >
+                                                                    {entity.name}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     ) : (
-                        <Empty
-                            description={<span style={{ color: '#64748b' }}>No entities found</span>}
-                            style={{ padding: '48px' }}
-                        />
+                        <Empty description="No entities found" style={{ padding: '48px' }} />
                     )
                 ) : (
-                    // Tree View
                     <div style={{ padding: '16px' }}>
                         {treeData.length > 0 ? (
                             <Tree
@@ -309,33 +440,11 @@ const TreeView: React.FC = () => {
                                 style={{ background: 'transparent', color: '#f1f5f9' }}
                             />
                         ) : (
-                            <Empty
-                                description={<span style={{ color: '#64748b' }}>No entities found</span>}
-                                style={{ padding: '48px' }}
-                            />
+                            <Empty description="No entities found" style={{ padding: '48px' }} />
                         )}
                     </div>
                 )}
             </div>
-
-            {/* Custom styles for Ant Design Collapse in dark theme */}
-            <style>{`
-        .ant-collapse > .ant-collapse-item > .ant-collapse-header {
-          color: #f1f5f9 !important;
-          background: #1a1a1a !important;
-          border-radius: 0 !important;
-        }
-        .ant-collapse > .ant-collapse-item > .ant-collapse-header:hover {
-          background: #2a2a2a !important;
-        }
-        .ant-collapse-content {
-          background: #111111 !important;
-          border-top: 1px solid #2a2a2a !important;
-        }
-        .ant-collapse-content > .ant-collapse-content-box {
-          padding: 16px 24px !important;
-        }
-      `}</style>
         </div>
     );
 };

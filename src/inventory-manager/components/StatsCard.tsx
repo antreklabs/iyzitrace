@@ -22,14 +22,15 @@ export const StatsCard: React.FC<StatsCardProps> = ({ title, value, icon, color 
         <div
             style={{
                 background: '#1a1a1a',
-                borderRadius: '12px',
+                borderRadius: '16px',
                 border: '1px solid #2a2a2a',
                 padding: '20px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
             }}
         >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                    <p style={{ fontSize: '14px', fontWeight: 500, color: '#94a3b8', margin: 0 }}>{title}</p>
+                    <p style={{ fontSize: '13px', fontWeight: 500, color: '#94a3b8', margin: 0 }}>{title}</p>
                     <p style={{ fontSize: '28px', fontWeight: 700, color: '#f1f5f9', margin: '8px 0 0 0' }}>
                         {typeof value === 'number' ? value.toLocaleString() : value}
                     </p>
