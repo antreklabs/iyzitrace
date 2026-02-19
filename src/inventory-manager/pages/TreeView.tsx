@@ -117,7 +117,7 @@ function toDataNodes(nodes: HierarchyNode[], selectEntity: (id: string) => void)
         return {
             title: (
                 <span
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                    className="tree-view__node-row"
                     onClick={(e) => {
                         if (node.entity && node.children.length === 0) {
                             e.stopPropagation();
@@ -126,23 +126,22 @@ function toDataNodes(nodes: HierarchyNode[], selectEntity: (id: string) => void)
                     }}
                 >
                     <EntityIcon type={node.type as EntityType} size={16} />
-                    <span style={{ color: '#f1f5f9', fontWeight: isGroup ? 600 : 500, fontSize: '14px' }}>
+                    <span className={isGroup ? 'tree-view__node-name--group' : 'tree-view__node-name'}>
                         {node.name}
                     </span>
                     {isGroup && node.count !== undefined && (
-                        <span style={{
-                            padding: '1px 8px',
-                            fontSize: '11px',
-                            fontWeight: 600,
-                            borderRadius: '10px',
-                            backgroundColor: `${color}20`,
-                            color: color,
-                        }}>
+                        <span
+                            className="tree-view__node-count"
+                            style={{
+                                backgroundColor: `${color}20`,
+                                color: color,
+                            }}
+                        >
                             {node.count}
                         </span>
                     )}
                     {!isGroup && (
-                        <span style={{ fontSize: '12px', color: '#64748b', marginLeft: 'auto' }}>
+                        <span className="tree-view__node-type">
                             {node.type}
                         </span>
                     )}
@@ -276,12 +275,12 @@ const TreeView: React.FC = () => {
     if (error) return <ErrorMessage message={error.message} onRetry={refresh} />;
 
     return (
-        <div style={{ padding: '24px 32px', minHeight: 'calc(100vh - 64px)' }}>
+        <div className="tree-view">
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+            <div className="tree-view__header">
                 <div>
-                    <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#f1f5f9', margin: 0 }}>Entity Tree</h1>
-                    <p style={{ fontSize: '14px', color: '#94a3b8', marginTop: '4px' }}>
+                    <h1 className="tree-view__title">Entity Tree</h1>
+                    <p className="tree-view__subtitle">
                         Hierarchical view of infrastructure entities
                     </p>
                 </div>
@@ -292,51 +291,35 @@ const TreeView: React.FC = () => {
                         { value: 'tree', icon: <UnorderedListOutlined />, label: 'Tree View' },
                         { value: 'category', icon: <FolderOutlined />, label: 'Category View' },
                     ]}
-                    style={{ background: '#2a2a2a' }}
+                    className="table-view__segmented"
                 />
             </div>
 
             {/* Search and Controls */}
-            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', alignItems: 'center' }}>
+            <div className="tree-view__controls">
                 <Input
                     placeholder="Search entities..."
-                    prefix={<SearchOutlined style={{ color: '#64748b' }} />}
+                    prefix={<SearchOutlined className="table-view__search-icon" />}
                     value={searchValue}
                     onChange={e => setSearchValue(e.target.value)}
-                    style={{ flex: 1, background: '#1a1a1a', border: '1px solid #2a2a2a' }}
+                    className="tree-view__search"
                     size="large"
                 />
-                <Button onClick={handleExpandAll} style={{ color: '#94a3b8', flexShrink: 0 }}>
+                <Button onClick={handleExpandAll} className="tree-view__btn">
                     Expand All
                 </Button>
-                <Button onClick={handleCollapseAll} style={{ color: '#94a3b8', flexShrink: 0 }}>
+                <Button onClick={handleCollapseAll} className="tree-view__btn">
                     Collapse All
                 </Button>
             </div>
 
             {/* Content */}
-            <div style={{
-                background: '#1a1a1a',
-                borderRadius: '16px',
-                border: '1px solid #2a2a2a',
-                minHeight: '400px',
-                overflow: 'hidden',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-            }}>
+            <div className="tree-view__content">
                 {viewMode === 'category' ? (
                     Object.keys(categoryData).length > 0 ? (
-                        <div style={{ padding: '8px' }}>
+                        <div className="tree-view__category-list">
                             {Object.entries(categoryData).map(([category, { types, total }]) => (
-                                <div
-                                    key={category}
-                                    style={{
-                                        background: '#1a1a1a',
-                                        borderRadius: '12px',
-                                        border: '1px solid #2a2a2a',
-                                        marginBottom: '8px',
-                                        overflow: 'hidden',
-                                    }}
-                                >
+                                <div key={category} className="tree-view__category-card">
                                     <button
                                         onClick={() => {
                                             setActivePanels(prev =>
@@ -345,82 +328,40 @@ const TreeView: React.FC = () => {
                                                     : [...prev, category]
                                             );
                                         }}
-                                        style={{
-                                            width: '100%',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '12px',
-                                            padding: '16px 20px',
-                                            background: 'transparent',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            textAlign: 'left',
-                                        }}
+                                        className="tree-view__category-btn"
                                     >
                                         <DownOutlined
+                                            className="tree-view__category-arrow"
                                             style={{
-                                                fontSize: '12px',
-                                                color: '#64748b',
                                                 transform: activePanels.includes(category) ? 'rotate(0deg)' : 'rotate(-90deg)',
-                                                transition: 'transform 0.2s',
                                             }}
                                         />
-                                        <span style={{ fontSize: '16px', fontWeight: 600, color: '#f1f5f9' }}>
+                                        <span className="tree-view__category-label">
                                             {CATEGORY_LABELS[category] || category}
                                         </span>
-                                        <span style={{
-                                            fontSize: '13px',
-                                            fontWeight: 500,
-                                            color: '#60a5fa',
-                                        }}>
+                                        <span className="tree-view__category-count">
                                             {total}
                                         </span>
                                     </button>
                                     {activePanels.includes(category) && (
-                                        <div style={{ padding: '0 20px 16px' }}>
+                                        <div className="tree-view__category-body">
                                             {Array.from(types.entries())
                                                 .sort(([, a], [, b]) => b.length - a.length)
                                                 .map(([type, entities]) => (
-                                                    <div key={type} style={{ marginBottom: '20px' }}>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                                                    <div key={type} className="tree-view__type-group">
+                                                        <div className="tree-view__type-header">
                                                             <EntityIcon type={type} size={16} />
-                                                            <span style={{ fontWeight: 600, color: ENTITY_COLORS[type] || '#64748b', fontSize: '13px' }}>{type}</span>
-                                                            <span style={{
-                                                                fontSize: '12px',
-                                                                fontWeight: 500,
-                                                                color: '#60a5fa',
-                                                                padding: '1px 8px',
-                                                                borderRadius: '10px',
-                                                                background: '#3b82f620',
-                                                            }}>
+                                                            <span className="tree-view__type-label" style={{ color: ENTITY_COLORS[type] || '#64748b' }}>{type}</span>
+                                                            <span className="tree-view__type-count">
                                                                 {entities.length}
                                                             </span>
                                                         </div>
-                                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', paddingLeft: '4px' }}>
+                                                        <div className="tree-view__entity-grid">
                                                             {entities.map(entity => (
                                                                 <button
                                                                     key={entity.id}
                                                                     onClick={() => selectEntity(entity.id)}
-                                                                    style={{
-                                                                        background: '#222222',
-                                                                        border: '1px solid #2a2a2a',
-                                                                        borderRadius: '8px',
-                                                                        padding: '10px 14px',
-                                                                        cursor: 'pointer',
-                                                                        color: '#f1f5f9',
-                                                                        fontSize: '13px',
-                                                                        fontWeight: 500,
-                                                                        textAlign: 'left',
-                                                                        transition: 'all 0.15s',
-                                                                    }}
-                                                                    onMouseEnter={(e) => {
-                                                                        e.currentTarget.style.background = '#2a2a3a';
-                                                                        e.currentTarget.style.borderColor = '#3b82f650';
-                                                                    }}
-                                                                    onMouseLeave={(e) => {
-                                                                        e.currentTarget.style.background = '#222222';
-                                                                        e.currentTarget.style.borderColor = '#2a2a2a';
-                                                                    }}
+                                                                    className="tree-view__entity-btn"
                                                                 >
                                                                     {entity.name}
                                                                 </button>
@@ -434,20 +375,20 @@ const TreeView: React.FC = () => {
                             ))}
                         </div>
                     ) : (
-                        <Empty description="No entities found" style={{ padding: '48px' }} />
+                        <Empty description="No entities found" className="inv-empty-padding" />
                     )
                 ) : (
-                    <div style={{ padding: '16px' }}>
+                    <div className="tree-view__tree-body">
                         {treeData.length > 0 ? (
                             <Tree
                                 treeData={treeData}
                                 expandedKeys={expandedKeys}
                                 onExpand={(keys) => setExpandedKeys(keys)}
                                 showLine={{ showLeafIcon: false }}
-                                style={{ background: 'transparent', color: '#f1f5f9' }}
+                                className="inv-tree-transparent"
                             />
                         ) : (
-                            <Empty description="No entities found" style={{ padding: '48px' }} />
+                            <Empty description="No entities found" className="inv-empty-padding" />
                         )}
                     </div>
                 )}

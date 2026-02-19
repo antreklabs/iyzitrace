@@ -9,7 +9,7 @@ import {
 } from '@ant-design/icons';
 import { NavigationProvider } from './components/NavigationContext';
 import EntityDrawer from './components/EntityDrawer';
-import './styles/inventory-manager.css';
+import '../assets/styles/pages/inventory-manager/inventory-manager.css';
 
 // Lazy load pages
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
@@ -32,7 +32,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <header className="inventory-header">
                 <div className="inventory-header-content">
                     <div className="inventory-logo">
-                        <PartitionOutlined style={{ fontSize: '24px' }} />
+                        <PartitionOutlined className="inv-route-icon" />
                         <span>Inventory</span>
                     </div>
 

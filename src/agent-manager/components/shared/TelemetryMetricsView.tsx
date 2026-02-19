@@ -112,8 +112,8 @@ export function TelemetryMetricsView({
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={chartData}>
-                <XAxis dataKey="time" style={{ fontSize: "10px" }} />
-                <YAxis style={{ fontSize: "10px" }} />
+                <XAxis dataKey="time" className="am-font-10" />
+                <YAxis className="am-font-10" />
                 <Tooltip />
                 <Line
                   type="monotone"

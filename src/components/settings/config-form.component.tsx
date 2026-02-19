@@ -124,40 +124,14 @@ const ConfigForm: React.FC = () => {
   };
 
   const renderHeader = () => (
-    <header style={{
-      background: '#1a1a1a',
-      borderBottom: '1px solid #2a2a2a',
-      position: 'sticky',
-      top: 0,
-      zIndex: 50,
-      marginBottom: '16px',
-    }}>
-      <div style={{
-        maxWidth: '1600px',
-        margin: '0 auto',
-        padding: '0 24px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height: '56px',
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          fontSize: '18px',
-          fontWeight: 700,
-          color: '#f1f5f9',
-        }}>
-          <SettingOutlined style={{ fontSize: '24px' }} />
+    <header className="settings-header">
+      <div className="settings-header__inner">
+        <div className="settings-header__title">
+          <SettingOutlined className="settings-header__title-icon" />
           <span>Settings</span>
         </div>
 
-        <nav style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
-        }}>
+        <nav className="settings-header__nav">
           {TAB_ITEMS.map((item) => {
             const isActive = activeTab === item.key;
 
@@ -165,32 +139,7 @@ const ConfigForm: React.FC = () => {
               <button
                 key={item.key}
                 onClick={() => setActiveTab(item.key)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  background: isActive ? '#3b82f6' : 'transparent',
-                  color: isActive ? 'white' : '#888888',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.background = '#2a2a2a';
-                    e.currentTarget.style.color = '#f1f5f9';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = '#888888';
-                  }
-                }}
+                className={`settings-header__tab ${isActive ? 'settings-header__tab--active' : 'settings-header__tab--inactive'}`}
               >
                 {item.label}
               </button>
@@ -202,58 +151,43 @@ const ConfigForm: React.FC = () => {
   );
 
   const renderPlaceholder = (title: string) => (
-    <div style={{ padding: '16px 4px' }}>
-      <h3 className="page-heading" style={{ marginBottom: 8 }}>{title}</h3>
-      <div style={{
-        padding: 16,
-        border: '1px dashed rgba(255,255,255,0.15)',
-        borderRadius: 8,
-        color: '#9CA3AF',
-        marginBottom: 16
-      }}>
-        <div style={{
-          fontSize: 13,
-          color: '#9CA3AF',
-          background: 'rgba(255,255,255,0.04)',
-          borderRadius: 8,
-          padding: '18px 20px',
-          marginTop: 8,
-          lineHeight: 1.7,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-        }}>
-          <div style={{ margin: '8px 0 12px 0', color: '#a3a3a3', fontSize: 13 }}>
+    <div className="settings-placeholder-wrapper">
+      <h3 className="page-heading config-heading-mb-8">{title}</h3>
+      <div className="settings-placeholder-content">
+        <div className="settings-placeholder-info">
+          <div className="settings-placeholder-intro">
             Below you can find important legal documents and policies regarding your use of IyziTrace. Please review these documents to understand your rights, responsibilities, and how your data is handled and protected.
           </div>
-          <ul style={{ margin: '0 0 0 18px', padding: 0, listStyle: 'disc' }}>
-            <li style={{ marginBottom: 8 }}>
-              <a href="https://beta.iyzitrace.com/legal/terms" target="_blank" rel="noopener noreferrer" style={{ color: '#34d399', fontWeight: 500 }}>
+          <ul className="settings-link-list">
+            <li className="settings-link-item">
+              <a href="https://beta.iyzitrace.com/legal/terms" target="_blank" rel="noopener noreferrer" className="settings-link">
                 Terms and Conditions
               </a>
-              <div style={{ fontSize: 12, color: '#bdbdbd', marginTop: 2 }}>
+              <div className="settings-link-description">
                 The main contract for using IyziTrace. Outlines your rights, obligations, and the rules for using our services.
               </div>
             </li>
-            <li style={{ marginBottom: 8 }}>
-              <a href="https://beta.iyzitrace.com/legal/privacy" target="_blank" rel="noopener noreferrer" style={{ color: '#34d399', fontWeight: 500 }}>
+            <li className="settings-link-item">
+              <a href="https://beta.iyzitrace.com/legal/privacy" target="_blank" rel="noopener noreferrer" className="settings-link">
                 Privacy Policy
               </a>
-              <div style={{ fontSize: 12, color: '#bdbdbd', marginTop: 2 }}>
+              <div className="settings-link-description">
                 Explains how we collect, use, store, and protect your personal data when you use IyziTrace.
               </div>
             </li>
-            <li style={{ marginBottom: 8 }}>
-              <a href="https://beta.iyzitrace.com/legal/dpa" target="_blank" rel="noopener noreferrer" style={{ color: '#34d399', fontWeight: 500 }}>
+            <li className="settings-link-item">
+              <a href="https://beta.iyzitrace.com/legal/dpa" target="_blank" rel="noopener noreferrer" className="settings-link">
                 Data Processing Agreement (DPA)
               </a>
-              <div style={{ fontSize: 12, color: '#bdbdbd', marginTop: 2 }}>
+              <div className="settings-link-description">
                 Details our commitments and your rights regarding data processing, especially for GDPR compliance.
               </div>
             </li>
-            <li style={{ marginBottom: 0 }}>
-              <a href="https://beta.iyzitrace.com/legal/vulnerability-disclosure" target="_blank" rel="noopener noreferrer" style={{ color: '#34d399', fontWeight: 500 }}>
+            <li className="settings-link-item">
+              <a href="https://beta.iyzitrace.com/legal/vulnerability-disclosure" target="_blank" rel="noopener noreferrer" className="settings-link">
                 Vulnerability Disclosure
               </a>
-              <div style={{ fontSize: 12, color: '#bdbdbd', marginTop: 2 }}>
+              <div className="settings-link-description">
                 Learn how to report security vulnerabilities and help us keep IyziTrace safe for everyone.
               </div>
             </li>
@@ -264,24 +198,18 @@ const ConfigForm: React.FC = () => {
   );
 
   return (
-    <div style={{ background: '#111111', minHeight: '100vh' }}>
+    <div className="settings-page">
       {renderHeader()}
 
-      <div className="page-container" style={{ padding: '0 24px' }}>
+      <div className="page-container config-container-padded">
         {activeTab === 'security' && (
           <>
-            <div style={{
-              marginBottom: 16,
-              padding: 16,
-              borderRadius: 12,
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.06)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <KeyOutlined style={{ color: '#34d399' }} />
-                <h3 className="page-heading" style={{ margin: 0 }}>API Settings</h3>
+            <div className="settings-section">
+              <div className="settings-section-header">
+                <KeyOutlined className="settings-icon-green" />
+                <h3 className="page-heading config-heading-m-0">API Settings</h3>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div className="settings-section-content">
                 {(() => {
                   const pendingKey = !!(secureJsonData?.apiKey && String(secureJsonData.apiKey).trim().length > 0);
                   const serverConfigured = !!secureJsonFields?.apiKey;
@@ -289,7 +217,7 @@ const ConfigForm: React.FC = () => {
                   const canPaste = !hasKey;
                   return (
                     <InlineField label="API Key" tooltip="Paste your API key from the IyziTrace website. Stored in secure_json_data.">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div className="settings-field-row">
                         <SecretInput
                           width={40}
                           isConfigured={serverConfigured}
@@ -321,7 +249,7 @@ const ConfigForm: React.FC = () => {
                     </InlineField>
                   );
                 })()}
-                <div style={{ color: '#9CA3AF' }}>
+                <div className="settings-description">
                   Obtain this key from the IyziTrace website and paste it here. It enables authorization for protected APIs so that pages and features respect your permissions. Once saved, the key cannot be viewed or copied again; the input will show "configured" on next load. Paste is enabled only when no key is set; Reset clears the current key and re-enables Paste.
                 </div>
               </div>
@@ -331,21 +259,15 @@ const ConfigForm: React.FC = () => {
 
         {activeTab === 'ai' && (
           <>
-            <div style={{
-              marginBottom: 16,
-              padding: 16,
-              borderRadius: 12,
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.06)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <RobotOutlined style={{ color: '#a78bfa' }} />
-                <h3 className="page-heading" style={{ margin: 0 }}>AI Assistant Configuration</h3>
+            <div className="settings-section">
+              <div className="settings-section-header">
+                <RobotOutlined className="settings-icon-purple" />
+                <h3 className="page-heading config-heading-m-0">AI Assistant Configuration</h3>
               </div>
-              <div style={{ marginBottom: 8, color: '#9CA3AF' }}>
+              <div className="settings-description-sm">
                 Configure the AI assistant settings. The API key will be stored securely and used for AI-powered insights.
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div className="settings-section-content-lg">
                 <div>
                   <InlineField label="API Key" tooltip="OpenRouter API key for AI services">
                     <Input
@@ -361,7 +283,7 @@ const ConfigForm: React.FC = () => {
                       placeholder="sk-or-v1-..."
                     />
                   </InlineField>
-                  <div style={{ color: '#9CA3AF', marginTop: 6 }}>
+                  <div className="settings-description-mt">
                     Your OpenRouter API key. Get one from https://openrouter.ai
                   </div>
                 </div>
@@ -388,7 +310,7 @@ const ConfigForm: React.FC = () => {
                       })}
                     />
                   </InlineField>
-                  <div style={{ color: '#9CA3AF', marginTop: 6 }}>
+                  <div className="settings-description-mt">
                     Choose the AI model. DeepSeek Chat offers the best balance of quality and cost.
                   </div>
                 </div>
@@ -410,7 +332,7 @@ const ConfigForm: React.FC = () => {
                       })}
                     />
                   </InlineField>
-                  <div style={{ color: '#9CA3AF', marginTop: 6 }}>
+                  <div className="settings-description-mt">
                     Controls response creativity. 0.0 = focused and deterministic, 2.0 = creative and varied. Recommended: 0.7
                   </div>
                 </div>
@@ -432,7 +354,7 @@ const ConfigForm: React.FC = () => {
                       })}
                     />
                   </InlineField>
-                  <div style={{ color: '#9CA3AF', marginTop: 6 }}>
+                  <div className="settings-description-mt">
                     Maximum length of AI responses. Higher values allow longer answers but cost more. Recommended: 150-500
                   </div>
                 </div>
@@ -443,18 +365,12 @@ const ConfigForm: React.FC = () => {
 
         {activeTab === 'definitions' && (
           <>
-            <div style={{
-              marginBottom: 16,
-              padding: 16,
-              borderRadius: 12,
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.06)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <FileTextOutlined style={{ color: '#60a5fa' }} />
-                <h3 className="page-heading" style={{ margin: 0 }}>Metric and Label Definitions</h3>
+            <div className="settings-section">
+              <div className="settings-section-header">
+                <FileTextOutlined className="settings-icon-blue" />
+                <h3 className="page-heading config-heading-m-0">Metric and Label Definitions</h3>
               </div>
-              <div style={{ marginBottom: 8, color: '#9CA3AF' }}>
+              <div className="settings-description-sm">
                 Configure label names and metric names used in Prometheus queries. These values are used throughout the application for querying service metrics.
               </div>
               <DefinitionsTable
@@ -468,7 +384,7 @@ const ConfigForm: React.FC = () => {
         {activeTab === 'privacy' && renderPlaceholder('Privacy')}
 
         {activeTab !== 'privacy' && (
-          <div style={{ position: 'sticky', bottom: 0, paddingTop: 8, paddingBottom: 8, background: 'rgba(17,17,17,0.95)', backdropFilter: 'blur(6px)', display: 'flex', justifyContent: 'flex-end' }}>
+          <div className="settings-save-container">
             <Button onClick={save} icon={<SaveOutlined />}>Save Settings</Button>
           </div>
         )}

@@ -1,6 +1,7 @@
 import React from 'react';
 import '../../../assets/styles/containers/trace-detail/selected-span-details.css';
-import { Tag, Typography, Button, Tabs, Divider, Collapse, Tooltip } from 'antd';
+import '../../../assets/styles/containers/trace-detail/trace-detail.css';
+import { Collapse, Typography, Tag, Divider, Tooltip, Tabs, Button, Badge } from 'antd';
 import { CopyOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import GroupedAttributeList from './GroupedAttributeList';
 
@@ -40,8 +41,8 @@ const formatDate = (nano: number): string => {
 
 const formatRelativeMs = (nano: number, baseNano: number): string => {
   const ms = (nano - baseNano) / 1e6;
-  if (ms > 1000) return `${(ms / 1000).toFixed(2)}s`;
-  return `${ms.toFixed(2)}ms`;
+  if (ms > 1000) return `${(ms / 1000).toFixed(2)} s`;
+  return `${ms.toFixed(2)} ms`;
 };
 
 const SelectedSpanDetails: React.FC<SelectedSpanDetailsProps> = ({
@@ -76,7 +77,7 @@ const SelectedSpanDetails: React.FC<SelectedSpanDetailsProps> = ({
       <div className="meta-grid">
         <div className="meta-label">SPAN NAME</div>
         <Tooltip title={span.name} placement="topLeft">
-          <Tag style={{ maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{span.name}</Tag>
+          <Tag className="span-tag-truncate">{span.name}</Tag>
         </Tooltip>
 
         <div className="meta-label">SPAN ID</div>
@@ -107,21 +108,21 @@ const SelectedSpanDetails: React.FC<SelectedSpanDetailsProps> = ({
         items={[
           {
             key: 'span_attributes',
-            label: `Span Attrs (${spanAttrsCount})`,
+            label: `Span Attrs(${spanAttrsCount})`,
             children: span.tags && spanAttrsCount > 0
               ? <GroupedAttributeList tags={span.tags} />
               : <div className="no-attributes-message">No span attributes captured.</div>
           },
           {
             key: 'resource_attributes',
-            label: `Resource (${resourceAttrsCount})`,
+            label: `Resource(${resourceAttrsCount})`,
             children: span.resourceAttributes && resourceAttrsCount > 0
               ? <GroupedAttributeList tags={span.resourceAttributes} />
               : <div className="no-attributes-message">No resource attributes captured.</div>
           },
           {
             key: 'events',
-            label: `Events (${events.length})`,
+            label: `Events(${events.length})`,
             children: events.length > 0
               ? <EventsList
                 events={events}
@@ -153,12 +154,12 @@ const EventsList: React.FC<{
     return {
       key: String(index),
       label: (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
-          <span style={{ width: '8px', height: '8px', backgroundColor: color, transform: 'rotate(45deg)', flexShrink: 0 }} />
-          <span style={{ color: '#94a3b8', fontSize: '12px', flexShrink: 0 }}>
+        <div className="span-event-label">
+          <span className="span-event-color-dot" style={{ backgroundColor: color }} />
+          <span className="span-event-time">
             {formatRelativeMs(event.timeUnixNano, spanStartTime)}
           </span>
-          <span style={{ color: '#f1f5f9', fontSize: '13px', fontWeight: 500 }}>
+          <span className="span-event-name">
             ({event.name})
           </span>
         </div>
@@ -166,15 +167,11 @@ const EventsList: React.FC<{
       children: (
         <div>
           {Object.keys(event.attributes).length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div className="span-event-attrs">
               {Object.entries(event.attributes).map(([key, value]) => (
                 <div key={key} className="tag-row">
-                  <Tag className="tag-key" style={{ fontSize: '12px' }}>{key}</Tag>
-                  <span className="tag-value" style={{
-                    fontFamily: 'monospace',
-                    fontSize: '12px',
-                    color: '#22c55e',
-                  }}>
+                  <Tag className="tag-key span-event-tag-key">{key}</Tag>
+                  <span className="tag-value span-event-tag-value">
                     "{String(value)}"
                   </span>
                 </div>

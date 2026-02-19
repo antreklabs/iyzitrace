@@ -53,13 +53,7 @@ const WizardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     // Show loading while checking wizard status
     if (loading) {
         return (
-            <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100vh',
-                background: '#111'
-            }}>
+            <div className="wizard-layout-loading">
                 <LoadingPlaceholder text="Loading..." />
             </div>
         );

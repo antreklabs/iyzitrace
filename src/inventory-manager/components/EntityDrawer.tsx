@@ -31,17 +31,17 @@ export const EntityDrawer: React.FC = () => {
             }}
         >
             {loading ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '256px' }}>
+                <div className="loading-spinner">
                     <Spin size="large" />
                 </div>
             ) : error ? (
-                <div style={{ padding: '32px' }}>
+                <div className="inv-drawer-padding">
                     <ErrorMessage message={error.message} />
                 </div>
             ) : entity ? (
                 <EntityDetail entity={entity} onClose={closeDrawer} />
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '256px', color: '#94a3b8' }}>
+                <div className="loading-spinner">
                     <p>No entity selected</p>
                 </div>
             )}

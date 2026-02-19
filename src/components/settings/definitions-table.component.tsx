@@ -1,6 +1,7 @@
 import React from 'react';
 import { InlineField, Input } from '@grafana/ui';
 import { Definitions } from '../../interfaces/utils/options';
+import '../../assets/styles/components/settings/settings.css';
 
 interface DefinitionsTableProps {
   value: Definitions;
@@ -26,7 +27,7 @@ export const DEFAULT_DEFINITIONS: Definitions = {
   p95_duration_metric_name: 'http_client_duration_milliseconds_sum',
   p99_duration_metric_name: 'http_client_duration_milliseconds_sum',
   avg_duration_metric_name: 'http_client_duration_milliseconds_sum',
-  
+
   duration_ms_label_name: 'duration_ms',
   http_method_label_name: 'http_method',
   http_url_label_name: 'http_url',
@@ -53,21 +54,13 @@ const DefinitionsTable: React.FC<DefinitionsTableProps> = ({ value, onChange }) 
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '200px 1fr',
-        gap: '12px',
-        padding: '12px',
-        background: 'rgba(255,255,255,0.02)',
-        borderRadius: 8,
-        marginBottom: 8
-      }}>
-        <div style={{ fontWeight: 600, color: '#E5E7EB' }}>Label Names</div>
-        <div style={{ fontWeight: 600, color: '#E5E7EB' }}>Value</div>
+    <div className="definitions-table-wrapper">
+      <div className="definitions-table-header">
+        <div className="definitions-table-heading">Label Names</div>
+        <div className="definitions-table-heading">Value</div>
       </div>
-      
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+
+      <div className="definitions-table-fields">
         <InlineField label="service_label_name">
           <Input
             value={definitions.service_label_name}
@@ -173,24 +166,15 @@ const DefinitionsTable: React.FC<DefinitionsTableProps> = ({ value, onChange }) 
             width={40}
           />
         </InlineField>
-        
+
       </div>
 
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '200px 1fr',
-        gap: '12px',
-        padding: '12px',
-        background: 'rgba(255,255,255,0.02)',
-        borderRadius: 8,
-        marginTop: 16,
-        marginBottom: 8
-      }}>
-        <div style={{ fontWeight: 600, color: '#E5E7EB' }}>Metric Names</div>
-        <div style={{ fontWeight: 600, color: '#E5E7EB' }}>Value</div>
+      <div className="definitions-table-header-mt">
+        <div className="definitions-table-heading">Metric Names</div>
+        <div className="definitions-table-heading">Value</div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className="definitions-table-fields">
         <InlineField label="request_count_metric_name">
           <Input
             value={definitions.request_count_metric_name}

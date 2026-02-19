@@ -8,18 +8,9 @@ interface LoadingSpinnerProps {
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ size = 'large', tip = 'Loading...' }) => {
     return (
-        <div
-            style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '48px',
-                color: '#94a3b8',
-            }}
-        >
+        <div className="loading-spinner">
             <Spin size={size} />
-            {tip && <p style={{ marginTop: '16px', fontSize: '14px' }}>{tip}</p>}
+            {tip && <p className="loading-spinner__text">{tip}</p>}
         </div>
     );
 };

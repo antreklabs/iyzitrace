@@ -57,14 +57,7 @@ export const ReceiverNode = ({ data }: ReceiverNodeProps) => {
       <Handle
         type="source"
         position={Position.Right}
-        style={{
-          right: "-7px",
-          backgroundColor: "#3b82f6",
-          border: "2px solid var(--background)",
-          zIndex: 20,
-          width: "14px",
-          height: "14px",
-        }}
+        className="pipeline-handle pipeline-handle-receiver"
         id="right"
       />
     </Card>

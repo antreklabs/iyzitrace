@@ -77,3 +77,34 @@
     flex: 1;
     text-align: left;
 }
+
+/* View Form Utilities */
+.view-input-white {
+    color: #ffffff;
+}
+
+.view-text-xs {
+    font-size: 11px;
+}
+
+.view-mt-6 {
+    margin-top: 6px;
+}
+
+.view-mt-8 {
+    margin-top: 8px;
+}
+
+.view-save-label {
+    font-weight: 500;
+}
+
+/* Grafana Date Picker */
+.gf-picker-space {
+    width: 100%;
+}
+
+.gf-picker-input-dark {
+    background: #2c2c2c;
+    color: #fff;
+}

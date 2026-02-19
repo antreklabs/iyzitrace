@@ -70,3 +70,36 @@
     flex-wrap: wrap;
     margin-top: 12px;
 }
+
+/* Trace Metrics Card */
+.trace-metrics-card {
+    border-radius: 12px;
+    margin-bottom: 12px;
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    width: 250px;
+    min-height: 180px;
+}
+
+.trace-metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 16px;
+    row-gap: 8px;
+}
+
+.trace-metrics-value {
+    color: #52c41a;
+    font-size: 28px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.trace-chart-bars {
+    display: flex;
+    align-items: end;
+    height: 100px;
+    gap: 1px;
+    margin-top: 8px;
+    padding: 4px 0;
+}

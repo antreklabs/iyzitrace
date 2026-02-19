@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { Service } from '../../api/service/interface.service';
 import ServiceMetricsCard from './service.container.card.component';
+import '../../assets/styles/components/service/service.css';
 
 interface ServiceCardContainerProps {
   services: Service[] | undefined;
@@ -16,35 +17,18 @@ const ServiceCardContainer: React.FC<ServiceCardContainerProps> = ({ services })
   };
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div className="service-card-scroll-wrapper">
       <button
         onClick={() => scrollBy(-400)}
-        style={{ 
-          position: 'absolute', 
-          left: 0, 
-          top: '50%', 
-          transform: 'translateY(-50%)', 
-          zIndex: 1, 
-          background: '#1f1f1f', 
-          border: '1px solid #303030', 
-          color: '#d9d9d9', 
-          borderRadius: 6, 
-          padding: '4px 8px',
-          cursor: 'pointer'
-        }}
+        className="service-card-scroll-btn service-card-scroll-btn-left"
       >
         ◀
       </button>
       <div
         ref={scrollerRef}
-        style={{ 
-          overflowX: 'auto', 
-          overflowY: 'hidden', 
-          whiteSpace: 'nowrap', 
-          padding: '0 36px' 
-        }}
+        className="service-card-scroll-area"
       >
-        <div style={{ display: 'inline-flex', gap: 16 }}>
+        <div className="service-card-scroll-inner">
           {services && services.map((service) => {
             return (
               <div key={service.id}>
@@ -56,19 +40,7 @@ const ServiceCardContainer: React.FC<ServiceCardContainerProps> = ({ services })
       </div>
       <button
         onClick={() => scrollBy(400)}
-        style={{ 
-          position: 'absolute', 
-          right: 0, 
-          top: '50%', 
-          transform: 'translateY(-50%)', 
-          zIndex: 1, 
-          background: '#1f1f1f', 
-          border: '1px solid #303030', 
-          color: '#d9d9d9', 
-          borderRadius: 6, 
-          padding: '4px 8px',
-          cursor: 'pointer'
-        }}
+        className="service-card-scroll-btn service-card-scroll-btn-right"
       >
         ▶
       </button>

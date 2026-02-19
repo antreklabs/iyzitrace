@@ -63,7 +63,7 @@ const SettingsPage: React.FC<PluginConfigProps> = (props) => {
 
   if (loading) {
     return (
-      <div style={{ padding: 40, textAlign: 'center' }}>
+      <div className="u-loading-center">
         <LoadingPlaceholder text="Loading configuration..." />
       </div>
     );
@@ -120,9 +120,9 @@ const SettingsPage: React.FC<PluginConfigProps> = (props) => {
       <Alert
         title="IyziTrace setup completed"
         severity="success"
-        style={{ marginBottom: 24 }}
+        className="u-mb-24"
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div className="u-flex-center-gap16">
           <span>You can start using the plugin.</span>
           <Button variant="primary" size="sm" onClick={handleGoToApp}>
             Open IyziTrace

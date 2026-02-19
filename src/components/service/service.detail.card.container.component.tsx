@@ -99,13 +99,7 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
         <Card
           hoverable
           size="small"
-          style={{
-            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(0, 0, 0, 0.4) 100%)',
-            border: '1px solid rgba(59, 130, 246, 0.3)',
-            borderRadius: '12px',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          }}
+          className="service-detail-stat-card-blue"
           styles={{ body: { padding: '20px' } }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-4px)';
@@ -140,13 +134,7 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
         <Card
           hoverable
           size="small"
-          style={{
-            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(0, 0, 0, 0.4) 100%)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            borderRadius: '12px',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          }}
+          className="service-detail-stat-card-green"
           styles={{ body: { padding: '20px' } }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-4px)';
@@ -181,13 +169,7 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
         <Card
           hoverable
           size="small"
-          style={{
-            background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(0, 0, 0, 0.4) 100%)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            borderRadius: '12px',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          }}
+          className="service-detail-stat-card-red"
           styles={{ body: { padding: '20px' } }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-4px)';
@@ -225,13 +207,7 @@ const BasicSummary: React.FC<BasicSummaryProps> = ({ data, filterModel }) => {
         <Card
           hoverable
           size="small"
-          style={{
-            background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(0, 0, 0, 0.4) 100%)',
-            border: '1px solid rgba(245, 158, 11, 0.3)',
-            borderRadius: '12px',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          }}
+          className="service-detail-stat-card-amber"
           styles={{ body: { padding: '20px' } }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-4px)';

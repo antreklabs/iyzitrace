@@ -1,5 +1,6 @@
 import React from 'react';
 import { Layout, Button, Typography } from 'antd';
+import '../../../assets/styles/containers/trace-detail/trace-detail.css';
 
 const { Sider } = Layout;
 const { Title } = Typography;
@@ -20,28 +21,22 @@ const FiltersSider: React.FC<FiltersSiderProps> = ({
   children,
 }) => {
   return (
-    <Sider 
-      width={width} 
-      style={{ 
-        background: '#1f1f1f', 
-        padding: 10,
-        top: 0,
-        position: 'sticky',
-        zIndex: 10,
-      }} 
-      collapsedWidth={0} 
+    <Sider
+      width={width}
+      className="filters-sider-bg"
+      collapsedWidth={0}
       collapsed={collapsed}
     >
       <Button
         type="primary"
         icon={collapsed ? <i className="fa fa-angle-right" /> : <i className="fa fa-angle-left" />}
         onClick={onToggle}
-        style={{ marginBottom: 16, color: '#fff', position: 'absolute', top: 16, right: collapsed ? -15 : 16 }}
+        className={`filters-sider-toggle-btn ${collapsed ? 'filters-sider-toggle-btn-collapsed' : 'filters-sider-toggle-btn-expanded'}`}
       />
-      <Title level={5} style={{ color: '#fff' }}>
+      <Title level={5} className="filters-sider-title">
         {title}
       </Title>
-      <div style={{ height: 'calc(100vh - 220px)', overflowY: 'auto' }}>
+      <div className="filters-sider-content">
         {children}
       </div>
     </Sider>

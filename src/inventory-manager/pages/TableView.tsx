@@ -126,14 +126,11 @@ const TableView: React.FC = () => {
             key: 'entity_info',
             width: '40%',
             render: (_, record: Entity) => (
-                <div
-                    style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
-                    onClick={() => selectEntity(record.id)}
-                >
+                <div className="table-view__entity-info" onClick={() => selectEntity(record.id)}>
                     <EntityIcon type={record.type} size={20} />
                     <div>
-                        <div style={{ fontSize: '14px', fontWeight: 600, color: '#f1f5f9' }}>{record.name}</div>
-                        <div style={{ fontSize: '11px', color: '#64748b', fontFamily: 'monospace' }}>{record.id.substring(0, 24)}…</div>
+                        <div className="table-view__entity-name">{record.name}</div>
+                        <div className="table-view__entity-id">{record.id.substring(0, 24)}…</div>
                     </div>
                 </div>
             ),
@@ -167,7 +164,7 @@ const TableView: React.FC = () => {
             key: 'last_seen',
             width: '20%',
             render: (value: string) => (
-                <span style={{ color: '#94a3b8', fontSize: '13px' }}>
+                <span className="table-view__timestamp">
                     {new Date(value).toLocaleString()}
                 </span>
             ),
@@ -179,17 +176,8 @@ const TableView: React.FC = () => {
             key: 'action',
             width: '8%',
             render: (_, record: Entity) => (
-                <button
-                    onClick={() => selectEntity(record.id)}
-                    style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        color: '#64748b',
-                        padding: '4px 8px',
-                    }}
-                >
-                    <ExportOutlined style={{ fontSize: '14px' }} />
+                <button onClick={() => selectEntity(record.id)} className="table-view__action-btn">
+                    <ExportOutlined className="table-view__action-icon" />
                 </button>
             ),
         },
@@ -204,17 +192,17 @@ const TableView: React.FC = () => {
     }
 
     return (
-        <div style={{ padding: '24px 32px', minHeight: 'calc(100vh - 64px)' }}>
+        <div className="table-view">
             {/* Header */}
-            <div style={{ marginBottom: '24px' }}>
-                <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#f1f5f9', margin: 0 }}>Data Explorer</h1>
-                <p style={{ fontSize: '14px', color: '#94a3b8', marginTop: '4px' }}>
+            <div className="table-view__header">
+                <h1 className="table-view__title">Data Explorer</h1>
+                <p className="table-view__subtitle">
                     Browse and search entities and relationships
                 </p>
             </div>
 
             {/* Tabs + Filters */}
-            <div style={{ display: 'flex', gap: '16px', marginBottom: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div className="table-view__filters">
                 <Segmented
                     value={activeTab}
                     onChange={(value) => setActiveTab(value as TabType)}
@@ -222,18 +210,14 @@ const TableView: React.FC = () => {
                         { value: 'entities', label: 'Entities' },
                         { value: 'relations', label: 'Relations' },
                     ]}
-                    style={{ background: '#2a2a2a' }}
+                    className="table-view__segmented"
                 />
                 <Input
                     placeholder={`Search ${activeTab}...`}
-                    prefix={<SearchOutlined style={{ color: '#64748b' }} />}
+                    prefix={<SearchOutlined className="table-view__search-icon" />}
                     value={searchValue}
                     onChange={e => setSearchValue(e.target.value)}
-                    style={{
-                        maxWidth: '350px',
-                        background: '#1a1a1a',
-                        border: '1px solid #2a2a2a',
-                    }}
+                    className="table-view__search-input"
                 />
                 {activeTab === 'entities' && (
                     <Select
@@ -241,7 +225,7 @@ const TableView: React.FC = () => {
                         placeholder="Filter by type..."
                         value={selectedTypes}
                         onChange={setSelectedTypes}
-                        style={{ minWidth: '300px' }}
+                        className="table-view__type-filter"
                         options={allEntityTypes.map(t => ({ label: t, value: t }))}
                         allowClear
                     />
@@ -249,7 +233,7 @@ const TableView: React.FC = () => {
             </div>
 
             {/* Metadata */}
-            <div style={{ marginBottom: '12px', fontSize: '13px', color: '#64748b' }}>
+            <div className="table-view__meta">
                 {activeTab === 'entities'
                     ? `${filteredEntities.length} of ${data?.total || 0} entities`
                     : `${filteredRelations.length} relations`
@@ -257,13 +241,7 @@ const TableView: React.FC = () => {
             </div>
 
             {/* Content */}
-            <div style={{
-                background: '#1a1a1a',
-                borderRadius: '16px',
-                border: '1px solid #2a2a2a',
-                overflow: 'hidden',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-            }}>
+            <div className="table-view__content">
                 {activeTab === 'entities' ? (
                     <Table
                         columns={columns}
@@ -275,7 +253,6 @@ const TableView: React.FC = () => {
                             showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}`,
                         }}
                         size="middle"
-                        style={{ background: 'transparent' }}
                     />
                 ) : (
                     <RelationsList
@@ -307,7 +284,7 @@ const RelationsList: React.FC<{
 
     if (relations.length === 0) {
         return (
-            <div style={{ padding: '48px', textAlign: 'center', color: '#64748b' }}>
+            <div className="relations-list__empty">
                 No relations found
             </div>
         );
@@ -315,7 +292,7 @@ const RelationsList: React.FC<{
 
     return (
         <div>
-            <div style={{ padding: '12px' }}>
+            <div className="relations-list__body">
                 {paginatedRelations.map((relation, idx) => {
                     const from = resolveNode(relation.from_id);
                     const to = resolveNode(relation.to_id);
@@ -327,104 +304,54 @@ const RelationsList: React.FC<{
                     const toType = to?.type;
 
                     return (
-                        <div
-                            key={idx}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '16px',
-                                padding: '14px 16px',
-                                borderRadius: '12px',
-                                border: '1px solid #2a2a2a',
-                                background: '#111111',
-                                marginBottom: '8px',
-                                transition: 'background 0.15s, border-color 0.15s',
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.background = '#1a1a1a';
-                                e.currentTarget.style.borderColor = '#3a3a3a';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = '#111111';
-                                e.currentTarget.style.borderColor = '#2a2a2a';
-                            }}
-                        >
+                        <div key={idx} className="relations-list__item">
                             {/* From Entity */}
-                            <div
-                                onClick={() => onOpenEntity(relation.from_id)}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '10px',
-                                    cursor: 'pointer',
-                                    flex: 1,
-                                    minWidth: 0,
-                                }}
-                            >
+                            <div onClick={() => onOpenEntity(relation.from_id)} className="relations-list__entity">
                                 <EntityBadge type={(fromType || 'unknown') as EntityType} />
-                                <div style={{ minWidth: 0 }}>
-                                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#f1f5f9', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                        {fromLabel}
-                                    </div>
-                                    <div style={{ fontSize: '11px', color: '#64748b', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                <div className="relations-list__entity-inner">
+                                    <div className="relations-list__entity-name">{fromLabel}</div>
+                                    <div className="relations-list__entity-meta">
                                         {fromType || 'unknown'} • {relation.from_id.substring(0, 16)}…
                                     </div>
                                 </div>
                             </div>
 
                             {/* Relation Badge */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                                <span style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '5px',
-                                    padding: '4px 12px',
-                                    fontSize: '12px',
-                                    fontWeight: 600,
-                                    borderRadius: '14px',
-                                    backgroundColor: relInfo.bg,
-                                    color: relInfo.color,
-                                    border: `1px solid ${relInfo.color}30`,
-                                    whiteSpace: 'nowrap',
-                                }}>
-                                    <SwapOutlined style={{ fontSize: '11px' }} />
+                            <div className="relations-list__badge-container">
+                                <span
+                                    className="relations-list__badge"
+                                    style={{
+                                        backgroundColor: relInfo.bg,
+                                        color: relInfo.color,
+                                        border: `1px solid ${relInfo.color}30`,
+                                    }}
+                                >
+                                    <SwapOutlined className="inv-sort-icon" />
                                     {relInfo.label}
                                 </span>
-                                <ArrowRightOutlined style={{ fontSize: '12px', color: '#475569' }} />
+                                <ArrowRightOutlined className="relations-list__arrow" />
                             </div>
 
                             {/* To Entity */}
-                            <div
-                                onClick={() => onOpenEntity(relation.to_id)}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '10px',
-                                    cursor: 'pointer',
-                                    flex: 1,
-                                    minWidth: 0,
-                                }}
-                            >
+                            <div onClick={() => onOpenEntity(relation.to_id)} className="relations-list__entity">
                                 <EntityBadge type={(toType || 'unknown') as EntityType} />
-                                <div style={{ minWidth: 0 }}>
-                                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#f1f5f9', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                        {toLabel}
-                                    </div>
-                                    <div style={{ fontSize: '11px', color: '#64748b', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                <div className="relations-list__entity-inner">
+                                    <div className="relations-list__entity-name">{toLabel}</div>
+                                    <div className="relations-list__entity-meta">
                                         {toType || 'unknown'} • {relation.to_id.substring(0, 16)}…
                                     </div>
                                 </div>
                             </div>
 
                             {/* Timestamp */}
-                            <div style={{ flexShrink: 0, textAlign: 'right', minWidth: '110px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
-                                    <ClockCircleOutlined style={{ fontSize: '11px', color: '#64748b' }} />
-                                    <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 500 }}>
+                            <div className="relations-list__timestamp">
+                                <div className="relations-list__time-row">
+                                    <ClockCircleOutlined className="relations-list__time-icon" />
+                                    <span className="relations-list__time-value">
                                         {formatRelativeTime(relation.last_seen)}
                                     </span>
                                 </div>
-                                <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px' }}>
+                                <div className="relations-list__time-full">
                                     {new Date(relation.last_seen).toLocaleString()}
                                 </div>
                             </div>
@@ -435,46 +362,22 @@ const RelationsList: React.FC<{
 
             {/* Pagination */}
             {totalPages > 1 && (
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '12px 16px',
-                    borderTop: '1px solid #2a2a2a',
-                }}>
-                    <span style={{ fontSize: '12px', color: '#64748b' }}>
+                <div className="relations-list__pagination">
+                    <span className="relations-list__page-info">
                         Page {page + 1} of {totalPages} ({relations.length} total)
                     </span>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div className="relations-list__page-btns">
                         <button
                             disabled={page === 0}
                             onClick={() => setPage(p => p - 1)}
-                            style={{
-                                padding: '6px 12px',
-                                fontSize: '12px',
-                                borderRadius: '6px',
-                                border: '1px solid #2a2a2a',
-                                background: '#1a1a1a',
-                                color: page === 0 ? '#475569' : '#f1f5f9',
-                                cursor: page === 0 ? 'not-allowed' : 'pointer',
-                                opacity: page === 0 ? 0.5 : 1,
-                            }}
+                            className="relations-list__page-btn"
                         >
                             Previous
                         </button>
                         <button
                             disabled={page >= totalPages - 1}
                             onClick={() => setPage(p => p + 1)}
-                            style={{
-                                padding: '6px 12px',
-                                fontSize: '12px',
-                                borderRadius: '6px',
-                                border: '1px solid #2a2a2a',
-                                background: '#1a1a1a',
-                                color: page >= totalPages - 1 ? '#475569' : '#f1f5f9',
-                                cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer',
-                                opacity: page >= totalPages - 1 ? 0.5 : 1,
-                            }}
+                            className="relations-list__page-btn"
                         >
                             Next
                         </button>

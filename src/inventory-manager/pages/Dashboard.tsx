@@ -52,63 +52,49 @@ const Dashboard: React.FC = () => {
     }
 
     return (
-        <div style={{ padding: '24px 32px', maxWidth: '1400px', margin: '0 auto', minHeight: 'calc(100vh - 64px)' }}>
+        <div className="dashboard">
             {/* Header */}
-            <div style={{ marginBottom: '32px' }}>
-                <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#f1f5f9', margin: 0 }}>Infrastructure Inventory</h1>
-                <p style={{ fontSize: '14px', color: '#94a3b8', marginTop: '4px' }}>
+            <div className="dashboard__header">
+                <h1 className="dashboard__title">Infrastructure Inventory</h1>
+                <p className="dashboard__subtitle">
                     Overview of discovered entities and relationships
                 </p>
             </div>
 
             {/* Main Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-                <StatsCard title="Total Entities" value={stats?.EntityCount || 0} icon={<AppstoreOutlined style={{ fontSize: '24px' }} />} color="primary" />
-                <StatsCard title="Total Relations" value={stats?.RelationCount || 0} icon={<BranchesOutlined style={{ fontSize: '24px' }} />} color="purple" />
-                <StatsCard title="Entity Types" value={Object.keys(stats?.EntityTypes || {}).length} icon={<PartitionOutlined style={{ fontSize: '24px' }} />} color="green" />
-                <StatsCard title="Relation Types" value={Object.keys(stats?.RelationTypes || {}).length} icon={<BranchesOutlined style={{ fontSize: '24px' }} />} color="orange" />
+            <div className="dashboard__stats-grid">
+                <StatsCard title="Total Entities" value={stats?.EntityCount || 0} icon={<AppstoreOutlined className="dashboard__stats-icon" />} color="primary" />
+                <StatsCard title="Total Relations" value={stats?.RelationCount || 0} icon={<BranchesOutlined className="dashboard__stats-icon" />} color="purple" />
+                <StatsCard title="Entity Types" value={Object.keys(stats?.EntityTypes || {}).length} icon={<PartitionOutlined className="dashboard__stats-icon" />} color="green" />
+                <StatsCard title="Relation Types" value={Object.keys(stats?.RelationTypes || {}).length} icon={<BranchesOutlined className="dashboard__stats-icon" />} color="orange" />
             </div>
 
             {/* Entity Breakdown Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+            <div className="dashboard__breakdown-grid">
                 <BreakdownCard title="Hosts" icon={<DesktopOutlined />} total={stats?.EntityTypes?.['host'] || 0} items={entityBreakdowns?.hostsByOS || []} color="#3b82f6" onClick={() => goToFiltered('host')} />
                 <BreakdownCard title="Containers" icon={<ContainerOutlined />} total={stats?.EntityTypes?.['container'] || 0} items={entityBreakdowns?.containersByRuntime || []} color="#8b5cf6" onClick={() => goToFiltered('container')} />
                 <BreakdownCard title="Kubernetes Pods" icon={<CloudOutlined />} total={stats?.EntityTypes?.['k8s.pod'] || 0} items={[]} color="#10b981" onClick={() => goToFiltered('k8s.pod')} />
                 <BreakdownCard title="Services" icon={<ApiOutlined />} total={stats?.EntityTypes?.['service'] || 0} items={entityBreakdowns?.servicesByNamespace || []} color="#ec4899" onClick={() => goToFiltered('service')} />
-                <BreakdownCard title="Databases & Cache" icon={<DatabaseOutlined />} total={(stats?.EntityTypes?.['db.instance'] || 0) + (stats?.EntityTypes?.['cache.instance'] || 0)} items={entityBreakdowns?.dbsBySystem || []} color="#f97316" onClick={() => goToFiltered('db.instance')} />
+                <BreakdownCard title="Databases &amp; Cache" icon={<DatabaseOutlined />} total={(stats?.EntityTypes?.['db.instance'] || 0) + (stats?.EntityTypes?.['cache.instance'] || 0)} items={entityBreakdowns?.dbsBySystem || []} color="#f97316" onClick={() => goToFiltered('db.instance')} />
                 <BreakdownCard title="Messaging Systems" icon={<MessageOutlined />} total={stats?.EntityTypes?.['messaging.system'] || 0} items={entityBreakdowns?.messagingBySystem || []} color="#a855f7" onClick={() => goToFiltered('messaging.system')} />
             </div>
 
             {/* All Entity Types and Recent Entities */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            <div className="dashboard__two-col">
                 {/* All Entity Types */}
-                <div style={{ background: '#1a1a1a', borderRadius: '16px', border: '1px solid #2a2a2a', padding: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>
-                    <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#f1f5f9', marginBottom: '16px' }}>All Entity Types</h2>
-                    <div style={{ maxHeight: '256px', overflowY: 'auto' }}>
+                <div className="dashboard__panel">
+                    <h2 className="dashboard__panel-title">All Entity Types</h2>
+                    <div className="dashboard__scrollable">
                         {stats?.EntityTypes && Object.entries(stats.EntityTypes)
                             .sort(([, a], [, b]) => b - a)
                             .map(([type, count]) => (
                                 <button
                                     key={type}
                                     onClick={() => goToFiltered(type as EntityType)}
-                                    style={{
-                                        width: '100%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        padding: '10px 12px',
-                                        borderRadius: '8px',
-                                        background: 'transparent',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        color: '#f1f5f9',
-                                        transition: 'background 0.15s',
-                                    }}
-                                    onMouseEnter={(e) => { e.currentTarget.style.background = '#222222'; }}
-                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                    className="dashboard__list-btn"
                                 >
                                     <EntityBadge type={type as EntityType} />
-                                    <span style={{ fontSize: '14px', fontWeight: 600, color: '#60a5fa' }}>{count}</span>
+                                    <span className="dashboard__entity-count">{count}</span>
                                 </button>
                             ))
                         }
@@ -116,40 +102,25 @@ const Dashboard: React.FC = () => {
                 </div>
 
                 {/* Recent Entities */}
-                <div style={{ background: '#1a1a1a', borderRadius: '16px', border: '1px solid #2a2a2a', padding: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                        <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#f1f5f9', margin: 0 }}>Recent Entities</h2>
-                        <Link to="../table" style={{ color: '#60a5fa', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}>
+                <div className="dashboard__panel">
+                    <div className="dashboard__panel-header">
+                        <h2 className="dashboard__panel-header-title">Recent Entities</h2>
+                        <Link to="../table" className="dashboard__view-all">
                             View all <ArrowRightOutlined />
                         </Link>
                     </div>
-                    <div style={{ maxHeight: '256px', overflowY: 'auto' }}>
+                    <div className="dashboard__scrollable">
                         {entitiesData?.entities.slice(0, 5).map((entity) => (
                             <button
                                 key={entity.id}
                                 onClick={() => selectEntity(entity.id)}
-                                style={{
-                                    width: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    padding: '12px',
-                                    borderRadius: '8px',
-                                    background: 'transparent',
-                                    border: 'none',
-                                    borderBottom: '1px solid #2a2a2a',
-                                    cursor: 'pointer',
-                                    color: '#f1f5f9',
-                                    transition: 'background 0.15s',
-                                }}
-                                onMouseEnter={(e) => { e.currentTarget.style.background = '#222222'; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                className="dashboard__list-btn--entity"
                             >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div className="dashboard__entity-row">
                                     <EntityBadge type={entity.type} />
-                                    <span style={{ fontSize: '14px', fontWeight: 500 }}>{entity.name}</span>
+                                    <span className="dashboard__entity-name">{entity.name}</span>
                                 </div>
-                                <span style={{ fontSize: '12px', color: '#64748b' }}>
+                                <span className="dashboard__entity-time">
                                     {new Date(entity.last_seen).toLocaleTimeString()}
                                 </span>
                             </button>
@@ -187,39 +158,20 @@ interface BreakdownCardProps {
 
 const BreakdownCard: React.FC<BreakdownCardProps> = ({ title, icon, total, items, color, onClick }) => {
     return (
-        <div
-            onClick={onClick}
-            style={{
-                background: '#1a1a1a',
-                borderRadius: '16px',
-                border: '1px solid #2a2a2a',
-                padding: '20px',
-                cursor: 'pointer',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                transition: 'border-color 0.2s, box-shadow 0.2s',
-            }}
-            onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#3a3a3a';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#2a2a2a';
-                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.2)';
-            }}
-        >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ padding: '8px', borderRadius: '10px', background: `${color}15`, color }}>{icon}</div>
-                    <h3 style={{ fontWeight: 600, color: '#f1f5f9', margin: 0, fontSize: '15px' }}>{title}</h3>
+        <div onClick={onClick} className="breakdown-card">
+            <div className="breakdown-card__header">
+                <div className="breakdown-card__icon-title">
+                    <div className="breakdown-card__icon-wrap" style={{ background: `${color}15`, color }}>{icon}</div>
+                    <h3 className="breakdown-card__title">{title}</h3>
                 </div>
-                <span style={{ fontSize: '24px', fontWeight: 700, color }}>{total}</span>
+                <span className="breakdown-card__total" style={{ color }}>{total}</span>
             </div>
             {items.length > 0 && (
                 <div>
                     {items.slice(0, 3).map(({ value, count }) => (
-                        <div key={value} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #2a2a2a' }}>
-                            <span style={{ fontSize: '13px', color: '#94a3b8', textTransform: 'capitalize' }}>{value}</span>
-                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#f1f5f9' }}>{count}</span>
+                        <div key={value} className="breakdown-card__item">
+                            <span className="breakdown-card__item-label">{value}</span>
+                            <span className="breakdown-card__item-count">{count}</span>
                         </div>
                     ))}
                 </div>

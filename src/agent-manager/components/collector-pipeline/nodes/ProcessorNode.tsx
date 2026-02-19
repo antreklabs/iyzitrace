@@ -48,27 +48,13 @@ export const ProcessorNode = ({ data }: ProcessorNodeProps) => {
       <Handle
         type="target"
         position={Position.Left}
-        style={{
-          left: "-7px",
-          backgroundColor: "#22c55e",
-          border: "2px solid var(--background)",
-          zIndex: 20,
-          width: "14px",
-          height: "14px",
-        }}
+        className="pipeline-handle pipeline-handle-processor-in"
         id="left"
       />
       <Handle
         type="source"
         position={Position.Right}
-        style={{
-          right: "-7px",
-          backgroundColor: "#22c55e",
-          border: "2px solid var(--background)",
-          zIndex: 20,
-          width: "14px",
-          height: "14px",
-        }}
+        className="pipeline-handle pipeline-handle-processor-out"
         id="right"
       />
     </Card>

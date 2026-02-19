@@ -277,7 +277,7 @@ const ExceptionDetailPage: React.FC = () => {
 
   const fetchExceptionDetail = async (index: number) => {
     if (!groupId) return;
-    
+
     setLoading(true);
     try {
       if (allExceptions.length > 0) {
@@ -301,17 +301,17 @@ const ExceptionDetailPage: React.FC = () => {
       }));
 
       const exceptions: any[] = [];
-      
+
       traceData.forEach((trace: any) => {
         trace.batches?.forEach((batch: any) => {
           const resourceAttrs = batch.resource?.attributes || [];
           const serviceName = resourceAttrs.find((attr: any) => attr.key === 'service.name')?.value?.stringValue || 'Unknown';
           const hostName = resourceAttrs.find((attr: any) => attr.key === 'host.name')?.value?.stringValue || 'Unknown';
-          
+
           batch.scopeSpans?.forEach((scopeSpan: any) => {
             scopeSpan.spans?.forEach((span: any) => {
               const spanAttrs = span.attributes || [];
-              
+
               span.events?.forEach((event: any, eventIdx: number) => {
                 if (event.name === 'exception') {
                   const eventAttrs = event.attributes || [];
@@ -319,10 +319,10 @@ const ExceptionDetailPage: React.FC = () => {
                   const exceptionMessage = eventAttrs.find((attr: any) => attr.key === 'exception.message')?.value?.stringValue || '';
                   const exceptionStacktrace = eventAttrs.find((attr: any) => attr.key === 'exception.stacktrace')?.value?.stringValue || '';
                   const exceptionEscaped = eventAttrs.find((attr: any) => attr.key === 'exception.escaped')?.value?.stringValue || 'false';
-                  
+
                   const traceIdHex = base64ToHex(span.traceId || '');
                   const spanIdBase64 = span.spanId || '';
-                  
+
                   const keyValuePairs: any = {
                     serviceName,
                     'host.name': hostName,
@@ -330,20 +330,20 @@ const ExceptionDetailPage: React.FC = () => {
                     spanID: spanIdBase64,
                     exceptionEscaped,
                   };
-                  
+
                   spanAttrs.forEach((attr: any) => {
                     const value = attr.value?.stringValue || attr.value?.intValue || attr.value?.boolValue || '';
                     keyValuePairs[attr.key] = String(value);
                   });
-                  
+
                   resourceAttrs.forEach((attr: any) => {
                     const value = attr.value?.stringValue || attr.value?.intValue || attr.value?.boolValue || '';
                     keyValuePairs[`resource.${attr.key}`] = String(value);
                   });
-                  
+
                   const timestampNanos = event.timeUnixNano || span.startTimeUnixNano;
                   const timestamp = new Date(Number(timestampNanos) / 1000000).toLocaleString();
-                  
+
                   exceptions.push({
                     exceptionType,
                     errorMessage: exceptionMessage,
@@ -372,14 +372,14 @@ const ExceptionDetailPage: React.FC = () => {
 
       const currentException = exceptions[Math.min(index, exceptions.length - 1)];
       setException(currentException);
-      
+
       setNavigation({
         hasOlder: index > 0,
         hasNewer: index < exceptions.length - 1,
         currentIndex: index,
         totalCount: exceptions.length,
       });
-      
+
       setCurrentIndex(index);
     } catch (error) {
       message.error('Failed to fetch exception details');
@@ -390,7 +390,7 @@ const ExceptionDetailPage: React.FC = () => {
 
   const handleNavigate = (direction: 'older' | 'newer') => {
     if (!navigation) return;
-    
+
     const newIndex = direction === 'older' ? currentIndex - 1 : currentIndex + 1;
     fetchExceptionDetail(newIndex);
   };
@@ -423,7 +423,7 @@ const ExceptionDetailPage: React.FC = () => {
       key: 'key',
       width: 200,
       render: (text: string) => (
-        <span style={{ color: '#fff', fontWeight: 500 }}>{text}</span>
+        <span className="u-text-white-fw500">{text}</span>
       ),
     },
     {
@@ -432,7 +432,7 @@ const ExceptionDetailPage: React.FC = () => {
       key: 'value',
       render: (value: any, record: { key: string }) => {
         const key = record.key.toLowerCase();
-        
+
         if (key.includes('servicename') && typeof value === 'string') {
           return (
             <Button
@@ -445,7 +445,7 @@ const ExceptionDetailPage: React.FC = () => {
             </Button>
           );
         }
-        
+
         if ((key.includes('trace') || key.includes('traceid')) && typeof value === 'string') {
           return (
             <Button
@@ -458,7 +458,7 @@ const ExceptionDetailPage: React.FC = () => {
             </Button>
           );
         }
-        
+
         if ((key.includes('span') || key.includes('spanid')) && typeof value === 'string') {
           return (
             <Button
@@ -471,7 +471,7 @@ const ExceptionDetailPage: React.FC = () => {
             </Button>
           );
         }
-        
+
         if (key.includes('log') && typeof value === 'string') {
           return (
             <Button
@@ -484,12 +484,12 @@ const ExceptionDetailPage: React.FC = () => {
             </Button>
           );
         }
-        
+
         if (typeof value === 'string' && (value.length > 50 || value.includes('http'))) {
           return <span className={styles.monospaceValue}>{value}</span>;
         }
-        
-        return <span style={{ color: '#8c8c8c' }}>{String(value)}</span>;
+
+        return <span className="u-text-muted">{String(value)}</span>;
       },
     },
   ];
@@ -497,7 +497,7 @@ const ExceptionDetailPage: React.FC = () => {
   if (loading && !exception) {
     return (
       <div className={styles.container}>
-        <div style={{ textAlign: 'center', padding: '40px', color: '#8c8c8c' }}>
+        <div className="u-text-center-muted">
           Loading exception details...
         </div>
       </div>
@@ -507,7 +507,7 @@ const ExceptionDetailPage: React.FC = () => {
   if (!exception) {
     return (
       <div className={styles.container}>
-        <div style={{ textAlign: 'center', padding: '40px', color: '#8c8c8c' }}>
+        <div className="u-text-center-muted">
           Exception not found
         </div>
       </div>
@@ -522,7 +522,7 @@ const ExceptionDetailPage: React.FC = () => {
   return (
     <div className={styles.container}>
       {
-}
+      }
       <Button
         className={styles.backButton}
         icon={<ArrowLeftOutlined />}
@@ -532,18 +532,18 @@ const ExceptionDetailPage: React.FC = () => {
       </Button>
 
       {
-}
+      }
       <div className={styles.header}>
         <div className={styles.exceptionInfo}>
           <h1 className={styles.exceptionType}>{exception.exceptionType}</h1>
           <div className={styles.errorMessage}>{exception.errorMessage}</div>
-          
+
           <div className={styles.eventInfo}>
             <span className={styles.eventId}>Event {exception.eventId}</span>
             <span className={styles.timestamp}>{exception.timestamp}</span>
           </div>
         </div>
-        
+
         <div className={styles.navigationButtons}>
           <Button
             className={styles.navButton}
@@ -564,60 +564,60 @@ const ExceptionDetailPage: React.FC = () => {
         </div>
       </div>
 
-{
-}
-<div className={styles.actionCardsContainer}>
-  {
-}
-  <div className={styles.actionCard}>
-    <div className={styles.actionCardText}>
-      View service details and performance metrics for this error
-    </div>
-    <Button
-      className={styles.serviceButton}
-      icon={<CodeOutlined />}
-      onClick={() => handleLinkClick('service', exception.serviceName || exception.application)}
-      disabled={!exception.serviceName && !exception.application}
-    >
-      View Service Details
-    </Button>
-  </div>
+      {
+      }
+      <div className={styles.actionCardsContainer}>
+        {
+        }
+        <div className={styles.actionCard}>
+          <div className={styles.actionCardText}>
+            View service details and performance metrics for this error
+          </div>
+          <Button
+            className={styles.serviceButton}
+            icon={<CodeOutlined />}
+            onClick={() => handleLinkClick('service', exception.serviceName || exception.application)}
+            disabled={!exception.serviceName && !exception.application}
+          >
+            View Service Details
+          </Button>
+        </div>
 
-  {
-}
-  <div className={styles.actionCard}>
-    <div className={styles.actionCardText}>
-      See what happened before and after this error in a trace graph
-    </div>
-    <Button
-      className={styles.traceButton}
-      icon={<CodeOutlined />}
-      onClick={() => handleLinkClick('trace', exception.traceId || '')}
-      disabled={!exception.traceId}
-    >
-      See the error in trace graph
-    </Button>
-  </div>
+        {
+        }
+        <div className={styles.actionCard}>
+          <div className={styles.actionCardText}>
+            See what happened before and after this error in a trace graph
+          </div>
+          <Button
+            className={styles.traceButton}
+            icon={<CodeOutlined />}
+            onClick={() => handleLinkClick('trace', exception.traceId || '')}
+            disabled={!exception.traceId}
+          >
+            See the error in trace graph
+          </Button>
+        </div>
 
-  {
-}
-  <div className={styles.actionCard}>
-    <div className={styles.actionCardText}>
-      View specific span details and execution context
-    </div>
-    <Button
-      className={styles.spanButton}
-      icon={<CodeOutlined />}
-      onClick={() => handleLinkClick('span', exception.spanId || '')}
-      disabled={!exception.spanId}
-    >
-      View Span Details
-    </Button>
-  </div>
-</div>
+        {
+        }
+        <div className={styles.actionCard}>
+          <div className={styles.actionCardText}>
+            View specific span details and execution context
+          </div>
+          <Button
+            className={styles.spanButton}
+            icon={<CodeOutlined />}
+            onClick={() => handleLinkClick('span', exception.spanId || '')}
+            disabled={!exception.spanId}
+          >
+            View Span Details
+          </Button>
+        </div>
+      </div>
 
       {
-}
+      }
       <div className={styles.keyValueCard}>
         <div className={styles.keyValueHeader}>Key-Value Pairs</div>
         <div className={styles.keyValueContent}>
@@ -632,14 +632,14 @@ const ExceptionDetailPage: React.FC = () => {
         </div>
       </div>
 
-{
-}
-<div className={styles.stacktraceCard}>
-  <div className={styles.stacktraceHeader}>Stacktrace</div>
-  <div className={styles.stacktraceContent}>
-    {exception.stacktrace}
-  </div>
-</div>
+      {
+      }
+      <div className={styles.stacktraceCard}>
+        <div className={styles.stacktraceHeader}>Stacktrace</div>
+        <div className={styles.stacktraceContent}>
+          {exception.stacktrace}
+        </div>
+      </div>
     </div>
   );
 };

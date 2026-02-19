@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import '../../assets/styles/components/core/view.css';
 import { Button, Dropdown, Modal, Form, Input, message } from 'antd';
 import { SaveOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -382,12 +383,12 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
       return {
         key: view.id,
         label: (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="view-dropdown-item">
+            <div className="view-dropdown-item-left">
 
               <span>{view.title}</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div className="view-dropdown-item-right">
               <Button
                 type="text"
                 size="small"
@@ -397,7 +398,7 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
                   setSelectedView(view);
                   handleUpdateView();
                 }}
-                style={{ color: '#1890ff', padding: '2px 4px' }}
+                className="view-action-btn-edit"
                 title="Update this view"
               />
               {!isDefault && (
@@ -409,7 +410,7 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
                     e.stopPropagation();
                     handleViewDelete(view.id);
                   }}
-                  style={{ color: '#ff4d4f', padding: '2px 4px' }}
+                  className="view-action-btn-delete"
                   title="Delete this view"
                 />
               )}
@@ -426,9 +427,9 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
     {
       key: 'save-as',
       label: (
-        <div style={{ display: 'flex', alignItems: 'center', padding: '4px 0', color: 'green' }}>
-          <SaveOutlined style={{ marginRight: 8, fontSize: '14px', color: 'green' }} />
-          <span style={{ fontWeight: 500 }}>Save as view</span>
+        <div className="view-save-item">
+          <SaveOutlined className="view-save-icon" />
+          <span className="view-save-label">Save as view</span>
         </div>
       ),
       onClick: handleSaveAsView
@@ -437,7 +438,7 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
 
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className="view-dropdown-wrapper">
         {
         }
         <Dropdown
@@ -446,25 +447,15 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
           placement="bottomLeft"
         >
           <Button
-            style={{
-              backgroundColor: '#404040',
-              border: '1px solid #555',
-              color: '#ffffff',
-              borderRadius: '6px',
-              height: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              minWidth: '160px'
-            }}
+            className="view-dropdown-btn"
           >
             {selectedView ? (
               <>
-                <span style={{ flex: 1, textAlign: 'left' }}>{selectedView.title}</span>
+                <span className="view-dropdown-btn-text">{selectedView.title}</span>
               </>
             ) : (
               <>
-                <span style={{ flex: 1, textAlign: 'left' }}>Views</span>
+                <span className="view-dropdown-btn-text">Views</span>
               </>
             )}
           </Button>

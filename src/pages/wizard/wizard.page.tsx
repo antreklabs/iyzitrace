@@ -527,11 +527,11 @@ const SetupWizardPage: React.FC = () => {
                         </div>
 
                         <div className="wizard-step-content">
-                            <p style={{ marginBottom: 24, color: '#94a3b8' }}>
+                            <p className="wizard-text-muted wizard-mb-24">
                                 Click the button below to check the health status of all platform services.
                             </p>
 
-                            <div style={{ marginBottom: 24 }}>
+                            <div className="wizard-mb-24">
                                 <Button
                                     variant="primary"
                                     onClick={runServiceHealthChecks}
@@ -549,13 +549,13 @@ const SetupWizardPage: React.FC = () => {
 
                             {verificationChecking && (
                                 <div className="wizard-verification-loading">
-                                    <LoadingOutlined style={{ fontSize: 24, color: '#3b82f6' }} />
-                                    <span style={{ color: '#94a3b8', marginLeft: 12 }}>Fetching platform status...</span>
+                                    <LoadingOutlined className="wizard-icon-blue-lg" />
+                                    <span className="wizard-text-muted-ml">Fetching platform status...</span>
                                 </div>
                             )}
 
                             {verificationError && (
-                                <Alert title="Connection Error" severity="error" style={{ marginTop: 16 }}>
+                                <Alert title="Connection Error" severity="error" className="wizard-mt-16">
                                     {verificationError}
                                 </Alert>
                             )}
@@ -565,9 +565,9 @@ const SetupWizardPage: React.FC = () => {
                                     {/* Overall status badge */}
                                     <div className="wizard-platform-status-badge" data-status={statusResponse.status}>
                                         {statusResponse.status === 'healthy' ? (
-                                            <CheckCircleOutlined style={{ color: '#22c55e', fontSize: 18 }} />
+                                            <CheckCircleOutlined className="wizard-icon-green-lg" />
                                         ) : (
-                                            <CloseCircleOutlined style={{ color: '#ef4444', fontSize: 18 }} />
+                                            <CloseCircleOutlined className="wizard-icon-red-lg" />
                                         )}
                                         <span>Platform Status: <strong>{statusResponse.status.toUpperCase()}</strong></span>
                                         <span className="wizard-status-updated">Updated: {new Date(statusResponse.updated_at).toLocaleTimeString()}</span>
@@ -580,9 +580,9 @@ const SetupWizardPage: React.FC = () => {
                                                 <div className="wizard-service-card-header">
                                                     <div className="wizard-service-card-name">
                                                         {component.status === 'online' ? (
-                                                            <CheckCircleOutlined style={{ color: '#22c55e' }} />
+                                                            <CheckCircleOutlined className="wizard-icon-green" />
                                                         ) : (
-                                                            <CloseCircleOutlined style={{ color: '#ef4444' }} />
+                                                            <CloseCircleOutlined className="wizard-icon-red" />
                                                         )}
                                                         <strong>{component.name}</strong>
                                                     </div>
@@ -605,13 +605,13 @@ const SetupWizardPage: React.FC = () => {
                             )}
 
                             {someServicesDown && (
-                                <Alert title="Some services are not responding" severity="warning" style={{ marginTop: 16 }}>
+                                <Alert title="Some services are not responding" severity="warning" className="wizard-mt-16">
                                     Please ensure all services are running and try again.
                                 </Alert>
                             )}
 
                             {allServicesHealthy && (
-                                <Alert title="All Services Healthy!" severity="success" style={{ marginTop: 16 }}>
+                                <Alert title="All Services Healthy!" severity="success" className="wizard-mt-16">
                                     All {statusResponse!.components.length} services are running correctly. You're ready to explore the platform!
                                 </Alert>
                             )}
@@ -635,7 +635,7 @@ const SetupWizardPage: React.FC = () => {
                                     </>
                                 ) : (
                                     <>
-                                        <AppstoreOutlined style={{ marginRight: 8 }} />
+                                        <AppstoreOutlined className="wizard-mr-8" />
                                         Explore Dashboards
                                     </>
                                 )}
@@ -693,7 +693,7 @@ const SetupWizardPage: React.FC = () => {
                         </div>
 
                         <div className="wizard-step-content">
-                            <p style={{ marginBottom: 24, color: '#94a3b8' }}>
+                            <p className="wizard-text-muted wizard-mb-24">
                                 Click the button below to automatically configure Prometheus, Loki, and Tempo
                                 data sources in Grafana.
                             </p>
@@ -707,20 +707,20 @@ const SetupWizardPage: React.FC = () => {
                                         <div key={type} className="wizard-datasource-item">
                                             <div className="wizard-datasource-info">
                                                 <strong>{config.name}</strong>
-                                                <span style={{ color: '#64748b', fontSize: 13 }}>{config.url}</span>
+                                                <span className="wizard-text-muted-sm">{config.url}</span>
                                             </div>
                                             <div className="wizard-datasource-status">
-                                                {status.checking && <LoadingOutlined style={{ color: '#3b82f6' }} />}
-                                                {status.success === true && <CheckCircleOutlined style={{ color: '#22c55e' }} />}
-                                                {status.success === false && <CloseCircleOutlined style={{ color: '#ef4444' }} />}
-                                                {status.success === null && !status.checking && <span style={{ color: '#64748b' }}>—</span>}
+                                                {status.checking && <LoadingOutlined className="wizard-icon-blue" />}
+                                                {status.success === true && <CheckCircleOutlined className="wizard-icon-green" />}
+                                                {status.success === false && <CloseCircleOutlined className="wizard-icon-red" />}
+                                                {status.success === null && !status.checking && <span className="wizard-text-muted-dash">—</span>}
                                             </div>
                                         </div>
                                     );
                                 })}
                             </div>
 
-                            <div style={{ marginTop: 24 }}>
+                            <div className="wizard-mt-24">
                                 <Button
                                     variant="primary"
                                     onClick={checkAndProvisionDatasources}
@@ -740,7 +740,7 @@ const SetupWizardPage: React.FC = () => {
                                 <Alert
                                     title="Some data sources could not be configured"
                                     severity="warning"
-                                    style={{ marginTop: 16 }}
+                                    className="wizard-mt-16"
                                 >
                                     Make sure the observability platform is running and accessible before click on Configure Data Sources button.
                                 </Alert>

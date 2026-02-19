@@ -147,8 +147,124 @@
     bottom: 0;
     padding-top: 8px;
     padding-bottom: 8px;
-    background: rgba(0, 0, 0, 0.35);
+    background: rgba(17, 17, 17, 0.95);
     backdrop-filter: blur(6px);
     display: flex;
     justify-content: flex-end;
+}
+
+/* Settings Page Header */
+.settings-page {
+    background: #111111;
+    min-height: 100vh;
+}
+
+.settings-header {
+    background: #1a1a1a;
+    border-bottom: 1px solid #2a2a2a;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    margin-bottom: 16px;
+}
+
+.settings-header__inner {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+}
+
+.settings-header__title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #f1f5f9;
+}
+
+.settings-header__title-icon {
+    font-size: 24px;
+}
+
+.settings-header__nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.settings-header__tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.settings-header__tab--active {
+    background: #3b82f6;
+    color: white;
+}
+
+.settings-header__tab--inactive {
+    background: transparent;
+    color: #888888;
+}
+
+.settings-header__tab--inactive:hover {
+    background: #2a2a2a;
+    color: #f1f5f9;
+}
+
+.settings-description-sm {
+    margin-bottom: 8px;
+    color: #9CA3AF;
+}
+
+/* Definitions Table */
+.definitions-table-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.definitions-table-header {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.definitions-table-header-mt {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    margin-top: 16px;
+    margin-bottom: 8px;
+}
+
+.definitions-table-heading {
+    font-weight: 600;
+    color: #E5E7EB;
+}
+
+.definitions-table-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }

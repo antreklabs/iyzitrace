@@ -20,6 +20,7 @@ import { getOperationTypeColor } from '../../api/service/services.service';
 import { useNavigate } from 'react-router-dom';
 import dagre from 'dagre';
 import { css } from '@emotion/css';
+import '../../assets/styles/components/service-map/service-map.css';
 
 interface ServiceMapBottomDrawerProps {
   infrastructure: Infrastructure | null;
@@ -263,44 +264,36 @@ const ServiceNode: React.FC<{ data: Service; selected?: boolean }> = (props) => 
       <Handle
         type="target"
         position={Position.Top}
+        className="sm-handle"
         style={{
           background: statusConfig.color,
-          width: 14,
-          height: 14,
-          border: `4px solid #0f172a`,
           boxShadow: `0 0 15px ${statusConfig.glow}`
         }}
       />
       <Handle
         type="source"
         position={Position.Bottom}
+        className="sm-handle"
         style={{
           background: statusConfig.color,
-          width: 14,
-          height: 14,
-          border: `4px solid #0f172a`,
           boxShadow: `0 0 15px ${statusConfig.glow}`
         }}
       />
       <Handle
         type="target"
         position={Position.Left}
+        className="sm-handle"
         style={{
           background: statusConfig.color,
-          width: 14,
-          height: 14,
-          border: `4px solid #0f172a`,
           boxShadow: `0 0 15px ${statusConfig.glow}`
         }}
       />
       <Handle
         type="source"
         position={Position.Right}
+        className="sm-handle"
         style={{
           background: statusConfig.color,
-          width: 14,
-          height: 14,
-          border: `4px solid #0f172a`,
           boxShadow: `0 0 15px ${statusConfig.glow}`
         }}
       />
@@ -670,12 +663,12 @@ const ServiceDetailPanel: React.FC<{
               {data.name}
             </h3>
             <div className={badgeStyle}>
-              <CloudServerOutlined style={{ fontSize: '14px' }} />
+              <CloudServerOutlined className="sm-icon-14" />
               SERVICE
             </div>
           </div>
           <button onClick={onClose} className={closeButtonStyle}>
-            <CloseOutlined style={{ fontSize: '16px', fontWeight: 'bold' }} />
+            <CloseOutlined className="sm-icon-16-bold" />
           </button>
         </div>
 
@@ -725,7 +718,7 @@ const ServiceDetailPanel: React.FC<{
         </div>
 
         {data.operations && data.operations.length > 0 && (
-          <div style={{ marginBottom: '16px' }}>
+          <div className="sm-drawer-mb-16">
             <h4 className={sectionTitleStyle}>
               <ApartmentOutlined />
               Operations ({data.operations.length})
@@ -783,21 +776,21 @@ const ServiceDetailPanel: React.FC<{
             onClick={handleNavigateToLogs}
             className={actionButtonStyle('rgba(59, 130, 246, 0.15)', 'rgba(59, 130, 246, 0.3)', '#60a5fa')}
           >
-            <BarChartOutlined style={{ fontSize: '16px' }} />
+            <BarChartOutlined className="sm-icon-16" />
             Logs
           </button>
           <button
             onClick={handleNavigateToMetrics}
             className={actionButtonStyle('rgba(34, 197, 94, 0.15)', 'rgba(34, 197, 94, 0.3)', '#4ade80')}
           >
-            <LineChartOutlined style={{ fontSize: '16px' }} />
+            <LineChartOutlined className="sm-icon-16" />
             Metrics
           </button>
           <button
             onClick={handleNavigateToTraces}
             className={actionButtonStyle('rgba(168, 85, 247, 0.15)', 'rgba(168, 85, 247, 0.3)', '#c084fc')}
           >
-            <ApartmentOutlined style={{ fontSize: '16px' }} />
+            <ApartmentOutlined className="sm-icon-16" />
             Traces
           </button>
         </div>
@@ -1019,90 +1012,35 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
         }
       `}</style>
       <div
-        style={{
-          position: 'fixed',
-          bottom: isFullscreen ? 0 : 0,
-          left: isFullscreen ? 0 : 0,
-          right: isFullscreen ? 0 : 0,
-          top: isFullscreen ? 0 : 'auto',
-          height: isFullscreen ? '100vh' : `${height}px`,
-          background: '#0f172a',
-          borderTop: isFullscreen ? 'none' : '2px solid #334155',
-          zIndex: isFullscreen ? 9999 : 1001,
-          display: 'flex',
-          flexDirection: 'column'
-        }}
+        className={`sm-drawer ${isFullscreen ? 'sm-drawer--fullscreen' : ''}`}
+        style={{ height: isFullscreen ? undefined : `${height}px` }}
       >
-        <div
-          style={{
-            height: '8px',
-            background: '#334155',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <div style={{
-            width: '40px',
-            height: '4px',
-            background: '#475569',
-            borderRadius: '2px'
-          }} />
+        <div className="sm-drawer-resize-bar">
+          <div className="sm-drawer-resize-handle" />
         </div>
 
         {
         }
-        <div
-          style={{
-            padding: '12px 20px',
-            borderBottom: '1px solid #334155',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            background: '#1e293b'
-          }}
-        >
+        <div className="sm-drawer-header">
           <div>
-            <h3 style={{ margin: 0, color: '#ffffff', fontSize: '16px', fontWeight: 'bold' }}>
+            <h3 className="sm-drawer-title">
               Service Map - {infrastructure?.name}
             </h3>
-            <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '4px' }}>
+            <div className="sm-drawer-subtitle">
               {nodes.length} services, {edges.length} connections
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="sm-drawer-actions">
             <button
               onClick={() => setIsFullscreen(!isFullscreen)}
-              style={{
-                background: 'rgba(59, 130, 246, 0.2)',
-                border: '1px solid #3b82f6',
-                borderRadius: '6px',
-                width: '32px',
-                height: '32px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                color: '#3b82f6'
-              }}
+              className="sm-drawer-action-btn sm-drawer-fullscreen-btn"
               title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
             >
               {isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
             </button>
             <button
               onClick={onClose}
-              style={{
-                background: 'rgba(239, 68, 68, 0.2)',
-                border: '1px solid #ef4444',
-                borderRadius: '6px',
-                width: '32px',
-                height: '32px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                color: '#ef4444'
-              }}
+              className="sm-drawer-action-btn sm-drawer-close-btn-red"
             >
               <CloseOutlined />
             </button>
@@ -1111,7 +1049,7 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
 
         {
         }
-        <div style={{ flex: 1, position: 'relative' }}>
+        <div className="sm-drawer-content">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -1122,7 +1060,7 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
             nodesConnectable={false}
             fitView
             fitViewOptions={{ padding: 0.2 }}
-            style={{ background: '#0f172a' }}
+            className="sm-drawer-reactflow-bg"
             minZoom={0.1}
             maxZoom={2.5}
             onNodeDragStop={(_, node) => {
@@ -1152,12 +1090,7 @@ const ServiceMapBottomDrawerInner: React.FC<ServiceMapBottomDrawerProps> = ({
             proOptions={{ hideAttribution: true }}
           >
             <Background color="#1f2937" gap={20} />
-            <Controls
-              style={{
-                background: '#1f2937',
-                border: '1px solid #374151'
-              }}
-            />
+            <Controls className="sm-drawer-controls" />
           </ReactFlow>
 
           {

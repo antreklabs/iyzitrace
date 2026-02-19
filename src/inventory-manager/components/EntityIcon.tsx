@@ -75,18 +75,11 @@ export const EntityBadge: React.FC<{ type: EntityType | string }> = ({ type }) =
 
     return (
         <span
+            className="entity-badge"
             style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '3px 10px',
-                borderRadius: '14px',
-                fontSize: '12px',
-                fontWeight: 600,
                 backgroundColor: `${color}20`,
                 color: color,
                 border: `1px solid ${color}30`,
-                whiteSpace: 'nowrap',
             }}
         >
             <EntityIcon type={type as EntityType} size={12} />
@@ -99,18 +92,11 @@ export const StatusBadge: React.FC<{ status: EntityStatus }> = ({ status }) => {
     const info = STATUS_INFO[status] || STATUS_INFO.active;
     return (
         <span
+            className="status-badge"
             style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                padding: '3px 10px',
-                fontSize: '10px',
-                fontWeight: 700,
-                borderRadius: '14px',
                 border: `1px solid ${info.color}30`,
                 backgroundColor: `${info.color}15`,
                 color: info.color,
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
             }}
         >
             {info.label}

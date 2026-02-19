@@ -612,3 +612,65 @@
     justify-content: center;
   }
 }
+
+/* Wizard Utility Classes */
+.wizard-icon-green {
+  color: #22c55e;
+}
+
+.wizard-icon-green-lg {
+  color: #22c55e;
+  font-size: 18px;
+}
+
+.wizard-icon-red {
+  color: #ef4444;
+}
+
+.wizard-icon-red-lg {
+  color: #ef4444;
+  font-size: 18px;
+}
+
+.wizard-icon-blue {
+  color: #3b82f6;
+}
+
+.wizard-icon-blue-lg {
+  color: #3b82f6;
+  font-size: 24px;
+}
+
+.wizard-text-muted {
+  color: #94a3b8;
+}
+
+.wizard-text-muted-sm {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.wizard-text-muted-ml {
+  color: #94a3b8;
+  margin-left: 12px;
+}
+
+.wizard-mb-24 {
+  margin-bottom: 24px;
+}
+
+.wizard-mt-16 {
+  margin-top: 16px;
+}
+
+.wizard-mt-24 {
+  margin-top: 24px;
+}
+
+.wizard-mr-8 {
+  margin-right: 8px;
+}
+
+.wizard-text-muted-dash {
+  color: #64748b;
+}

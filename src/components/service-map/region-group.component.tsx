@@ -96,11 +96,7 @@ export const RegionGroup: React.FC<RegionGroupProps> = ({ data }) => {
           <span className={iconStyle}>{getRegionIcon()}</span>
           <span>{region.name}</span>
           {getInfraCount() && (
-            <span style={{
-              color: '#94a3b8',
-              fontSize: '11px',
-              fontWeight: 500
-            }}>
+            <span className="sm-region-infra-count">
               {getInfraCount()}
             </span>
           )}

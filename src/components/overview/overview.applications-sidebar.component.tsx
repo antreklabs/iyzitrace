@@ -45,8 +45,8 @@ const ApplicationsSidebar: React.FC<ApplicationsSidebarProps> = ({
   return (
     <Drawer
       title={
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'white' }}>
-          <AppstoreOutlined style={{ color: '#1890ff' }} />
+        <div className="overview-apps-drawer-title">
+          <AppstoreOutlined className="overview-apps-drawer-title-icon" />
           <span>Applications Layer</span>
         </div>
       }
@@ -55,51 +55,49 @@ const ApplicationsSidebar: React.FC<ApplicationsSidebarProps> = ({
       open={visible}
       width={400}
       styles={{
-        header: { 
+        header: {
           background: '#1f1f1f',
           borderBottom: '1px solid #333',
         },
-        body: { 
+        body: {
           padding: 0,
           background: '#1f1f1f',
         },
       }}
-      closeIcon={<span style={{ color: 'white', fontSize: '16px' }}>✕</span>}
+      closeIcon={<span className="overview-apps-close-icon">✕</span>}
     >
       <List
         dataSource={applications}
         renderItem={(application) => {
           const statusValue = application.status?.value || 'unknown';
+          const isSelected = selectedApplicationId === application.id;
           return (
             <List.Item
+              className="overview-sidebar-item"
               style={{
-                cursor: 'pointer',
-                padding: '16px 24px',
-                background: selectedApplicationId === application.id ? '#1890ff' : '#2a2a2a',
-                borderLeft: selectedApplicationId === application.id ? '3px solid #40a9ff' : '3px solid transparent',
-                transition: 'all 0.3s ease',
-                borderBottom: '1px solid #333',
+                background: isSelected ? '#1890ff' : '#2a2a2a',
+                borderLeft: isSelected ? '3px solid #40a9ff' : '3px solid transparent',
               }}
               onMouseEnter={(e) => {
-                if (selectedApplicationId !== application.id) {
+                if (!isSelected) {
                   e.currentTarget.style.background = '#333';
                 }
               }}
               onMouseLeave={(e) => {
-                if (selectedApplicationId !== application.id) {
+                if (!isSelected) {
                   e.currentTarget.style.background = '#2a2a2a';
                 }
               }}
             >
               <List.Item.Meta
                 avatar={
-                  <div style={{ fontSize: '32px' }}>
+                  <div className="overview-apps-platform-icon">
                     {getPlatformIcon(application.platform)}
                   </div>
                 }
                 title={
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Text strong style={{ color: selectedApplicationId === application.id ? 'white' : '#e8e8e8' }}>
+                  <div className="overview-apps-item-title">
+                    <Text strong className={isSelected ? 'overview-card-text-selected' : 'overview-card-text-unselected'}>
                       {application.name}
                     </Text>
                     <Badge
@@ -107,13 +105,13 @@ const ApplicationsSidebar: React.FC<ApplicationsSidebarProps> = ({
                         statusValue === 'healthy'
                           ? 'success'
                           : statusValue === 'warning'
-                          ? 'warning'
-                          : statusValue === 'degraded'
-                          ? 'processing'
-                          : 'error'
+                            ? 'warning'
+                            : statusValue === 'degraded'
+                              ? 'processing'
+                              : 'error'
                       }
                       text={
-                        <span style={{ color: selectedApplicationId === application.id ? 'white' : '#b8b8b8' }}>
+                        <span className={isSelected ? 'overview-card-metric-val-selected' : 'overview-card-metric-val-unselected'}>
                           {getStatusText(statusValue)}
                         </span>
                       }
@@ -121,10 +119,9 @@ const ApplicationsSidebar: React.FC<ApplicationsSidebarProps> = ({
                   </div>
                 }
                 description={
-                  <div style={{ 
-                    fontSize: '12px', 
-                    color: selectedApplicationId === application.id ? 'rgba(255,255,255,0.8)' : '#8c8c8c'
-                  }}>
+                  <div
+                    className={`overview-apps-item-desc ${isSelected ? 'overview-card-subtext-selected' : 'overview-card-subtext-unselected'}`}
+                  >
                     <div>{application.platform}</div>
                     <div>Version: {application.version}</div>
                   </div>

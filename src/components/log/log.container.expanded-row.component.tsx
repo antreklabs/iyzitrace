@@ -41,7 +41,7 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
   return (
     <div className="log-expanded-row-container">
       {
-}
+      }
       {record.message && (
         <div>
           <h5 className="log-expanded-row-message-title">Message</h5>
@@ -52,7 +52,7 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
       )}
 
       {
-}
+      }
       {telemetryFields.length > 0 && (
         <div className="log-expanded-row-telemetry-section">
           <h5 className="log-expanded-row-telemetry-title">Telemetry Information</h5>
@@ -68,10 +68,10 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
 
       <div className="log-expanded-row-grid">
         {
-}
+        }
         <div className="log-expanded-row-left-column">
           {
-}
+          }
           <div>
             <h5 className="log-expanded-row-section-title">Basic Information</h5>
             {basicFields.map(field => (
@@ -79,9 +79,9 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
                 <strong className="log-expanded-row-field-label">{field.label}:</strong>
                 {field.label === 'Level' ? (
                   <span className={
-                    field.value === 'ERROR' ? 'log-expanded-row-level-error' : 
-                    field.value === 'WARN' ? 'log-expanded-row-level-warn' : 
-                    field.value === 'INFO' ? 'log-expanded-row-level-info' : 'log-expanded-row-level-debug'
+                    field.value === 'ERROR' ? 'log-expanded-row-level-error' :
+                      field.value === 'WARN' ? 'log-expanded-row-level-warn' :
+                        field.value === 'INFO' ? 'log-expanded-row-level-info' : 'log-expanded-row-level-debug'
                   }>
                     {field.value}
                   </span>
@@ -93,10 +93,10 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
           </div>
 
           {
-}
+          }
           {runtimeFields.length > 0 && (
-          <div className="log-expanded-row-runtime-section">
-            <h5 className="log-expanded-row-section-title">Runtime Information</h5>
+            <div className="log-expanded-row-runtime-section">
+              <h5 className="log-expanded-row-section-title">Runtime Information</h5>
               {runtimeFields.map(field => (
                 <p key={field.label} className="log-expanded-row-field">
                   <strong className="log-expanded-row-field-label">{field.label}:</strong>
@@ -108,19 +108,19 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
         </div>
 
         {
-}
+        }
         {Object.keys(attributes).length > 0 && (
           <div className="log-expanded-row-right-column">
             <h5 className="log-expanded-row-section-title">Additional Attributes</h5>
             <div className="log-expanded-row-attributes-container">
               {Object.entries(attributes)
-                .filter(([key]) => !basicFields.some(f => f.value === attributes[key]) && 
-                                 !runtimeFields.some(f => f.value === attributes[key]) && 
-                                 !telemetryFields.some(f => f.value === attributes[key]))
+                .filter(([key]) => !basicFields.some(f => f.value === attributes[key]) &&
+                  !runtimeFields.some(f => f.value === attributes[key]) &&
+                  !telemetryFields.some(f => f.value === attributes[key]))
                 .sort(([keyA], [keyB]) => {
                   const traceKeys = ['otelTraceID', 'trace_id', 'traceId', 'traceID'];
                   const spanKeys = ['otelSpanID', 'span_id', 'spanId', 'spanID'];
-                  
+
                   const isTraceA = traceKeys.includes(keyA);
                   const isTraceB = traceKeys.includes(keyB);
                   const isSpanA = spanKeys.includes(keyA);
@@ -137,11 +137,11 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
 
                   if (key === 'otelTraceID' || key === 'trace_id' || key === 'traceId' || key === 'traceID') {
                     content = (
-                      <a 
+                      <a
                         href={`/a/iyzitrace-app/traces/${value}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ color: '#1890ff', textDecoration: 'underline' }}
+                        className="u-text-link-blue"
                       >
                         {value as string}
                       </a>
@@ -150,11 +150,11 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
                     const traceId = attributes['otelTraceID'] || attributes['trace_id'] || attributes['traceId'] || attributes['traceID'];
                     if (traceId) {
                       content = (
-                        <a 
+                        <a
                           href={`/a/iyzitrace-app/traces/${traceId}?spanId=${value}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ color: '#1890ff', textDecoration: 'underline' }}
+                          className="u-text-link-blue"
                         >
                           {value as string}
                         </a>
@@ -163,10 +163,10 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
                   }
 
                   return (
-                  <div key={key} className="log-expanded-row-attribute-item">
-                    <div className="log-expanded-row-attribute-key">{key}</div>
+                    <div key={key} className="log-expanded-row-attribute-item">
+                      <div className="log-expanded-row-attribute-key">{key}</div>
                       <div className="log-expanded-row-attribute-value">{content}</div>
-                  </div>
+                    </div>
                   );
                 })}
             </div>
