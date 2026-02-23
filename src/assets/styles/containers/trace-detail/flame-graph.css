@@ -1,8 +1,8 @@
 /* FlameGraph Styles */
 
 .flamegraph-container {
-    background-color: #1f1f1f;
-    color: #fff;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
     font-size: 12px;
     width: 100%;
 }
@@ -11,7 +11,7 @@
     display: flex;
     align-items: center;
     height: 42px;
-    border-bottom: 1px solid #2a2a2a;
+    border-bottom: 1px solid var(--border-light);
 }
 
 .flamegraph-label {
@@ -61,7 +61,7 @@
     padding: 0 6px;
     font-size: 12px;
     font-weight: bold;
-    color: #fff;
+    color: var(--text-primary);
     cursor: pointer;
 }
 

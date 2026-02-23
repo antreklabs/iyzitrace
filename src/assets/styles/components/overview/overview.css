@@ -16,7 +16,7 @@
     border-radius: 50%;
     background: #ff4d4f;
     border: none;
-    color: white;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -55,7 +55,7 @@
 }
 
 .overview-infra-title {
-    color: white;
+    color: var(--text-primary);
     margin: 0;
 }
 
@@ -87,7 +87,7 @@
 }
 
 .overview-infra-metric-value {
-    color: white;
+    color: var(--text-primary);
     font-size: 12px;
 }
 
@@ -105,7 +105,7 @@
 }
 
 .overview-service-title {
-    color: white;
+    color: var(--text-primary);
     margin: 0;
 }
 
@@ -149,7 +149,7 @@
 }
 
 .overview-operation-name {
-    color: white;
+    color: var(--text-primary);
     font-weight: 500;
 }
 
@@ -183,7 +183,7 @@
 }
 
 .overview-region-title {
-    color: white;
+    color: var(--text-primary);
     margin: 0;
 }
 
@@ -204,7 +204,7 @@
 }
 
 .overview-region-stat-value {
-    color: white;
+    color: var(--text-primary);
     font-size: 18px;
     font-weight: 600;
 }
@@ -218,7 +218,7 @@
 }
 
 .overview-apps-sidebar-title {
-    color: white;
+    color: var(--text-primary);
     font-weight: 600;
 }
 
@@ -244,7 +244,7 @@
 }
 
 .overview-apps-item-name {
-    color: white;
+    color: var(--text-primary);
     font-weight: 500;
 }
 
@@ -277,7 +277,7 @@
 }
 
 .overview-service-card-title {
-    color: white;
+    color: var(--text-primary);
     margin: 0;
     display: flex;
     align-items: center;
@@ -288,7 +288,7 @@
 }
 
 .overview-service-expand-btn {
-    color: white;
+    color: var(--text-primary);
     font-weight: 600;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -389,7 +389,7 @@
 }
 
 .overview-service-metric-val {
-    color: white;
+    color: var(--text-primary);
     font-weight: 600;
     font-size: 13px;
     display: block;
@@ -406,7 +406,7 @@
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     border: 1px solid #333;
-    background: #1f1f1f;
+    background: var(--bg-secondary);
     height: 100%;
     min-width: 300px;
     width: max-content;
@@ -425,16 +425,16 @@
 
 .overview-operation-card-title {
     margin: 0;
-    color: #e8e8e8;
+    color: var(--text-primary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .overview-operation-expand-btn {
-    background: #2a2a2a;
-    border-color: #404040;
-    color: #b8b8b8;
+    background: var(--bg-tertiary);
+    border-color: var(--border-strong);
+    color: var(--text-secondary);
     padding: 4px 12px;
     height: auto;
     font-weight: 600;
@@ -442,9 +442,9 @@
 }
 
 .overview-operation-expand-btn:hover {
-    background: #333;
+    background: var(--bg-tertiary);
     border-color: #555;
-    color: #e8e8e8;
+    color: var(--text-primary);
 }
 
 .overview-operation-body {
@@ -464,11 +464,11 @@
 }
 
 .overview-operation-item--default {
-    background-color: #2a2a2a;
+    background-color: var(--bg-tertiary);
 }
 
 .overview-operation-item--default:hover {
-    background-color: #333;
+    background-color: var(--bg-tertiary);
 }
 
 .overview-operation-item--selected {
@@ -521,8 +521,8 @@
 }
 
 .overview-operation-avatar {
-    background: #1f1f1f;
-    border: 1px solid #404040;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-strong);
     flex-shrink: 0;
 }
 
@@ -535,14 +535,14 @@
 .overview-operation-metric-subtitle {
     font-size: 11px;
     display: block;
-    color: #8c8c8c;
+    color: var(--text-muted);
 }
 
 .overview-operation-metric-val {
     font-weight: 600;
     font-size: 13px;
     display: block;
-    color: #b8b8b8;
+    color: var(--text-secondary);
 }
 
 .overview-operation-icon {
@@ -567,7 +567,7 @@
     width: 100%;
     background: rgba(255, 255, 255, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
+    color: var(--text-primary);
     font-weight: 600;
 }
 
@@ -598,7 +598,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: white;
+    color: var(--text-primary);
 }
 
 .overview-apps-drawer-title-icon {
@@ -606,7 +606,7 @@
 }
 
 .overview-apps-close-icon {
-    color: white;
+    color: var(--text-primary);
     font-size: 16px;
 }
 
@@ -647,11 +647,11 @@
 
 /* Overview Card — Selected State */
 .overview-card-text-selected {
-    color: white;
+    color: var(--text-primary);
 }
 
 .overview-card-text-unselected {
-    color: #e8e8e8;
+    color: var(--text-primary);
 }
 
 .overview-card-subtext-selected {
@@ -659,7 +659,7 @@
 }
 
 .overview-card-subtext-unselected {
-    color: #8c8c8c;
+    color: var(--text-muted);
 }
 
 .overview-card-metric-subtitle-selected {
@@ -667,15 +667,15 @@
 }
 
 .overview-card-metric-subtitle-unselected {
-    color: #8c8c8c;
+    color: var(--text-muted);
 }
 
 .overview-card-metric-val-selected {
-    color: white;
+    color: var(--text-primary);
 }
 
 .overview-card-metric-val-unselected {
-    color: #b8b8b8;
+    color: var(--text-secondary);
 }
 
 .overview-card-bg-selected {
@@ -693,7 +693,7 @@
 }
 
 .overview-service-name {
-    color: white;
+    color: var(--text-primary);
 }
 
 .overview-service-subtext {
@@ -729,7 +729,7 @@
     z-index: 10;
     background: rgba(0, 0, 0, 0.6);
     border: 1px solid #3a3a3a;
-    color: white;
+    color: var(--text-primary);
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -749,22 +749,22 @@
 
 /* Global Utility Classes */
 .u-text-white {
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .u-text-white-fw500 {
-    color: #fff;
+    color: var(--text-primary);
     font-weight: 500;
 }
 
 .u-text-muted {
-    color: #8c8c8c;
+    color: var(--text-muted);
 }
 
 .u-text-center-muted {
     text-align: center;
     padding: 40px;
-    color: #8c8c8c;
+    color: var(--text-muted);
 }
 
 .u-text-link-blue {
@@ -854,7 +854,7 @@
 }
 
 .overview-region-text-selected {
-    color: white;
+    color: var(--text-primary);
 }
 
 .overview-region-text-unselected {
@@ -862,7 +862,7 @@
 }
 
 .overview-region-status-span-selected {
-    color: white;
+    color: var(--text-primary);
     font-weight: 500;
     font-size: 14px;
 }
@@ -874,7 +874,7 @@
 }
 
 .overview-region-icon-selected {
-    color: white;
+    color: var(--text-primary);
 }
 
 .overview-region-icon-unselected {
@@ -921,7 +921,7 @@
 .wizard-layout-container {
     display: flex;
     min-height: 100vh;
-    background: #0b1120;
+    background: var(--bg-primary);
 }
 
 .wizard-layout-loading {
@@ -929,7 +929,7 @@
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background: #111;
+    background: var(--bg-primary);
 }
 
 /* FlameGraph Row */
@@ -961,7 +961,7 @@
 }
 
 .inv-topology-bg {
-    background: #111111;
+    background: var(--bg-primary);
 }
 
 /* Agent Manager */
@@ -986,7 +986,7 @@
 /* AI Page */
 .ai-model-tag {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    color: var(--text-primary);
     border: none;
     padding: 4px 12px;
     font-size: 13px;
@@ -1011,7 +1011,7 @@
 /* Overview Infrastructure Card */
 .overview-infra-card-base {
     border-radius: 12px;
-    color: white;
+    color: var(--text-primary);
     cursor: pointer;
     transition: all 0.3s ease;
     width: 100%;
@@ -1036,7 +1036,7 @@
 /* Inventory Tree Transparent */
 .inv-tree-transparent {
     background: transparent;
-    color: #f1f5f9;
+    color: var(--text-primary);
 }
 
 /* Overview Card Grid */
@@ -1045,4 +1045,138 @@
     grid-template-rows: repeat(2, min-content);
     gap: 8px;
     grid-auto-flow: column;
+}
+
+/* ===== Light Mode Overrides ===== */
+[data-theme="light"] .overview-infra-card {
+    background: #ffffff !important;
+    border-color: #e8e8e8 !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .overview-infra-card:hover {
+    border-color: #d9d9d9 !important;
+}
+
+[data-theme="light"] .overview-infra-subtitle {
+    color: #595959;
+}
+
+[data-theme="light"] .overview-infra-metric-label {
+    color: #1a1a1a;
+}
+
+[data-theme="light"] .overview-infra-apps-btn {
+    background: rgba(0, 0, 0, 0.04) !important;
+    border-color: #d9d9d9 !important;
+    color: #1a1a1a !important;
+}
+
+[data-theme="light"] .overview-service-card {
+    background: #ffffff !important;
+    border-color: #e8e8e8 !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .overview-service-type {
+    color: #595959;
+}
+
+[data-theme="light"] .overview-service-metric-label {
+    color: #595959;
+}
+
+[data-theme="light"] .overview-service-ops-title {
+    color: #1a1a1a;
+}
+
+[data-theme="light"] .overview-service-expand-btn {
+    background: rgba(0, 0, 0, 0.04) !important;
+    border-color: #d9d9d9 !important;
+    color: #1a1a1a !important;
+}
+
+[data-theme="light"] .overview-service-subtext {
+    color: #595959;
+}
+
+[data-theme="light"] .overview-service-avatar {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .overview-service-metric-subtitle {
+    color: #8c8c8c;
+}
+
+[data-theme="light"] .overview-service-unmap-icon {
+    color: #8c8c8c;
+}
+
+[data-theme="light"] .overview-operation-card {
+    border-color: #e8e8e8 !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .overview-operation-metric-label {
+    color: #8c8c8c;
+}
+
+[data-theme="light"] .overview-operation-metric-value {
+    color: #1a1a1a;
+}
+
+[data-theme="light"] .overview-card-subtext-selected {
+    color: #595959;
+}
+
+[data-theme="light"] .overview-card-metric-subtitle-selected {
+    color: #8c8c8c;
+}
+
+[data-theme="light"] .overview-card-bg-selected {
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .overview-card-bg-unselected {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .overview-apps-item {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .overview-apps-item:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .overview-apps-item-count {
+    color: #8c8c8c;
+}
+
+[data-theme="light"] .overview-region-stat-label {
+    color: #8c8c8c;
+}
+
+[data-theme="light"] .overview-scroll-container {
+    scrollbar-color: #d9d9d9 transparent;
+}
+
+[data-theme="light"] .overview-scroll-nav-btn {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-color: #d9d9d9 !important;
+    color: #1a1a1a !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .overview-sidebar-item {
+    border-bottom-color: #e8e8e8;
+}
+
+[data-theme="light"] .overview-infra-card-base {
+    background: #ffffff !important;
+    border-color: #e8e8e8 !important;
+}
+
+[data-theme="light"] .sm-search-result-text {
+    color: #1a1a1a;
 }

@@ -62,9 +62,9 @@
 }
 
 .view-dropdown-btn {
-    background-color: #404040;
+    background-color: var(--border-strong);
     border: 1px solid #555;
-    color: #ffffff;
+    color: var(--text-primary);
     border-radius: 6px;
     height: 32px;
     display: flex;
@@ -80,7 +80,7 @@
 
 /* View Form Utilities */
 .view-input-white {
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 .view-text-xs {
@@ -105,6 +105,6 @@
 }
 
 .gf-picker-input-dark {
-    background: #2c2c2c;
-    color: #fff;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
 }

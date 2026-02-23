@@ -50,6 +50,13 @@ export interface Definitions {
 export interface PluginJsonData {
     serviceMap?: ServiceMapItem[];
     definitions?: Definitions;
+    platformUrl?: string;
+    authType?: 'open' | 'apikey';
+    wizardState?: {
+        completed: boolean;
+        completedAt?: string;
+        skipped?: boolean;
+    };
     aiConfig?: {
         apiKey?: string;
         model?: string;

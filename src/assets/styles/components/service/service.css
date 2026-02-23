@@ -42,7 +42,7 @@
 .service-card-title {
     font-size: 16px;
     font-weight: 600;
-    color: white;
+    color: var(--text-primary);
 }
 
 .service-card-actions {
@@ -288,8 +288,8 @@
 .service-metrics-card {
     border-radius: 12px;
     margin-bottom: 12px;
-    background: #141414;
-    border: 1px solid #2a2a2a;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
     width: 180px;
 }
 
@@ -301,12 +301,12 @@
 }
 
 .service-metrics-label {
-    color: #8c8c8c;
+    color: var(--text-muted);
     font-size: 12px;
 }
 
 .service-metrics-value {
-    color: #fff;
+    color: var(--text-primary);
     font-weight: 600;
 }
 
@@ -325,7 +325,7 @@
     top: 50%;
     transform: translateY(-50%);
     z-index: 1;
-    background: #1f1f1f;
+    background: var(--bg-secondary);
     border: 1px solid #303030;
     color: #d9d9d9;
     border-radius: 6px;
@@ -334,7 +334,7 @@
 }
 
 .service-card-scroll-btn:hover {
-    background: #303030;
+    background: var(--bg-tertiary);
 }
 
 .service-card-scroll-btn-left {

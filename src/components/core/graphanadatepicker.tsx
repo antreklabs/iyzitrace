@@ -144,7 +144,7 @@ const GrafanaLikeRangePicker = ({
                   setFromDate(date);
                   setSelectedQuickLabel(null);
                 }}
-                styles={{ popup: { root: { background: '#1e1e1e' } } }}
+                styles={{ popup: { root: { background: 'var(--bg-secondary)' } } }}
               />
               <TimePicker
                 className="date-picker-time-picker gf-picker-input-dark"
@@ -153,7 +153,7 @@ const GrafanaLikeRangePicker = ({
                   setFromTime(time);
                   setSelectedQuickLabel(null);
                 }}
-                styles={{ popup: { root: { background: '#1e1e1e' } } }}
+                styles={{ popup: { root: { background: 'var(--bg-secondary)' } } }}
               />
             </div>
           </div>
@@ -168,7 +168,7 @@ const GrafanaLikeRangePicker = ({
                   setToDate(date);
                   setSelectedQuickLabel(null);
                 }}
-                styles={{ popup: { root: { background: '#1e1e1e' } } }}
+                styles={{ popup: { root: { background: 'var(--bg-secondary)' } } }}
               />
               <TimePicker
                 className="date-picker-time-picker gf-picker-input-dark"
@@ -177,7 +177,7 @@ const GrafanaLikeRangePicker = ({
                   setToTime(time);
                   setSelectedQuickLabel(null);
                 }}
-                styles={{ popup: { root: { background: '#1e1e1e' } } }}
+                styles={{ popup: { root: { background: 'var(--bg-secondary)' } } }}
               />
             </div>
           </div>

@@ -12,20 +12,20 @@
 }
 
 .views-title {
-    color: white;
+    color: var(--text-primary);
     margin: 0;
 }
 
 .views-description {
-    color: #8c8c8c;
+    color: var(--text-muted);
 }
 
 /* View Preview Card */
 .view-preview-wrapper {
     margin-top: 12px;
-    border: 1px solid #303030;
+    border: 1px solid var(--border-color);
     border-radius: 12px;
-    background: radial-gradient(circle at top, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.2));
+    background: var(--bg-secondary);
     min-height: 180px;
     padding: 16px;
     display: flex;
@@ -34,7 +34,7 @@
 }
 
 .view-preview-error {
-    color: #8c8c8c;
+    color: var(--text-muted);
     font-size: 12px;
     text-align: center;
     margin: auto 0;
@@ -72,8 +72,8 @@
 }
 
 .view-live-button.inactive {
-    color: #8c8c8c;
-    border-color: #434343;
+    color: var(--text-muted);
+    border-color: var(--border-strong);
 }
 
 .view-stop-button {
@@ -82,7 +82,7 @@
     padding: 0;
     font-size: 11px;
     color: #ff4d4f;
-    border: 1px solid #434343;
+    border: 1px solid var(--border-strong);
     border-radius: 4px;
     display: flex;
     align-items: center;
@@ -97,15 +97,15 @@
 }
 
 .view-preview-item {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-hover);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
     padding: 12px;
 }
 
 .view-preview-label {
     font-size: 11px;
-    color: #8c8c8c;
+    color: var(--text-muted);
     display: block;
     margin-bottom: 4px;
 }
@@ -113,7 +113,7 @@
 .view-preview-value {
     font-size: 18px;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-primary);
     word-break: break-word;
 }
 
@@ -136,7 +136,7 @@
 
 /* Empty State */
 .views-empty-description {
-    color: #595959;
+    color: var(--text-secondary);
     font-size: 12px;
     margin-top: 8px;
 }

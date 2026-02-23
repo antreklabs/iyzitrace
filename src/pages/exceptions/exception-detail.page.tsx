@@ -44,9 +44,9 @@ export interface ExceptionNavigation {
 const getStyles = () => ({
   container: css`
     padding: 24px;
-    background: #0f0f0f;
+    background: var(--bg-primary);
     min-height: 100vh;
-    color: #fff;
+    color: var(--text-primary);
   `,
   header: css`
     display: flex;
@@ -55,19 +55,19 @@ const getStyles = () => ({
     margin-bottom: 24px;
   `,
   breadcrumb: css`
-    color: #8c8c8c;
+    color: var(--text-muted);
     font-size: 14px;
     margin-bottom: 16px;
   `,
   backButton: css`
-    background: #1f1f1f;
-    border: 1px solid #404040;
-    color: #fff;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
     margin-bottom: 16px;
     
     &:hover {
-      background: #2a2a2a;
-      border-color: #555;
+      background: var(--bg-hover);
+      border-color: var(--border-strong);
     }
   `,
   exceptionInfo: css`
@@ -76,11 +76,11 @@ const getStyles = () => ({
   exceptionType: css`
     font-size: 24px;
     font-weight: 600;
-    color: #fff;
+    color: var(--text-primary);
     margin: 0 0 8px 0;
   `,
   errorMessage: css`
-    color: #8c8c8c;
+    color: var(--text-muted);
     font-size: 14px;
     margin-bottom: 16px;
     word-break: break-all;
@@ -92,12 +92,12 @@ const getStyles = () => ({
     margin-bottom: 16px;
   `,
   eventId: css`
-    color: #8c8c8c;
+    color: var(--text-muted);
     font-family: monospace;
     font-size: 12px;
   `,
   timestamp: css`
-    color: #8c8c8c;
+    color: var(--text-muted);
     font-size: 14px;
   `,
   navigationButtons: css`
@@ -105,19 +105,19 @@ const getStyles = () => ({
     gap: 8px;
   `,
   navButton: css`
-    background: #1f1f1f;
-    border: 1px solid #404040;
-    color: #fff;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
     
     &:hover {
-      background: #2a2a2a;
-      border-color: #555;
+      background: var(--bg-hover);
+      border-color: var(--border-strong);
     }
     
     &:disabled {
-      background: #2a2a2a;
-      border-color: #404040;
-      color: #666;
+      background: var(--bg-tertiary);
+      border-color: var(--border-color);
+      color: var(--text-muted);
       cursor: not-allowed;
     }
   `,
@@ -128,14 +128,14 @@ const getStyles = () => ({
     margin-bottom: 24px;
   `,
   actionCard: css`
-    background: #2a2a2a;
-    border: 1px solid #404040;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 16px;
     text-align: center;
   `,
   actionCardText: css`
-    color: #8c8c8c;
+    color: var(--text-muted);
     margin-bottom: 12px;
     font-size: 14px;
   `,
@@ -170,39 +170,39 @@ const getStyles = () => ({
     }
   `,
   stacktraceCard: css`
-    background: #1a1a1a;
-    border: 1px solid #404040;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     margin-bottom: 24px;
   `,
   stacktraceHeader: css`
-    background: #2a2a2a;
+    background: var(--bg-tertiary);
     padding: 12px 16px;
-    border-bottom: 1px solid #404040;
+    border-bottom: 1px solid var(--border-color);
     font-weight: 600;
-    color: #fff;
+    color: var(--text-primary);
   `,
   stacktraceContent: css`
     padding: 16px;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: 12px;
     line-height: 1.5;
-    color: #e0e0e0;
-    background: #0f0f0f;
+    color: var(--text-secondary);
+    background: var(--bg-primary);
     white-space: pre-wrap;
     overflow-x: auto;
   `,
   keyValueCard: css`
-    background: #1a1a1a;
-    border: 1px solid #404040;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
   `,
   keyValueHeader: css`
-    background: #2a2a2a;
+    background: var(--bg-tertiary);
     padding: 12px 16px;
-    border-bottom: 1px solid #404040;
+    border-bottom: 1px solid var(--border-color);
     font-weight: 600;
-    color: #fff;
+    color: var(--text-primary);
   `,
   keyValueContent: css`
     padding: 16px;
@@ -210,22 +210,22 @@ const getStyles = () => ({
   keyValueTable: css`
     .ant-table {
       background: transparent;
-      color: #fff;
+      color: var(--text-primary);
     }
     
     .ant-table-thead > tr > th {
-      background: #2a2a2a;
-      border-bottom: 1px solid #404040;
-      color: #fff;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-primary);
     }
     
     .ant-table-tbody > tr > td {
-      border-bottom: 1px solid #404040;
-      color: #fff;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-primary);
     }
     
     .ant-table-tbody > tr:hover > td {
-      background: #2a2a2a;
+      background: var(--bg-hover);
     }
   `,
   linkButton: css`
@@ -241,7 +241,7 @@ const getStyles = () => ({
   monospaceValue: css`
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: 12px;
-    color: #8c8c8c;
+    color: var(--text-muted);
   `,
 });
 

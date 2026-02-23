@@ -32,8 +32,6 @@ interface InfrastructureMapProps {
   data: ServiceMapData;
 }
 
-const cardBg = (hex: string) =>
-  `linear-gradient(180deg, ${hex} 0%, rgba(6,10,19,0.9) 100%)`;
 
 const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }, ref) => {
   const [selectedNodeId, setSelectedNodeId] = useState<string>('');
@@ -389,27 +387,12 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
         <div className="infra-map-canvas-wrapper">
           {
           }
-          <div className="infra-map-title-overlay">
-            <div
-              className="infra-map-panel-card"
-              style={{ background: cardBg('#1b2a44') }}
-            >
-              <div className="infra-map-panel-title">
-                Infrastructure Map
-              </div>
-              <div className="infra-map-panel-subtitle">
-                Regions → Infrastructures
-              </div>
-            </div>
-          </div>
+
 
           {
           }
           <div className="infra-map-legend-overlay">
-            <div
-              className="infra-map-legend-card"
-              style={{ background: cardBg('#1b2a44') }}
-            >
+            <div className="infra-map-legend-card">
               <div className="infra-map-legend-items">
                 <span className="infra-map-legend-healthy">● healthy</span>
                 <span className="infra-map-legend-warning">● warning / degraded</span>

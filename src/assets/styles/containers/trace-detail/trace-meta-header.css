@@ -5,24 +5,24 @@
     align-items: center;
     justify-content: space-between;
     padding: 12px 24px;
-    background-color: #121212;
-    border-bottom: 1px solid #2a2a2a;
-    color: #fff;
+    background-color: var(--bg-primary);
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-primary);
     font-size: 14px;
 }
 
 .trace-label {
     font-weight: 500;
-    color: #999;
+    color: var(--text-muted);
     margin-right: 8px;
 }
 
 .trace-id-box {
-    background-color: #1f1f1f;
+    background-color: var(--bg-secondary);
     border-radius: 4px;
     padding: 4px 8px;
     font-family: monospace;
-    color: #ccc;
+    color: var(--text-secondary);
 }
 
 .center-section {
@@ -32,12 +32,12 @@
 
 .service-name {
     font-weight: 600;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .duration,
 .timestamp {
-    color: #ccc;
+    color: var(--text-secondary);
     font-size: 13px;
     display: flex;
     align-items: center;
@@ -55,7 +55,7 @@
 .meta-count {
     font-weight: 500;
     margin-right: 12px;
-    color: #aaa;
+    color: var(--text-muted);
 }
 
 .meta-error {

@@ -5,8 +5,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: #1f1f1f;
-  color: #fff;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
   font-family: sans-serif;
 }
 
@@ -19,14 +19,14 @@
 .trace-flamegraph {
   flex: 1;
   overflow: auto;
-  border-right: 1px solid #2a2a2a;
+  border-right: 1px solid var(--border-light);
 }
 
 .trace-sidebar {
   width: 450px;
-  background-color: #0b0c0e;
+  background-color: var(--bg-primary);
   overflow: auto;
-  border-left: 1px solid #2a2a2a;
+  border-left: 1px solid var(--border-light);
   height: calc(100vh - 24px);
 }
 
@@ -57,7 +57,7 @@
 }
 
 .trace-detail-error-message {
-  color: #8c8c8c;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
@@ -70,7 +70,7 @@
 }
 
 .trace-detail-empty-title {
-  color: #8c8c8c;
+  color: var(--text-muted);
   font-size: 16px;
   margin-bottom: 8px;
 }
@@ -103,13 +103,13 @@
 }
 
 .span-event-time {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 12px;
   flex-shrink: 0;
 }
 
 .span-event-name {
-  color: #f1f5f9;
+  color: var(--text-primary);
   font-size: 13px;
   font-weight: 500;
 }
@@ -132,7 +132,7 @@
 
 /* Filters Sider */
 .filters-sider-bg {
-  background: #1f1f1f;
+  background: var(--bg-secondary);
   padding: 10px;
   top: 0;
   position: sticky;
@@ -141,7 +141,7 @@
 
 .filters-sider-toggle-btn {
   margin-bottom: 16px;
-  color: #fff;
+  color: var(--text-primary);
   position: absolute;
   top: 16px;
 }
@@ -155,7 +155,7 @@
 }
 
 .filters-sider-title {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .filters-sider-content {
@@ -173,8 +173,8 @@
 }
 
 .am-layout-header {
-  background: #1a1a1a;
-  border-bottom: 1px solid #2a2a2a;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-light);
   position: sticky;
   top: 0;
   z-index: 50;
@@ -196,7 +196,7 @@
   gap: 12px;
   font-size: 18px;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--text-primary);
 }
 
 .am-layout-brand-icon {
@@ -224,17 +224,17 @@
 
 .am-layout-nav-link--active {
   background: #3b82f6;
-  color: white;
+  color: var(--text-primary);
 }
 
 .am-layout-nav-link--inactive {
   background: transparent;
-  color: #888888;
+  color: var(--text-muted);
 }
 
 .am-layout-nav-link--inactive:hover {
-  background: #2a2a2a;
-  color: #f1f5f9;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 .am-layout-nav-icon {
@@ -245,5 +245,5 @@
 .am-layout-content {
   flex: 1;
   overflow: auto;
-  background: #111111;
+  background: var(--bg-primary);
 }

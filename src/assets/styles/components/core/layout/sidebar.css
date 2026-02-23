@@ -1,34 +1,51 @@
 /* Sidebar Component Styles */
 
 .sidebar-container {
-    min-height: 100vh;
-    background-color: #141414;
+    height: 100vh;
+    max-height: 100vh;
+    background-color: var(--sidebar-bg) !important;
     padding: 16px 0;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--sidebar-border);
+    transition: background-color 0.3s ease;
+    overflow: hidden;
 }
 
 .sidebar-header {
     display: flex;
     align-items: center;
-    padding: 20px;
-    margin-bottom: 24px;
-    justify-content: flex-end;
+    padding: 12px 20px;
+    margin-bottom: 16px;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .sidebar-toggle-btn {
-    color: #ffffff;
-    background-color: #C75A2B;
-    width: 32px;
-    height: 32px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    color: #ffffff !important;
+    background-color: #C75A2B !important;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(199, 90, 43, 0.35);
     display: flex;
     align-items: center;
     justify-content: center;
+    border: none !important;
+    transition: all 0.2s ease;
+}
+
+.sidebar-toggle-btn:hover {
+    background-color: #b5502a !important;
+    box-shadow: 0 4px 12px rgba(199, 90, 43, 0.5);
+    transform: scale(1.05);
 }
 
 .sidebar-toggle-icon {
-    font-size: 12px;
+    font-size: 14px;
     color: #ffffff;
 }
 
@@ -38,5 +55,104 @@
 
 .sidebar-menu {
     border-right: 0;
-    background: transparent;
+    background: transparent !important;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Theme toggle - pinned to bottom */
+.sidebar-theme-toggle {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 14px 24px;
+    cursor: pointer;
+    border-top: 1px solid var(--sidebar-border);
+    transition: background-color 0.2s ease;
+    gap: 12px;
+    justify-content: center;
+}
+
+.sidebar-theme-toggle:hover {
+    background-color: var(--sidebar-hover);
+}
+
+.sidebar-theme-toggle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--bg-hover);
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.sidebar-theme-toggle:hover .sidebar-theme-toggle-icon {
+    background: var(--accent-primary);
+    color: #ffffff;
+}
+
+.sidebar-theme-toggle-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    font-family: 'Quicksand', sans-serif;
+    transition: color 0.2s ease;
+}
+
+.sidebar-theme-toggle:hover .sidebar-theme-toggle-label {
+    color: var(--text-primary);
+}
+
+/* Fix Menu text color for light/dark mode */
+.sidebar-menu .ant-menu-item {
+    color: var(--sidebar-text) !important;
+}
+
+.sidebar-menu .ant-menu-item .sidebar-menu-icon {
+    color: var(--sidebar-icon) !important;
+}
+
+.sidebar-menu .ant-menu-item-selected {
+    color: var(--sidebar-selected-text) !important;
+    background-color: transparent !important;
+    border-right: 3px solid var(--sidebar-selected-text);
+}
+
+.sidebar-menu .ant-menu-item-selected .sidebar-menu-icon {
+    color: var(--sidebar-selected-text) !important;
+}
+
+.sidebar-menu .ant-menu-item:hover {
+    background-color: var(--sidebar-hover) !important;
+}
+
+/* ===== Light Mode Sidebar Overrides ===== */
+[data-theme="light"] .sidebar-container {
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .sidebar-theme-toggle-icon {
+    background: #f0f0f0;
+    color: #595959;
+    border: 1px solid #e0e0e0;
+}
+
+[data-theme="light"] .sidebar-theme-toggle:hover .sidebar-theme-toggle-icon {
+    background: #C75A2B;
+    border-color: #C75A2B;
+    color: #ffffff;
+}
+
+[data-theme="light"] .sidebar-theme-toggle-label {
+    color: #595959;
+}
+
+[data-theme="light"] .sidebar-theme-toggle:hover .sidebar-theme-toggle-label {
+    color: #1a1a1a;
 }

@@ -60,7 +60,7 @@ const ServiceChartContainer: React.FC<ServiceChartContainerProps> = ({ services 
                     value={durationMetric}
                     onChange={setDurationMetric}
                     className="service-chart-select-80"
-                    dropdownStyle={{ backgroundColor: '#1f1f1f', border: '1px solid #303030' }}
+                    dropdownStyle={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
                     options={[
                       { value: 'p99', label: 'p99' },
                       { value: 'p95', label: 'p95' },

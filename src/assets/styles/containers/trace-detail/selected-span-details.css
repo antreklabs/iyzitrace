@@ -2,9 +2,9 @@
 
 .selected-span-details {
     padding: 16px;
-    color: #fff;
+    color: var(--text-primary);
     font-size: 13px;
-    background-color: #0b0c0e;
+    background-color: var(--bg-primary);
     height: 100%;
     overflow-y: auto;
 }
@@ -30,7 +30,7 @@
 }
 
 .meta-label {
-    color: #999;
+    color: var(--text-muted);
     text-transform: uppercase;
     font-size: 11px;
 }
@@ -63,7 +63,7 @@
 
 /* Empty attributes message */
 .no-attributes-message {
-    color: #aaa;
+    color: var(--text-muted);
 }
 
 /* Grouped Attribute List */
@@ -73,7 +73,7 @@
     gap: 8px;
     padding: 2px 12px;
     font-size: 13px;
-    color: #ddd;
+    color: var(--text-secondary);
 }
 
 .tag-key {
@@ -82,6 +82,6 @@
 }
 
 .tag-value {
-    color: #aaa;
+    color: var(--text-muted);
     word-break: break-all;
 }

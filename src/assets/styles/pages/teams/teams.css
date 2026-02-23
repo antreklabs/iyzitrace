@@ -3,7 +3,7 @@
 /* Teams Page Container */
 .teams-page-container {
     padding: 24px;
-    background: #0f0f0f;
+    background: var(--bg-primary);
     min-height: 100vh;
 }
 
@@ -21,13 +21,13 @@
 .teams-page-title {
     font-size: 24px;
     font-weight: 600;
-    color: #fff;
+    color: var(--text-primary);
     margin: 0 0 8px 0;
 }
 
 .teams-page-description {
     font-size: 14px;
-    color: #8c8c8c;
+    color: var(--text-muted);
     margin: 0;
 }
 
@@ -46,9 +46,9 @@
 }
 
 .teams-search-bar .ant-input {
-    background: #1f1f1f;
-    border-color: #404040;
-    color: #fff;
+    background: var(--bg-secondary);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
 }
 
 .teams-search-bar .ant-input:focus {
@@ -57,25 +57,25 @@
 }
 
 .teams-table-card .ant-table {
-    background: #1f1f1f;
+    background: var(--bg-secondary);
     border-radius: 8px;
 }
 
 .teams-table-card .ant-table-thead>tr>th {
-    background: #262626;
-    border-bottom: 1px solid #404040;
-    color: #fff;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-strong);
+    color: var(--text-primary);
     font-weight: 600;
 }
 
 .teams-table-card .ant-table-tbody>tr>td {
-    background: #1f1f1f;
-    border-bottom: 1px solid #404040;
-    color: #fff;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-strong);
+    color: var(--text-primary);
 }
 
 .teams-table-card .ant-table-tbody>tr:hover>td {
-    background: #262626;
+    background: var(--bg-tertiary);
 }
 
 .team-icon {
@@ -87,53 +87,53 @@
     justify-content: center;
     font-size: 16px;
     font-weight: 600;
-    color: #fff;
+    color: var(--text-primary);
     margin-right: 12px;
 }
 
 .team-name {
     font-weight: 500;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .team-manage-button {
     background: transparent;
-    border: 1px solid #404040;
-    color: #fff;
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
 }
 
 .team-manage-button:hover {
-    background: #262626;
+    background: var(--bg-tertiary);
     border-color: #7c3aed;
     color: #7c3aed;
 }
 
 .teams-modal .ant-modal-content {
-    background: #1f1f1f;
+    background: var(--bg-secondary);
     border-radius: 8px;
 }
 
 .teams-modal .ant-modal-header {
-    background: #1f1f1f;
-    border-bottom: 1px solid #404040;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-strong);
 }
 
 .teams-modal .ant-modal-title {
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .teams-modal .ant-modal-body {
-    background: #1f1f1f;
+    background: var(--bg-secondary);
 }
 
 .teams-modal .ant-form-item-label>label {
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .teams-modal .ant-input {
-    background: #262626;
-    border-color: #404040;
-    color: #fff;
+    background: var(--bg-tertiary);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
 }
 
 .teams-modal .ant-input:focus {
@@ -150,19 +150,19 @@
     justify-content: center;
     font-size: 20px;
     font-weight: 600;
-    color: #fff;
+    color: var(--text-primary);
     margin-right: 16px;
     background: linear-gradient(135deg, #7c3aed, #a855f7);
 }
 
 .team-randomize-button {
-    background: #262626;
-    border-color: #404040;
-    color: #fff;
+    background: var(--bg-tertiary);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
 }
 
 .team-randomize-button:hover {
-    background: #404040;
+    background: var(--border-strong);
     border-color: #7c3aed;
     color: #7c3aed;
 }
@@ -188,13 +188,13 @@
 
 .team-member-name {
     font-size: 12px;
-    color: #8c8c8c;
+    color: var(--text-muted);
 }
 
 .teams-empty-state {
     text-align: center;
     padding: 40px;
-    color: #8c8c8c;
+    color: var(--text-muted);
 }
 
 .teams-pagination-wrapper {
@@ -221,7 +221,7 @@
 /* Teams Manage Page Styles */
 .teams-manage-container {
     padding: 24px;
-    background: #0f0f0f;
+    background: var(--bg-primary);
     min-height: 100vh;
 }
 
@@ -236,7 +236,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #8c8c8c;
+    color: var(--text-muted);
     font-size: 14px;
 }
 
@@ -264,13 +264,13 @@
     justify-content: center;
     font-size: 12px;
     font-weight: 600;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .teams-manage-team-name {
     font-size: 18px;
     font-weight: 600;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .teams-manage-header-actions {
@@ -289,25 +289,25 @@
 }
 
 .teams-leave-button {
-    background: #262626;
-    border-color: #404040;
-    color: #fff;
+    background: var(--bg-tertiary);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
 }
 
 .teams-leave-button:hover {
-    background: #404040;
+    background: var(--border-strong);
     border-color: #dc2626;
     color: #dc2626;
 }
 
 .teams-tabs-card .ant-tabs-nav {
-    background: #1f1f1f;
+    background: var(--bg-secondary);
     border-radius: 8px 8px 0 0;
     margin: 0;
 }
 
 .teams-tabs-card .ant-tabs-tab {
-    color: #8c8c8c;
+    color: var(--text-muted);
 }
 
 .teams-tabs-card .ant-tabs-tab.ant-tabs-tab-active {
@@ -319,7 +319,7 @@
 }
 
 .teams-tabs-card .ant-tabs-content-holder {
-    background: #1f1f1f;
+    background: var(--bg-secondary);
     border-radius: 0 0 8px 8px;
     padding: 24px;
 }
@@ -329,9 +329,9 @@
 }
 
 .teams-manage-search-bar .ant-input {
-    background: #262626;
-    border-color: #404040;
-    color: #fff;
+    background: var(--bg-tertiary);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
 }
 
 .teams-manage-search-bar .ant-input:focus {
@@ -340,25 +340,25 @@
 }
 
 .teams-manage-table .ant-table {
-    background: #262626;
+    background: var(--bg-tertiary);
     border-radius: 8px;
 }
 
 .teams-manage-table .ant-table-thead>tr>th {
-    background: #404040;
-    border-bottom: 1px solid #525252;
-    color: #fff;
+    background: var(--border-strong);
+    border-bottom: 1px solid var(--border-strong);
+    color: var(--text-primary);
     font-weight: 600;
 }
 
 .teams-manage-table .ant-table-tbody>tr>td {
-    background: #262626;
-    border-bottom: 1px solid #525252;
-    color: #fff;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-strong);
+    color: var(--text-primary);
 }
 
 .teams-manage-table .ant-table-tbody>tr:hover>td {
-    background: #404040;
+    background: var(--border-strong);
 }
 
 .teams-member-info {
@@ -369,24 +369,24 @@
 
 .teams-member-name {
     font-weight: 500;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .teams-member-email {
     font-size: 12px;
-    color: #8c8c8c;
+    color: var(--text-muted);
 }
 
 .teams-remove-button {
     background: transparent;
-    border: 1px solid #404040;
+    border: 1px solid var(--border-strong);
     color: #dc2626;
 }
 
 .teams-remove-button:hover {
     background: #dc2626;
     border-color: #dc2626;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 /* Page Item */
@@ -402,21 +402,21 @@
 
 .teams-page-item-name {
     font-weight: 500;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .teams-page-item-description {
     font-size: 12px;
-    color: #8c8c8c;
+    color: var(--text-muted);
 }
 
 .teams-page-item-route {
-    color: #8c8c8c;
+    color: var(--text-muted);
     font-family: monospace;
 }
 
 .teams-page-item-date {
-    color: #8c8c8c;
+    color: var(--text-muted);
 }
 
 /* Available Page Item */
@@ -424,7 +424,7 @@
     display: flex;
     align-items: center;
     padding: 12px 0;
-    border-bottom: 1px solid #404040;
+    border-bottom: 1px solid var(--border-strong);
 }
 
 .teams-available-page-icon {
@@ -438,17 +438,17 @@
 }
 
 .teams-available-page-name {
-    color: #fff;
+    color: var(--text-primary);
     font-weight: 500;
 }
 
 .teams-available-page-description {
-    color: #8c8c8c;
+    color: var(--text-muted);
     font-size: 12px;
 }
 
 .teams-available-page-route {
-    color: #8c8c8c;
+    color: var(--text-muted);
     font-size: 11px;
     font-family: monospace;
 }

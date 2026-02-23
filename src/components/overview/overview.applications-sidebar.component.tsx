@@ -56,12 +56,12 @@ const ApplicationsSidebar: React.FC<ApplicationsSidebarProps> = ({
       width={400}
       styles={{
         header: {
-          background: '#1f1f1f',
-          borderBottom: '1px solid #333',
+          background: 'var(--bg-secondary)',
+          borderBottom: '1px solid var(--border-color)',
         },
         body: {
           padding: 0,
-          background: '#1f1f1f',
+          background: 'var(--bg-secondary)',
         },
       }}
       closeIcon={<span className="overview-apps-close-icon">✕</span>}
@@ -75,17 +75,17 @@ const ApplicationsSidebar: React.FC<ApplicationsSidebarProps> = ({
             <List.Item
               className="overview-sidebar-item"
               style={{
-                background: isSelected ? '#1890ff' : '#2a2a2a',
+                background: isSelected ? '#1890ff' : 'var(--bg-tertiary)',
                 borderLeft: isSelected ? '3px solid #40a9ff' : '3px solid transparent',
               }}
               onMouseEnter={(e) => {
                 if (!isSelected) {
-                  e.currentTarget.style.background = '#333';
+                  e.currentTarget.style.background = 'var(--bg-hover)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isSelected) {
-                  e.currentTarget.style.background = '#2a2a2a';
+                  e.currentTarget.style.background = 'var(--bg-tertiary)';
                 }
               }}
             >
