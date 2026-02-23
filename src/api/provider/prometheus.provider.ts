@@ -21,6 +21,19 @@ export const getLabelValues = async (labelName: string): Promise<string[]> => {
   }
 };
 
+export const getLabelValuesWithFilter = async (labelName: string, matchSelector: string): Promise<string[]> => {
+  try {
+    const prometheusUid = await getDefaultPrometheusUid();
+    const response = await getBackendSrv().get(
+      `/api/datasources/proxy/uid/${prometheusUid}/api/v1/label/${labelName}/values`,
+      { 'match[]': matchSelector }
+    );
+    return response.data;
+  } catch (error) {
+    return [];
+  }
+};
+
 export const getQueryData = async (query: string): Promise<any> => {
   const prometheusUid = await getDefaultPrometheusUid();
   const response = await getBackendSrv().get(`/api/datasources/proxy/uid/${prometheusUid}/api/v1/query`, {

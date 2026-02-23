@@ -396,7 +396,7 @@ const ExceptionDetailPage: React.FC = () => {
   };
 
   const handleBack = () => {
-    navigate(`${PLUGIN_BASE_URL}/exceptions`);
+    navigate(-1);
   };
 
   const handleLinkClick = (type: 'service' | 'trace' | 'span' | 'logs', value: string) => {
@@ -524,7 +524,7 @@ const ExceptionDetailPage: React.FC = () => {
       {
       }
       <Button
-        className={styles.backButton}
+        className="detail-back-button"
         icon={<ArrowLeftOutlined />}
         onClick={handleBack}
       >

@@ -76,7 +76,8 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       setLabels(labels);
     }
     if (hasOperationsFilter) {
-      const operations = await getPrometheusOperations();
+      const urlServiceName = new URLSearchParams(window.location.search).get('serviceName');
+      const operations = await getPrometheusOperations(urlServiceName || undefined);
       setOperations(operations);
     }
     if (hasStatusesFilter) {
@@ -552,6 +553,21 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
     }
   }, [form]);
 
+  const handleServiceChange = useCallback(async (serviceName: string | undefined) => {
+    if (hasOperationsFilter) {
+      // Clear current operation selection
+      form.setFieldsValue({
+        filters: {
+          ...form.getFieldValue('filters'),
+          operationName: undefined
+        }
+      });
+      // Reload operations filtered by selected service
+      const operations = await getPrometheusOperations(serviceName || undefined);
+      setOperations(operations);
+    }
+  }, [form, hasOperationsFilter]);
+
   const handleApply = () => {
     const values = form.getFieldsValue();
     updateURLWithFilters(values);
@@ -697,6 +713,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
                 placeholder="Select service"
                 className="filter-value-select"
                 notFoundContent="No services found"
+                onChange={handleServiceChange}
               >
                 {services.map((service) => {
                   return (

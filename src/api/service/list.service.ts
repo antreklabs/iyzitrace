@@ -1,4 +1,4 @@
-import { getLabels, getLabelValues } from '../provider/prometheus.provider';
+import { getLabels, getLabelValues, getLabelValuesWithFilter } from '../provider/prometheus.provider';
 import { getDefinitions } from './query.service';
 
 export class DropdownOption {
@@ -18,7 +18,7 @@ export class DropdownOption {
 export const getPrometheusLabels = async (): Promise<DropdownOption[]> => {
   try {
     const response = await getLabels();
-    
+
     return response.map((label: string) => new DropdownOption(label));
   } catch (error) {
     return [];
@@ -28,7 +28,7 @@ export const getPrometheusLabels = async (): Promise<DropdownOption[]> => {
 export const getPrometheusLabelValues = async (labelName: string): Promise<DropdownOption[]> => {
   try {
     const response = await getLabelValues(labelName);
-    
+
     return response.map((value: string) => new DropdownOption(`${labelName}-${value}`, value, value));
   } catch (error) {
     return [];
@@ -40,8 +40,17 @@ export const getPrometheusServices = async (): Promise<DropdownOption[]> => {
   return getPrometheusLabelValues(definitions.service_label_name);
 };
 
-export const getPrometheusOperations = async (): Promise<DropdownOption[]> => {
+export const getPrometheusOperations = async (serviceName?: string): Promise<DropdownOption[]> => {
   const definitions = await getDefinitions();
+  if (serviceName) {
+    const matchSelector = `${definitions.request_count_metric_name}{${definitions.service_label_name}="${serviceName}"}`;
+    try {
+      const response = await getLabelValuesWithFilter(definitions.span_label_name, matchSelector);
+      return response.map((value: string) => new DropdownOption(`${definitions.span_label_name}-${value}`, value, value));
+    } catch (error) {
+      return getPrometheusLabelValues(definitions.span_label_name);
+    }
+  }
   return getPrometheusLabelValues(definitions.span_label_name);
 };
 

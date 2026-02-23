@@ -223,6 +223,45 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
     }
   };
 
+  const handleQuickSave = async (targetViewId?: string) => {
+    const targetId = targetViewId || selectedView?.id;
+    const targetView = views.find(v => v.id === targetId);
+    if (!targetView) {
+      message.warning('No view selected');
+      return;
+    }
+    try {
+      setLoading(true);
+      let currentQuery = location.search;
+      const searchParams = new URLSearchParams(currentQuery);
+      searchParams.delete('viewId');
+      const cleanQuery = searchParams.toString();
+      currentQuery = cleanQuery ? `?${cleanQuery}` : '';
+
+      try {
+        const settings = await getPluginSettings();
+        const pageViews = settings.pageViews || [];
+        const updatedViews = pageViews.map((view: ViewData) =>
+          view.id === targetView.id ? { ...view, query: currentQuery } : view
+        );
+        await savePluginSettings({ ...settings, pageViews: updatedViews });
+      } catch (pluginError) {
+        const localViews = JSON.parse(localStorage.getItem(`iyzitrace-views-${pageName}`) || '[]');
+        const updatedViews = localViews.map((view: ViewData) =>
+          view.id === targetView.id ? { ...view, query: currentQuery } : view
+        );
+        localStorage.setItem(`iyzitrace-views-${pageName}`, JSON.stringify(updatedViews));
+      }
+
+      message.success(`View "${targetView.title}" saved`);
+      await loadViews();
+    } catch (error) {
+      message.error('Failed to save view');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleModalOk = async () => {
     try {
       setLoading(true);
@@ -392,6 +431,17 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
               <Button
                 type="text"
                 size="small"
+                icon={<SaveOutlined />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleQuickSave(view.id);
+                }}
+                className="view-action-btn-save"
+                title={`Save current filters to "${view.title}"`}
+              />
+              <Button
+                type="text"
+                size="small"
                 icon={<EditOutlined />}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -460,6 +510,18 @@ const ViewComponent: React.FC<ViewComponentProps> = ({ pageName }) => {
             )}
           </Button>
         </Dropdown>
+      </div>
+
+      {/* Quick Save Button */}
+      <div className="view-quick-save-wrapper">
+        <Button
+          type="text"
+          icon={<SaveOutlined />}
+          onClick={() => handleQuickSave()}
+          loading={loading}
+          className="view-quick-save-btn"
+          title={selectedView ? `Quick save to "${selectedView.title}"` : 'Save view'}
+        />
       </div>
 
       <Modal

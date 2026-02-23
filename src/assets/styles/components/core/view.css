@@ -29,6 +29,15 @@
     padding: 2px 4px;
 }
 
+.view-action-btn-save {
+    color: #52c41a;
+    padding: 2px 4px;
+}
+
+.view-action-btn-save:hover {
+    color: #389e0d !important;
+}
+
 .view-save-item {
     display: flex;
     align-items: center;
@@ -107,4 +116,40 @@
 .gf-picker-input-dark {
     background: var(--bg-tertiary);
     color: var(--text-primary);
+}
+
+/* Quick Save Button */
+.view-quick-save-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.view-quick-save-btn {
+    color: var(--text-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    background: transparent !important;
+}
+
+.view-quick-save-btn:hover {
+    color: #52c41a !important;
+    border-color: #52c41a !important;
+    background: rgba(82, 196, 26, 0.08) !important;
+}
+
+[data-theme="light"] .view-quick-save-btn {
+    color: #595959 !important;
+    border-color: #d9d9d9 !important;
+}
+
+[data-theme="light"] .view-quick-save-btn:hover {
+    color: #389e0d !important;
+    border-color: #389e0d !important;
+    background: rgba(56, 158, 13, 0.06) !important;
 }
