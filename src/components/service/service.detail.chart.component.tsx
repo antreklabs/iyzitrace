@@ -9,7 +9,7 @@ interface MsChartsProps {
 
 const formatTimeValue = (val: number): string => {
   const absVal = Math.abs(val);
-  
+
   if (absVal === 0) return '0 ms';
   if (absVal < 1000) return `${val.toFixed(2)} ms`;
   if (absVal < 60000) return `${(val / 1000).toFixed(2)} s`;
@@ -54,7 +54,7 @@ const MsCharts: React.FC<MsChartsProps> = ({ series, colors, chartId = 'default'
     const timer1 = setTimeout(overrideTouchEvents, 100);
     const timer2 = setTimeout(forceResize, 200);
     const timer3 = setTimeout(forceResize, 500);
-    
+
     return () => {
       clearTimeout(timer1);
       clearTimeout(timer2);
@@ -158,7 +158,7 @@ const MsCharts: React.FC<MsChartsProps> = ({ series, colors, chartId = 'default'
         sizeOffset: 3
       }
     },
-    xaxis: { 
+    xaxis: {
       type: 'datetime',
       labels: {
         style: {
@@ -215,7 +215,7 @@ const MsCharts: React.FC<MsChartsProps> = ({ series, colors, chartId = 'default'
       fontWeight: 500,
       offsetX: 0,
       offsetY: 0,
-      formatter: function(seriesName: string) {
+      formatter: function (seriesName: string) {
         return seriesName;
       },
       labels: {
@@ -296,16 +296,9 @@ const MsCharts: React.FC<MsChartsProps> = ({ series, colors, chartId = 'default'
     },
   };
   return (
-    <div 
+    <div
       ref={chartRef}
-      style={{ 
-        width: '100%', 
-        height: '250px', 
-        minHeight: '250px',
-        maxHeight: '250px',
-        overflow: 'hidden',
-        position: 'relative'
-      }}
+      className="service-detail-chart-wrapper"
     >
       <style>{`
         .apexcharts-legend {
@@ -337,18 +330,13 @@ const MsCharts: React.FC<MsChartsProps> = ({ series, colors, chartId = 'default'
           flex-shrink: 0 !important;
         }
       `}</style>
-      <ApexCharts 
-        options={options as any} 
-        series={series} 
-        type="line" 
-        height={250} 
+      <ApexCharts
+        options={options as any}
+        series={series}
+        type="line"
+        height={250}
         width="100%"
-        style={{ 
-          width: '100% !important', 
-          height: '250px !important',
-          minHeight: '250px !important',
-          maxHeight: '250px !important'
-        }}
+        className="service-detail-chart-inner"
       />
     </div>
   );

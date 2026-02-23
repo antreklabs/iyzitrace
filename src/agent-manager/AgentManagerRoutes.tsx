@@ -4,7 +4,7 @@ import { SWRProvider } from '@agent-manager/lib/swr-provider';
 import { ApiProvider } from '@agent-manager/providers/ApiProvider';
 import { ThemeProvider } from '@agent-manager/components/ThemeProvider';
 import Layout from '@agent-manager/layout';
-import '@agent-manager/styles/agent-manager.css';
+import '../assets/styles/pages/agent-manager/agent-manager.css';
 
 // Lazy load pages
 const AgentsPage = React.lazy(() => import('@agent-manager/pages/Agents'));

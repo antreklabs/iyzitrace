@@ -62,9 +62,9 @@
 }
 
 .view-dropdown-btn {
-    background-color: #404040;
+    background-color: var(--border-strong);
     border: 1px solid #555;
-    color: #ffffff;
+    color: var(--text-primary);
     border-radius: 6px;
     height: 32px;
     display: flex;
@@ -76,4 +76,35 @@
 .view-dropdown-btn-text {
     flex: 1;
     text-align: left;
+}
+
+/* View Form Utilities */
+.view-input-white {
+    color: var(--text-primary);
+}
+
+.view-text-xs {
+    font-size: 11px;
+}
+
+.view-mt-6 {
+    margin-top: 6px;
+}
+
+.view-mt-8 {
+    margin-top: 8px;
+}
+
+.view-save-label {
+    font-weight: 500;
+}
+
+/* Grafana Date Picker */
+.gf-picker-space {
+    width: 100%;
+}
+
+.gf-picker-input-dark {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
 }

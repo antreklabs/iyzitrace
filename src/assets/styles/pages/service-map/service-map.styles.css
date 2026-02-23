@@ -30,7 +30,7 @@
   position: absolute;
   top: -8px;
   right: -8px;
-  color: white;
+  color: var(--text-primary);
   border-radius: 12px;
   padding: 2px 8px;
   font-size: 10px;
@@ -52,7 +52,7 @@
 .service-node__title {
   font-size: 16px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: 12px;
   display: flex;
   align-items: center;
@@ -94,7 +94,7 @@
 
 .service-node__metric-value {
   font-size: 13px;
-  color: #ffffff;
+  color: var(--text-primary);
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -113,7 +113,7 @@
   bottom: -8px;
   left: 50%;
   transform: translateX(-50%);
-  color: white;
+  color: var(--text-primary);
   border-radius: 8px;
   padding: 2px 6px;
   font-size: 8px;
@@ -128,7 +128,7 @@
 }
 
 .service-map__status-bar {
-  color: #ffffff;
+  color: var(--text-primary);
   padding: 12px 20px;
   border-bottom: 2px solid rgba(52, 152, 219, 0.3);
   display: flex;
@@ -215,7 +215,7 @@
   right: 0;
   height: 100vh;
   background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-  color: #ffffff;
+  color: var(--text-primary);
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
   z-index: 1000;
   display: flex;
@@ -264,7 +264,7 @@
 .service-detail-panel__title {
   font-size: 18px;
   font-weight: bold;
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -295,7 +295,7 @@
 }
 
 .service-detail-panel__section-title {
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: 12px;
   display: flex;
   align-items: center;
@@ -364,7 +364,7 @@
   justify-content: center;
   font-size: 10px;
   font-weight: bold;
-  color: #ffffff;
+  color: var(--text-primary);
   border: 2px solid #2980b9;
 }
 
@@ -379,7 +379,7 @@
   align-items: center;
   justify-content: center;
   font-size: 7px;
-  color: #ffffff;
+  color: var(--text-primary);
   border: 1px solid #229954;
 }
 
@@ -409,7 +409,7 @@
   justify-content: center;
   font-size: 8px;
   font-weight: bold;
-  color: #ffffff;
+  color: var(--text-primary);
   border: 1px solid #7d3c98;
 }
 
@@ -428,7 +428,7 @@
 }
 
 .service-map__refresh-btn {
-  color: white;
+  color: var(--text-primary);
   border: none;
   border-radius: 6px;
   padding: 8px 16px;

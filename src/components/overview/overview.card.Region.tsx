@@ -32,21 +32,17 @@ const RegionCard: React.FC<RegionCardProps> = ({ region, onClick, isSelected }) 
       }}
       bodyStyle={{ padding: '20px' }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <CloudOutlined style={{ fontSize: '32px', color: isSelected ? 'white' : '#1890ff' }} />
-        <div style={{ flex: 1 }}>
-          <div style={{ 
-            fontWeight: 700, 
-            fontSize: '18px', 
-            marginBottom: '6px',
-            color: isSelected ? 'white' : '#000',
-            letterSpacing: '0.3px',
-          }}>
+      <div className="overview-region-card-row">
+        <CloudOutlined className={`overview-region-icon ${isSelected ? 'overview-region-icon-selected' : 'overview-region-icon-unselected'}`} />
+        <div className="overview-region-flex1">
+          <div
+            className={`overview-region-name ${isSelected ? 'overview-region-text-selected' : 'overview-region-text-unselected'}`}
+          >
             {region.name}
           </div>
-          <Badge 
-            status={statusValue === 'healthy' ? 'success' : statusValue === 'warning' ? 'warning' : statusValue === 'degraded' ? 'processing' : 'error'} 
-            text={<span style={{ color: isSelected ? 'white' : '#000', fontWeight: 500, fontSize: '14px' }}>{getStatusText(statusValue)}</span>}
+          <Badge
+            status={statusValue === 'healthy' ? 'success' : statusValue === 'warning' ? 'warning' : statusValue === 'degraded' ? 'processing' : 'error'}
+            text={<span className="overview-badge-status-text" style={{ color: isSelected ? 'white' : '#000' }}>{getStatusText(statusValue)}</span>}
           />
         </div>
       </div>

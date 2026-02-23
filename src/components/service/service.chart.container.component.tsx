@@ -4,6 +4,7 @@ import { Service } from '../../api/service/interface.service';
 import ServiceRequestChart from './service.request.chart.component';
 import ServiceErrorChart from './service.error.chart.component';
 import ServiceDurationChart from './service.duration.chart.component';
+import '../../assets/styles/components/service/service.css';
 
 interface ServiceChartContainerProps {
   services: Service[] | undefined;
@@ -13,18 +14,18 @@ const ServiceChartContainer: React.FC<ServiceChartContainerProps> = ({ services 
   const [durationMetric, setDurationMetric] = useState<string>('p50');
 
   return (
-    <div style={{ position: 'relative', marginBottom: '24px' }}>
-      <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
+    <div className="service-chart-container-wrapper">
+      <Row gutter={[16, 16]} className="service-chart-row">
         {
-}
+        }
         <Col xs={24} lg={8}>
           <Card
             title={
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="service-chart-card-title">
                 <span>Requests</span>
               </div>
             }
-            style={{ height: '300px' }}
+            className="service-chart-height-300"
             styles={{ body: { height: '250px', padding: '16px' } }}
           >
             <ServiceRequestChart services={services || []} />
@@ -32,15 +33,15 @@ const ServiceChartContainer: React.FC<ServiceChartContainerProps> = ({ services 
         </Col>
 
         {
-}
+        }
         <Col xs={24} lg={8}>
           <Card
             title={
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="service-chart-card-title">
                 <span>Errors</span>
               </div>
             }
-            style={{ height: '300px' }}
+            className="service-chart-height-300"
             styles={{ body: { height: '250px', padding: '16px' } }}
           >
             <ServiceErrorChart services={services || []} />
@@ -48,18 +49,18 @@ const ServiceChartContainer: React.FC<ServiceChartContainerProps> = ({ services 
         </Col>
 
         {
-}
+        }
         <Col xs={24} lg={8}>
           <Card
             title={
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className="service-chart-card-title">
+                <div className="service-chart-card-duration-header">
                   <span>Duration</span>
                   <Select
                     value={durationMetric}
                     onChange={setDurationMetric}
-                    style={{ width: '80px' }}
-                    dropdownStyle={{ backgroundColor: '#1f1f1f', border: '1px solid #303030' }}
+                    className="service-chart-select-80"
+                    dropdownStyle={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
                     options={[
                       { value: 'p99', label: 'p99' },
                       { value: 'p95', label: 'p95' },
@@ -69,12 +70,12 @@ const ServiceChartContainer: React.FC<ServiceChartContainerProps> = ({ services 
                     ]}
                   />
                 </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  
+                <div className="service-chart-card-empty-actions">
+
                 </div>
               </div>
             }
-            style={{ height: '300px' }}
+            className="service-chart-height-300"
             styles={{ body: { height: '250px', padding: '16px' } }}
           >
             <ServiceDurationChart services={services || []} metric={durationMetric} />

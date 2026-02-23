@@ -103,7 +103,7 @@ const TopologyGraph: React.FC<TopologyGraphProps> = ({ topology, onNodeClick, se
                         border: `2px solid ${color}`,
                         borderRadius: '8px',
                         padding: '8px 12px',
-                        color: '#f1f5f9',
+                        color: 'var(--text-primary)',
                         fontSize: '11px',
                         fontWeight: 600,
                         minWidth: '180px',
@@ -127,10 +127,10 @@ const TopologyGraph: React.FC<TopologyGraphProps> = ({ topology, onNodeClick, se
                 source: edge.from,
                 target: edge.to,
                 animated: false,
-                style: { stroke: '#475569', strokeWidth: 1 },
+                style: { stroke: 'var(--border-strong)', strokeWidth: 1 },
                 markerEnd: {
                     type: MarkerType.ArrowClosed,
-                    color: '#475569',
+                    color: 'var(--border-strong)',
                     width: 12,
                     height: 12,
                 },
@@ -159,12 +159,12 @@ const TopologyGraph: React.FC<TopologyGraphProps> = ({ topology, onNodeClick, se
                 type: 'smoothstep',
                 style: { stroke: '#475569', strokeWidth: 1 },
             }}
-            style={{ background: '#111111' }}
+            className="inv-topology-bg"
         >
             <Background color="#2a2a2a" gap={20} size={1} />
-            <Controls style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px' }} />
+            <Controls className="topology-view__controls" />
             <MiniMap
-                style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px' }}
+                className="topology-view__minimap"
                 nodeColor={(n) => {
                     const type = n.data?.type as EntityType;
                     return getNodeColor(type);
@@ -172,19 +172,13 @@ const TopologyGraph: React.FC<TopologyGraphProps> = ({ topology, onNodeClick, se
                 maskColor="rgba(0, 0, 0, 0.3)"
             />
 
-            <Panel position="top-left" style={{
-                background: 'rgba(26, 26, 26, 0.9)',
-                padding: '12px 16px',
-                borderRadius: '8px',
-                border: '1px solid #2a2a2a',
-                margin: '16px',
-            }}>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', color: '#94a3b8' }}>
-                    <span><span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', marginRight: '6px' }} />Region</span>
-                    <span><span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6', marginRight: '6px' }} />Host</span>
-                    <span><span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#ec4899', marginRight: '6px' }} />Service</span>
-                    <span><span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', marginRight: '6px' }} />Database</span>
-                    <span><span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#f97316', marginRight: '6px' }} />Messaging</span>
+            <Panel position="top-left" className="topology-view__legend">
+                <div className="topology-view__legend-items">
+                    <span><span className="topology-view__legend-dot topology-view__legend-dot--region" />Region</span>
+                    <span><span className="topology-view__legend-dot topology-view__legend-dot--host" />Host</span>
+                    <span><span className="topology-view__legend-dot topology-view__legend-dot--service" />Service</span>
+                    <span><span className="topology-view__legend-dot topology-view__legend-dot--database" />Database</span>
+                    <span><span className="topology-view__legend-dot topology-view__legend-dot--messaging" />Messaging</span>
                 </div>
             </Panel>
         </ReactFlow>
@@ -210,76 +204,43 @@ const TopologyView: React.FC = () => {
 
     if (!topology || topology.nodes.length === 0) {
         return (
-            <div style={{ padding: '24px', background: '#1a1a1a', minHeight: 'calc(100vh - 64px)' }}>
-                <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#f1f5f9', margin: 0 }}>Infrastructure Topology</h1>
-                <p style={{ fontSize: '14px', color: '#94a3b8', marginTop: '8px' }}>No topology data available</p>
+            <div className="topology-view__empty">
+                <h1 className="topology-view__empty-title">Infrastructure Topology</h1>
+                <p className="topology-view__empty-text">No topology data available</p>
             </div>
         );
     }
 
     return (
-        <div style={{ height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column', background: '#111111', color: '#fff', overflow: 'hidden' }}>
+        <div className="topology-view">
             {/* Header Panel */}
-            <div style={{
-                background: 'rgba(26, 26, 26, 0.95)',
-                borderBottom: '1px solid #2a2a2a',
-                padding: '16px 24px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                zIndex: 10,
-                backdropFilter: 'blur(8px)',
-            }}>
+            <div className="topology-view__header">
                 <div>
-                    <h1 style={{
-                        fontSize: '20px',
-                        fontWeight: 700,
-                        margin: 0,
-                        background: 'linear-gradient(to right, #60a5fa, #818cf8)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent'
-                    }}>
+                    <h1 className="topology-view__title">
                         Infrastructure Topology
                     </h1>
-                    <p style={{ fontSize: '12px', color: '#64748b', fontWeight: 500, marginTop: '4px' }}>
+                    <p className="topology-view__info">
                         {topology.nodes.length} nodes · {topology.edges.length} edges
                         {topology.nodes.length > 200 && ' (showing first 200)'}
                     </p>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div className="topology-view__actions">
                     <Input
                         placeholder="Filter nodes..."
-                        prefix={<SearchOutlined style={{ color: '#64748b' }} />}
+                        prefix={<SearchOutlined className="topology-view__search-icon" />}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{
-                            width: '200px',
-                            background: '#1a1a1a',
-                            border: '1px solid #2a2a2a',
-                            borderRadius: '9999px',
-                            color: '#f1f5f9',
-                        }}
+                        className="topology-view__search"
                     />
-                    <button
-                        onClick={refresh}
-                        style={{
-                            padding: '8px',
-                            background: 'transparent',
-                            border: 'none',
-                            borderRadius: '9999px',
-                            color: '#94a3b8',
-                            cursor: 'pointer',
-                        }}
-                        title="Refresh"
-                    >
-                        <ReloadOutlined style={{ fontSize: '16px' }} />
+                    <button onClick={refresh} className="topology-view__refresh-btn" title="Refresh">
+                        <ReloadOutlined className="topology-view__refresh-icon" />
                     </button>
                 </div>
             </div>
 
             {/* React Flow Canvas */}
-            <div style={{ flex: 1 }}>
+            <div className="topology-view__canvas">
                 <ReactFlowProvider>
                     <TopologyGraph topology={topology} onNodeClick={handleNodeClick} searchQuery={searchQuery} />
                 </ReactFlowProvider>

@@ -170,7 +170,7 @@ const LandingPage: React.FC = () => {
           </div>
 
           <button className="landing-dismiss-btn" onClick={handleDismiss}>
-            <EyeInvisibleOutlined style={{ marginRight: 6 }} />
+            <EyeInvisibleOutlined className="wizard-mr-8" />
             Don't show active status
           </button>
         </div>

@@ -20,28 +20,28 @@ export const EntityDrawer: React.FC = () => {
             closeIcon={<CloseOutlined />}
             styles={{
                 header: {
-                    background: '#0f172a',
-                    borderBottom: '1px solid #334155',
-                    color: '#f1f5f9',
+                    background: 'var(--bg-secondary)',
+                    borderBottom: '1px solid var(--border-color)',
+                    color: 'var(--text-primary)',
                 },
                 body: {
-                    background: '#1e293b',
+                    background: 'var(--bg-primary)',
                     padding: 0,
                 },
             }}
         >
             {loading ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '256px' }}>
+                <div className="loading-spinner">
                     <Spin size="large" />
                 </div>
             ) : error ? (
-                <div style={{ padding: '32px' }}>
+                <div className="inv-drawer-padding">
                     <ErrorMessage message={error.message} />
                 </div>
             ) : entity ? (
                 <EntityDetail entity={entity} onClose={closeDrawer} />
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '256px', color: '#94a3b8' }}>
+                <div className="loading-spinner">
                     <p>No entity selected</p>
                 </div>
             )}

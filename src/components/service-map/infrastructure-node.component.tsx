@@ -62,27 +62,16 @@ export const InfrastructureNode: React.FC<InfrastructureNodeProps> = ({ data }) 
   return (
     <div
       onClick={handleClick}
+      className="infra-node-card infra-node-card-base"
       style={{
-        width: '140px',
-        padding: '16px',
-        background: '#1e293b',
         border: `2px solid ${statusConfig.color}`,
-        borderRadius: '12px',
-        cursor: 'pointer',
-        textAlign: 'center'
       }}
     >
       {/* Status Badge */}
       <div
+        className="infra-node-status-badge"
         style={{
           background: statusConfig.background,
-          color: 'white',
-          fontSize: '10px',
-          fontWeight: 700,
-          padding: '4px 10px',
-          borderRadius: '10px',
-          marginBottom: '12px',
-          display: 'inline-block'
         }}
       >
         {statusConfig.label}
@@ -90,46 +79,26 @@ export const InfrastructureNode: React.FC<InfrastructureNodeProps> = ({ data }) 
 
       {/* Icon */}
       <div
+        className="infra-node-icon-container"
         style={{
-          width: '64px',
-          height: '64px',
-          margin: '0 auto 12px',
           background: statusConfig.background,
-          borderRadius: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '32px'
         }}
       >
         {getIcon()}
       </div>
 
       {/* Name */}
-      <div
-        style={{
-          color: '#f1f5f9',
-          fontWeight: 700,
-          fontSize: '13px',
-          marginBottom: '4px'
-        }}
-      >
+      <div className="infra-node-name">
         {infrastructure.name}
       </div>
 
       {/* Type */}
-      <div
-        style={{
-          color: '#94a3b8',
-          fontSize: '11px',
-          textTransform: 'uppercase'
-        }}
-      >
+      <div className="infra-node-type infra-node-type-upper">
         {infrastructure.type || 'server'}
       </div>
 
-      <Handle type="source" position={Position.Right} id="r" style={{ opacity: 0 }} />
-      <Handle type="target" position={Position.Left} id="l" style={{ opacity: 0 }} />
+      <Handle type="source" position={Position.Right} id="r" className="infra-handle-hidden" />
+      <Handle type="target" position={Position.Left} id="l" className="infra-handle-hidden" />
     </div>
   );
 };

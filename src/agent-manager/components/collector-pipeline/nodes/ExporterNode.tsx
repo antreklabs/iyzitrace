@@ -60,14 +60,7 @@ export const ExporterNode = ({ data }: ExporterNodeProps) => {
       <Handle
         type="target"
         position={Position.Left}
-        style={{
-          left: "-7px",
-          backgroundColor: "#a855f7",
-          border: "2px solid var(--background)",
-          zIndex: 20,
-          width: "14px",
-          height: "14px",
-        }}
+        className="pipeline-handle pipeline-handle-exporter"
         id="left"
       />
     </Card>

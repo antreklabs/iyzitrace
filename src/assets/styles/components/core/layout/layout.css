@@ -2,7 +2,9 @@
 
 .main-content {
     padding: 5px;
-    transition: margin-left 0.5s;
+    transition: margin-left 0.5s, background-color 0.3s ease;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
 }
 
 .menuContent {

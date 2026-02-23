@@ -3,6 +3,7 @@ import { Typography, Form, Card, Button, Space, Empty, Modal, Input, message, Ro
 import { PluginPage } from '@grafana/runtime';
 import { getPluginSettings, savePluginSettings, PluginSettings } from '../../api/service/settings.service';
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlayCircleOutlined, PauseCircleOutlined, StopOutlined } from '@ant-design/icons';
+import '../../assets/styles/pages/views/views.css';
 import { getRegions } from '../../api/service/service-map.service';
 import { getServicesTableData } from '../../api/service/services.service';
 import { getTracesTableData } from '../../api/service/traces.service';
@@ -42,10 +43,10 @@ function ViewsPage() {
       try {
         const settings: PluginSettings = await getPluginSettings();
         let loadedWidgets = (settings.pageViews as PageViewItem[]) || [];
-        
+
         const idCounts = new Map<string, number>();
         let needsFix = false;
-        
+
         loadedWidgets.forEach(w => {
           const count = idCounts.get(w.id) || 0;
           idCounts.set(w.id, count + 1);
@@ -53,16 +54,16 @@ function ViewsPage() {
             needsFix = true;
           }
         });
-        
+
         if (needsFix) {
           loadedWidgets = loadedWidgets.map((w, index) => {
             const newId = `view-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 9)}`;
             return { ...w, id: newId };
           });
-          
+
           await savePluginSettings({ ...settings, pageViews: loadedWidgets });
         }
-        
+
         setWidgets(loadedWidgets);
       } catch (error) {
         setWidgets([]);
@@ -179,7 +180,7 @@ function ViewsPage() {
     const url = widget.query || '';
     const separator = url.includes('?') ? '&' : '?';
     const urlWithViewId = `${url}${separator}viewId=${widget.id}`;
-    
+
     switch (widget.page) {
       case 'logs':
         return `/a/iyzitrace-app/logs${urlWithViewId}`;
@@ -243,7 +244,7 @@ function ViewsPage() {
           footer: 'Metrics refreshed in real-time'
         }
       };
-      
+
       return meta[widget.page] || {
         title: 'Stored Filters',
         accent: '#3b82f6',
@@ -272,7 +273,7 @@ function ViewsPage() {
 
       const loadPreview = async () => {
         if (!isMounted) return;
-        
+
         setPreviewError(null);
         try {
           const filterModel = buildFilterModel(widget.query || '');
@@ -285,11 +286,11 @@ function ViewsPage() {
               const infrastructures = regions.flatMap((region: any) => region.infrastructures || []);
               const applications = infrastructures.flatMap((infra: any) => infra.applications || []);
               const serviceCount = infrastructures.flatMap((infra: any) => infra.services || []).length;
-              
+
               newHighlights = [
-                  { label: 'Regions', value: regions.length.toString() },
-                  { label: 'Infrastructures', value: infrastructures.length.toString() },
-                  { label: 'Applications', value: applications.length.toString() },
+                { label: 'Regions', value: regions.length.toString() },
+                { label: 'Infrastructures', value: infrastructures.length.toString() },
+                { label: 'Applications', value: applications.length.toString() },
                 { label: 'Services', value: serviceCount.toString() }
               ];
               break;
@@ -300,18 +301,18 @@ function ViewsPage() {
                 .filter(s => s.metrics?.avgDurationMs)
                 .sort((a, b) => (b.metrics?.avgDurationMs ?? 0) - (a.metrics?.avgDurationMs ?? 0))
                 .slice(0, 3);
-              
+
               newHighlights = sortedServices.length
                 ? sortedServices.map(service => ({
-                label: service.name,
-                    value: formatDuration(service.metrics?.avgDurationMs ?? 0)
-                  }))
+                  label: service.name,
+                  value: formatDuration(service.metrics?.avgDurationMs ?? 0)
+                }))
                 : [{ label: 'No data', value: '-' }];
               break;
             }
             case 'traces': {
               const tracesData = await getTracesTableData(filterModel);
-              
+
               if (tracesData.length > 0) {
                 const durations = tracesData.map(t => t.durationMs || 0).filter(d => d > 0);
                 const avgDuration = durations.length > 0 ? durations.reduce((a, b) => a + b, 0) / durations.length : 0;
@@ -331,7 +332,7 @@ function ViewsPage() {
             }
             case 'logs': {
               const logsData = await getLogsTableData(filterModel);
-              
+
               if (logsData.length > 0) {
                 const levels = logsData.reduce((acc: any, log: any) => {
                   const level = log.level || 'unknown';
@@ -357,7 +358,7 @@ function ViewsPage() {
             }
             case 'exceptions': {
               const exceptionsData = await getExceptions(filterModel);
-              
+
               if (exceptionsData.length > 0) {
                 const totalExceptions = exceptionsData.reduce((sum, ex) => sum + (ex.count || 0), 0);
                 const topExceptions = exceptionsData
@@ -382,7 +383,7 @@ function ViewsPage() {
                 getServicesTableData(filterModel),
                 getTracesTableData(filterModel)
               ]);
-              
+
               const regions = regionsData ?? [];
               const infrastructures = regions.flatMap((r: any) => r.infrastructures || []);
               const healthyServices = servicesData.filter(s => s.status?.value === 'healthy').length;
@@ -455,50 +456,30 @@ function ViewsPage() {
 
     return (
       <div
-        style={{
-          marginTop: 12,
-          border: '1px solid #303030',
-          borderRadius: 12,
-          background: 'radial-gradient(circle at top, rgba(255,255,255,0.08), rgba(0,0,0,0.2))',
-          minHeight: 180,
-          padding: 16,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-        }}
+        className="view-preview-wrapper"
       >
         {isInitialLoad ? (
           <Skeleton active title={false} paragraph={{ rows: 3 }} />
         ) : previewError ? (
-          <div style={{ color: '#8c8c8c', fontSize: 12, textAlign: 'center', margin: 'auto 0' }}>
+          <div className="view-preview-error">
             {previewError}
           </div>
         ) : (
           <>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <Text style={{ color: metadata.accent, fontWeight: 600, fontSize: 14 }}>
+            <div className="view-preview-header">
+              <Text className="view-preview-title" style={{ color: metadata.accent }}>
                 {metadata.title}
               </Text>
               <Space size={8}>
-                <Text type="secondary" style={{ fontSize: 11 }}>
+                <Text type="secondary" className="view-text-xs">
                   {lastUpdate.toLocaleTimeString()}
-              </Text>
+                </Text>
                 <Button
                   type="text"
                   size="small"
                   icon={isLive ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
                   onClick={() => setIsLive(!isLive)}
-                  style={{
-                    height: 24,
-                    padding: '0 8px',
-                    fontSize: 11,
-                    color: isLive ? '#52c41a' : '#8c8c8c',
-                    border: `1px solid ${isLive ? '#52c41a' : '#434343'}`,
-                    borderRadius: 4,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 4
-                  }}
+                  className={`view-live-button ${isLive ? 'active' : 'inactive'}`}
                 >
                   {isLive ? 'Live' : 'Paused'}
                 </Button>
@@ -508,50 +489,29 @@ function ViewsPage() {
                     size="small"
                     icon={<StopOutlined />}
                     onClick={() => setIsLive(true)}
-                    style={{
-                      height: 24,
-                      width: 24,
-                      padding: 0,
-                      fontSize: 11,
-                      color: '#ff4d4f',
-                      border: '1px solid #434343',
-                      borderRadius: 4,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
+                    className="view-stop-button"
                   />
                 )}
               </Space>
             </div>
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(2, 1fr)', 
-              gap: 12,
-              marginBottom: 12
-            }}>
+            <div className="view-preview-grid">
               {highlights.slice(0, 4).map((item, index) => (
                 <div
                   key={`${item.label}-${index}`}
-                  style={{
-                    background: 'rgba(0,0,0,0.3)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: 8,
-                    padding: '12px',
-                  }}
+                  className="view-preview-item"
                 >
-                  <Text style={{ fontSize: 11, color: '#8c8c8c', display: 'block', marginBottom: 4 }}>
+                  <Text className="view-preview-label">
                     {item.label}
                   </Text>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', wordBreak: 'break-word' }}>
+                  <div className="view-preview-value">
                     {item.value}
                   </div>
                 </div>
               ))}
             </div>
-              <Text type="secondary" style={{ marginTop: 'auto', fontSize: 11 }}>
+            <Text type="secondary" className="view-preview-footer">
               {metadata.footer}
-              </Text>
+            </Text>
           </>
         )}
       </div>
@@ -565,7 +525,7 @@ function ViewsPage() {
         key={widget.id}
         title={widget.title}
         size="small"
-        style={{ marginBottom: '16px' }}
+        className="view-widget-card"
         extra={
           <Space>
             <Button
@@ -616,11 +576,11 @@ function ViewsPage() {
 
   return (
     <PluginPage>
-      <div style={{ padding: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div className="views-container">
+        <div className="views-header">
           <div>
-            <Title level={2} style={{ color: 'white', margin: 0 }}>Views</Title>
-            <Text style={{ color: '#8c8c8c' }}>
+            <Title level={2} className="views-title">Views</Title>
+            <Text className="views-description">
               Manage your views and quick access to different screens
             </Text>
           </div>
@@ -631,21 +591,21 @@ function ViewsPage() {
             image={Empty.PRESENTED_IMAGE_SIMPLE}
             description={
               <div>
-                <Text style={{ color: '#8c8c8c' }}>No views added yet.</Text>
-                <p style={{ color: '#595959', fontSize: '12px', marginTop: '8px' }}>
+                <Text className="views-description">No views added yet.</Text>
+                <p className="views-empty-description">
                   Click "Add View" to create your first view, or use "Save as View" from other pages.
                 </p>
               </div>
             }
           />
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+          <div className="views-grid">
             {widgets.map(renderWidget)}
           </div>
         )}
 
         {
-}
+        }
         <Modal
           title={editingWidget ? 'Edit View' : 'Add View to Dashboard'}
           open={modalVisible}
@@ -677,7 +637,7 @@ function ViewsPage() {
               label="Description"
               name="description"
             >
-              <Input.TextArea 
+              <Input.TextArea
                 placeholder="Optional description for this view"
                 rows={2}
               />
@@ -690,13 +650,13 @@ function ViewsPage() {
                   <Col span={2}></Col>
                 </Row>
                 {queryPairs.map(p => (
-                  <Row key={p.id} gutter={8} style={{ marginTop: 6 }}>
+                  <Row key={p.id} gutter={8} className="view-mt-6">
                     <Col span={10}>
                       <Input
                         placeholder="key"
                         value={p.key}
                         readOnly={p.lockedKey}
-                        style={{ color: '#ffffff' }}
+                        className="view-input-white"
                         onChange={e => updateParamRow(p.id, 'key', e.target.value)}
                         onBlur={() => lockKeyIfNeeded(p.id)}
                       />
@@ -713,8 +673,8 @@ function ViewsPage() {
                     </Col>
                   </Row>
                 ))}
-                <Button style={{ marginTop: 8 }} onClick={addParamRow}>Add param</Button>
-                <Input.TextArea style={{ marginTop: 8 }} rows={3} readOnly placeholder="Preview (auto-generated)" value={previewQuery} />
+                <Button className="view-mt-8" onClick={addParamRow}>Add param</Button>
+                <Input.TextArea className="view-mt-8" rows={3} readOnly placeholder="Preview (auto-generated)" value={previewQuery} />
               </>
             </Form.Item>
           </Form>

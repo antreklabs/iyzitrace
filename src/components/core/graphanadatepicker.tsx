@@ -57,10 +57,10 @@ const GrafanaLikeRangePicker = ({
   const [to, setTo] = useState('now');
   const [search, setSearch] = useState('');
   const [selectedQuickLabel, setSelectedQuickLabel] = useState<string | null>('Last 1 hour');
-  
+
   const initialFrom = value ? dayjs(value[0]) : dayjs().subtract(1, 'hour');
   const initialTo = value ? dayjs(value[1]) : dayjs();
-  
+
   const [fromDate, setFromDate] = useState<dayjs.Dayjs | null>(initialFrom);
   const [toDate, setToDate] = useState<dayjs.Dayjs | null>(initialTo);
   const [fromTime, setFromTime] = useState<dayjs.Dayjs | null>(initialFrom);
@@ -71,14 +71,14 @@ const GrafanaLikeRangePicker = ({
       const diffMin = Math.round((end - start) / 60000);
       const match =
         diffMin === 5 ? 'Last 5 minutes' :
-        diffMin === 15 ? 'Last 15 minutes' :
-        diffMin === 30 ? 'Last 30 minutes' :
-        diffMin === 60 ? 'Last 1 hour' :
-        diffMin === 180 ? 'Last 3 hours' :
-        diffMin === 360 ? 'Last 6 hours' :
-        diffMin === 720 ? 'Last 12 hours' :
-        diffMin === 1440 ? 'Last 24 hours' :
-        diffMin === 2880 ? 'Last 2 days' : null;
+          diffMin === 15 ? 'Last 15 minutes' :
+            diffMin === 30 ? 'Last 30 minutes' :
+              diffMin === 60 ? 'Last 1 hour' :
+                diffMin === 180 ? 'Last 3 hours' :
+                  diffMin === 360 ? 'Last 6 hours' :
+                    diffMin === 720 ? 'Last 12 hours' :
+                      diffMin === 1440 ? 'Last 24 hours' :
+                        diffMin === 2880 ? 'Last 2 days' : null;
       setSelectedQuickLabel(match);
     }
   };
@@ -108,7 +108,7 @@ const GrafanaLikeRangePicker = ({
     if (fromParsed && toParsed) {
       const startMs = fromParsed.valueOf();
       const endMs = toParsed.valueOf();
-      
+
       if (Math.abs(endMs - startMs) < 60 * 1000) {
         const newStart = dayjs().subtract(1, 'hour').valueOf();
         const newEnd = dayjs().valueOf();
@@ -131,31 +131,29 @@ const GrafanaLikeRangePicker = ({
   const content = (
     <div className="date-picker-container">
       <div className="date-picker-absolute-section">
-        <Space direction="vertical" size="small" style={{ width: '100%' }}>
+        <Space direction="vertical" size="small" className="gf-picker-space">
           <Text className="date-picker-section-title">Absolute time range</Text>
-          
+
           <div>
             <Text className="date-picker-field-label">From</Text>
             <div className="date-picker-date-time-row">
               <DatePicker
-                className="date-picker-date-picker"
+                className="date-picker-date-picker gf-picker-input-dark"
                 value={fromDate}
                 onChange={(date) => {
                   setFromDate(date);
                   setSelectedQuickLabel(null);
                 }}
-                style={{ background: '#2c2c2c', color: '#fff' }}
-                styles={{ popup: { root: { background: '#1e1e1e' } } }}
+                styles={{ popup: { root: { background: 'var(--bg-secondary)' } } }}
               />
               <TimePicker
-                className="date-picker-time-picker"
+                className="date-picker-time-picker gf-picker-input-dark"
                 value={fromTime}
                 onChange={(time) => {
                   setFromTime(time);
                   setSelectedQuickLabel(null);
                 }}
-                style={{ background: '#2c2c2c', color: '#fff' }}
-                styles={{ popup: { root: { background: '#1e1e1e' } } }}
+                styles={{ popup: { root: { background: 'var(--bg-secondary)' } } }}
               />
             </div>
           </div>
@@ -164,24 +162,22 @@ const GrafanaLikeRangePicker = ({
             <Text className="date-picker-field-label">To</Text>
             <div className="date-picker-date-time-row">
               <DatePicker
-                className="date-picker-date-picker"
+                className="date-picker-date-picker gf-picker-input-dark"
                 value={toDate}
                 onChange={(date) => {
                   setToDate(date);
                   setSelectedQuickLabel(null);
                 }}
-                style={{ background: '#2c2c2c', color: '#fff' }}
-                styles={{ popup: { root: { background: '#1e1e1e' } } }}
+                styles={{ popup: { root: { background: 'var(--bg-secondary)' } } }}
               />
               <TimePicker
-                className="date-picker-time-picker"
+                className="date-picker-time-picker gf-picker-input-dark"
                 value={toTime}
                 onChange={(time) => {
                   setToTime(time);
                   setSelectedQuickLabel(null);
                 }}
-                style={{ background: '#2c2c2c', color: '#fff' }}
-                styles={{ popup: { root: { background: '#1e1e1e' } } }}
+                styles={{ popup: { root: { background: 'var(--bg-secondary)' } } }}
               />
             </div>
           </div>
@@ -199,7 +195,7 @@ const GrafanaLikeRangePicker = ({
             Read the documentation
           </Link>
           {
-}
+          }
         </Space>
       </div>
 
@@ -222,10 +218,10 @@ const GrafanaLikeRangePicker = ({
                 setFrom(relative);
                 setTo('now');
                 setSelectedQuickLabel(item.label);
-                
+
                 const fromParsed = parseRelativeInput(relative);
                 const toParsed = parseRelativeInput('now');
-                
+
                 if (fromParsed && toParsed) {
                   setFromDate(fromParsed);
                   setFromTime(fromParsed);

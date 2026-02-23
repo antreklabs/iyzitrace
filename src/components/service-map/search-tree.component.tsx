@@ -28,48 +28,48 @@ export const SearchTree: React.FC<SearchTreeProps> = ({
 }) => {
   const treeData = useMemo(() => {
     const nodes: TreeNode[] = [];
-    
+
     regions.forEach((region: Region) => {
       const regionNode: TreeNode = {
         title: region.name,
         key: `region-${region.id}`,
         children: []
       };
-      
+
       (region.infrastructures || []).forEach((infra: Infrastructure) => {
         const infraNode: TreeNode = {
           title: infra.name,
           key: `infra-${infra.id}`
         };
-        
+
         regionNode.children!.push(infraNode);
       });
-      
+
       nodes.push(regionNode);
     });
-    
+
     return nodes;
   }, [regions]);
 
   const filterTreeData = useCallback((data: TreeNode[], search: string): TreeNode[] => {
     if (!search) return data;
-    
+
     const filter = (nodes: TreeNode[]): TreeNode[] => {
       return nodes.reduce((acc: TreeNode[], node) => {
         const matchesSearch = node.title.toLowerCase().includes(search.toLowerCase());
         const filteredChildren = node.children ? filter(node.children) : [];
-        
+
         if (matchesSearch || filteredChildren.length > 0) {
           acc.push({
             ...node,
             children: filteredChildren.length > 0 ? filteredChildren : node.children
           });
         }
-        
+
         return acc;
       }, []);
     };
-    
+
     return filter(data);
   }, []);
 
@@ -84,66 +84,37 @@ export const SearchTree: React.FC<SearchTreeProps> = ({
   }, [onSelect]);
 
   return (
-    <div style={{ 
-      background: '#1f2937', 
-      padding: '12px', 
-      borderRadius: '8px', 
-      border: '1px solid #374151',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-      width: '300px',
-      maxHeight: '400px',
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
+    <div className="search-tree-container">
       {
-}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+      }
+      <div className="search-tree-header">
         <Input
           placeholder="Search..."
-          prefix={<SearchOutlined style={{ color: '#9ca3af' }} />}
+          prefix={<SearchOutlined className="sm-search-icon" />}
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
-          style={{
-            background: '#374151',
-            border: '1px solid #4b5563',
-            color: '#e5e7eb',
-            flex: 1
-          }}
+          className="sm-search-input"
         />
         {(selectedKey || searchValue) && (
           <Button
             icon={<CloseOutlined />}
             onClick={onClear}
-            style={{
-              background: '#dc2626',
-              border: '1px solid #b91c1c',
-              color: '#ffffff',
-              minWidth: '32px',
-              height: '32px'
-            }}
+            className="sm-search-clear-btn"
             title="Clear selection"
           />
         )}
       </div>
-      
+
       {
-}
-      <div style={{ 
-        flex: 1, 
-        overflowY: 'auto',
-        background: '#1f2937'
-      }}>
+      }
+      <div className="sm-search-tree-container">
         <Tree
           treeData={filteredTreeData}
           onSelect={handleSelect}
           selectedKeys={selectedKey ? [selectedKey] : []}
-          style={{
-            background: 'transparent',
-            color: '#e5e7eb'
-          }}
+          className="sm-search-tree"
           titleRender={(nodeData) => (
-            <span style={{ color: '#e5e7eb' }}>
+            <span className="sm-search-result-text">
               {nodeData.title}
             </span>
           )}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Typography, Form, Card, Button, Space, Empty, Modal, Input, message, Row, Col, Skeleton } from 'antd';
 import { getPluginSettings, savePluginSettings, PluginSettings } from '../../api/service/settings.service';
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlayCircleOutlined, PauseCircleOutlined, StopOutlined } from '@ant-design/icons';
+import '../../assets/styles/pages/views/views.css';
 import { getRegions } from '../../api/service/service-map.service';
 import { getServicesTableData } from '../../api/service/services.service';
 import { getTracesTableData } from '../../api/service/traces.service';
@@ -454,32 +455,22 @@ const ViewsPanel: React.FC = () => {
 
         return (
             <div
-                style={{
-                    marginTop: 12,
-                    border: '1px solid #303030',
-                    borderRadius: 12,
-                    background: 'radial-gradient(circle at top, rgba(255,255,255,0.08), rgba(0,0,0,0.2))',
-                    minHeight: 180,
-                    padding: 16,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden',
-                }}
+                className="view-preview-wrapper"
             >
                 {isInitialLoad ? (
                     <Skeleton active title={false} paragraph={{ rows: 3 }} />
                 ) : previewError ? (
-                    <div style={{ color: '#8c8c8c', fontSize: 12, textAlign: 'center', margin: 'auto 0' }}>
+                    <div className="view-preview-error">
                         {previewError}
                     </div>
                 ) : (
                     <>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                            <Text style={{ color: metadata.accent, fontWeight: 600, fontSize: 14 }}>
+                        <div className="view-preview-header">
+                            <Text className="view-preview-title" style={{ color: metadata.accent }}>
                                 {metadata.title}
                             </Text>
                             <Space size={8}>
-                                <Text type="secondary" style={{ fontSize: 11 }}>
+                                <Text type="secondary" className="view-text-xs">
                                     {lastUpdate.toLocaleTimeString()}
                                 </Text>
                                 <Button
@@ -487,17 +478,7 @@ const ViewsPanel: React.FC = () => {
                                     size="small"
                                     icon={isLive ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
                                     onClick={() => setIsLive(!isLive)}
-                                    style={{
-                                        height: 24,
-                                        padding: '0 8px',
-                                        fontSize: 11,
-                                        color: isLive ? '#52c41a' : '#8c8c8c',
-                                        border: `1px solid ${isLive ? '#52c41a' : '#434343'}`,
-                                        borderRadius: 4,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 4
-                                    }}
+                                    className={`view-live-button ${isLive ? 'active' : 'inactive'}`}
                                 >
                                     {isLive ? 'Live' : 'Paused'}
                                 </Button>
@@ -507,48 +488,27 @@ const ViewsPanel: React.FC = () => {
                                         size="small"
                                         icon={<StopOutlined />}
                                         onClick={() => setIsLive(true)}
-                                        style={{
-                                            height: 24,
-                                            width: 24,
-                                            padding: 0,
-                                            fontSize: 11,
-                                            color: '#ff4d4f',
-                                            border: '1px solid #434343',
-                                            borderRadius: 4,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center'
-                                        }}
+                                        className="view-stop-button"
                                     />
                                 )}
                             </Space>
                         </div>
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(2, 1fr)',
-                            gap: 12,
-                            marginBottom: 12
-                        }}>
+                        <div className="view-preview-grid">
                             {highlights.slice(0, 4).map((item, index) => (
                                 <div
                                     key={`${item.label}-${index}`}
-                                    style={{
-                                        background: 'rgba(0,0,0,0.3)',
-                                        border: '1px solid rgba(255,255,255,0.1)',
-                                        borderRadius: 8,
-                                        padding: '12px',
-                                    }}
+                                    className="view-preview-item"
                                 >
-                                    <Text style={{ fontSize: 11, color: '#8c8c8c', display: 'block', marginBottom: 4 }}>
+                                    <Text className="view-preview-label">
                                         {item.label}
                                     </Text>
-                                    <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', wordBreak: 'break-word' }}>
+                                    <div className="view-preview-value">
                                         {item.value}
                                     </div>
                                 </div>
                             ))}
                         </div>
-                        <Text type="secondary" style={{ marginTop: 'auto', fontSize: 11 }}>
+                        <Text type="secondary" className="view-preview-footer">
                             {metadata.footer}
                         </Text>
                     </>
@@ -564,7 +524,7 @@ const ViewsPanel: React.FC = () => {
                 key={widget.id}
                 title={widget.title}
                 size="small"
-                style={{ marginBottom: '16px' }}
+                className="view-widget-card"
                 extra={
                     <Space>
                         <Button
@@ -620,15 +580,15 @@ const ViewsPanel: React.FC = () => {
                     image={Empty.PRESENTED_IMAGE_SIMPLE}
                     description={
                         <div>
-                            <Text style={{ color: '#8c8c8c' }}>No views added yet.</Text>
-                            <p style={{ color: '#595959', fontSize: '12px', marginTop: '8px' }}>
+                            <Text className="views-description">No views added yet.</Text>
+                            <p className="views-empty-description">
                                 Use "Save as View" from other pages to create views.
                             </p>
                         </div>
                     }
                 />
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+                <div className="views-grid">
                     {widgets.map(renderWidget)}
                 </div>
             )}
@@ -677,13 +637,13 @@ const ViewsPanel: React.FC = () => {
                                 <Col span={2}></Col>
                             </Row>
                             {queryPairs.map(p => (
-                                <Row key={p.id} gutter={8} style={{ marginTop: 6 }}>
+                                <Row key={p.id} gutter={8} className="view-mt-6">
                                     <Col span={10}>
                                         <Input
                                             placeholder="key"
                                             value={p.key}
                                             readOnly={p.lockedKey}
-                                            style={{ color: '#ffffff' }}
+                                            className="view-input-white"
                                             onChange={e => updateParamRow(p.id, 'key', e.target.value)}
                                             onBlur={() => lockKeyIfNeeded(p.id)}
                                         />
@@ -700,8 +660,8 @@ const ViewsPanel: React.FC = () => {
                                     </Col>
                                 </Row>
                             ))}
-                            <Button style={{ marginTop: 8 }} onClick={addParamRow}>Add param</Button>
-                            <Input.TextArea style={{ marginTop: 8 }} rows={3} readOnly placeholder="Preview (auto-generated)" value={previewQuery} />
+                            <Button className="view-mt-8" onClick={addParamRow}>Add param</Button>
+                            <Input.TextArea className="view-mt-8" rows={3} readOnly placeholder="Preview (auto-generated)" value={previewQuery} />
                         </>
                     </Form.Item>
                 </Form>

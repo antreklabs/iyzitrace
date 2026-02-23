@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { Server, Network, Users, FileCode } from "lucide-react";
+import '../assets/styles/containers/trace-detail/trace-detail.css';
 
 const navItems = [
   { name: "Agents", path: "agents", icon: Server },
@@ -16,41 +17,16 @@ export default function Layout() {
   const currentPath = location.pathname.split('/').pop() || 'agents';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', overflow: 'hidden' }}>
+    <div className="am-layout">
       {/* Tab Navigation - Same style as Inventory Manager */}
-      <header style={{
-        background: '#1a1a1a',
-        borderBottom: '1px solid #2a2a2a',
-        position: 'sticky',
-        top: 0,
-        zIndex: 50,
-      }}>
-        <div style={{
-          maxWidth: '1600px',
-          margin: '0 auto',
-          padding: '0 24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: '56px',
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            fontSize: '18px',
-            fontWeight: 700,
-            color: '#f1f5f9',
-          }}>
-            <Server style={{ width: '24px', height: '24px' }} />
+      <header className="am-layout-header">
+        <div className="am-layout-header-inner">
+          <div className="am-layout-brand">
+            <Server className="am-layout-brand-icon" />
             <span>Agent Manager</span>
           </div>
 
-          <nav style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-          }}>
+          <nav className="am-layout-nav">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentPath === item.path ||
@@ -60,33 +36,9 @@ export default function Layout() {
                 <Link
                   key={item.path}
                   to={item.path}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    textDecoration: 'none',
-                    transition: 'all 0.2s',
-                    background: isActive ? '#3b82f6' : 'transparent',
-                    color: isActive ? 'white' : '#888888',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.background = '#2a2a2a';
-                      e.currentTarget.style.color = '#f1f5f9';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = '#888888';
-                    }
-                  }}
+                  className={`am-layout-nav-link ${isActive ? 'am-layout-nav-link--active' : 'am-layout-nav-link--inactive'}`}
                 >
-                  <Icon style={{ width: '16px', height: '16px' }} />
+                  <Icon className="am-layout-nav-icon" />
                   {item.name}
                 </Link>
               );
@@ -96,7 +48,7 @@ export default function Layout() {
       </header>
 
       {/* Page Content */}
-      <div style={{ flex: 1, overflow: 'auto', background: '#111111' }}>
+      <div className="am-layout-content">
         <Outlet />
       </div>
     </div>

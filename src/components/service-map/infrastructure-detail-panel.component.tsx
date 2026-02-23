@@ -304,13 +304,13 @@ export const InfrastructureDetailPanel: React.FC<InfrastructureDetailPanelProps>
               {infrastructure.name}
             </h3>
             <div className={badgeStyle}>
-              <CloudServerOutlined style={{ fontSize: '14px' }} />
+              <CloudServerOutlined className="sm-icon-14" />
               INFRASTRUCTURE
             </div>
           </div>
           {onClose && (
             <button onClick={onClose} className={closeButtonStyle}>
-              <CloseOutlined style={{ fontSize: '16px', fontWeight: 'bold' }} />
+              <CloseOutlined className="sm-icon-16-bold" />
             </button>
           )}
         </div>
@@ -370,7 +370,7 @@ export const InfrastructureDetailPanel: React.FC<InfrastructureDetailPanelProps>
         </div>
 
         {infrastructure.applications && infrastructure.applications.length > 0 && (
-          <div style={{ marginBottom: '16px' }}>
+          <div className="sm-drawer-mb-16">
             <h4 className={sectionTitleStyle}>
               <AppstoreOutlined />
               Applications ({infrastructure.applications.length})
@@ -400,7 +400,7 @@ export const InfrastructureDetailPanel: React.FC<InfrastructureDetailPanelProps>
         <div className={servicesButtonContainerStyle}>
           <button onClick={onServicesClick} className={servicesButtonStyle}>
             <span>View Services Map ({infrastructure.services.length})</span>
-            <span style={{ fontSize: '24px' }}>→</span>
+            <span className="sm-icon-24">→</span>
           </button>
         </div>
       )}

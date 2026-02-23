@@ -42,7 +42,7 @@
 .service-card-title {
     font-size: 16px;
     font-weight: 600;
-    color: white;
+    color: var(--text-primary);
 }
 
 .service-card-actions {
@@ -282,4 +282,208 @@
 .service-chart-title-text {
     font-size: 14px;
     font-weight: 600;
+}
+
+/* Service Metrics Card */
+.service-metrics-card {
+    border-radius: 12px;
+    margin-bottom: 12px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    width: 180px;
+}
+
+.service-metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 16px;
+    row-gap: 8px;
+}
+
+.service-metrics-label {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.service-metrics-value {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.service-metrics-view-btn {
+    margin-top: 12px;
+    width: 100%;
+}
+
+/* Service Card Container Scroll */
+.service-card-scroll-wrapper {
+    position: relative;
+}
+
+.service-card-scroll-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    background: var(--bg-secondary);
+    border: 1px solid #303030;
+    color: #d9d9d9;
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.service-card-scroll-btn:hover {
+    background: var(--bg-tertiary);
+}
+
+.service-card-scroll-btn-left {
+    left: 0;
+}
+
+.service-card-scroll-btn-right {
+    right: 0;
+}
+
+.service-card-scroll-area {
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding: 0 36px;
+}
+
+.service-card-scroll-inner {
+    display: inline-flex;
+    gap: 16px;
+}
+
+/* Chart Card Title Layout */
+.service-chart-card-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.service-chart-card-duration-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.service-chart-card-empty-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Chart Container Wrapper */
+.service-chart-container-wrapper {
+    position: relative;
+    margin-bottom: 24px;
+}
+
+.service-chart-row {
+    margin-top: 24px;
+}
+
+/* Service Detail Chart Container - Gradient Cards */
+.service-detail-chart-card-blue {
+    height: 380px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.service-detail-chart-card-green {
+    height: 380px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.service-detail-chart-card-amber {
+    height: 380px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.service-detail-chart-card-purple {
+    height: 380px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* Service Detail Card Container - Stat Cards */
+.service-detail-stat-card-blue {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(0, 0, 0, 0.4) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.service-detail-stat-card-green {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(0, 0, 0, 0.4) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.service-detail-stat-card-red {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(0, 0, 0, 0.4) 100%);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.service-detail-stat-card-amber {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(0, 0, 0, 0.4) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Service Detail Chart Sizing */
+.service-detail-chart-wrapper {
+    width: 100%;
+    height: 250px;
+    min-height: 250px;
+    max-height: 250px;
+    overflow: hidden;
+    position: relative;
+}
+
+.service-detail-chart-inner {
+    width: 100% !important;
+    height: 250px !important;
+    min-height: 250px !important;
+    max-height: 250px !important;
+}
+
+/* Collector Pipeline Handle Base */
+.pipeline-handle {
+    z-index: 20;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--background);
+}
+
+.pipeline-handle-receiver {
+    right: -7px;
+    background-color: #3b82f6;
+}
+
+.pipeline-handle-processor-in {
+    left: -7px;
+    background-color: #22c55e;
+}
+
+.pipeline-handle-processor-out {
+    right: -7px;
+    background-color: #22c55e;
+}
+
+.pipeline-handle-exporter {
+    left: -7px;
+    background-color: #a855f7;
 }

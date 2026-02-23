@@ -20,9 +20,9 @@ const ServiceMetricsCard: React.FC<ServiceMetricsCardProps> = ({ service }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-        try {
-          setLoading(true);
-          setMetrics({ avg: service.metrics.avgDurationMs, min: service.metrics.minDurationMs, max: service.metrics.maxDurationMs, count: service.metrics.callsCount });
+      try {
+        setLoading(true);
+        setMetrics({ avg: service.metrics.avgDurationMs, min: service.metrics.minDurationMs, max: service.metrics.maxDurationMs, count: service.metrics.callsCount });
 
       } finally {
         setLoading(false);
@@ -54,7 +54,7 @@ const ServiceMetricsCard: React.FC<ServiceMetricsCardProps> = ({ service }) => {
       <Card
         hoverable
         size="small"
-        style={{ borderRadius: 12, marginBottom: 12, background: '#141414', border: '1px solid #2a2a2a', width: '180px' }}
+        className="service-metrics-card"
         title={
           <Flex gap={8} align="center">
             <Text strong>{makeServiceName(service.name)}</Text>
@@ -66,29 +66,29 @@ const ServiceMetricsCard: React.FC<ServiceMetricsCardProps> = ({ service }) => {
           <Flex justify="center"><Spin size="small" /></Flex>
         ) : (
           <Flex gap={16} align="center">
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 16, rowGap: 8 }}>
+
+            <div className="service-metrics-grid">
               <div>
-                <div style={{ color: '#8c8c8c', fontSize: 12 }}>Avg. Lat</div>
-                <div style={{ color: '#fff', fontWeight: 600 }}>{metrics ? formatLatency(metrics.avg) : '—'}</div>
+                <div className="service-metrics-label">Avg. Lat</div>
+                <div className="service-metrics-value">{metrics ? formatLatency(metrics.avg) : '—'}</div>
               </div>
               <div>
-                <div style={{ color: '#8c8c8c', fontSize: 12 }}>Min. Lat</div>
-                <div style={{ color: '#fff', fontWeight: 600 }}>{metrics ? formatLatency(metrics.min) : '—'}</div>
+                <div className="service-metrics-label">Min. Lat</div>
+                <div className="service-metrics-value">{metrics ? formatLatency(metrics.min) : '—'}</div>
               </div>
               <div>
-                <div style={{ color: '#8c8c8c', fontSize: 12 }}>Max. Lat</div>
-                <div style={{ color: '#fff', fontWeight: 600 }}>{metrics ? formatLatency(metrics.max) : '—'}</div>
+                <div className="service-metrics-label">Max. Lat</div>
+                <div className="service-metrics-value">{metrics ? formatLatency(metrics.max) : '—'}</div>
               </div>
               <div>
-                <div style={{ color: '#8c8c8c', fontSize: 12 }}>Count</div>
-                <div style={{ color: '#fff', fontWeight: 600 }}>{metrics ? metrics.count : '—'}</div>
+                <div className="service-metrics-label">Count</div>
+                <div className="service-metrics-value">{metrics ? metrics.count : '—'}</div>
               </div>
             </div>
           </Flex>
         )}
 
-        <Button style={{ marginTop: 12, width: '100%' }} onClick={(e) => { e.stopPropagation(); navigate(`${PLUGIN_BASE_URL}/services/${service.id}`); }}>
+        <Button className="service-metrics-view-btn" onClick={(e) => { e.stopPropagation(); navigate(`${PLUGIN_BASE_URL}/services/${service.id}`); }}>
           View full details
         </Button>
       </Card>

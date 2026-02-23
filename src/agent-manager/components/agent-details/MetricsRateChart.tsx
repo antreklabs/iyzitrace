@@ -131,13 +131,13 @@ export function MetricsRateChart({
                     />
                     <XAxis
                         dataKey="time"
-                        style={{ fontSize: "10px" }}
+                        className="am-font-10"
                         stroke="hsl(var(--muted-foreground))"
                         tickLine={false}
                         axisLine={{ stroke: "hsl(var(--border))", opacity: 0.5 }}
                     />
                     <YAxis
-                        style={{ fontSize: "10px" }}
+                        className="am-font-10"
                         stroke="hsl(var(--muted-foreground))"
                         tickLine={false}
                         axisLine={{ stroke: "hsl(var(--border))", opacity: 0.5 }}

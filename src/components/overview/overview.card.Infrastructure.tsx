@@ -82,18 +82,9 @@ const InfrastructureCard: React.FC<InfrastructureCardProps> = ({
   const showDropEffect = isDropTarget || isDropping;
 
   return (
-    <div style={{ position: 'relative', width: '100%' }}>
+    <div className="overview-infra-wrapper">
       {showDropEffect && (
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          borderRadius: '12px',
-          border: '4px solid #52c41a',
-          background: 'rgba(82, 196, 26, 0.15)',
-          zIndex: 10,
-          pointerEvents: 'none',
-          animation: 'pulse 1.5s ease-in-out infinite',
-        }} />
+        <div className="overview-infra-drop-overlay" />
       )}
       <Card
         hoverable
@@ -102,57 +93,53 @@ const InfrastructureCard: React.FC<InfrastructureCardProps> = ({
         onDragOver={(e) => onDragOver && onDragOver(e)}
         onDragEnter={(e) => onDragEnter && onDragEnter(infrastructure, e)}
         onDragLeave={(e) => onDragLeave && onDragLeave(infrastructure, e)}
+        className="overview-infra-card-base"
         style={{
-          borderRadius: '12px',
           background: gradient,
-          color: 'white',
           border: isSelected ? '2px solid #1890ff' : 'none',
           boxShadow: isSelected
             ? '0 4px 16px rgba(24, 144, 255, 0.4)'
             : showDropEffect
               ? '0 8px 24px rgba(82, 196, 26, 0.6), 0 0 0 4px rgba(82, 196, 26, 0.2)'
               : '0 4px 12px rgba(0,0,0,0.1)',
-          cursor: 'pointer',
-          transition: 'all 0.3s ease',
-          width: '100%',
           transform: showDropEffect ? 'scale(1.05)' : 'scale(1)',
         }}
         bodyStyle={{ padding: '20px' }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+        <div className="overview-infra-header">
           <div>
-            <Title level={4} style={{ color: 'white', margin: 0 }}>{infrastructure.name}</Title>
-            <Text style={{ color: 'rgba(255,255,255,0.8)' }}>{infrastructure.type || infrastructure.osVersion}</Text>
+            <Title level={4} className="overview-infra-title">{infrastructure.name}</Title>
+            <Text className="overview-infra-subtitle">{infrastructure.type || infrastructure.osVersion}</Text>
           </div>
           <Badge
             color={getStatusColor(status)}
-            style={{ width: '12px', height: '12px' }}
+            className="overview-infra-status"
           />
         </div>
         {infrastructure.cpu && (
-          <div style={{ marginBottom: '12px' }}>
-            <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: '14px' }}>CPU Usage</Text>
+          <div className="overview-infra-metric-section">
+            <Text className="overview-infra-metric-label">CPU Usage</Text>
             <Progress
               percent={cpuPercentage}
               strokeColor={getProgressColor(cpuPercentage)}
               trailColor="rgba(255,255,255,0.3)"
               showInfo={false}
-              style={{ margin: '4px', width: '50%' }}
+              className="overview-infra-progress"
             />
-            <Text style={{ color: 'white', fontSize: '12px' }}>{cpuPercentage?.toFixed(1)}%</Text>
+            <Text className="overview-infra-metric-value">{cpuPercentage?.toFixed(1)}%</Text>
           </div>
         )}
         {infrastructure.memory && (
-          <div style={{ marginBottom: '16px' }}>
-            <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: '14px' }}>Memory</Text>
+          <div className="overview-infra-metric-section-lg">
+            <Text className="overview-infra-metric-label">Memory</Text>
             <Progress
               percent={memoryPercentage}
               strokeColor={getProgressColor(memoryPercentage)}
               trailColor="rgba(255,255,255,0.3)"
               showInfo={false}
-              style={{ margin: '4px', width: '50%' }}
+              className="overview-infra-progress"
             />
-            <Text style={{ color: 'white', fontSize: '12px' }}>
+            <Text className="overview-infra-metric-value">
               {infrastructure?.memory?.usage?.toFixed(1)}GB / {infrastructure?.memory?.capacity?.toFixed(1)}GB
             </Text>
           </div>
@@ -161,29 +148,11 @@ const InfrastructureCard: React.FC<InfrastructureCardProps> = ({
           type="primary"
           icon={<AppstoreOutlined />}
           onClick={(e) => onApplicationsClick(infrastructure, e)}
-          style={{
-            width: '100%',
-            background: 'rgba(255,255,255,0.2)',
-            border: '1px solid rgba(255,255,255,0.3)',
-            color: 'white',
-            fontWeight: 600,
-          }}
+          className="overview-infra-apps-btn"
         >
           Applications
         </Button>
       </Card>
-      <style>{`
-      @keyframes pulse {
-        0%, 100% {
-          opacity: 1;
-          transform: scale(1);
-        }
-        50% {
-          opacity: 0.7;
-          transform: scale(0.98);
-        }
-      }
-    `}</style>
     </div>
   );
 };

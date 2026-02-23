@@ -156,7 +156,7 @@ export function ConfigYamlEditorWithMetrics({
           }}
         >
           {lineNumbers.map((num) => (
-            <div key={num} style={{ height: '19.5px' }}>{num}</div>
+            <div key={num} className="am-line-num">{num}</div>
           ))}
         </div>
 

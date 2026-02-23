@@ -30,53 +30,38 @@ export const EntityDetail: React.FC<EntityDetailProps> = ({ entity, onClose }) =
     const evidenceBySignal = groupEvidenceBySignal(entity.evidence || []);
     const signalCounts = getSignalCounts(entity.evidence || []);
 
-    const sectionStyle: React.CSSProperties = {
-        marginBottom: '20px',
-    };
-
-    const sectionTitleStyle: React.CSSProperties = {
-        fontSize: '14px',
-        fontWeight: 600,
-        color: '#94a3b8',
-        marginBottom: '12px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-    };
-
     return (
-        <div style={{ padding: '20px', color: '#f1f5f9' }}>
+        <div className="entity-detail">
             {/* Header */}
-            <div style={{ marginBottom: '24px', borderBottom: '1px solid #334155', paddingBottom: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+            <div className="entity-detail__header">
+                <div className="entity-detail__header-badges">
                     <EntityBadge type={entity.type} />
                     <StatusBadge status={entity.status} />
                 </div>
-                <Title level={4} style={{ color: '#f1f5f9', margin: 0 }}>{entity.name}</Title>
-                <Text style={{ fontSize: '12px', color: '#64748b', fontFamily: 'monospace' }}>{entity.id}</Text>
+                <Title level={4} className="entity-detail__title">{entity.name}</Title>
+                <Text className="entity-detail__id">{entity.id}</Text>
             </div>
 
             {/* Signal Sources Summary */}
-            <div style={sectionStyle}>
-                <div style={sectionTitleStyle}>
+            <div className="entity-detail__section">
+                <div className="entity-detail__section-title">
                     <ThunderboltOutlined />
                     Discovered From
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px' }}>
+                <div className="entity-detail__signal-grid">
                     {Object.entries(signalCounts).map(([signalType, count]) => {
                         const info = SIGNAL_TYPE_INFO[signalType] || { label: signalType, color: '#64748b', bgColor: '#334155' };
                         return (
                             <div
                                 key={signalType}
+                                className="entity-detail__signal-card"
                                 style={{
-                                    padding: '12px',
-                                    borderRadius: '8px',
                                     background: `${info.color}15`,
                                     border: `1px solid ${info.color}40`,
                                 }}
                             >
-                                <div style={{ fontSize: '24px', fontWeight: 700, color: info.color }}>{count}</div>
-                                <div style={{ fontSize: '12px', fontWeight: 500, color: info.color }}>{info.label}</div>
+                                <div className="entity-detail__signal-count" style={{ color: info.color }}>{count}</div>
+                                <div className="entity-detail__signal-label" style={{ color: info.color }}>{info.label}</div>
                             </div>
                         );
                     })}
@@ -85,23 +70,23 @@ export const EntityDetail: React.FC<EntityDetailProps> = ({ entity, onClose }) =
 
             {/* Instances */}
             {entity.instance_count > 0 && (
-                <div style={sectionStyle}>
-                    <div style={sectionTitleStyle}>
+                <div className="entity-detail__section">
+                    <div className="entity-detail__section-title">
                         <AppstoreOutlined />
                         Instances
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-                        <div style={{ padding: '12px', borderRadius: '8px', background: '#22c55e15', border: '1px solid #22c55e40' }}>
-                            <div style={{ fontSize: '24px', fontWeight: 700, color: '#22c55e' }}>{entity.active_count}</div>
-                            <div style={{ fontSize: '12px', color: '#22c55e' }}>Active</div>
+                    <div className="entity-detail__instances-grid">
+                        <div className="entity-detail__instance-card--active">
+                            <div className="entity-detail__instance-count--active">{entity.active_count}</div>
+                            <div className="entity-detail__instance-label--active">Active</div>
                         </div>
-                        <div style={{ padding: '12px', borderRadius: '8px', background: '#f59e0b15', border: '1px solid #f59e0b40' }}>
-                            <div style={{ fontSize: '24px', fontWeight: 700, color: '#f59e0b' }}>{entity.instance_count - entity.active_count}</div>
-                            <div style={{ fontSize: '12px', color: '#f59e0b' }}>Stale/Stopped</div>
+                        <div className="entity-detail__instance-card--stale">
+                            <div className="entity-detail__instance-count--stale">{entity.instance_count - entity.active_count}</div>
+                            <div className="entity-detail__instance-label--stale">Stale/Stopped</div>
                         </div>
-                        <div style={{ padding: '12px', borderRadius: '8px', background: '#64748b15', border: '1px solid #64748b40' }}>
-                            <div style={{ fontSize: '24px', fontWeight: 700, color: '#94a3b8' }}>{entity.instance_count}</div>
-                            <div style={{ fontSize: '12px', color: '#94a3b8' }}>Total</div>
+                        <div className="entity-detail__instance-card--total">
+                            <div className="entity-detail__instance-count--total">{entity.instance_count}</div>
+                            <div className="entity-detail__instance-label--total">Total</div>
                         </div>
                     </div>
                 </div>
@@ -109,50 +94,39 @@ export const EntityDetail: React.FC<EntityDetailProps> = ({ entity, onClose }) =
 
             {/* Relations */}
             {entity.attrs['host.id'] && entity.type !== 'host' && (
-                <div style={sectionStyle}>
-                    <div style={sectionTitleStyle}>
+                <div className="entity-detail__section">
+                    <div className="entity-detail__section-title">
                         <BranchesOutlined />
                         Relations
                     </div>
                     <button
                         onClick={() => selectEntity(entity.attrs['host.id'])}
-                        style={{
-                            width: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            padding: '12px',
-                            background: '#3b82f615',
-                            border: '1px solid #3b82f640',
-                            borderRadius: '8px',
-                            cursor: 'pointer',
-                            color: '#60a5fa',
-                        }}
+                        className="entity-detail__relation-btn"
                     >
                         <div>
-                            <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' }}>Runs On Host</div>
-                            <div style={{ fontSize: '14px', fontWeight: 500 }}>{entity.attrs['host.name'] || entity.attrs['host.id']}</div>
+                            <div className="entity-detail__relation-label">Runs On Host</div>
+                            <div className="entity-detail__relation-value">{entity.attrs['host.name'] || entity.attrs['host.id']}</div>
                         </div>
                     </button>
                 </div>
             )}
 
             {/* Timestamps */}
-            <div style={sectionStyle}>
-                <div style={sectionTitleStyle}>
+            <div className="entity-detail__section">
+                <div className="entity-detail__section-title">
                     <ClockCircleOutlined />
                     Timestamps
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    <div style={{ padding: '12px', borderRadius: '8px', background: '#334155' }}>
-                        <div style={{ fontSize: '12px', color: '#64748b' }}>First Seen</div>
-                        <div style={{ fontSize: '14px', fontWeight: 500, color: '#f1f5f9' }}>
+                <div className="entity-detail__timestamp-grid">
+                    <div className="entity-detail__timestamp-card">
+                        <div className="entity-detail__timestamp-label">First Seen</div>
+                        <div className="entity-detail__timestamp-value">
                             {new Date(entity.first_seen).toLocaleString()}
                         </div>
                     </div>
-                    <div style={{ padding: '12px', borderRadius: '8px', background: '#334155' }}>
-                        <div style={{ fontSize: '12px', color: '#64748b' }}>Last Seen</div>
-                        <div style={{ fontSize: '14px', fontWeight: 500, color: '#f1f5f9' }}>
+                    <div className="entity-detail__timestamp-card">
+                        <div className="entity-detail__timestamp-label">Last Seen</div>
+                        <div className="entity-detail__timestamp-value">
                             {new Date(entity.last_seen).toLocaleString()}
                         </div>
                     </div>
@@ -160,32 +134,32 @@ export const EntityDetail: React.FC<EntityDetailProps> = ({ entity, onClose }) =
             </div>
 
             {/* Attributes */}
-            <div style={sectionStyle}>
-                <div style={sectionTitleStyle}>
+            <div className="entity-detail__section">
+                <div className="entity-detail__section-title">
                     <FileTextOutlined />
                     Attributes
                 </div>
-                <div style={{ background: '#334155', borderRadius: '8px', padding: '12px' }}>
+                <div className="entity-detail__attrs-container">
                     {Object.entries(entity.attrs || {}).map(([key, value]) => (
-                        <div key={key} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #475569' }}>
-                            <span style={{ fontSize: '12px', color: '#64748b', fontFamily: 'monospace' }}>{key}</span>
-                            <span style={{ fontSize: '12px', color: '#f1f5f9', fontWeight: 500 }}>{value}</span>
+                        <div key={key} className="entity-detail__attr-row">
+                            <span className="entity-detail__attr-key">{key}</span>
+                            <span className="entity-detail__attr-value">{value}</span>
                         </div>
                     ))}
                 </div>
             </div>
 
             {/* Evidence */}
-            <div style={sectionStyle}>
-                <div style={{ ...sectionTitleStyle, justifyContent: 'space-between' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="entity-detail__section">
+                <div className="entity-detail__section-title--between">
+                    <span className="entity-detail__evidence-section-title">
                         <BranchesOutlined />
                         Source Evidence ({entity.evidence?.length || 0})
                     </span>
                     {entity.evidence?.length > 5 && (
                         <button
                             onClick={() => setShowAllEvidence(!showAllEvidence)}
-                            style={{ background: 'none', border: 'none', color: '#60a5fa', fontSize: '12px', cursor: 'pointer' }}
+                            className="entity-detail__evidence-toggle"
                         >
                             {showAllEvidence ? 'Show less' : 'Show all'}
                         </button>
@@ -196,19 +170,19 @@ export const EntityDetail: React.FC<EntityDetailProps> = ({ entity, onClose }) =
                     const displayItems = showAllEvidence ? items : items.slice(0, 3);
                     return (
                         <div key={signalType} style={{ marginBottom: '8px', border: `1px solid ${info.color}40`, borderRadius: '8px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: `${info.color}15` }}>
-                                <span style={{ color: info.color, fontWeight: 500 }}>{info.label}</span>
-                                <span style={{ fontSize: '12px', color: '#94a3b8' }}>({items.length})</span>
+                            <div className="entity-detail__evidence-header" style={{ background: `${info.color}15` }}>
+                                <span className="entity-detail__evidence-header-label" style={{ color: info.color }}>{info.label}</span>
+                                <span className="entity-detail__evidence-header-count">({items.length})</span>
                             </div>
-                            <div style={{ padding: '8px 12px' }}>
+                            <div className="entity-detail__evidence-body">
                                 {displayItems.map((evidence, idx) => (
-                                    <div key={idx} style={{ padding: '8px 0', borderBottom: idx < displayItems.length - 1 ? '1px solid #475569' : 'none' }}>
-                                        <div style={{ marginBottom: '4px' }}>
-                                            <Tag color={info.color} style={{ fontSize: '10px' }}>{evidence.attribute_key}</Tag>
-                                            <span style={{ color: '#94a3b8' }}> = </span>
-                                            <span style={{ color: '#f1f5f9', fontWeight: 500 }}>{evidence.attribute_value}</span>
+                                    <div key={idx} className={idx < displayItems.length - 1 ? 'entity-detail__evidence-item--bordered' : 'entity-detail__evidence-item'}>
+                                        <div className="entity-detail__evidence-detail">
+                                            <Tag color={info.color} className="am-tag-xs">{evidence.attribute_key}</Tag>
+                                            <span className="entity-detail__evidence-separator"> = </span>
+                                            <span className="entity-detail__evidence-value">{evidence.attribute_value}</span>
                                         </div>
-                                        <div style={{ fontSize: '11px', color: '#64748b' }}>
+                                        <div className="entity-detail__evidence-timestamp">
                                             {new Date(evidence.timestamp).toLocaleString()}
                                         </div>
                                     </div>

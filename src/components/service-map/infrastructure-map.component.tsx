@@ -32,8 +32,6 @@ interface InfrastructureMapProps {
   data: ServiceMapData;
 }
 
-const cardBg = (hex: string) =>
-  `linear-gradient(180deg, ${hex} 0%, rgba(6,10,19,0.9) 100%)`;
 
 const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }, ref) => {
   const [selectedNodeId, setSelectedNodeId] = useState<string>('');
@@ -377,81 +375,42 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
   );
 
   return (
-    <div style={{ paddingBottom: 100, height: '90vh', overflow: 'hidden' }}>
+    <div className="infra-map-container">
       <style>{`
         .react-flow__node-group { width: auto !important; }
       `}</style>
 
       <Card
-        style={{ background: '#0f172a', borderColor: '#1f2937', height: '80vh' }}
+        className="infra-map-card"
         styles={{ body: { padding: 0, height: '100%' } }}
       >
-        <div style={{ position: 'relative', height: '100%' }}>
+        <div className="infra-map-canvas-wrapper">
           {
           }
-          <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 10, width: '180px' }}>
-            <div
-              style={{
-                padding: 10,
-                borderRadius: 10,
-                border: '1px solid rgba(148,163,184,0.18)',
-                background: cardBg('#1b2a44'),
-                color: '#cbd5e1',
-                fontSize: 12
-              }}
-            >
-              <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                Infrastructure Map
-              </div>
-              <div style={{ opacity: 0.7, fontSize: 11 }}>
-                Regions → Infrastructures
+
+
+          {
+          }
+          <div className="infra-map-legend-overlay">
+            <div className="infra-map-legend-card">
+              <div className="infra-map-legend-items">
+                <span className="infra-map-legend-healthy">● healthy</span>
+                <span className="infra-map-legend-warning">● warning / degraded</span>
+                <span className="infra-map-legend-error">● error</span>
               </div>
             </div>
           </div>
 
           {
           }
-          <div style={{ position: 'absolute', top: 12, right: 55, zIndex: 10 }}>
-            <div
-              style={{
-                padding: 5,
-                borderRadius: 10,
-                border: '1px solid rgba(148,163,184,0.18)',
-                background: cardBg('#1b2a44'),
-                color: '#cbd5e1',
-                fontSize: 12
-              }}
-            >
-              <div style={{ marginTop: 0, display: 'flex', flexDirection: 'row', gap: 8 }}>
-                <span style={{ color: '#22c55e' }}>● healthy</span>
-                <span style={{ color: '#f59e0b' }}>● warning / degraded</span>
-                <span style={{ color: '#ef4444' }}>● error</span>
-              </div>
-            </div>
-          </div>
-
-          {
-          }
-          <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 10 }}>
+          <div className="infra-map-search-overlay">
             <Dropdown
               dropdownRender={() => searchTreeContent}
               trigger={['click']}
               placement="bottomRight"
             >
               <div
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 8,
-                  color: '#e5e7eb',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '1px solid #1f2937',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.35)',
-                  background: '#1f2937'
-                }}
+                className="infra-map-search-btn"
                 aria-label="Search"
                 title="Search"
               >
@@ -463,7 +422,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
           {
           }
           {selectedInfrastructure && (
-            <div style={{ position: 'absolute', left: 12, top: 100, zIndex: 1000 }}>
+            <div className="infra-map-detail-overlay">
               <InfrastructureDetailPanel
                 infrastructure={selectedInfrastructure}
                 onClose={handleCloseDetailPanel}
@@ -494,7 +453,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
               nodesConnectable={false}
               fitView
               fitViewOptions={{ padding: 0.2 }}
-              style={{ background: '#0f172a' }}
+              className="infra-map-reactflow"
               minZoom={0.1}
               maxZoom={2.5}
               onNodeClick={(_, node) => {
@@ -511,12 +470,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
               proOptions={{ hideAttribution: true }}
             >
               <Background color="#1f2937" gap={20} />
-              <Controls
-                style={{
-                  background: '#1f2937',
-                  border: '1px solid #374151'
-                }}
-              >
+              <Controls className="infra-map-controls">
                 <ControlButton
                   onClick={() => setIsFullscreen(!isFullscreen)}
                   title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
@@ -525,10 +479,7 @@ const InfrastructureMapInner = forwardRef<any, InfrastructureMapProps>(({ data }
                 </ControlButton>
               </Controls>
               <MiniMap
-                style={{
-                  background: '#1f2937',
-                  border: '1px solid #374151'
-                }}
+                className="infra-map-minimap"
                 nodeColor="#60a5fa"
               />
               <style>{`

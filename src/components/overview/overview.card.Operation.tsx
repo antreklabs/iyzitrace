@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Card, Badge, Typography, Avatar, Button } from 'antd';
-import { 
+import {
   UnorderedListOutlined,
   UserOutlined,
   CheckCircleOutlined,
@@ -20,9 +20,9 @@ interface OperationCardProps {
   searchQuery?: string;
 }
 
-const OperationCard: React.FC<OperationCardProps> = ({ 
-  operations, 
-  title, 
+const OperationCard: React.FC<OperationCardProps> = ({
+  operations,
+  title,
   onClick,
   selectedOperationId,
   searchQuery = ''
@@ -72,45 +72,45 @@ const OperationCard: React.FC<OperationCardProps> = ({
   const getOperationIcon = (operationName: string) => {
     const nameLower = operationName.toLowerCase();
     if (nameLower.includes('create') && nameLower.includes('user')) {
-      return <UserOutlined style={{ fontSize: '18px', color: '#1890ff' }} />;
+      return <UserOutlined className="overview-operation-icon icon-color-blue" />;
     }
     if (nameLower.includes('validate')) {
-      return <CheckCircleOutlined style={{ fontSize: '18px', color: '#52c41a' }} />;
+      return <CheckCircleOutlined className="overview-operation-icon icon-color-green" />;
     }
     if (nameLower.includes('update') || nameLower.includes('profile')) {
-      return <EditOutlined style={{ fontSize: '18px', color: '#722ed1' }} />;
+      return <EditOutlined className="overview-operation-icon icon-color-purple" />;
     }
     if (nameLower.includes('create') && nameLower.includes('order')) {
-      return <PlusOutlined style={{ fontSize: '18px', color: '#fa8c16' }} />;
+      return <PlusOutlined className="overview-operation-icon icon-color-orange" />;
     }
     if (nameLower.includes('ship')) {
-      return <TruckOutlined style={{ fontSize: '18px', color: '#1890ff' }} />;
+      return <TruckOutlined className="overview-operation-icon icon-color-blue" />;
     }
     if (nameLower.includes('process') || nameLower.includes('payment')) {
-      return <CheckCircleOutlined style={{ fontSize: '18px', color: '#f5222d' }} />;
+      return <CheckCircleOutlined className="overview-operation-icon icon-color-red" />;
     }
-    return <UnorderedListOutlined style={{ fontSize: '18px', color: '#1890ff' }} />;
+    return <UnorderedListOutlined className="overview-operation-icon icon-color-blue" />;
   };
 
   const sortedOperations = useMemo(() => {
     let filtered = operations;
-    
+
     if (searchQuery && searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = operations.filter(operation => 
+      filtered = operations.filter(operation =>
         operation.name.toLowerCase().includes(query) ||
         operation.type?.toLowerCase().includes(query)
       );
     }
-    
+
     return filtered.sort((a, b) => {
       const statusPriorityA = getStatusPriority(a.status?.value);
       const statusPriorityB = getStatusPriority(b.status?.value);
-      
+
       if (statusPriorityA !== statusPriorityB) {
         return statusPriorityA - statusPriorityB;
       }
-      
+
       const avgLatencyA = a.metrics?.avgDurationMs || 0;
       const avgLatencyB = b.metrics?.avgDurationMs || 0;
       return avgLatencyB - avgLatencyA;
@@ -126,158 +126,86 @@ const OperationCard: React.FC<OperationCardProps> = ({
 
   return (
     <Card
-      style={{
-        borderRadius: '12px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-        border: '1px solid #333',
-        background: '#1f1f1f',
-        height: '100%',
-        minWidth: '300px',
-        width: 'max-content',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'visible',
-        transition: 'all 0.3s ease',
-      }}
+      className="overview-operation-card"
       bodyStyle={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'visible' }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <Title 
-          level={4} 
-          style={{ 
-            margin: 0,
-            color: '#e8e8e8',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
+      <div className="overview-operation-card-header">
+        <Title
+          level={4}
+          className="overview-operation-card-title"
           title={title}
         >
-        {title}
-      </Title>
+          {title}
+        </Title>
         {hasMore && (
           <Button
             type="default"
             onClick={() => setExpanded(!expanded)}
-            style={{
-              background: '#2a2a2a',
-              borderColor: '#404040',
-              color: '#b8b8b8',
-              padding: '4px 12px',
-              height: 'auto',
-              fontWeight: 600,
-              fontSize: '12px',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#333';
-              e.currentTarget.style.borderColor = '#555';
-              e.currentTarget.style.color = '#e8e8e8';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#2a2a2a';
-              e.currentTarget.style.borderColor = '#404040';
-              e.currentTarget.style.color = '#b8b8b8';
-            }}
+            className="overview-operation-expand-btn"
           >
             {expanded ? 'Less' : `More (+${sortedOperations.length - 2})`}
           </Button>
         )}
       </div>
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ 
-          display: 'grid', 
+      <div className="overview-operation-body">
+        <div className="overview-card-grid" style={{
           gridTemplateColumns: expanded ? `repeat(${Math.ceil(sortedOperations.length / 2)}, 240px)` : '240px',
-          gridTemplateRows: 'repeat(2, min-content)',
-          gap: '8px',
-          gridAutoFlow: 'column'
         }}>
           {displayOperations.map((operation) => {
-          const status = operation.status?.value || 'unknown';
-          const avgDurationMs = operation.metrics?.avgDurationMs || 0;
-          const callsPerSecond = operation.metrics?.callsPerSecond || 0;
-          const isSelected = operation.id === selectedOperationId;
-          
-          return (
-            <div 
-              key={operation.id}
-              style={{ 
-                border: 'none', 
-                padding: '6px',
-                cursor: 'pointer',
-                backgroundColor: isSelected ? '#1890ff' : '#2a2a2a',
-                borderRadius: '8px',
-                transition: 'all 0.2s ease',
-                overflow: 'hidden',
-              }}
-              onClick={() => onClick(operation)}
-              onMouseEnter={(e) => {
-                if (!isSelected) {
-                  e.currentTarget.style.backgroundColor = '#333';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isSelected) {
-                  e.currentTarget.style.backgroundColor = '#2a2a2a';
-                }
-              }}
-            >
-              <div style={{ width: '100%', minWidth: 0, overflow: 'hidden' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', gap: '6px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                    <Avatar icon={getOperationIcon(operation.name)} style={{ background: '#1f1f1f', border: '1px solid #404040', flexShrink: 0 }} />
-                    <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                      <Text 
-                        style={{ 
-                          fontWeight: 600, 
-                          display: 'block', 
-                          color: isSelected ? 'white' : '#e8e8e8',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                        title={operation.name}
-                      >
-                        {operation.name}
+            const status = operation.status?.value || 'unknown';
+            const avgDurationMs = operation.metrics?.avgDurationMs || 0;
+            const callsPerSecond = operation.metrics?.callsPerSecond || 0;
+            const isSelected = operation.id === selectedOperationId;
+
+            return (
+              <div
+                key={operation.id}
+                className={`overview-operation-item ${isSelected ? 'overview-operation-item--selected' : 'overview-operation-item--default'}`}
+                onClick={() => onClick(operation)}
+              >
+                <div className="overview-operation-item-content">
+                  <div className="overview-operation-item-header">
+                    <div className="overview-operation-item-info">
+                      <Avatar icon={getOperationIcon(operation.name)} className="overview-operation-avatar" />
+                      <div className="overview-operation-item-text">
+                        <Text
+                          className={`overview-operation-item-name ${isSelected ? 'overview-card-text-selected' : 'overview-card-text-unselected'}`}
+                          title={operation.name}
+                        >
+                          {operation.name}
+                        </Text>
+                        <Text
+                          className={`overview-operation-item-type ${isSelected ? 'overview-card-subtext-selected' : 'overview-card-subtext-unselected'}`}
+                          title={operation.type || 'Operation'}
+                        >
+                          {operation.type || 'Operation'}
+                        </Text>
+                      </div>
+                    </div>
+                    <Badge color={getStatusColor(status)} className="badge-no-shrink" />
+                  </div>
+                  <div className="overview-operation-metrics">
+                    <div>
+                      <Text className={`overview-operation-metric-subtitle ${isSelected ? 'overview-card-metric-subtitle-selected' : 'overview-card-metric-subtitle-unselected'}`}>
+                        Avg Duration
                       </Text>
-                      <Text 
-                        style={{ 
-                          fontSize: '12px', 
-                          color: isSelected ? 'rgba(255,255,255,0.7)' : '#8c8c8c',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                          display: 'block',
-                        }}
-                        title={operation.type || 'Operation'}
-                      >
-                        {operation.type || 'Operation'}
+                      <Text className={`overview-operation-metric-val ${isSelected ? 'overview-card-metric-val-selected' : 'overview-card-metric-val-unselected'}`}>
+                        {formatDuration(avgDurationMs)}
+                      </Text>
+                    </div>
+                    <div>
+                      <Text className={`overview-operation-metric-subtitle ${isSelected ? 'overview-card-metric-subtitle-selected' : 'overview-card-metric-subtitle-unselected'}`}>
+                        Calls/sec
+                      </Text>
+                      <Text className={`overview-operation-metric-val ${isSelected ? 'overview-card-metric-val-selected' : 'overview-card-metric-val-unselected'}`}>
+                        {callsPerSecond.toFixed(2)}
                       </Text>
                     </div>
                   </div>
-                  <Badge color={getStatusColor(status)} style={{ flexShrink: 0 }} />
-                </div>
-                <div style={{ display: 'flex', gap: '16px', paddingLeft: '44px' }}>
-                  <div>
-                    <Text style={{ fontSize: '11px', color: isSelected ? 'rgba(255,255,255,0.6)' : '#8c8c8c', display: 'block' }}>
-                      Avg Duration
-                    </Text>
-                    <Text style={{ fontWeight: 600, fontSize: '13px', color: isSelected ? 'white' : '#b8b8b8' }}>
-                      {formatDuration(avgDurationMs)}
-                    </Text>
-                  </div>
-                  <div>
-                    <Text style={{ fontSize: '11px', color: isSelected ? 'rgba(255,255,255,0.6)' : '#8c8c8c', display: 'block' }}>
-                      Calls/sec
-                    </Text>
-                    <Text style={{ fontWeight: 600, fontSize: '13px', color: isSelected ? 'white' : '#b8b8b8' }}>
-                      {callsPerSecond.toFixed(2)}
-                    </Text>
-                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
         </div>
       </div>
     </Card>

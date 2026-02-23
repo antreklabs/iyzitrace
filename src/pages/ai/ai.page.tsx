@@ -65,19 +65,19 @@ const styles = {
     animation: ${gradientAnimation} 15s ease infinite;
     padding: 40px 20px;
   `,
-  
+
   innerContainer: css`
     max-width: 1400px;
     margin: 0 auto;
     animation: ${fadeIn} 0.6s ease-out;
   `,
-  
+
   header: css`
     text-align: center;
     margin-bottom: 40px;
     color: white;
   `,
-  
+
   title: css`
     font-size: 48px;
     font-weight: 700;
@@ -88,21 +88,21 @@ const styles = {
     text-shadow: 0 0 30px rgba(255,255,255,0.3);
     letter-spacing: -1px;
   `,
-  
+
   subtitle: css`
     font-size: 18px;
     color: rgba(255, 255, 255, 0.9);
     margin: 0;
     font-weight: 300;
   `,
-  
+
   quickActionsGrid: css`
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 20px;
     margin-bottom: 40px;
   `,
-  
+
   quickActionCard: css`
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
@@ -120,26 +120,26 @@ const styles = {
       animation: ${pulse} 0.6s ease;
     }
   `,
-  
+
   quickActionIcon: css`
     font-size: 36px;
     margin-bottom: 12px;
     display: block;
   `,
-  
+
   quickActionTitle: css`
     font-size: 18px;
     font-weight: 600;
     margin: 0 0 8px 0;
     color: #1a1a1a;
   `,
-  
+
   quickActionDesc: css`
     font-size: 14px;
     color: #666;
     margin: 0;
   `,
-  
+
   mainCard: css`
     background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(20px);
@@ -148,13 +148,13 @@ const styles = {
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.3);
   `,
-  
+
   chatContainer: css`
     height: 600px;
     display: flex;
     flex-direction: column;
   `,
-  
+
   messagesArea: css`
     flex: 1;
     overflow-y: auto;
@@ -175,7 +175,7 @@ const styles = {
       border-radius: 10px;
     }
   `,
-  
+
   emptyState: css`
     height: 100%;
     display: flex;
@@ -185,7 +185,7 @@ const styles = {
     color: #999;
     text-align: center;
   `,
-  
+
   emptyIcon: css`
     font-size: 72px;
     margin-bottom: 24px;
@@ -193,37 +193,37 @@ const styles = {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   `,
-  
+
   emptyTitle: css`
     font-size: 24px;
     font-weight: 600;
     color: #333;
     margin: 0 0 12px 0;
   `,
-  
+
   emptyDesc: css`
     font-size: 16px;
     color: #666;
     max-width: 500px;
   `,
-  
+
   message: css`
     margin-bottom: 24px;
     animation: ${fadeIn} 0.4s ease-out;
   `,
-  
+
   userMessage: css`
     display: flex;
     justify-content: flex-end;
     gap: 12px;
   `,
-  
+
   aiMessage: css`
     display: flex;
     justify-content: flex-start;
     gap: 12px;
   `,
-  
+
   messageAvatar: css`
     width: 40px;
     height: 40px;
@@ -234,30 +234,30 @@ const styles = {
     font-size: 20px;
     flex-shrink: 0;
   `,
-  
+
   userAvatar: css`
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
   `,
-  
+
   aiAvatar: css`
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     color: white;
   `,
-  
+
   messageBubble: css`
     max-width: 70%;
     padding: 16px 20px;
     border-radius: 16px;
     position: relative;
   `,
-  
+
   userBubble: css`
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border-bottom-right-radius: 4px;
   `,
-  
+
   aiBubble: css`
     background: white;
     color: #333;
@@ -265,7 +265,7 @@ const styles = {
     border-bottom-left-radius: 4px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   `,
-  
+
   messageContent: css`
     font-size: 15px;
     line-height: 1.6;
@@ -317,19 +317,19 @@ const styles = {
       font-style: italic;
     }
   `,
-  
+
   messageActions: css`
     display: flex;
     gap: 8px;
     margin-top: 12px;
   `,
-  
+
   messageActionBtn: css`
     font-size: 12px;
     padding: 4px 12px;
     height: auto;
   `,
-  
+
   messageMetadata: css`
     display: flex;
     align-items: center;
@@ -340,23 +340,23 @@ const styles = {
     font-size: 12px;
     color: #999;
   `,
-  
+
   inputArea: css`
     padding: 24px;
     background: white;
     border-top: 1px solid #e8e8e8;
   `,
-  
+
   inputRow: css`
     display: flex;
     gap: 12px;
     align-items: flex-end;
   `,
-  
+
   textAreaWrapper: css`
     flex: 1;
   `,
-  
+
   sendButton: css`
     height: 48px;
     min-width: 48px;
@@ -385,7 +385,7 @@ const styles = {
       cursor: not-allowed;
     }
   `,
-  
+
   cancelButton: css`
     height: 48px;
     min-width: 48px;
@@ -411,7 +411,7 @@ const styles = {
       transform: translateY(0);
     }
   `,
-  
+
   contextBar: css`
     padding: 16px 24px;
     background: linear-gradient(90deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
@@ -422,7 +422,7 @@ const styles = {
     flex-wrap: wrap;
     gap: 16px;
   `,
-  
+
   contextSection: css`
     display: flex;
     align-items: center;
@@ -434,7 +434,7 @@ const styles = {
       font-weight: 500;
     }
   `,
-  
+
   statsBar: css`
     padding: 16px 24px;
     background: linear-gradient(90deg, #f6f8ff 0%, #f8f6ff 100%);
@@ -445,13 +445,13 @@ const styles = {
     flex-wrap: wrap;
     gap: 16px;
   `,
-  
+
   statsGrid: css`
     display: flex;
     gap: 24px;
     flex-wrap: wrap;
   `,
-  
+
   statItem: css`
     display: flex;
     align-items: center;
@@ -459,12 +459,12 @@ const styles = {
     font-size: 14px;
     color: #666;
   `,
-  
+
   statValue: css`
     font-weight: 600;
     color: #333;
   `,
-  
+
   loadingDots: css`
     display: inline-flex;
     gap: 4px;
@@ -480,14 +480,14 @@ const styles = {
       &:nth-child(3) { animation-delay: 0.4s; }
     }
   `,
-  
+
   suggestedQuestions: css`
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
     margin-top: 16px;
   `,
-  
+
   suggestionChip: css`
     background: rgba(102, 126, 234, 0.1);
     border: 1px solid rgba(102, 126, 234, 0.3);
@@ -504,14 +504,14 @@ const styles = {
       transform: translateY(-2px);
     }
   `,
-  
+
   settingsPanel: css`
     .ant-collapse-header {
       background: #fafafa !important;
       border-radius: 8px !important;
     }
   `,
-  
+
   statusCard: css`
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
@@ -525,51 +525,51 @@ const styles = {
     justify-content: space-between;
     gap: 16px;
   `,
-  
+
   statusLeft: css`
     display: flex;
     align-items: center;
     gap: 16px;
   `,
-  
+
   statusIcon: css`
     font-size: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
   `,
-  
+
   statusInfo: css`
     display: flex;
     flex-direction: column;
     gap: 4px;
   `,
-  
+
   statusTitle: css`
     font-size: 18px;
     font-weight: 600;
     color: #1a1a1a;
     margin: 0;
   `,
-  
+
   statusDesc: css`
     font-size: 14px;
     color: #666;
     margin: 0;
   `,
-  
+
   statusBadge: css`
     padding: 6px 16px;
     border-radius: 20px;
     font-weight: 600;
     font-size: 13px;
   `,
-  
+
   statusBadgeActive: css`
     background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
     color: white;
   `,
-  
+
   statusBadgeInactive: css`
     background: linear-gradient(135deg, #8c8c8c 0%, #bfbfbf 100%);
     color: white;
@@ -621,10 +621,10 @@ const AIPage: React.FC = () => {
       try {
         const apiKeyConfigured = await isAIConfigured();
         setIsApiKeyConfigured(apiKeyConfigured);
-        
+
         const settings = await getBackendSrv().get(`/api/plugins/${PLUGIN_ID}/settings`);
         const aiConfig = (settings?.jsonData as PluginJsonData)?.aiConfig;
-        
+
         const config = {
           apiKey: aiConfig?.apiKey || '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',
           model: aiConfig?.model || 'deepseek/deepseek-chat',
@@ -632,7 +632,7 @@ const AIPage: React.FC = () => {
           temperature: aiConfig?.temperature ?? 0.7,
           maxTokens: aiConfig?.maxTokens ?? 1500,
         };
-        
+
         initAI(config);
         setAiModel(config.model);
         setInitialized(true);
@@ -672,7 +672,7 @@ const AIPage: React.FC = () => {
       id: 'overview',
       title: '🎯 Quick Overview',
       description: 'Get instant system health summary',
-      icon: <DashboardOutlined className={styles.quickActionIcon} style={{ color: '#667eea' }} />,
+      icon: <DashboardOutlined className={`${styles.quickActionIcon} ai-quick-icon-purple`} />,
       color: '#667eea',
       action: async () => {
         if (regions.length === 0) {
@@ -686,7 +686,7 @@ const AIPage: React.FC = () => {
       id: 'service-health',
       title: '❤️ Service Health',
       description: 'Analyze all services performance',
-      icon: <HeartOutlined className={styles.quickActionIcon} style={{ color: '#f5576c' }} />,
+      icon: <HeartOutlined className={`${styles.quickActionIcon} ai-quick-icon-red`} />,
       color: '#f5576c',
       action: async () => {
         if (services.length === 0) {
@@ -700,7 +700,7 @@ const AIPage: React.FC = () => {
       id: 'anomalies',
       title: '🔥 Find Anomalies',
       description: 'Detect unusual patterns and issues',
-      icon: <BugOutlined className={styles.quickActionIcon} style={{ color: '#ff6b6b' }} />,
+      icon: <BugOutlined className={`${styles.quickActionIcon} ai-quick-icon-orange`} />,
       color: '#ff6b6b',
       action: async () => {
         await sendMessage('Identify any anomalies, unusual patterns, or critical issues in the system', true);
@@ -710,7 +710,7 @@ const AIPage: React.FC = () => {
       id: 'recommendations',
       title: '⚡ Recommendations',
       description: 'Get optimization suggestions',
-      icon: <ThunderboltOutlined className={styles.quickActionIcon} style={{ color: '#feca57' }} />,
+      icon: <ThunderboltOutlined className={`${styles.quickActionIcon} ai-quick-icon-yellow`} />,
       color: '#feca57',
       action: async () => {
         await sendMessage('Provide specific recommendations for improving system performance and reliability', true);
@@ -734,11 +734,11 @@ const AIPage: React.FC = () => {
 
     try {
       const context: any = {};
-      
+
       if (includeRegions && regions.length > 0) {
         const filteredRegions = regions.map(region => {
           const regionCopy = { ...region };
-          
+
           if (!includeInfrastructures) {
             delete regionCopy.infrastructures;
           } else if (includeInfrastructures && regionCopy.infrastructures) {
@@ -770,21 +770,21 @@ const AIPage: React.FC = () => {
               }
             }
           }
-          
+
           return regionCopy;
         });
-        
+
         context.regions = filteredRegions;
       }
-      
+
       if (includeServices && services.length > 0) {
-        const filteredServices = includeOperations 
-          ? services 
+        const filteredServices = includeOperations
+          ? services
           : services.map(s => {
-              const sCopy = { ...s };
-              delete sCopy.operations;
-              return sCopy;
-            });
+            const sCopy = { ...s };
+            delete sCopy.operations;
+            return sCopy;
+          });
         context.services = filteredServices;
       }
 
@@ -809,7 +809,7 @@ const AIPage: React.FC = () => {
     } catch (error: any) {
       const aiError = error as AIError;
       message.error(aiError.message || 'Failed to get AI response');
-      
+
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'ai',
@@ -857,7 +857,7 @@ const AIPage: React.FC = () => {
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/`(.*?)`/g, '<code>$1</code>')
       .replace(/\n/g, '<br />');
-    
+
     return <div dangerouslySetInnerHTML={{ __html: formatted }} />;
   };
 
@@ -874,7 +874,7 @@ const AIPage: React.FC = () => {
       <div className={styles.container}>
         <div className={styles.innerContainer}>
           {
-}
+          }
           <div className={styles.header}>
             <h1 className={styles.title}>
               <RobotOutlined /> IyziTrace AI Assistant
@@ -885,32 +885,31 @@ const AIPage: React.FC = () => {
           </div>
 
           {
-}
+          }
           <div className={styles.statusCard}>
             <div className={styles.statusLeft}>
               <div className={styles.statusIcon}>
-                <RobotOutlined style={{ 
+                <RobotOutlined style={{
                   color: isApiKeyConfigured ? '#52c41a' : '#8c8c8c',
                 }} />
               </div>
               <div className={styles.statusInfo}>
                 <h3 className={styles.statusTitle}>AI Assistant Configuration</h3>
                 <p className={styles.statusDesc}>
-                  {isApiKeyConfigured 
-                    ? 'API key is configured and ready to use' 
+                  {isApiKeyConfigured
+                    ? 'API key is configured and ready to use'
                     : 'API key is not configured. Please configure in Settings.'}
                 </p>
               </div>
             </div>
-            <div className={`${styles.statusBadge} ${
-              isApiKeyConfigured ? styles.statusBadgeActive : styles.statusBadgeInactive
-            }`}>
+            <div className={`${styles.statusBadge} ${isApiKeyConfigured ? styles.statusBadgeActive : styles.statusBadgeInactive
+              }`}>
               {isApiKeyConfigured ? 'Active' : 'Inactive'}
             </div>
           </div>
 
           {
-}
+          }
           <div className={styles.quickActionsGrid}>
             {quickActions.map((action) => (
               <div
@@ -926,22 +925,22 @@ const AIPage: React.FC = () => {
           </div>
 
           {
-}
+          }
           <Card className={styles.mainCard} bordered={false}>
             {
-}
+            }
             <div className={styles.statsBar}>
               <div className={styles.statsGrid}>
                 <div className={styles.statItem}>
-                  <FireOutlined style={{ color: '#667eea' }} />
+                  <FireOutlined className="ai-context-icon-purple" />
                   <span>Requests: <span className={styles.statValue}>{requestCount}</span></span>
                 </div>
                 <div className={styles.statItem}>
-                  <BarChartOutlined style={{ color: '#f5576c' }} />
+                  <BarChartOutlined className="ai-context-icon-red" />
                   <span>Tokens: <span className={styles.statValue}>{totalTokens.toLocaleString()}</span></span>
                 </div>
                 {
-}
+                }
               </div>
               <Space>
                 <Button size="small" icon={<DeleteOutlined />} onClick={clearChat}>
@@ -951,17 +950,17 @@ const AIPage: React.FC = () => {
             </div>
 
             {
-}
+            }
             <div className={styles.contextBar}>
               <div className={styles.contextSection}>
-                <span style={{ fontWeight: 600, color: '#333', fontSize: '14px' }}>Context:</span>
+                <span className="ai-context-label">Context:</span>
                 <Space size={4}>
                   <Switch
                     size="small"
                     checked={includeRegions}
                     onChange={setIncludeRegions}
                   />
-                  <span style={{ color: '#333', fontSize: '13px' }}>Regions ({regions.length})</span>
+                  <span className="ai-context-text">Regions ({regions.length})</span>
                 </Space>
                 <Space size={4}>
                   <Switch
@@ -969,7 +968,7 @@ const AIPage: React.FC = () => {
                     checked={includeInfrastructures}
                     onChange={setIncludeInfrastructures}
                   />
-                  <span style={{ color: '#333', fontSize: '13px' }}>Infrastructures ({
+                  <span className="ai-context-text">Infrastructures ({
                     regions.reduce((sum: number, r: Region) => sum + (r.infrastructures?.length || 0), 0)
                   })</span>
                 </Space>
@@ -979,7 +978,7 @@ const AIPage: React.FC = () => {
                     checked={includeApplications}
                     onChange={setIncludeApplications}
                   />
-                  <span style={{ color: '#333', fontSize: '13px' }}>Applications ({
+                  <span className="ai-context-text">Applications ({
                     regions.reduce((sum: number, r: Region) => {
                       if (!r.infrastructures) return sum;
                       const infraCount = (r.infrastructures as Infrastructure[]).reduce((s: number, i: Infrastructure) => {
@@ -995,7 +994,7 @@ const AIPage: React.FC = () => {
                     checked={includeServices}
                     onChange={setIncludeServices}
                   />
-                  <span style={{ color: '#333', fontSize: '13px' }}>Services ({services.length})</span>
+                  <span className="ai-context-text">Services ({services.length})</span>
                 </Space>
                 <Space size={4}>
                   <Switch
@@ -1003,28 +1002,21 @@ const AIPage: React.FC = () => {
                     checked={includeOperations}
                     onChange={setIncludeOperations}
                   />
-                  <span style={{ color: '#333', fontSize: '13px' }}>Operations ({
+                  <span className="ai-context-text">Operations ({
                     services.reduce((sum: number, s: Service) => sum + (s.operations?.length || 0), 0)
                   })</span>
                 </Space>
               </div>
-              <Tag 
+              <Tag
                 icon={<RobotOutlined />}
-                style={{ 
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  border: 'none',
-                  padding: '4px 12px',
-                  fontSize: '13px',
-                  fontWeight: 500
-                }}
+                className="ai-model-tag"
               >
                 {aiModel}
               </Tag>
             </div>
 
             {
-}
+            }
             <div className={styles.chatContainer}>
               <div className={styles.messagesArea}>
                 {messages.length === 0 ? (
@@ -1052,9 +1044,8 @@ const AIPage: React.FC = () => {
                     {messages.map((msg) => (
                       <div
                         key={msg.id}
-                        className={`${styles.message} ${
-                          msg.role === 'user' ? styles.userMessage : styles.aiMessage
-                        }`}
+                        className={`${styles.message} ${msg.role === 'user' ? styles.userMessage : styles.aiMessage
+                          }`}
                       >
                         {msg.role === 'ai' && (
                           <div className={`${styles.messageAvatar} ${styles.aiAvatar}`}>
@@ -1063,26 +1054,25 @@ const AIPage: React.FC = () => {
                         )}
                         <div>
                           <div
-                            className={`${styles.messageBubble} ${
-                              msg.role === 'user' ? styles.userBubble : styles.aiBubble
-                            }`}
+                            className={`${styles.messageBubble} ${msg.role === 'user' ? styles.userBubble : styles.aiBubble
+                              }`}
                           >
                             <div className={styles.messageContent}>
                               {formatMessageContent(msg.content)}
                             </div>
                             {msg.role === 'ai' && (
                               <>
-                            {msg.tokens && (
-                              <div className={styles.messageMetadata}>
-                                <span>
-                                  <CodeOutlined /> {msg.tokens.totalTokens} tokens
-                                </span>
-                                <span>•</span>
-                                <span>
-                                  <ClockCircleOutlined /> {msg.timestamp.toLocaleTimeString()}
-                                </span>
-                              </div>
-                            )}
+                                {msg.tokens && (
+                                  <div className={styles.messageMetadata}>
+                                    <span>
+                                      <CodeOutlined /> {msg.tokens.totalTokens} tokens
+                                    </span>
+                                    <span>•</span>
+                                    <span>
+                                      <ClockCircleOutlined /> {msg.timestamp.toLocaleTimeString()}
+                                    </span>
+                                  </div>
+                                )}
                                 <div className={styles.messageActions}>
                                   <Button
                                     size="small"
@@ -1124,7 +1114,7 @@ const AIPage: React.FC = () => {
               </div>
 
               {
-}
+              }
               <div className={styles.inputArea}>
                 <div className={styles.inputRow}>
                   <div className={styles.textAreaWrapper}>
@@ -1136,12 +1126,7 @@ const AIPage: React.FC = () => {
                       placeholder="Ask me anything about your observability data..."
                       autoSize={{ minRows: 1, maxRows: 4 }}
                       disabled={loading || !initialized}
-                      style={{
-                        fontSize: '15px',
-                        borderRadius: '12px',
-                        border: '2px solid #e8e8e8',
-                        padding: '12px 16px',
-                      }}
+                      className="ai-chat-input"
                     />
                   </div>
                   {loading ? (

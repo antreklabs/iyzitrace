@@ -24,6 +24,7 @@ import HorizontalScrollContainer from '../../components/core/horizontal-scroll-c
 import { getOperationTypeColor } from '../../api/service/services.service';
 import '../../assets/styles/containers/containers.css';
 import '../../assets/styles/global.css';
+import '../../assets/styles/components/overview/overview.css';
 
 const OverviewContainer: React.FC = () => {
   const navigate = useNavigate();
@@ -94,7 +95,7 @@ const OverviewContainer: React.FC = () => {
     const serviceNameColumn = l1.find((col: ColumnItem) => col.key === 'name');
     if (serviceNameColumn) {
       serviceNameColumn.render = (value: string) => {
-        return <span style={{ color: '#1890ff', cursor: 'pointer' }} onClick={() => navigate(`/a/iyzitrace-app/services/${value}`)}>{value}</span>;
+        return <span className="overview-link-blue" onClick={() => navigate(`/a/iyzitrace-app/services/${value}`)}>{value}</span>;
       };
     }
 
@@ -363,12 +364,12 @@ const OverviewContainer: React.FC = () => {
         />
       }
     >
-      <div style={{ padding: '24px', minHeight: '100vh' }}>
+      <div className="overview-main-wrapper">
         {
         }
         <HorizontalScrollContainer
           title="Regions"
-          icon={<CloudOutlined style={{ color: '#1890ff' }} />}
+          icon={<CloudOutlined className="overview-icon-blue" />}
           searchable={true}
           searchPlaceholder=" Search regions..."
           getSearchableText={(child) => {
@@ -383,7 +384,7 @@ const OverviewContainer: React.FC = () => {
           }}
         >
           {regions.map((region) => (
-            <div key={region.id} style={{ display: 'inline-block', width: '280px' }}>
+            <div key={region.id} className="overview-card-wrapper-region">
               <RegionCard
                 region={region}
                 onClick={handleRegionClick}
@@ -397,7 +398,7 @@ const OverviewContainer: React.FC = () => {
         }
         <HorizontalScrollContainer
           title="Infrastructures"
-          icon={<CloudServerOutlined style={{ color: '#1890ff' }} />}
+          icon={<CloudServerOutlined className="overview-icon-blue" />}
           searchable={true}
           searchPlaceholder=" Search infrastructures..."
           getSearchableText={(child) => {
@@ -412,7 +413,7 @@ const OverviewContainer: React.FC = () => {
           }}
         >
           {filteredInfrastructures.map((infrastructure) => (
-            <div key={infrastructure.id} style={{ display: 'inline-block', width: '300px' }}>
+            <div key={infrastructure.id} className="overview-card-wrapper-infra">
               <InfrastructureCard
                 infrastructure={infrastructure}
                 onClick={handleInfrastructureClick}
@@ -443,7 +444,7 @@ const OverviewContainer: React.FC = () => {
         {orphanServices.length > 0 && (
           <HorizontalScrollContainer
             title="Orphan Services (Drag to Infrastructure)"
-            icon={<SettingOutlined style={{ color: '#8c8c8c' }} />}
+            icon={<SettingOutlined className="overview-icon-gray" />}
             searchPlaceholder=" Search orphan services..."
             searchable={true}
             getSearchableText={(child) => {
@@ -460,12 +461,9 @@ const OverviewContainer: React.FC = () => {
             {orphanServices.map((service) => (
               <div
                 key={service.id}
+                className="overview-card-wrapper-service overview-drag-item"
                 style={{
-                  display: 'inline-block',
-                  minWidth: '240px',
-                  cursor: 'grab',
                   opacity: draggedService?.id === service.id ? 0.5 : 1,
-                  transition: 'opacity 0.2s ease'
                 }}
                 draggable
                 onDragStart={() => handleServiceDragStart(service)}
@@ -473,7 +471,7 @@ const OverviewContainer: React.FC = () => {
                 <ServiceCard
                   services={[service]}
                   title={service.name}
-                  icon={<SettingOutlined style={{ color: 'white' }} />}
+                  icon={<SettingOutlined className="overview-icon-white" />}
                   gradient="linear-gradient(135deg, #6b7280 0%, #4b5563 100%)"
                   onClick={handleServiceClick}
                   selectedServiceId={selectedServiceId}
@@ -488,18 +486,18 @@ const OverviewContainer: React.FC = () => {
         {Object.keys(servicesByInfrastructure).length > 0 && (
           <HorizontalScrollContainer
             title="Services"
-            icon={<SettingOutlined style={{ color: '#1890ff' }} />}
+            icon={<SettingOutlined className="overview-icon-blue" />}
             searchable={true}
             searchPlaceholder=" Search services..."
             searchQuery={servicesSearchQuery}
             onSearchChange={setServicesSearchQuery}
           >
             {Object.entries(servicesByInfrastructure).map(([infraId, { infrastructure, services }]) => (
-              <div key={infraId} style={{ display: 'inline-block' }}>
+              <div key={infraId} className="overview-card-wrapper">
                 <ServiceCard
                   services={services}
                   title={`${infrastructure.name}`}
-                  icon={<SettingOutlined style={{ color: 'white' }} />}
+                  icon={<SettingOutlined className="overview-icon-white" />}
                   gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
                   onClick={handleServiceClick}
                   onUnmap={handleUnmapService}
@@ -517,14 +515,14 @@ const OverviewContainer: React.FC = () => {
         {Object.keys(operationsByService).length > 0 && (
           <HorizontalScrollContainer
             title="Operations"
-            icon={<UnorderedListOutlined style={{ color: '#1890ff' }} />}
+            icon={<UnorderedListOutlined className="overview-icon-blue" />}
             searchable={true}
             searchPlaceholder=" Search operations..."
             searchQuery={operationsSearchQuery}
             onSearchChange={setOperationsSearchQuery}
           >
             {Object.entries(operationsByService).map(([serviceName, operations]) => (
-              <div key={serviceName} style={{ display: 'inline-block' }}>
+              <div key={serviceName} className="overview-card-wrapper">
                 <OperationCard
                   operations={operations}
                   title={`${serviceName}`}
@@ -550,8 +548,8 @@ const OverviewContainer: React.FC = () => {
       )}
       <Modal
         title={
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <ExclamationCircleOutlined style={{ color: '#faad14', fontSize: '24px' }} />
+          <div className="modal-header-with-icon">
+            <ExclamationCircleOutlined className="modal-icon-warning" />
             <span>Remove Service Mapping</span>
           </div>
         }
@@ -563,11 +561,11 @@ const OverviewContainer: React.FC = () => {
         okButtonProps={{ danger: true }}
         width={500}
       >
-        <div style={{ padding: '16px 0' }}>
-          <p style={{ fontSize: '16px', marginBottom: '12px' }}>
+        <div className="modal-body-content">
+          <p className="modal-body-title">
             Are you sure you want to remove the mapping for <strong>"{serviceToUnmap?.name}"</strong>?
           </p>
-          <p style={{ color: '#8c8c8c', fontSize: '14px' }}>
+          <p className="modal-body-description">
             This will move the service back to <strong>Orphan Services</strong> and it will no longer be associated with its current infrastructure.
           </p>
         </div>

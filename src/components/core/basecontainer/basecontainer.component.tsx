@@ -60,7 +60,7 @@ const BaseContainer: React.FC<BaseConatinerProps> = ({ title, children, showHead
                 type="link"
                 icon={<SettingOutlined />}
                 onClick={handleGoToSettings}
-                style={{ padding: '0 8px' }}
+                className="u-p-0-8"
               >
                 Go to Settings
               </Button>
@@ -69,7 +69,7 @@ const BaseContainer: React.FC<BaseConatinerProps> = ({ title, children, showHead
           type="warning"
           showIcon
           icon={<WarningOutlined />}
-          style={{ marginBottom: 16 }}
+          className="u-mb-16"
         />
       )}
       {children as any}
