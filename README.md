@@ -14,9 +14,13 @@ A comprehensive OpenTelemetry-native observability platform built as a Grafana p
   * [Performance Monitoring](#performance-monitoring)
   * [Distributed Tracing](#distributed-tracing)
   * [Log Management](#log-management)
+  * [AI-Powered Analysis](#ai-powered-analysis)
+  * [Agent Management](#agent-management)
+  * [Inventory Management](#inventory-management)
   * [Customization](#customization)
 * [Get Started](#get-started)
   * [Installation](#installation)
+  * [Setup Wizard](#setup-wizard)
   * [Initial Configuration](#initial-configuration)
   * [Quick Start Guide](#quick-start-guide)
 * [Key Concepts](#key-concepts)
@@ -34,6 +38,8 @@ A comprehensive OpenTelemetry-native observability platform built as a Grafana p
   * [Views](#views)
   * [Exceptions](#exceptions)
   * [AI Assistant](#ai-assistant)
+  * [Agent Manager](#agent-manager)
+  * [Inventory Manager](#inventory-manager)
 * [Configuration](#configuration)
   * [Settings](#settings)
   * [Datasources](#datasources)
@@ -77,6 +83,8 @@ IyziTrace offers:
 - **Service-Centric View**: Understand your microservices architecture at a glance
 - **Infrastructure Monitoring**: Real-time insights into your hosts and containers
 - **AI-Powered Analysis**: Get intelligent recommendations and anomaly detection
+- **Agent Management**: Manage and monitor OpenTelemetry collectors remotely
+- **Inventory Management**: Track and discover all infrastructure entities and relationships
 - **OpenTelemetry Native**: Built on open standards for maximum compatibility
 
 ### Why IyziTrace?
@@ -87,27 +95,27 @@ No complex setups, no maintenance — all the context for your logs, metrics and
 
 - **Full-stack Infrastructure Overview**: See servers, runtimes, services and operations in a single layered view. From CPU usage to business operations, IyziTrace gives you an instant, end-to-end snapshot of your system health.
 
-  ![Full-stack Infrastructure Overview](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2010.58.00.png&w=1920&q=75)
+  ![Full-stack Infrastructure Overview](docs/images/screenshots/overview/overview.png)
 
-- **Infrastructure Layer Map**: Visualize all infrastructures across regions as interactive cards with health badges. Quickly spot which data center or platform needs attention before it impacts your services.
+- **Service Dependency Topology**: Visualize all services and their dependencies as interactive service maps. Click any node to see details including infrastructure info, resources, health status, and connected applications.
 
-  ![Infrastructure Layer Map](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2010.59.18.png&w=1920&q=75)
+  ![Service Dependency Topology](docs/images/screenshots/service-map/service-map.png)
 
-- **Focus on Critical Zones**: Drill into a specific zone or cluster to understand how internal components behave. Highlighted elements let you zoom in on what matters without losing the global context.
+- **Deep Service Performance**: Drill into individual services to analyze latency percentiles (P50, P75, P90, P95, P99), throughput, Apdex scores, and operation rates with real-time performance charts.
 
-  ![Focus on Critical Zones](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2010.59.34.png&w=1920&q=75)
+  ![Deep Service Performance](docs/images/screenshots/services/service-detail.png)
 
-- **Deep Infrastructure Details**: Select any infrastructure node and instantly see IP, OS, type and resource usage. No more jumping between tools – all critical details are a single click away.
+- **Distributed Trace Analysis**: Follow the complete journey of requests across services with detailed Gantt chart timelines, span attributes, and operation type filtering.
 
-  ![Deep Infrastructure Details](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2010.59.59.png&w=1920&q=75)
+  ![Distributed Trace Analysis](docs/images/screenshots/traces/trace-detail.png)
 
-- **Application Layer Topology**: Discover every runtime and platform running on your infrastructure – Go, Node.js, Nginx, Java, PHP and more. IyziTrace shows how each application fits into the bigger picture.
+- **AI-Powered Insights**: Get instant system health analysis, anomaly detection, and optimization recommendations from the AI Assistant with context-aware data analysis.
 
-  ![Application Layer Topology](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2011.00.59.png&w=1920&q=75)
+  ![AI-Powered Insights](docs/images/screenshots/ai-agent/ai2.png)
 
-- **Application Health & Latency**: Open any application to see its status, connected services and latency distribution. Identify slow dependencies and failing integrations directly from the detail panel.
+- **Agent Fleet Management**: Manage and monitor your OpenTelemetry collectors with real-time topology views, configuration management, metrics dashboards, and centralized log collection.
 
-  ![Application Health & Latency](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2011.01.16.png&w=1920&q=75)
+  ![Agent Fleet Management](docs/images/screenshots/agent-manager/agent-topology.png)
 
 ### Built for Modern Platforms
 
@@ -160,167 +168,292 @@ IyziTrace provides a comprehensive set of features designed to give you complete
 
 ### Infrastructure & Service Topology
 
-**1. Service Map – End-to-End Calls**
+**1. Overview – Regions & Infrastructures**
 
-![Service Map – End-to-End Calls](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2011.01.54.png&w=1920&q=75)
+![Overview – Regions & Infrastructures](docs/images/screenshots/overview/overview.png)
 
-View every API and backend service as a connected map. Follow request paths across microservices and understand how each dependency affects overall performance.
+See your entire infrastructure at a glance. The overview page presents regions, infrastructure hosts with CPU/memory metrics, services grouped by infrastructure, and operations — all in a single scrollable view with advanced filtering.
 
-- Visual representation of all services
-- Interactive dependency graph
-- Real-time call flow visualization
-- Identify bottlenecks at a glance
+- Regions with health status indicators
+- Infrastructure cards with real-time CPU & memory usage
+- Service cards grouped by infrastructure host
+- Operations grouped by service
+- Full filter panel with service, type, operation, status, labels, and fields
 
-**2. Full Service Dependency Graph**
+**2. Overview – Operations & Data Table**
 
-![Full Service Dependency Graph](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2011.03.40.png&w=1920&q=75)
+![Overview – Operations & Data Table](docs/images/screenshots/overview/overview2.png)
 
-Visualize every microservice in your system and how they interact. Expand, search, or drill into any node to understand dependencies, bottlenecks, or upstream/downstream risks.
+Drill down into operation-level details and view all infrastructure data in a sortable, expandable table. Expand any infrastructure to see its services, and expand services to see operations with detailed metrics.
 
-- Complete system topology
-- Interactive node exploration
-- Dependency impact analysis
-- Upstream/downstream tracing
+- Operation cards grouped by service
+- Expandable data table with status, error/warning/degraded ratios
+- Per-service metrics: Type, Port, Avg, Min, Max, P50–P99, Calls, Calls/s, Operations
 
-**3. Visual Call Flows**
+**3. Service Map – Infrastructure Topology**
 
-![Visual Call Flows](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2011.02.05.png&w=1920&q=75)
+![Service Map – Infrastructure Topology](docs/images/screenshots/service-map/service-map.png)
 
-Follow the exact path of a request across services – from the edge to the core and back. IyziTrace turns complex microservice flows into an easy-to-read visual journey.
+Visualize your entire infrastructure topology with interactive region-based grouping. Click any infrastructure node to see its details including IP address, OS version, type, resource usage, health status, and connected applications.
 
-- Request path visualization
-- Service interaction timeline
-- Cross-service tracing
-- Easy-to-understand flow diagrams
+- Region-based infrastructure grouping
+- Infrastructure detail drawer with resources and applications
+- Health status indicators (healthy, warning/degraded, error)
+- Minimap for navigation
+
+**4. Service Map – Dependency Graph**
+
+![Service Map – Dependency Graph](docs/images/screenshots/service-map/service-map2.png)
+
+View the complete service dependency graph for any infrastructure. See all services and their interconnections with metrics including average latency, min/max latency, calls count, and status badges.
+
+- Full service dependency visualization
+- Service detail drawer with operations list
+- Quick navigation to Logs, Metrics, and Traces
+- Fullscreen mode for detailed analysis
+
+**5. Service Map – Detailed View**
+
+![Service Map – Detailed View](docs/images/screenshots/service-map/service-map3.png)
+
+Zoom into specific service connections with detailed metrics per node. Each service card shows average/min latency, calls count, operation types (HTTP, RPC, MESSAGING, etc.), and health status.
+
+- Per-service metrics on every node
+- Operation type badges
+- Connection lines showing request flow
+- Service info panel with full details
 
 ### Performance Monitoring
 
-**4. Service Performance Overview**
+**6. Services Overview**
 
-![Service Performance Overview](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2011.04.24.png&w=1920&q=75)
+![Services Overview](docs/images/screenshots/services/services.png)
 
-Track latency, error rates, traffic volume, and performance metrics across all services. The overview dashboard gives you a real-time picture of system behavior across your entire stack.
+Track all services with summary cards showing average, min, and max latency along with call counts. Below, interactive charts display request rates, error rates, and duration percentiles (P50) over time, with a sortable services table.
 
-- Real-time metrics display
-- Aggregated performance data
-- System-wide health snapshot
-- Traffic pattern analysis
+- Service summary cards with latency metrics
+- Requests chart (stacked bar chart per service)
+- Errors chart (line chart per service)
+- Duration chart with configurable percentiles
+- Sortable services table with Type, Port, Avg/Min/Max Latency, Requests, Calls/s, Operations, Status, and Error Ratio
 
-**5. Service-Level Metrics**
+**7. Service Detail – Call Metrics**
 
-![Service-Level Metrics](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2011.02.29.png&w=1920&q=75)
+![Service Detail – Call Metrics](docs/images/screenshots/services/service-detail.png)
 
-Open a single service to inspect its health, error rate and latency (avg, min, max). From here you can jump directly to logs, metrics or traces for faster root cause analysis.
+Analyze detailed call metrics for any service. View operation count, total call count, max/min latency spans, and interactive charts for latency percentiles (P50, P75, P90, P95, P99), operation rate, Apdex score, and key operations.
 
-- Detailed service health
-- Error rate tracking
-- Latency analysis (avg, min, max)
-- Quick navigation to related data
+- Summary cards: Operation Count, Total Call Count, Max/Min Latency Span
+- Latency chart with P50–P99 percentiles
+- Operation Rate chart
+- Apdex Score chart
+- Key Operations chart
 
-**6. Service Detail – Call Metrics**
+**8. Service Detail – Operations Tab**
 
-![Service Detail – Call Metrics](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2011.04.59.png&w=1920&q=75)
+![Service Detail – Operations Tab](docs/images/screenshots/services/service-detail2.png)
 
-Analyze detailed call metrics for the selected service, including latency percentiles (P50, P90, P99), throughput, and performance anomalies over time.
+Switch to the Operations tab to see per-operation latency breakdown with P50 tooltips, operation rates, and Apdex scores — all with interactive time-series charts.
 
-- Latency percentiles
-- Throughput analysis
-- Performance anomaly detection
-- Time-series visualization
-
-**7. Service Detail – Operations Insight**
-
-![Service Detail – Operations Insight](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2011.05.14.png&w=1920&q=75)
-
-Dive into operation-level performance for a service. Monitor latency, APDEX scores, and operations-per-second to detect regressions or spikes instantly.
-
-- Operation-level metrics
-- APDEX scoring
-- Regression detection
-- Spike identification
-
-**8. Operation-Level Insight**
-
-![Operation-Level Insight](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2011.03.03.png&w=1920&q=75)
-
-Monitor each operation such as "Create User" with its own latency and P95 metrics. See which source and target services are involved in every call.
-
-- Per-operation metrics
-- P95 latency tracking
-- Source-target service mapping
-- Operation health monitoring
-
-**9. Operation Detail – Update Profile**
-
-![Operation Detail – Update Profile](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2011.03.11.png&w=1920&q=75)
-
-Inspect the full execution of specific operations, including latency (avg/p95), HTTP/gRPC method, and source–target service path. Quickly identify bottlenecks in user-facing flows.
-
-- Full operation execution details
-- HTTP/gRPC method inspection
-- Service path visualization
-- Bottleneck identification
+- Per-operation P50 latency visualization
+- Operation-level performance breakdown
+- Time-correlated charts for comparison
 
 ### Distributed Tracing
 
-**10. Distributed Traces Overview**
+**9. Traces Overview**
 
-![Distributed Traces Overview](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2011.06.02.png&w=1920&q=75)
+![Traces Overview](docs/images/screenshots/traces/traces.png)
 
-View all traces across your system sorted by latency, root service, or timestamp. Instantly find the slowest or fastest requests and inspect their complete trace data.
+View all traces across your system with summary cards showing max latency, min latency, average latency, and total span count. The trace list includes Trace ID, Service, Trace name, Duration, Start/End Time, and per-service span counts.
 
-- Sortable trace list
-- Quick performance analysis
-- Complete trace inspection
-- Root service identification
+- Summary cards with latency statistics and span distribution chart
+- Sortable trace table with service span count columns
+- Clickable Trace IDs for detailed inspection
+- Search and filter capabilities
 
-**11. Advanced Time Range Filtering**
+**10. Trace Detail**
 
-![Advanced Time Range Filtering](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2011.06.14.png&w=1920&q=75)
+![Trace Detail](docs/images/screenshots/traces/trace-detail.png)
 
-Use quick ranges or precise date-time selection to analyze trace data within any custom timeframe. Perfect for incident analysis or regression detection.
+Inspect individual traces with a complete Gantt chart timeline view. Filter by operation type (HTTP, MESSAGING, CACHE, DATABASE, RPC), view parent-child span relationships, and inspect span details including attributes, resources, and events.
 
-- Quick time range selection
-- Custom date-time picker
-- Incident analysis tools
-- Regression detection support
-
-**12. Multi-Backend Trace Selection**
-
-![Multi-Backend Trace Selection](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2011.06.27.png&w=1920&q=75)
-
-Choose between multiple tracing backends (Tempo, Observability Platform, etc.) to compare environments, test data, or staging vs production pipelines.
-
-- Multiple backend support
-- Environment comparison
-- Staging vs production analysis
-- Seamless backend switching
+- Trace header with root service, duration, timestamp, and span count
+- Operation type filter chips
+- Gantt chart with color-coded spans and status codes
+- Span Details panel: Span Name, Span ID, Start Time, Duration, Service, Span Kind, Status Code
+- Expandable attribute groups: app, network, peer, server, rpc, thread, type, operation, host
 
 ### Log Management
 
-**13. Centralized Log Explorer**
+**11. Centralized Log Explorer**
 
-![Centralized Log Explorer](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2011.07.14.png&w=1920&q=75)
+![Centralized Log Explorer](docs/images/screenshots/logs/logs.png)
 
-Search, filter, and inspect logs from any service. View runtime details, JVM/OS diagnostics, container metadata, and attributes from OpenTelemetry logs.
+Search, filter, and inspect logs from any service. Expand any log entry to see the full message, telemetry information (SDK, version, language), basic information, runtime details, and additional attributes with clickable trace/span IDs.
 
-- Unified log search
-- Runtime diagnostics
-- Container metadata
-- OpenTelemetry attributes
+- Log list with Timestamp, Level (color-coded), Service, and Message
+- Expandable log detail view with structured sections
+- Telemetry Information badges (SDK, Version, Language)
+- Basic Information: Log ID, Timestamp, Level, Service, Namespace, Version, Host Name
+- Runtime Information: OS Type, OS Description, Architecture
+- Additional Attributes with clickable trace_id, otelTraceID, span_id, otelSpanID links
+- Pagination controls
+
+### AI-Powered Analysis
+
+**12. AI Assistant – Chat Interface**
+
+![AI Assistant – Chat Interface](docs/images/screenshots/ai-agent/ai.png)
+
+The AI Assistant provides a full-page intelligent analysis interface. Quick action cards (Quick Overview, Service Health, Find Anomalies, Recommendations) give instant insights. Context toggles let you include Regions, Infrastructures, Applications, Services, and Operations data.
+
+- AI Configuration status with Active/Inactive indicator
+- Quick action cards for common analyses
+- Context toggles for data scope selection
+- Model selector (e.g., deepseek/deepseek-chat)
+- Suggested questions for quick start
+- Request and token usage tracking
+
+**13. AI Assistant – Analysis Response**
+
+![AI Assistant – Analysis Response](docs/images/screenshots/ai-agent/ai2.png)
+
+AI responses include structured summaries, key findings with severity indicators, and actionable recommendations. Results show token count and timestamp with copy functionality.
+
+- Structured response format: Summary, Key Findings, Recommendations
+- Severity-coded findings (🔴 critical, 🟡 warning, 🟢 healthy)
+- Copy button for sharing results
+- Token count and timestamp metadata
+
+### Agent Management
+
+**14. Agent Manager – Agents List**
+
+![Agent Manager – Agents List](docs/images/screenshots/agent-manager/agent.png)
+
+Manage and monitor all registered OpenTelemetry agents. View agent status (Online/Offline), name, version, group assignment, last seen timestamp, and labels. Search, filter by active status, and perform actions on agents.
+
+- Agent list with Status, Name, Version, Group, Last Seen, Labels
+- Search and filter controls
+- "Show active only" toggle
+- Delete action per agent
+- Tabs: Agents, Topology, Groups, Configs
+
+**15. Agent Topology**
+
+![Agent Topology](docs/images/screenshots/agent-manager/agent-topology.png)
+
+Visualize your agent infrastructure as interactive topology cards. View agents grouped by instance or group, with metrics (Metrics count, Logs count, Throughput), and a resource tree showing Agent Groups and individual agents with online/offline status.
+
+- Instance and Group view modes
+- Agent cards with metrics and group assignment
+- Resource sidebar with Agent Groups tree
+- Individual agent status indicators
+
+**16. Agent Groups**
+
+![Agent Groups](docs/images/screenshots/agent-manager/agent-group.png)
+
+Organize agents into logical groups for easier management. View group name, agent count, configuration assignment, creation/update dates, labels, and perform edit/delete actions.
+
+- Groups table with Name, Agents count, Config, Created, Updated, Labels
+- Create Group button
+- Edit and Delete actions per group
+
+**17. Agent Configuration**
+
+![Agent Configuration](docs/images/screenshots/agent-manager/agent-config.png)
+
+Create and edit OpenTelemetry Collector configurations with a built-in YAML editor and live pipeline visualization. The pipeline view shows Receivers, Processors, and Exporters for Traces, Metrics, and Logs with validation status.
+
+- YAML configuration editor with syntax highlighting
+- Live pipeline visualization (Receiver → Processor → Exporter)
+- Separate pipeline views for Traces, Metrics, and Logs
+- Configuration validation indicator (Valid/Invalid)
+- Target group selector and save functionality
+
+**18. Agent Detail – Metrics**
+
+![Agent Detail – Metrics](docs/images/screenshots/agent-manager/agent-detail-metrics.png)
+
+Monitor individual agent performance with detailed telemetry metrics. View Spans Rate, Metric Points Rate, and Log Records Rate over time with interactive charts showing accepted data across receivers.
+
+- Tabs: Overview, Config, Metrics, Logs
+- Time range selection (1h, 6h, 24h)
+- Receivers, Processors, Exporters breakdown
+- Interactive rate charts with Min, Max, Mean statistics
+
+**19. Agent Detail – Logs**
+
+![Agent Detail – Logs](docs/images/screenshots/agent-manager/agent-detail-logs.png)
+
+View agent-specific logs with severity filtering and search. Logs show timestamp, severity level (Info, Error), and message content for troubleshooting agent issues.
+
+- Severity filter dropdown
+- Search within logs
+- Time range selection
+- Color-coded log entries by severity
+
+### Inventory Management
+
+**20. Inventory Dashboard**
+
+![Inventory Dashboard](docs/images/screenshots/inventory-manager/inventory-dashboard.png)
+
+Get a complete overview of all discovered infrastructure entities and their relationships. Summary cards show Total Entities, Total Relations, Entity Types, and Relation Types. Resource breakdown cards display Hosts, Containers, Kubernetes Pods, Services, Databases & Cache, and Messaging Systems.
+
+- Summary cards: Total Entities (4,202), Total Relations (4,379), Entity Types (10), Relation Types (8)
+- Resource breakdown: Hosts, Containers, Kubernetes Pods, Services, Databases & Cache, Messaging Systems
+- All Entity Types with counts (process, container, service, host, cloud.region, etc.)
+- Recent Entities list with type badges and timestamps
+- Tabs: Dashboard, Tree View, Table View
+
+**21. Inventory Tree View**
+
+![Inventory Tree View](docs/images/screenshots/inventory-manager/inventory-treeview.png)
+
+Explore your infrastructure hierarchy in an interactive tree structure. Navigate from cloud regions → hosts → services → containers with expandable nodes. Switch between Tree View and Category View.
+
+- Hierarchical entity tree: cloud.region → host → services → containers
+- Expand/Collapse all functionality
+- Search across entities
+- Tree View and Category View toggle
+- Entity type badges with color coding
+
+**22. Inventory Company View**
+
+![Inventory Company View](docs/images/screenshots/inventory-manager/inventory-company.png)
+
+**23. Inventory Service Detail**
+
+![Inventory Service Detail](docs/images/screenshots/inventory-manager/inventory-service-detail.png)
+
+**24. Inventory Table – Entities**
+
+![Inventory Table – Entities](docs/images/screenshots/inventory-manager/inventory-table-entity.png)
+
+**25. Inventory Table – Relations**
+
+![Inventory Table – Relations](docs/images/screenshots/inventory-manager/inventory-table-relations.png)
 
 ### Customization
 
-**14. Custom Monitoring Dashboards**
+**26. Exception Tracking**
 
-![Custom Monitoring Dashboards](https://beta.iyzitrace.com/_next/image?url=%2Ffeatures%2FScreenshot%202025-10-17%20at%2011.08.59.png&w=1920&q=75)
+![Exception Tracking](docs/images/screenshots/exception/exceptions.png)
 
-Create dashboards tailored to your needs: logs, metrics, service maps, or trace views. Save and reuse widgets to build a personalized observability control center.
+Track and analyze exceptions across services. View ExceptionType, Count, Service, Operation, Type (messaging, rpc, etc.), and ExceptionMessage with search and pagination.
 
-- Custom dashboard creation
-- Widget library
-- Reusable components
-- Personalized layouts
+**27. Exception Detail**
+
+![Exception Detail](docs/images/screenshots/exception/exception-detail.png)
+
+Inspect individual exceptions with full context. Quick action cards link to Service Details, Trace Graph, and Span Details. Key-Value Pairs table shows all span attributes including serviceName, host.name, traceID, spanID, messaging details, resource information, and more.
+
+- Navigation: Previous/Next Exception
+- Quick actions: View Service Details, See the error in trace graph, View Span Details
+- Complete key-value pairs with clickable trace/span links
 
 ---
 
@@ -335,6 +468,8 @@ Create dashboards tailored to your needs: logs, metrics, service maps, or trace 
 3. Search for **"IyziTrace"**
 4. Click **Install**
 
+![Plugin Installation](docs/images/screenshots/plugin/plugin-install.png)
+
 Alternatively, install via CLI:
 
 ```bash
@@ -347,93 +482,78 @@ grafana-cli plugins install iyzitrace-app
 2. Find **IyziTrace** in your installed plugins
 3. Click **Enable**
 
+![Plugin Configuration](docs/images/screenshots/plugin/plugin-configuration.png)
+
+### Setup Wizard
+
+IyziTrace includes a guided setup wizard to get you started quickly:
+
+#### Step 1: Platform Connection
+
+![Wizard – Platform Connection](docs/images/screenshots/wizard/wizard1.png)
+
+Connect to your IyziTrace Observability Platform:
+1. Enter your **Platform URL** (e.g., `http://localhost`)
+2. Choose **Authentication Type**: Open Access or API Key Protected
+3. If API Key Protected, enter your **Platform API Key**
+4. Click **Verify Connection** to test connectivity
+5. Click **Continue** to proceed
+
+#### Step 2: Configure Data Sources
+
+![Wizard – Data Sources](docs/images/screenshots/wizard/wizard2.png)
+
+Automatically configure Prometheus, Loki, and Tempo data sources:
+1. Review the auto-detected data source endpoints
+2. Click **Configure Data Sources** to set them up in Grafana
+3. Verify all data sources show green checkmarks
+4. Click **Continue** to proceed
+
+#### Step 3: Verification
+
+![Wizard – Verification](docs/images/screenshots/wizard/wizard3.png)
+
+The wizard verifies your setup:
+1. Check that all data sources are properly connected
+2. Verify data is flowing through the platform
+3. Click **Finish** to complete the setup
+
 ### Initial Configuration
 
-#### Step 1: Obtain API Key
+After completing the setup wizard, you can fine-tune your configuration in **Settings**:
 
-1. Visit [IyziTrace Website](https://iyzitrace.com)
-2. Sign up or log in to your account
-3. Navigate to **API Keys** section
-4. Generate a new API key
-5. Copy the key (you'll need it in the next step)
+![Settings – Platform](docs/images/screenshots/setting/settings.png)
 
-#### Step 2: Configure Settings
+#### Settings Tabs:
 
-1. In Grafana, go to **IyziTrace** → **Settings**
-2. Navigate to the **Security** tab
-3. Paste your **API Key**
-4. Click **Save Settings**
+1. **Platform**: Configure platform URL and authentication
+2. **Data Sources**: Manage Prometheus, Loki, and Tempo connections
+3. **AI**: Configure AI assistant with OpenRouter API key and model selection
+4. **Definitions**: Define metric and label patterns
+5. **Privacy**: Privacy and data handling settings
 
-#### Step 3: Add Datasources
-
-**Add Tempo Datasource:**
-
-1. Go to **Connections** → **Data sources**
-2. Click **Add data source**
-3. Select **Tempo**
-4. Configure your Tempo endpoint
-5. Click **Save & test**
-
-**Add Loki Datasource:**
-
-1. Click **Add data source**
-2. Select **Loki**
-3. Configure your Loki endpoint
-4. Click **Save & test**
-
-**Add Prometheus Datasource:**
-
-1. Click **Add data source**
-2. Select **Prometheus**
-3. Configure your Prometheus endpoint
-4. Click **Save & test**
-
-Then, return to **IyziTrace** → **Settings** → **Datasources** tab and select your default datasources.
-
-#### Step 4: Configure Definitions
-
-1. Go to **Settings** → **Definitions** tab
-2. Define your metric and label patterns:
-   - **Service Label Name**: Default label for service names (e.g., `service_name`)
-   - **Operation Label Name**: Default label for operation names (e.g., `span_name`)
-   - **Type Label Name**: Default label for operation types (e.g., `span_kind`)
-3. Add custom metric definitions for your specific use cases
-4. Click **Save Settings**
-
-#### Step 5: (Optional) Enable AI Support
-
-1. Visit [OpenRouter](https://openrouter.ai/)
-2. Create an account and obtain an API key
-3. In IyziTrace, go to **Settings** → **AI Configuration** tab
-4. Enter your **OpenRouter API Key**
-5. Configure AI settings:
-   - **Model**: Select your preferred model (e.g., `gpt-4`)
-   - **Temperature**: Adjust creativity (0.0 - 1.0)
-   - **Max Tokens**: Set maximum response length
-6. Click **Save Settings**
-
-#### Step 6: Configure Teams (Optional)
-
-1. Navigate to **Teams**
-2. Click **Create Team**
-3. Set team name and description
-4. Assign team members
-5. Configure page permissions for the team
-6. Click **Save**
+![Settings – Data Sources](docs/images/screenshots/setting/settings2.png)
 
 ### Quick Start Guide
 
-Once configured, you'll see the **Landing Page** with setup progress:
+Once configured, you'll see the **Home Page** with module status and views:
 
-1. ✅ **Set Api Key** - Configured in step 2
-2. ✅ **Add Tempo Datasource** - Configured in step 3
-3. ✅ **Add Loki Datasource** - Configured in step 3
-4. ✅ **Add Prometheus Datasource** - Configured in step 3
-5. ⏳ **Send Traces** - Configure your applications to send OTLP traces
-6. ⏳ **Send Logs** - Configure your applications to send logs
-7. ⏳ **Send Metrics** - Configure your applications to send metrics
-8. ⏳ **Assign Orphan Services** - Map services to infrastructure
-9. ✅ **Setup AI Assistant** - Configured in step 5
+![Home Page](docs/images/screenshots/home/home.png)
+
+**Module Status** shows active modules (e.g., 10/11 active), and **Section Cards** provide quick navigation:
+
+- **Overview** – Infrastructure & service topology
+- **Service Map** – Visual dependency graph
+- **Services** – Performance monitoring
+- **Traces** – Distributed trace analysis
+- **Logs** – Centralized log management
+- **Exceptions** – Exception tracking
+- **AI Assistant** – AI-powered insights
+- **Teams** – User & team management
+- **Agents** – OpenTelemetry agent management
+- **Inventories** – Infrastructure inventory
+
+Each card shows **Explore** and **Active/Inactive** status. Below, the **Views** section shows saved monitoring views with live metrics.
 
 ---
 
@@ -465,23 +585,31 @@ IyziTrace automatically discovers relationships between services and infrastruct
 
 ### Time Picker
 
+![Time Range Filter](docs/images/screenshots/common/timerange-filter.png)
+
 All views support flexible time range selection:
 
-- **Quick Ranges**: Last 5 minutes, 15 minutes, 1 hour, 6 hours, 24 hours, 7 days
-- **Custom Range**: Select specific start and end times
+- **Quick Ranges**: Last 5 minutes, 15 minutes, 30 minutes, 1 hour, 3 hours, 6 hours, 12 hours, 24 hours, 2 days
+- **Custom Range**: Select specific start and end times with absolute date-time picker
 - **Relative Ranges**: "now-1h" to "now"
 
 Time ranges are preserved when navigating between views.
 
 ### Filtering
 
+![Filters Panel](docs/images/screenshots/common/filters.png)
+
 IyziTrace provides powerful filtering capabilities:
 
-- **Field Filters**: Filter by any resource attribute
-- **Label Filters**: Filter by OpenTelemetry labels
-- **Operation Filters**: Filter by operation name or type
-- **Status Filters**: Filter by health status (healthy, warning, error)
-- **Search**: Free-text search across all visible data
+- **Service**: Filter by service name
+- **Type**: Filter by service type
+- **Operation**: Filter by operation name
+- **Status**: Filter by health status
+- **Exception Type**: Filter by exception type
+- **Labels**: Add custom label filters
+- **Fields**: Add custom field filters
+- **Options**: Limit, Interval, Page Count, Order By, Direction
+- **Apply / Reset**: Apply filters or reset to defaults
 
 ---
 
@@ -489,733 +617,340 @@ IyziTrace provides powerful filtering capabilities:
 
 ### Landing Page
 
-The **Landing Page** provides an at-a-glance overview of your observability setup.
+The **Home Page** provides an at-a-glance overview of your observability setup.
+
+![Home Page](docs/images/screenshots/home/home.png)
 
 **Key Features:**
-- **Setup Progress**: Track completion of setup steps
-- **Section Status Cards**: Quick view of which features have data
-  - Overview: Active if infrastructure data exists
-  - Service Map: Active if service graph data exists
-  - Services: Active if service metrics exist
-  - Traces: Active if trace data exists
-  - Logs: Active if log data exists
-  - Views: Active if saved views exist
-  - Exceptions: Active if exception data exists
-  - AI Assistant: Active if API key is configured
-  - Teams: Active if teams are configured
-  - Settings: Active if API key is set
+- **Module Status**: Shows active module count (e.g., 10/11 active)
+- **Section Status Cards**: Quick view of all modules with Active/Inactive status
+  - Overview, Service Map, Services, Traces, Logs, Exceptions, AI Assistant, Teams, Agents, Inventories
 - **Quick Navigation**: Click "Explore" on any card to jump to that section
-
-**Setup Steps:**
-
-1. **Set Api Key**: Configure your IyziTrace API key
-2. **Add Tempo Datasource**: Connect to your Tempo instance
-3. **Add Loki Datasource**: Connect to your Loki instance
-4. **Add Prometheus Datasource**: Connect to your Prometheus instance
-5. **Send Traces**: Start sending OTLP traces from your applications
-6. **Send Logs**: Start sending logs to Loki
-7. **Send Metrics**: Start sending metrics to Prometheus
-8. **Assign Orphan Services**: Map discovered services to infrastructure
-9. **Setup AI Assistant**: Configure AI for intelligent insights
-
-Hover over incomplete steps to see detailed information and quick links.
+- **Views Section**: Saved monitoring views with live metric panels
+  - Overview Dashboard, Top Services, Trace Metrics, Log Statistics, Exception Summary, Topology Snapshot
+  - Each view shows live metrics refreshed in real-time
 
 ### Overview
 
-The **Overview** page provides a comprehensive view of your entire infrastructure and service topology - from physical hosts to business operations in a single layered view.
+The **Overview** page provides a comprehensive view of your entire infrastructure and service topology.
 
-**What You'll See:**
-
-From CPU usage to business operations, IyziTrace gives you an instant, end-to-end snapshot of your system health. The overview combines infrastructure monitoring with service-level observability, allowing you to:
-
-- Track latency, error rates, traffic volume, and performance metrics across all services
-- Get a real-time picture of system behavior across your entire stack
-- See servers, runtimes, services and operations in a single unified interface
-- Identify bottlenecks from infrastructure to application level
+![Overview – Full View](docs/images/screenshots/overview/overview.png)
 
 **Layout:**
 
 The page is organized into horizontal scrollable sections:
 
-1. **Regions**: Cloud regions where your infrastructure is deployed
-2. **Infrastructures**: Physical/virtual hosts grouped by region
-3. **Orphan Services**: Services not yet mapped to infrastructure (if any)
-4. **Services**: Services mapped to their infrastructure
-5. **Operations**: Operations within each service
+1. **Regions**: Cloud regions with health indicators (Healthy, Error)
+2. **Infrastructures**: Host cards with OS type, CPU usage, memory usage, and Applications button
+3. **Services**: Services grouped by infrastructure with type badges, avg duration, and calls/sec
+4. **Operations**: Operations grouped by service with expandable details
 
-**Key Features:**
+![Overview – Table View](docs/images/screenshots/overview/overview2.png)
 
-#### 1. Interactive Drill-Down
-
-- Click on a **Region** to filter infrastructures to that region
-- Click on an **Infrastructure** to see its services and applications
-- Click on a **Service** to see its operations
-- Click on an **Operation** to view detailed metrics
-
-#### 2. Infrastructure Cards
-
-Each infrastructure card displays:
-
-- **Name**: Host name
-- **OS Type**: Operating system (Linux, Windows, macOS)
-- **IP Address**: Host IP address
-- **Status**: Health status with color indicator
-  - 🟢 Healthy
-  - 🟡 Warning
-  - 🔴 Error
-- **CPU Usage**: Real-time CPU percentage
-- **Memory Usage**: Current memory utilization
-- **Service Count**: Number of services running
-
-**Visual Indicators:**
-- Different background gradients for different OS types
-- Color-coded status badges
-- Applications icon shows number of apps
-
-#### 3. Service-Infrastructure Mapping
-
-**Orphan Services:**
-
-Services that cannot be automatically mapped appear in the "Orphan Services" section.
-
-**Drag-and-Drop Mapping:**
-
-1. Locate the orphan service
-2. Drag it to the target infrastructure card
-3. Drop to create the mapping
-4. The service immediately moves to the "Services" section
-
-**Visual Feedback:**
-- Dragged service becomes semi-transparent
-- Drop target infrastructure shows green border and glow effect
-- Smooth animation on successful drop
-
-**Unmapping Services:**
-
-1. Find the mapped service
-2. Click the small ❌ icon next to the health status
-3. Confirm in the modal dialog
-4. Service returns to "Orphan Services"
-
-#### 4. Service Cards
-
-Each service card displays:
-
-- **Service Name**: Name of the service
-- **Type**: Service type (HTTP, gRPC, Database, etc.)
-- **Status**: Health indicator
-- **Avg Duration**: Average response time
-- **Calls/sec**: Request rate
-- **Operations**: Number of operations
-
-Services are sorted by status (error → warning → healthy) and then by latency.
-
-#### 5. Operation Cards
-
-Each operation card displays:
-
-- **Operation Name**: Endpoint or function name
-- **Method**: HTTP method or operation type
-- **Avg Duration**: Average execution time
-- **P95 Duration**: 95th percentile latency
-- **Call Count**: Number of calls
-
-#### 6. Search Functionality
-
-Each section has its own search bar:
-
-- **Regions**: Search by region name
-- **Infrastructures**: Search by host name or IP
-- **Services**: Search by service name or type
-- **Operations**: Search by operation name or method
-- **Orphan Services**: Search by service name
-
-Search is **real-time** and **case-insensitive**.
-
-#### 7. Expandable Table View
-
-At the bottom, a detailed table shows:
-
-- **Root Level**: All infrastructures with their metrics
-- **Level 1**: Services per infrastructure (expandable)
-- **Level 2**: Operations per service (expandable)
-
-**Table Features:**
-- Sortable columns
-- Filterable by any field
-- Resizable columns
-- Export to CSV
+**Data Table Features:**
+- Expandable rows: Infrastructure → Services → Operations
+- Columns: Name, OS Version, IP Address, Type, Status, Error Ratio, Warning Ratio, Degraded Ratio
+- Service sub-table: Name, Type, Port, Sum, Avg, Min, Max, P50–P99, Calls, Calls/s, Ops, Status
 
 ### Service Map
 
-The **Service Map** provides a visual representation of service dependencies and data flow, turning complex microservice flows into an easy-to-read visual journey.
+The **Service Map** provides a visual representation of service dependencies and data flow.
 
-**Service Map – End-to-End Calls**
-
-View every API and backend service as a connected map. Follow request paths across microservices and understand how each dependency affects overall performance. The service map helps you:
-
-- Visualize every microservice in your system and how they interact
-- Expand, search, or drill into any node to understand dependencies
-- Identify bottlenecks or upstream/downstream risks
-- Follow the exact path of a request across services – from the edge to the core and back
+![Service Map – Infrastructure View](docs/images/screenshots/service-map/service-map.png)
 
 **Two Views Available:**
 
-#### 1. Overview Service Map
+#### 1. Infrastructure Topology Map
 
-Shows the complete topology from infrastructure to services.
+Shows infrastructure nodes grouped by region with health status:
+- Region-based grouping (e.g., Linux-farm, Onprem)
+- Infrastructure cards with health badges (HEALTHY, ERROR)
+- Click any node to open detail drawer with:
+  - Infrastructure info (IP Address, OS Version, Type)
+  - Resources (CPU, Memory, Usage)
+  - Health status with monitoring status
+  - Applications list
+  - "View Services Map" link
 
-**Components:**
+#### 2. Service Dependency Map
 
-- **Regions**: Top-level grouping by cloud region
-- **Infrastructures**: Hosts within each region
-- **Services**: Services running on each host
-- **Dependency Lines**: Arrows showing request flow between services
+![Service Map – Dependencies](docs/images/screenshots/service-map/service-map2.png)
 
-**Features:**
+Detailed service dependency graph showing all connections:
+- Service nodes with metrics (Avg Lat, Min Lat, Max Lat, Calls)
+- Connection lines showing request flow
+- Service detail drawer with:
+  - Service Info (Name, Type)
+  - Metrics (Avg Lat, Min Lat, Max Lat)
+  - Health status
+  - Operations list with type badges and latency
+  - Quick links: Logs, Metrics, Traces
 
-- **Auto-Layout**: Automatic positioning using Dagre algorithm
-- **Zoom & Pan**: Navigate large service maps
-- **Minimap**: Overview of the entire graph
-- **Click to Focus**: Click any node to see details
-- **Service Legend**: Color-coded by service type
-
-#### 2. Infrastructure Service Map
-
-Detailed view for a specific infrastructure.
-
-**To Access:**
-1. Select an infrastructure from the dropdown
-2. The map shows all services on that host and their connections
-
-**Node Information:**
-
-Each node shows:
-- Service name
-- Request rate (calls/sec)
-- Average latency
-- Error rate
-
-**Edge Information:**
-
-Each edge shows:
-- Number of requests
-- Average duration
-- Operation type (HTTP, gRPC, etc.)
-
-**Interactive Features:**
-
-- **Hover**: See detailed metrics
-- **Click Node**: Open service detail drawer
-- **Click Edge**: See operation-level details
-- **Fullscreen Mode**: Expand map to full screen
-
-**Service Map Drawer:**
-
-When you click a node, a drawer opens showing:
-
-- **Service Metrics**:
-  - Call count
-  - Average duration
-  - P50, P75, P90, P95, P99 latencies
-  - Error count and rate
-  
-- **Incoming Dependencies**: Services calling this service
-- **Outgoing Dependencies**: Services this service calls
-- **Recent Traces**: Latest traces involving this service
-- **Quick Links**: Jump to Traces, Logs, or Service Detail
+![Service Map – Zoomed Detail](docs/images/screenshots/service-map/service-map3.png)
 
 ### Services
 
-The **Services** page provides comprehensive performance monitoring for all your services with service-level and operation-level insights.
+The **Services** page provides comprehensive performance monitoring.
 
-**Service-Level Metrics**
+![Services Page](docs/images/screenshots/services/services.png)
 
-Open a single service to inspect its health, error rate and latency (avg, min, max). From here you can jump directly to logs, metrics or traces for faster root cause analysis. Each service card displays:
+**Service Summary Cards:**
+- Each service shows: Avg. Lat, Min. Lat, Max. Lat, Count
+- "View full details" link for each service
 
-- **Health Status**: Real-time health indicator
-- **Error Rate**: Percentage of failed requests
-- **Latency Distribution**: Average, minimum, and maximum response times
-- **Quick Navigation**: Jump to related traces, logs, or detailed metrics
+**Performance Charts:**
+- **Requests**: Stacked bar chart showing request volume per service
+- **Errors**: Line chart showing error rates per service
+- **Duration**: Line chart with configurable percentiles (P50, P90, P95, P99)
 
-**Operation-Level Insight**
-
-Monitor each operation such as "Create User" with its own latency and P95 metrics. See which source and target services are involved in every call. Dive into operation-level performance to:
-
-- Monitor latency, APDEX scores, and operations-per-second
-- Detect regressions or spikes instantly
-- Inspect full execution including HTTP/gRPC method
-- Identify bottlenecks in user-facing flows
-
-**Overview Cards:**
-
-At the top, you'll see summary cards:
-
-1. **Total Services**: Count of all services
-2. **Average Latency**: Overall avg response time
-3. **Total Calls**: Sum of all requests
-4. **Error Rate**: Percentage of failed requests
-
-**Services Grid:**
-
-Each service is displayed in a card showing:
-
-- **Service Name** with icon
-- **Type**: HTTP, gRPC, Database, etc.
-- **Status**: Health indicator
-- **Metrics**:
-  - Avg Duration
-  - Calls/sec
-  - Error Count
-  - Success Rate
-
-**Sorting:**
-
-Services are automatically sorted by:
-1. Status (error → warning → healthy)
-2. Latency (highest first)
-
-**Filtering:**
-
-Use the filter panel to:
-- Filter by service name (contains)
-- Filter by service type
-- Filter by status
-- Filter by latency range
-- Filter by time range
+**Services Table:**
+- Columns: Name, Type, Port, Avg Latency, Min Latency, Max Latency, Requests, Calls Per Second, Operations, Status, Error Ratio, Warning Ratio
+- Expandable rows to see operations within each service
+- Search and sort capabilities
 
 **Service Detail:**
 
-Click on any service card to open the detail page with comprehensive analytics:
+![Service Detail – Call Metrics](docs/images/screenshots/services/service-detail.png)
 
-1. **Service Detail – Call Metrics**:
-   - Analyze detailed call metrics for the selected service
-   - Latency percentiles (P50, P90, P99)
-   - Throughput and performance anomalies over time
-   - Real-time performance graphs
+Click any service to see detailed analytics:
+- Summary cards: Operation Count, Total Call Count, Max/Min Latency Span
+- **Call Metrics tab**: Latency (P50–P99), Operation Rate, Apdex Score, Key Operations
+- **Operations tab**: Per-operation latency breakdown
 
-2. **Service Detail – Operations Insight**:
-   - Dive into operation-level performance
-   - Monitor latency, APDEX scores, and operations-per-second
-   - Detect regressions or spikes instantly
-   - Identify which operations need optimization
-
-3. **Performance Timeline**:
-   - Latency over time (line chart)
-   - Request rate over time (bar chart)
-   - Error rate over time (area chart)
-   - Interactive charts with zoom and pan
-
-4. **Operations List**:
-   - All operations within the service
-   - Sorted by latency (highest first)
-   - Click to see operation details
-   - Filter and search operations
-
-5. **Recent Traces**:
-   - Latest traces for this service
-   - Click to open full trace view
-   - See trace duration and status
-
-6. **Related Logs**:
-   - Logs from this service
-   - Automatically filtered by service name
-   - Correlated with traces for debugging
+![Service Detail – Operations](docs/images/screenshots/services/service-detail2.png)
 
 ### Traces
 
-The **Traces** page helps you analyze distributed traces across your microservices, providing visual call flows and detailed span information.
+The **Traces** page helps you analyze distributed traces across your microservices.
 
-**Distributed Traces Overview**
+![Traces Page](docs/images/screenshots/traces/traces.png)
 
-View all traces across your system sorted by latency, root service, or timestamp. Instantly find the slowest or fastest requests and inspect their complete trace data. The traces page provides:
-
-- **Visual Call Flows**: Follow the exact path of a request across services – from the edge to the core and back
-- **Performance Analysis**: Sort by duration to find bottlenecks
-- **Full Visibility**: Complete trace data with all spans and attributes
-- **Quick Filtering**: Find traces by service, operation, or time range
-
-**Advanced Time Range Filtering**
-
-Use quick ranges or precise date-time selection to analyze trace data within any custom timeframe:
-
-- **Quick Ranges**: Last 5 min, 15 min, 1 hour, 6 hours, 24 hours, 7 days
-- **Custom Selection**: Pick exact start and end times
-- **Perfect for**: Incident analysis or regression detection
-- **Time Correlation**: Align with logs and metrics for complete picture
-
-**Multi-Backend Trace Selection**
-
-Choose between multiple tracing backends (Tempo, Observability Platform, etc.) to:
-
-- Compare environments (dev, staging, production)
-- Test data from different sources
-- Switch between tracing backends seamlessly
-- Maintain consistent UI across backends
+**Summary Cards:**
+- Max Latency, Min Latency, Avg Latency, Total Span Count
+- Mini chart showing span distribution
 
 **Trace List:**
-
-Displays all traces with:
-
-- **Trace ID**: Unique identifier (clickable for details)
-- **Root Service**: Entry point service
-- **Duration**: Total trace duration (sortable)
-- **Spans**: Number of spans in the trace
-- **Timestamp**: When the trace occurred
-- **Status**: Success or error indicator with color coding
-
-**Filtering:**
-
-Advanced filter options:
-
-- **Service Name**: Filter by root or any service in the trace
-- **Operation Name**: Filter by specific operation
-- **Duration Range**: Min and max duration
-- **Status**: Success, error, or both
-- **Tags**: Filter by custom tags
-- **Time Range**: Select time window
-
-**Search:**
-
-Free-text search across:
-- Trace IDs
-- Service names
-- Operation names
-- Tag values
+- Columns: TraceId, Service, Trace, Duration, Start Time, End Time, per-service span counts
+- Clickable Trace IDs for detailed view
+- Search bar for filtering
 
 **Trace Detail:**
 
-Click on a trace to see:
+![Trace Detail](docs/images/screenshots/traces/trace-detail.png)
 
-#### 1. Trace Timeline
-
-- **Gantt Chart View**: Horizontal timeline of all spans
-- **Color Coding**: Different services have different colors
-- **Span Duration**: Width represents duration
-- **Parent-Child Relationships**: Indentation shows call hierarchy
-
-#### 2. Flame Graph
-
-- **Visual Performance**: See which spans took the most time
-- **Interactive**: Click to zoom into specific sections
-- **Color Intensity**: Darker colors indicate longer duration
-
-#### 3. Span Details
-
-When you click a span:
-
-- **Service Information**: Service name, instance, version
-- **Operation Details**: Operation name, type, method
-- **Timing**: Start time, duration, timestamps
-- **Attributes**: All span attributes (grouped by category)
-- **Events**: Span events and logs
-- **Links**: Links to related spans or traces
-
-**Special Features:**
-
-- **Trace ID Links**: If logs contain `otelTraceID`, they link to this page
-- **Span ID Links**: Direct link to specific span in trace
-- **Export**: Download trace as JSON
-- **Share**: Generate shareable link
+Click any trace to see:
+- Trace header: Trace ID, root service, duration, timestamp, total spans
+- **Operation Type Filters**: HTTP, MESSAGING, CACHE, DATABASE, RPC
+- **Gantt Chart Timeline**: Visual span timeline with:
+  - Color-coded spans by status (200, 308, etc.)
+  - Parent-child relationship indentation
+  - Duration labels on each span
+- **Span Details Panel**:
+  - Span Name, Span ID, Start Time, Duration
+  - Service, Span Kind, Status Code String
+  - Tabs: Span Attrs, Resource, Events
+  - Expandable attribute groups: app, network, peer, server, rpc, thread, type, operation, host
 
 ### Logs
 
-The **Logs** page provides powerful log aggregation and search capabilities with centralized log exploration.
+The **Logs** page provides powerful log aggregation and search capabilities.
 
-**Centralized Log Explorer**
-
-Search, filter, and inspect logs from any service. View runtime details, JVM/OS diagnostics, container metadata, and attributes from OpenTelemetry logs. The log explorer provides:
-
-- **Unified View**: All logs from all services in one place
-- **Rich Context**: Runtime details, diagnostics, and metadata
-- **OpenTelemetry Integration**: Full support for OTEL log attributes
-- **Fast Search**: Find what you need in seconds
+![Logs Page](docs/images/screenshots/logs/logs.png)
 
 **Log Stream:**
+- Columns: Timestamp, Level (color-coded), Service, Message
+- Expandable log entries with detailed view
+- Pagination with configurable page size
 
-Real-time log entries with:
-
-- **Timestamp**: When the log was generated
-- **Level**: Debug, Info, Warning, Error, Fatal
-- **Service**: Source service name
-- **Message**: Log message content
-- **Labels**: Associated labels and attributes
-- **Trace Correlation**: Link to related traces when available
-
-**Level Indicators:**
-
-- 🔵 **Debug**: Blue
-- 🟢 **Info**: Green
-- 🟡 **Warning**: Yellow  
-- 🔴 **Error**: Red
-- 🟣 **Fatal**: Purple
-
-**Filtering:**
-
-Multiple filter options:
-
-- **Log Level**: Select one or more levels
-- **Service Name**: Filter by service
-- **Search Query**: LogQL queries or free text
-- **Time Range**: Select time window
-- **Labels**: Filter by any label
-
-**LogQL Support:**
-
-Write powerful queries:
-
-```logql
-{service_name="api-gateway"} |= "error" | json
-```
-
-```logql
-{job="app"} | json | line_format "{{.level}}: {{.message}}"
-```
-
-**Expanded Log View:**
-
-Click on a log entry to see:
-
-#### 1. Full Log Details
-
-- Complete message (if truncated)
-- Formatted JSON (if structured log)
-- All attributes and labels
-- Stack trace (if error)
-
-#### 2. Additional Attributes
-
-**Special Handling for OpenTelemetry:**
-
-- **Trace ID**: Clickable link to trace detail
-- **Span ID**: Clickable link to specific span in trace
-- Automatically sorted to show trace/span IDs first
-
-#### 3. Context Menu
-
-- **Show Context**: View logs before/after this entry
-- **Filter by Field**: Add field value to filter
-- **Copy**: Copy log message or entire entry
-- **Jump to Trace**: If trace ID present
-
-**AI Log Analysis (if enabled):**
-
-- **Severity Inference**: AI determines actual severity
-- **Pattern Detection**: Identifies common error patterns
-- **Anomaly Detection**: Highlights unusual log entries
-
-**Log Metrics:**
-
-At the top, see aggregated statistics:
-
-- **Log Count**: Total logs in time range
-- **Error Rate**: Percentage of error logs
-- **Top Services**: Services with most logs
-- **Log Distribution**: Timeline of log volume
+**Expanded Log Entry:**
+- **Message**: Full log message content
+- **Telemetry Information**: SDK badges (Telemetry SDK, SDK Version, SDK Language)
+- **Basic Information**: Log ID, Timestamp, Level, Service, Service Namespace, Service Version, Host Name
+- **Runtime Information**: OS Type, OS Description, Architecture
+- **Additional Attributes**: Complete key-value pairs with clickable links for trace_id, otelTraceID, span_id, otelSpanID, cloud_region, code_file_path, code_function_name
 
 ### Views
 
-The **Views** page allows you to save and manage custom views of your observability data.
+The **Views** section (on the Home page) allows you to save and manage custom monitoring views.
 
-**Custom Monitoring Dashboards**
-
-Create dashboards tailored to your needs: logs, metrics, service maps, or trace views. Save and reuse widgets to build a personalized observability control center. Views help you:
-
-- **Save Complex Queries**: Don't rebuild filters every time
-- **Share with Team**: Collaborate on common investigations
-- **Quick Access**: One-click access to frequently used views
-- **Organize Workflows**: Structure your monitoring process
-
-**What is a View?**
-
-A view is a saved combination of:
-- Page (Service Map, Services, Traces, Logs, etc.)
-- Filters and query parameters
-- Time range
-- Selected fields
-- Display preferences
+![Views on Home Page](docs/images/screenshots/home/home.png)
 
 **Creating a View:**
-
-1. Navigate to any page (e.g., Logs)
+1. Navigate to any page (e.g., Overview, Services, Traces)
 2. Apply your desired filters
 3. Click **Save View** button
 4. Enter a name and description
 5. Click **Save**
 
-**View List:**
+**View Cards:**
+Each saved view shows:
+- View name and page type
+- Created date
+- Live metric panels with real-time data
+- View, Edit, Delete actions
 
-The main page shows all your saved views:
-
-- **Name**: View title
-- **Page**: Which page this view is for
-- **Created**: When it was created
-- **Last Used**: When you last accessed it
-- **Creator**: Who created it
-
-**Using a View:**
-
-Click on any view to:
-- Instantly navigate to that page
-- Auto-apply all saved filters
-- Restore saved time range
-
-**Managing Views:**
-
-- **Edit**: Modify name, description, or query
-- **Duplicate**: Create a copy to modify
-- **Share**: Share with team members
-- **Delete**: Remove the view
-
-**View Organization:**
-
-- **Search**: Find views by name
-- **Filter by Page**: Show only views for specific pages
-- **Sort**: By name, date, or last used
-- **Favorites**: Star frequently used views
+**Available View Types:**
+- **Overview Dashboard**: Regions, Infrastructures, Healthy Services, Traces
+- **Top Services**: Service-specific latency metrics
+- **Trace Metrics**: Total Traces, Avg Latency, Max Latency, Total Spans
+- **Log Statistics**: Total Logs, log level breakdown
+- **Exception Summary**: Total Count, exception type breakdown
+- **Topology Snapshot**: Regions, Infrastructures, Applications, Services
 
 ### Exceptions
 
-The **Exceptions** page helps you track and analyze errors and exceptions across your services.
+The **Exceptions** page helps you track and analyze errors across services.
 
-**Exception Overview:**
-
-Summary cards showing:
-
-1. **Total Exceptions**: Count of all exceptions
-2. **Exception Rate**: Exceptions per second
-3. **Affected Services**: Number of services with exceptions
-4. **New Exceptions**: First-time exceptions in time range
+![Exceptions Page](docs/images/screenshots/exception/exceptions.png)
 
 **Exception List:**
-
-Each exception entry shows:
-
-- **Exception Type**: Class or error type
-- **Message**: Error message
-- **Service**: Where the exception occurred
-- **Count**: Number of occurrences
-- **First Seen**: When first detected
-- **Last Seen**: Most recent occurrence
-- **Trend**: Increasing, stable, or decreasing
+- Columns: ExceptionType, Count, Service, Operation, Type, ExceptionMessage
+- Color-coded type badges (messaging, rpc, etc.)
+- Clickable exception types for detail view
+- Search and pagination
 
 **Exception Detail:**
 
-Click on an exception to see:
+![Exception Detail](docs/images/screenshots/exception/exception-detail.png)
 
-#### 1. Exception Information
-
-- Full exception type and message
-- Stack trace (if available)
-- Exception attributes
-
-#### 2. Occurrence Timeline
-
-- Chart showing exception frequency over time
-- Identify spikes or patterns
-
-#### 3. Affected Services
-
-- List of services where this exception occurs
-- Percentage of occurrences per service
-
-#### 4. Related Traces
-
-- Recent traces containing this exception
-- Click to view full trace
-
-#### 5. Related Logs
-
-- Log entries around the time of exceptions
-- Automatically filtered by service and time
-
-**Grouping:**
-
-Exceptions are intelligently grouped by:
-- Exception type
-- Similar stack traces
-- Same service and operation
-
-**Alerting:**
-
-Set up alerts for:
-- New exception types
-- Exception rate threshold
-- Exception in critical services
+Click any exception to see:
+- Exception type and message header
+- Event ID and timestamp
+- **Quick Actions**:
+  - View Service Details
+  - See the error in trace graph
+  - View Span Details
+- **Key-Value Pairs**: Complete span attributes including:
+  - serviceName, host.name, traceID, spanID
+  - Messaging details (client, consumer group, operation, system, destination)
+  - Resource details (container.id, host.arch, os.type, os.description)
+- Previous/Next Exception navigation
 
 ### AI Assistant
 
 The **AI Assistant** provides intelligent insights and recommendations powered by AI.
 
+![AI Assistant](docs/images/screenshots/ai-agent/ai.png)
+
 **Features:**
 
-#### 1. AI Chat Interface
+#### 1. Full-Page Analysis Interface
+- **Configuration Status**: API key status (Active/Inactive)
+- **Quick Action Cards**: Quick Overview, Service Health, Find Anomalies, Recommendations
+- **Context Toggles**: Enable/disable Regions, Infrastructures, Applications, Services, Operations
+- **Model Selection**: Choose AI model (e.g., deepseek/deepseek-chat)
+- **Usage Tracking**: Request count and token usage
 
-A floating chat button in the bottom right of every page:
+#### 2. Suggested Questions
+Pre-built questions for quick start:
+- "What services have the highest latency?"
+- "Are there any critical issues?"
+- "Show me error rate trends"
+- "Which services are degraded?"
+- "Analyze infrastructure health"
 
-- Click to open AI Assistant
-- Minimal design with glassmorphism effect
-- Smooth animations
+#### 3. AI Analysis Response
 
-**Chat Functionality:**
+![AI Response](docs/images/screenshots/ai-agent/ai2.png)
 
-- **Context-Aware**: AI knows which page you're on
-- **Data-Aware**: AI has access to your current view data
-- **Natural Language**: Ask questions in plain English
+Structured responses with:
+- **Summary**: Overview of findings
+- **Key Findings**: Severity-coded items (🔴 critical, 🟡 warning, 🟢 healthy)
+- **Recommendations**: Numbered action items
+- Token count and timestamp
+- Copy button for sharing
 
-**Example Questions:**
+### Agent Manager
 
-```
-"What services have the highest error rate?"
-"Show me the slowest endpoints"
-"Why is my response time increasing?"
-"Which services are calling user-service?"
-"Find anomalies in my logs"
-```
+The **Agent Manager** provides comprehensive management of OpenTelemetry collectors.
 
-#### 2. Optimization Tips
+![Agent Manager – Agents](docs/images/screenshots/agent-manager/agent.png)
 
-When you first open the AI Assistant, it automatically:
+**Agents Tab:**
+- All registered agents with Status, Name, Version, Group, Last Seen, Labels
+- Search agents and filter by active status
+- Delete action per agent
+- Click any agent to open the detail drawer
 
-- Analyzes your current page data
-- Identifies potential issues
-- Provides optimization recommendations
+**Agent Detail Drawer:**
 
-**Example Tips:**
+The drawer provides four tabs:
 
-- "Service X has high latency on operation Y"
-- "Consider adding caching to reduce database calls"
-- "Your error rate spiked 2 hours ago on service Z"
+1. **Overview**: Agent basic information and status
 
-#### 3. Action Buttons
+2. **Config**: Current configuration details
+   ![Agent Detail – Config](docs/images/screenshots/agent-manager/agent-detail-config-light-mode.png)
 
-Below each AI response:
+3. **Metrics**: Telemetry performance metrics
+   ![Agent Detail – Metrics](docs/images/screenshots/agent-manager/agent-detail-metrics.png)
+   - Spans Rate, Metric Points Rate, Log Records Rate
+   - Receivers, Processors, Exporters tabs
+   - Interactive charts with Min, Max, Mean statistics
 
-- **Tell me more**: Get detailed explanation
-- **Find more issues**: Discover additional problems
-- **Show examples**: See code examples or queries
+4. **Logs**: Agent-specific logs
+   ![Agent Detail – Logs](docs/images/screenshots/agent-manager/agent-detail-logs.png)
+   - Severity filtering (All Severities, Info, Error, etc.)
+   - Search within logs
+   - Time range selection (1h, 6h, 24h)
 
-#### 4. Full Screen Mode
+**Topology Tab:**
 
-- Click the fullscreen icon to expand chat
-- Maximize for complex analyses
-- Press again to restore
+![Agent Topology](docs/images/screenshots/agent-manager/agent-topology.png)
 
-**AI Configuration:**
+- Visualize agents as interactive topology cards
+- Instance and Group view modes
+- Resource sidebar with Agent Groups tree
+- Per-agent metrics (Metrics, Logs, Throughput)
 
-In Settings → AI Configuration:
+**Groups Tab:**
 
-- **API Key**: Your OpenRouter API key
-- **Model**: Choose AI model (GPT-4, Claude, etc.)
-- **Temperature**: Adjust creativity (0.0-1.0)
-- **Max Tokens**: Maximum response length
+![Agent Groups](docs/images/screenshots/agent-manager/agent-group.png)
 
-**AI Status Card:**
+- Organize agents into logical groups
+- Group details: Name, Agent count, Config, Created, Updated, Labels
+- Create, Edit, and Delete groups
 
-On the landing page and AI page:
-- Shows "Active" if API key is configured
-- Shows "Inactive" if not configured
-- Click to go to settings
+**Configs Tab:**
+
+![Agent Configuration](docs/images/screenshots/agent-manager/agent-config.png)
+
+- YAML configuration editor with syntax highlighting
+- Live pipeline visualization (Receiver → Processor → Exporter)
+- Pipeline views for Traces, Metrics, and Logs
+- Validation status indicator
+
+### Inventory Manager
+
+The **Inventory Manager** provides complete infrastructure discovery and relationship tracking.
+
+![Inventory Dashboard](docs/images/screenshots/inventory-manager/inventory-dashboard.png)
+
+**Dashboard Tab:**
+- Summary cards: Total Entities, Total Relations, Entity Types, Relation Types
+- Resource breakdown: Hosts, Containers, Kubernetes Pods, Services, Databases & Cache, Messaging Systems
+- All Entity Types with counts
+- Recent Entities list with type badges
+
+**Tree View Tab:**
+
+![Inventory Tree View](docs/images/screenshots/inventory-manager/inventory-treeview.png)
+
+- Hierarchical entity tree (cloud.region → host → services → containers)
+- Expand/Collapse all functionality
+- Entity search
+- Tree View and Category View toggle
+
+**Table View Tab:**
+
+![Inventory Table – Entities](docs/images/screenshots/inventory-manager/inventory-table-entity.png)
+
+- Tabular view of all entities with sortable columns
+- Entity detail view with full attribute list
+
+![Inventory Table – Relations](docs/images/screenshots/inventory-manager/inventory-table-relations.png)
+
+- View all entity relationships
+- Source, Relation Type, and Target columns
 
 ---
 
@@ -1225,31 +960,27 @@ On the landing page and AI page:
 
 Access settings via the **Settings** menu item.
 
+![Settings – Platform](docs/images/screenshots/setting/settings.png)
+
 #### Tabs:
 
-1. **Datasources**: Configure default data sources
-2. **Definitions**: Define metric and label patterns
-3. **Time Range**: Set default time range
-4. **AI Configuration**: Configure AI assistant
-5. **Security**: API key management
+1. **Platform**: Platform URL and authentication settings
+2. **Data Sources**: Configure Prometheus, Loki, and Tempo connections
+3. **AI**: Configure AI assistant (OpenRouter API key, model, temperature, max tokens)
+4. **Definitions**: Define metric and label patterns
+5. **Privacy**: Privacy and data handling settings
+
+![Settings – Data Sources](docs/images/screenshots/setting/settings2.png)
 
 ### Datasources
 
 **Default Datasources:**
 
-- **Default Prometheus**: Primary metrics source
-- **Default Tempo**: Primary traces source
-- **Default Loki**: Primary logs source
+- **Prometheus (Observability Platform)**: Primary metrics source
+- **Loki (Observability Platform)**: Primary logs source
+- **Tempo (Observability Platform)**: Primary traces source
 
-**Default Time Range:**
-
-Select from:
-- Last 5 minutes
-- Last 15 minutes
-- Last 1 hour
-- Last 6 hours
-- Last 24 hours
-- Last 7 days
+All data sources are automatically configured through the platform with endpoints pointing to the Observability Platform query APIs.
 
 ### Definitions
 
@@ -1268,14 +999,6 @@ Add custom metrics for:
 - Error metrics (e.g., `http_requests_total{status="5xx"}`)
 - Throughput metrics (e.g., `http_requests_total`)
 
-**Definition Table:**
-
-Each definition has:
-- **Name**: Human-readable name
-- **Type**: Metric or Label
-- **PromQL Pattern**: Query pattern
-- **Description**: What this definition represents
-
 ### AI Configuration
 
 **API Key:**
@@ -1286,27 +1009,9 @@ Each definition has:
 
 **Model Settings:**
 
-- **Model**: Select AI model
-  - GPT-4
-  - GPT-3.5-turbo
-  - Claude 3
-  - Other OpenRouter models
-  
+- **Model**: Select AI model (GPT-4, Claude, DeepSeek, etc.)
 - **Temperature**: Controls randomness (0.0-1.0)
-  - 0.0: Deterministic, focused responses
-  - 1.0: Creative, varied responses
-  
 - **Max Tokens**: Maximum response length
-  - Typical: 2000-4000 tokens
-  - Long analyses: Up to 8000 tokens
-
-**Save All Settings:**
-
-Click **Save Settings** button to save:
-- All datasource configurations
-- All definitions
-- All AI settings
-- All security settings
 
 ---
 
@@ -1315,6 +1020,8 @@ Click **Save Settings** button to save:
 ### Teams
 
 IyziTrace supports multi-tenancy through teams.
+
+![Teams Page](docs/images/screenshots/team/teams.png)
 
 **Creating a Team:**
 
@@ -1326,47 +1033,36 @@ IyziTrace supports multi-tenancy through teams.
    - **Description**: Team purpose
 4. Click **Save**
 
-**Team Management:**
+**Team Detail:**
 
-- **View Teams**: See all teams you have access to
-- **Edit Team**: Modify team details
-- **Delete Team**: Remove team (admin only)
+![Team Detail](docs/images/screenshots/team/team-detail.png)
 
 ### Page Permissions
 
 Control which pages team members can access:
 
+![Team Pages](docs/images/screenshots/team/team-pages.png)
+
 **Available Pages:**
 
-- Landing
+- Home
 - Overview
 - Service Map
 - Services
 - Traces
 - Logs
-- Views
 - Exceptions
 - AI Assistant
 - Teams
 - Settings
-
-**Setting Permissions:**
-
-1. Select a team
-2. Check pages the team can access
-3. Click **Save Permissions**
+- Agent Manager
+- Inventory Manager
 
 **Permission Levels:**
 
 - **Admin**: Can access all pages and manage teams
 - **User**: Can access assigned pages only
 - **No Access**: If a team has no page assignments, they see all pages (default behavior)
-
-**Sidebar Behavior:**
-
-- Admin users see all menu items
-- Team users only see allowed menu items
-- If no permissions are set, all users see all items
 
 ---
 
@@ -1389,26 +1085,6 @@ For services that can't be auto-mapped:
 2. Drag the service card
 3. Drop it on target infrastructure
 4. Mapping is saved persistently
-
-**Mapping Storage:**
-
-Mappings are stored in Grafana plugin settings:
-
-```json
-{
-  "serviceInfrastructureMapping": {
-    "service-id-1": "infrastructure-id-1",
-    "service-id-2": "infrastructure-id-2"
-  }
-}
-```
-
-**Unmapping:**
-
-1. Click the ❌ icon on a mapped service
-2. Confirm in the modal
-3. Service returns to orphan services
-4. Mapping is removed from storage
 
 ### Orphan Services
 
@@ -1439,20 +1115,6 @@ Each section supports search:
 - **Case-insensitive**: Matches regardless of case
 - **Contains logic**: Matches partial strings
 - **Multi-field**: Searches across multiple fields
-
-**Search Scope by Section:**
-
-- **Regions**: Region name
-- **Infrastructures**: Name, IP, OS type
-- **Services**: Service name, type
-- **Operations**: Operation name, method, path
-- **Orphan Services**: Service name, type
-
-**Filter Persistence:**
-
-- Filters are preserved in URL
-- Share filtered views with team members
-- Bookmark specific filter combinations
 
 ---
 
@@ -1549,20 +1211,18 @@ const response = await askAI(
 
 **Q: How do I start sending data to IyziTrace?**
 
-A: IyziTrace doesn't collect data directly. Configure your applications to send:
+A: Use the Setup Wizard to configure your platform connection and data sources. Then configure your applications to send:
 - Traces to Tempo (via OTLP)
 - Logs to Loki
 - Metrics to Prometheus
 
-Then connect these datasources in IyziTrace settings.
-
 **Q: Why don't I see my services?**
 
 A: Ensure:
-1. Your datasources are connected
+1. Your datasources are connected (check Settings → Data Sources)
 2. Data is being sent to Prometheus/Tempo/Loki
 3. Metrics contain required labels (`service_name`, etc.)
-4. Check definitions in Settings match your label names
+4. Check definitions in Settings → Definitions match your label names
 
 **Q: How do I map orphan services?**
 
@@ -1571,6 +1231,14 @@ A: Drag the service from "Orphan Services" section and drop it on the target inf
 **Q: Can I use IyziTrace without AI features?**
 
 A: Yes! AI Assistant is optional. All core features work without it.
+
+**Q: How do I manage OpenTelemetry agents?**
+
+A: Navigate to Agent Manager from the sidebar. You can view all agents, organize them into groups, create/edit configurations, monitor metrics, and view logs.
+
+**Q: What is the Inventory Manager?**
+
+A: The Inventory Manager automatically discovers and tracks all infrastructure entities (hosts, containers, services, cloud regions, etc.) and their relationships. It provides Dashboard, Tree View, and Table View for exploring your infrastructure.
 
 **Q: How are permissions enforced?**
 
@@ -1648,25 +1316,25 @@ A: Alerts are managed through Grafana's native alerting system. Create alert rul
 - Ensure both service and infrastructure exist
 - Review auto-discovery logic in service-map.service.ts
 
-#### 5. "Table not showing nested data"
+#### 5. "Agent Manager not showing agents"
 
-**Symptoms**: Infrastructure expands but shows no services
-
-**Solutions**:
-- Verify data structure includes `services` array
-- Check that `l1Key` and `l2Key` match your data
-- Review table column definitions
-- Check browser console for errors
-
-#### 6. "Search not working"
-
-**Symptoms**: Search returns no results or wrong results
+**Symptoms**: Agent list is empty
 
 **Solutions**:
-- Check search is case-insensitive
-- Verify searchable fields are configured
-- Review getSearchableText function
-- Clear search and try again
+- Verify OpenTelemetry agents are configured with OpAMP
+- Check agent connectivity to the platform
+- Verify platform URL is correct in Settings
+- Review agent logs for connection errors
+
+#### 6. "Inventory showing no entities"
+
+**Symptoms**: Inventory dashboard shows zero entities
+
+**Solutions**:
+- Verify the platform is running and accessible
+- Check that telemetry data is being sent
+- Ensure infrastructure discovery is configured
+- Review platform logs for errors
 
 ### Debug Mode
 
@@ -1694,9 +1362,31 @@ For additional support:
 
 ---
 
+## Navigation
+
+![Sidebar Menu](docs/images/screenshots/common/menu.png)
+
+IyziTrace provides a clean sidebar navigation with access to all modules:
+
+- 🏠 Home
+- 📊 Overview
+- 🔗 Service Map
+- 📈 Services
+- 📋 Traces
+- 📝 Logs
+- ⚠️ Exceptions
+- 🤖 AI Assistant
+- 👥 Teams
+- ⚙️ Settings
+- 🔧 Agent Manager
+- 📦 Inventory Manager
+- 🌓 Light Mode toggle
+
+---
+
 ## Meta
 
-**Version**: 1.0.0
+**Version**: 2.0.0
 
 **License**: Proprietary
 
@@ -1713,10 +1403,11 @@ No credit card required. Start your observability journey today!
 **Ready to get started?**
 
 1. Install the IyziTrace plugin from Grafana Marketplace
-2. Configure your datasources (Tempo, Loki, Prometheus)
-3. Set up your API key
-4. Start sending telemetry data
-5. Explore your systems with powerful visualizations
+2. Run the Setup Wizard to configure platform and data sources
+3. Start sending telemetry data
+4. Explore your systems with powerful visualizations
+5. Manage your agents with the Agent Manager
+6. Track your inventory with the Inventory Manager
 
 **Need help?** Contact us at support@iyzitrace.com
 
@@ -1731,5 +1422,4 @@ No credit card required. Start your observability journey today!
 
 ---
 
-*©2025 IYZI Trace Inc. Built with ❤️ by the IyziTrace Team*
-
+*©2026 IYZI Trace Inc. Built with ❤️ by the IyziTrace Team*
