@@ -383,9 +383,6 @@ const SetupWizardPage: React.FC = () => {
                         <p className="wizard-subtitle">
                             Set up and run your observability platform in a few steps
                         </p>
-                        <Button variant="secondary" size="sm" onClick={handleSkipWizard} disabled={skipping} className="wizard-skip-button">
-                            {skipping ? <><Spinner inline size="sm" /> Skipping...</> : 'Skip Setup'}
-                        </Button>
                     </div>
 
                     <div className="wizard-progress">
@@ -548,9 +545,6 @@ const SetupWizardPage: React.FC = () => {
                         <p className="wizard-subtitle">
                             Set up and run your observability platform in a few steps
                         </p>
-                        <Button variant="secondary" size="sm" onClick={handleSkipWizard} disabled={skipping} className="wizard-skip-button">
-                            {skipping ? <><Spinner inline size="sm" /> Skipping...</> : 'Skip Setup'}
-                        </Button>
                     </div>
 
                     {/* Progress */}
@@ -668,9 +662,6 @@ const SetupWizardPage: React.FC = () => {
                     <p className="wizard-subtitle">
                         Set up and run your observability platform in a few steps
                     </p>
-                    <Button variant="secondary" size="sm" onClick={handleSkipWizard} disabled={skipping} className="wizard-skip-button">
-                        {skipping ? <><Spinner inline size="sm" /> Skipping...</> : 'Skip Setup'}
-                    </Button>
                 </div>
 
                 {/* Progress */}
