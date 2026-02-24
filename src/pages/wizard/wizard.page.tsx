@@ -703,6 +703,13 @@ const SetupWizardPage: React.FC = () => {
                     </div>
 
                     <div className="wizard-step-content">
+                        <Alert title="" severity="info" className="wizard-mb-24">
+                            Before you can use this plugin, you must install and run the IyziTrace Observability Platform. For detailed instructions,{' '}
+                            <a href="https://iyzitrace.com/docs/getting-started" target="_blank" rel="noopener noreferrer">
+                                view the documentation
+                            </a>.
+                        </Alert>
+
                         {/* Platform URL */}
                         <div className="wizard-form-group">
                             <label className="wizard-form-label">
