@@ -486,7 +486,7 @@ grafana-cli plugins install iyzitrace-app
 
 ### Setup Wizard
 
-<video src="docs/videos/1-wizard.mp4" controls width="100%"></video>
+![Wizard Demo](https://github.com/antreklabs/iyzitrace/raw/dev/docs/videos/1-wizard.mp4)
 
 IyziTrace includes a guided setup wizard to get you started quickly:
 
@@ -619,7 +619,7 @@ IyziTrace provides powerful filtering capabilities:
 
 ### Landing Page
 
-<video src="docs/videos/2-home-views.mov" controls width="100%"></video>
+![Landing Page Demo](https://github.com/antreklabs/iyzitrace/raw/dev/docs/videos/2-home-views.mov)
 
 The **Home Page** provides an at-a-glance overview of your observability setup.
 
@@ -636,7 +636,7 @@ The **Home Page** provides an at-a-glance overview of your observability setup.
 
 ### Overview
 
-<video src="docs/videos/3-overview.mov" controls width="100%"></video>
+![Overview Demo](https://github.com/antreklabs/iyzitrace/raw/dev/docs/videos/3-overview.mov)
 
 The **Overview** page provides a comprehensive view of your entire infrastructure and service topology.
 
@@ -660,7 +660,7 @@ The page is organized into horizontal scrollable sections:
 
 ### Service Map
 
-<video src="docs/videos/4-service-map.mov" controls width="100%"></video>
+![Service Map Demo](https://github.com/antreklabs/iyzitrace/raw/dev/docs/videos/4-service-map.mov)
 
 The **Service Map** provides a visual representation of service dependencies and data flow.
 
@@ -698,7 +698,7 @@ Detailed service dependency graph showing all connections:
 
 ### Services
 
-<video src="docs/videos/5-services.mov" controls width="100%"></video>
+![Services Demo](https://github.com/antreklabs/iyzitrace/raw/dev/docs/videos/5-services.mov)
 
 The **Services** page provides comprehensive performance monitoring.
 
@@ -731,7 +731,7 @@ Click any service to see detailed analytics:
 
 ### Traces
 
-<video src="docs/videos/6-traces.mov" controls width="100%"></video>
+![Traces Demo](https://github.com/antreklabs/iyzitrace/raw/dev/docs/videos/6-traces.mov)
 
 The **Traces** page helps you analyze distributed traces across your microservices.
 
@@ -765,7 +765,7 @@ Click any trace to see:
 
 ### Logs
 
-<video src="docs/videos/7-logs.mov" controls width="100%"></video>
+![Logs Demo](https://github.com/antreklabs/iyzitrace/raw/dev/docs/videos/7-logs.mov)
 
 The **Logs** page provides powerful log aggregation and search capabilities.
 
@@ -813,7 +813,7 @@ Each saved view shows:
 
 ### Exceptions
 
-<video src="docs/videos/8-exceptions.mov" controls width="100%"></video>
+![Exceptions Demo](https://github.com/antreklabs/iyzitrace/raw/dev/docs/videos/8-exceptions.mov)
 
 The **Exceptions** page helps you track and analyze errors across services.
 
@@ -844,7 +844,7 @@ Click any exception to see:
 
 ### AI Assistant
 
-<video src="docs/videos/9-ai-asistant.mov" controls width="100%"></video>
+![AI Assistant Demo](https://github.com/antreklabs/iyzitrace/raw/dev/docs/videos/9-ai-asistant.mov)
 
 The **AI Assistant** provides intelligent insights and recommendations powered by AI.
 
@@ -880,7 +880,7 @@ Structured responses with:
 
 ### Agent Manager
 
-<video src="docs/videos/11-agent-manager.mov" controls width="100%"></video>
+![Agent Manager Demo](https://github.com/antreklabs/iyzitrace/raw/dev/docs/videos/11-agent-manager.mov)
 
 The **Agent Manager** provides comprehensive management of OpenTelemetry collectors.
 
@@ -941,7 +941,7 @@ The drawer provides four tabs:
 
 ### Inventory Manager
 
-<video src="docs/videos/12-inventory-management.mov" controls width="100%"></video>
+![Inventory Manager Demo](https://github.com/antreklabs/iyzitrace/raw/dev/docs/videos/12-inventory-management.mov)
 
 The **Inventory Manager** provides complete infrastructure discovery and relationship tracking.
 
@@ -1041,7 +1041,7 @@ Add custom metrics for:
 
 ### Teams
 
-<video src="docs/videos/10-teams.mov" controls width="100%"></video>
+![Teams Demo](https://github.com/antreklabs/iyzitrace/raw/dev/docs/videos/10-teams.mov)
 
 IyziTrace supports multi-tenancy through teams.
 
