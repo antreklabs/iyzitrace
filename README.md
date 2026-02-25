@@ -486,6 +486,8 @@ grafana-cli plugins install iyzitrace-app
 
 ### Setup Wizard
 
+<video src="docs/videos/1-wizard.mp4" controls width="100%"></video>
+
 IyziTrace includes a guided setup wizard to get you started quickly:
 
 #### Step 1: Platform Connection
@@ -617,6 +619,8 @@ IyziTrace provides powerful filtering capabilities:
 
 ### Landing Page
 
+<video src="docs/videos/2-home-views.mov" controls width="100%"></video>
+
 The **Home Page** provides an at-a-glance overview of your observability setup.
 
 ![Home Page](docs/images/screenshots/home/home.png)
@@ -631,6 +635,8 @@ The **Home Page** provides an at-a-glance overview of your observability setup.
   - Each view shows live metrics refreshed in real-time
 
 ### Overview
+
+<video src="docs/videos/3-overview.mov" controls width="100%"></video>
 
 The **Overview** page provides a comprehensive view of your entire infrastructure and service topology.
 
@@ -653,6 +659,8 @@ The page is organized into horizontal scrollable sections:
 - Service sub-table: Name, Type, Port, Sum, Avg, Min, Max, P50–P99, Calls, Calls/s, Ops, Status
 
 ### Service Map
+
+<video src="docs/videos/4-service-map.mov" controls width="100%"></video>
 
 The **Service Map** provides a visual representation of service dependencies and data flow.
 
@@ -690,6 +698,8 @@ Detailed service dependency graph showing all connections:
 
 ### Services
 
+<video src="docs/videos/5-services.mov" controls width="100%"></video>
+
 The **Services** page provides comprehensive performance monitoring.
 
 ![Services Page](docs/images/screenshots/services/services.png)
@@ -720,6 +730,8 @@ Click any service to see detailed analytics:
 ![Service Detail – Operations](docs/images/screenshots/services/service-detail2.png)
 
 ### Traces
+
+<video src="docs/videos/6-traces.mov" controls width="100%"></video>
 
 The **Traces** page helps you analyze distributed traces across your microservices.
 
@@ -752,6 +764,8 @@ Click any trace to see:
   - Expandable attribute groups: app, network, peer, server, rpc, thread, type, operation, host
 
 ### Logs
+
+<video src="docs/videos/7-logs.mov" controls width="100%"></video>
 
 The **Logs** page provides powerful log aggregation and search capabilities.
 
@@ -799,6 +813,8 @@ Each saved view shows:
 
 ### Exceptions
 
+<video src="docs/videos/8-exceptions.mov" controls width="100%"></video>
+
 The **Exceptions** page helps you track and analyze errors across services.
 
 ![Exceptions Page](docs/images/screenshots/exception/exceptions.png)
@@ -827,6 +843,8 @@ Click any exception to see:
 - Previous/Next Exception navigation
 
 ### AI Assistant
+
+<video src="docs/videos/9-ai-asistant.mov" controls width="100%"></video>
 
 The **AI Assistant** provides intelligent insights and recommendations powered by AI.
 
@@ -861,6 +879,8 @@ Structured responses with:
 - Copy button for sharing
 
 ### Agent Manager
+
+<video src="docs/videos/11-agent-manager.mov" controls width="100%"></video>
 
 The **Agent Manager** provides comprehensive management of OpenTelemetry collectors.
 
@@ -920,6 +940,8 @@ The drawer provides four tabs:
 - Validation status indicator
 
 ### Inventory Manager
+
+<video src="docs/videos/12-inventory-management.mov" controls width="100%"></video>
 
 The **Inventory Manager** provides complete infrastructure discovery and relationship tracking.
 
@@ -1018,6 +1040,8 @@ Add custom metrics for:
 ## Access Control
 
 ### Teams
+
+<video src="docs/videos/10-teams.mov" controls width="100%"></video>
 
 IyziTrace supports multi-tenancy through teams.
 
