@@ -351,15 +351,15 @@ const ServiceDetailPanel: React.FC<{
   const statusConfig = getStatusConfig(data.status?.value);
 
   const handleNavigateToLogs = () => {
-    navigate(`/a/iyzitrace-app/logs?serviceName=${encodeURIComponent(data.name)}&serviceNameOperator=%3D&option_limit=100&option_interval=5m&option_pageCount=20&option_orderBy=timestamp&option_orderDirection=desc`);
+    navigate(`/a/antreklabs-iyzitrace-app/logs?serviceName=${encodeURIComponent(data.name)}&serviceNameOperator=%3D&option_limit=100&option_interval=5m&option_pageCount=20&option_orderBy=timestamp&option_orderDirection=desc`);
   };
 
   const handleNavigateToMetrics = () => {
-    navigate(`/a/iyzitrace-app/services/${encodeURIComponent(data.name)}`);
+    navigate(`/a/antreklabs-iyzitrace-app/services/${encodeURIComponent(data.name)}`);
   };
 
   const handleNavigateToTraces = () => {
-    navigate(`/a/iyzitrace-app/traces?serviceName=${encodeURIComponent(data.name)}&serviceNameOperator=%3D&option_limit=100&option_interval=5m&option_pageCount=20&option_orderBy=traceId&option_orderDirection=desc`);
+    navigate(`/a/antreklabs-iyzitrace-app/traces?serviceName=${encodeURIComponent(data.name)}&serviceNameOperator=%3D&option_limit=100&option_interval=5m&option_pageCount=20&option_orderBy=traceId&option_orderDirection=desc`);
   };
 
   const containerStyle = css`

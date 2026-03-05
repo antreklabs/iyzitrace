@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
   "type": "app",
   "name": "IyziTrace",
-  "id": "iyzitrace-app",
+  "id": "antreklabs-iyzitrace-app",
   "info": {
     "keywords": [
       "app"
@@ -24,80 +24,80 @@
     {
       "type": "page",
       "name": "Home",
-      "path": "/a/iyzitrace-app/landing",
+      "path": "/a/antreklabs-iyzitrace-app/landing",
       "addToNav": true
     },
     {
       "type": "page",
       "name": "Overview",
-      "path": "/a/iyzitrace-app/overview",
+      "path": "/a/antreklabs-iyzitrace-app/overview",
       "addToNav": true
     },
     {
       "type": "page",
       "name": "Service Map",
-      "path": "/a/iyzitrace-app/service-map",
+      "path": "/a/antreklabs-iyzitrace-app/service-map",
       "addToNav": true
     },
     {
       "type": "page",
       "name": "Services",
-      "path": "/a/iyzitrace-app/services",
+      "path": "/a/antreklabs-iyzitrace-app/services",
       "addToNav": true
     },
     {
       "type": "page",
       "name": "Traces",
-      "path": "/a/iyzitrace-app/traces",
+      "path": "/a/antreklabs-iyzitrace-app/traces",
       "addToNav": true
     },
     {
       "type": "page",
       "name": "Logs",
-      "path": "/a/iyzitrace-app/logs",
+      "path": "/a/antreklabs-iyzitrace-app/logs",
       "addToNav": true
     },
     {
       "type": "page",
       "name": "Exceptions",
-      "path": "/a/iyzitrace-app/exceptions",
+      "path": "/a/antreklabs-iyzitrace-app/exceptions",
       "addToNav": true
     },
     {
       "type": "page",
       "name": "AI Assistant",
-      "path": "/a/iyzitrace-app/ai",
+      "path": "/a/antreklabs-iyzitrace-app/ai",
       "addToNav": true
     },
     {
       "type": "page",
       "name": "Teams",
-      "path": "/a/iyzitrace-app/teams",
+      "path": "/a/antreklabs-iyzitrace-app/teams",
       "addToNav": true
     },
     {
       "type": "page",
       "name": "Settings",
-      "path": "/a/iyzitrace-app/settings",
+      "path": "/a/antreklabs-iyzitrace-app/settings",
       "addToNav": true
     },
     {
       "type": "page",
       "name": "Agent Manager",
-      "path": "/a/iyzitrace-app/agent-manager",
+      "path": "/a/antreklabs-iyzitrace-app/agent-manager",
       "addToNav": true
     },
     {
       "type": "page",
       "name": "Inventory Manager",
-      "path": "/a/iyzitrace-app/inventory-manager",
+      "path": "/a/antreklabs-iyzitrace-app/inventory-manager",
       "addToNav": true
     },
     {
       "type": "page",
       "icon": "cog",
       "name": "Configuration",
-      "path": "/plugins/iyzitrace-app",
+      "path": "/plugins/antreklabs-iyzitrace-app",
       "role": "Admin",
       "addToNav": true
     }

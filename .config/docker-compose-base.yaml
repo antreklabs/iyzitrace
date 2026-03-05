@@ -1,7 +1,7 @@
 services:
   grafana:
     user: root
-    container_name: 'iyzitrace-app'
+    container_name: 'antreklabs-iyzitrace-app'
 
     build:
       context: .
@@ -14,17 +14,17 @@ services:
       - 3000:3000/tcp
     volumes:
       - ../grafana-data:/var/lib/grafana
-      - ../dist:/var/lib/grafana/plugins/iyzitrace-app
+      - ../dist:/var/lib/grafana/plugins/antreklabs-iyzitrace-app
       - ../provisioning:/etc/grafana/provisioning
-      - ..:/root/iyzitrace-app
+      - ..:/root/antreklabs-iyzitrace-app
       - grafana-data:/var/lib/grafana
 
     environment:
       NODE_ENV: development
-      GF_LOG_FILTERS: plugin.iyzitrace-app:debug
+      GF_LOG_FILTERS: plugin.antreklabs-iyzitrace-app:debug
       GF_LOG_LEVEL: debug
       GF_DATAPROXY_LOGGING: 1
-      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: iyzitrace-app
+      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: antreklabs-iyzitrace-app
       GF_AUTH_ANONYMOUS_ENABLED: true
       GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
       GF_AUTH_DISABLE_LOGIN_FORM: true

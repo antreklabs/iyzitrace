@@ -30,7 +30,7 @@ import {
     type PlatformStatusResponse,
 } from '../../utils/platform-setup.utils';
 
-const PLUGIN_ID = 'iyzitrace-app';
+const PLUGIN_ID = 'antreklabs-iyzitrace-app';
 
 type WizardStep = 'platform' | 'datasources' | 'verification';
 
@@ -325,10 +325,10 @@ const SetupWizardPage: React.FC = () => {
             });
 
             setWizardCompleted(true);
-            window.location.href = '/a/iyzitrace-app/landing';
+            window.location.href = '/a/antreklabs-iyzitrace-app/landing';
         } catch (err) {
             console.error('Failed to save wizard state:', err);
-            window.location.href = '/a/iyzitrace-app/landing';
+            window.location.href = '/a/antreklabs-iyzitrace-app/landing';
         } finally {
             setSaving(false);
         }
@@ -353,10 +353,10 @@ const SetupWizardPage: React.FC = () => {
             });
 
             setWizardCompleted(true);
-            window.location.href = '/a/iyzitrace-app/landing';
+            window.location.href = '/a/antreklabs-iyzitrace-app/landing';
         } catch (err) {
             console.error('Failed to save wizard state:', err);
-            window.location.href = '/a/iyzitrace-app/landing';
+            window.location.href = '/a/antreklabs-iyzitrace-app/landing';
         } finally {
             setSkipping(false);
         }

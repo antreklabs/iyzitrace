@@ -138,7 +138,7 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
                   if (key === 'otelTraceID' || key === 'trace_id' || key === 'traceId' || key === 'traceID') {
                     content = (
                       <a
-                        href={`/a/iyzitrace-app/traces/${value}`}
+                        href={`/a/antreklabs-iyzitrace-app/traces/${value}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="u-text-link-blue"
@@ -151,7 +151,7 @@ const LogExpandedRowComponent: React.FC<LogExpandedRowProps> = ({ record }) => {
                     if (traceId) {
                       content = (
                         <a
-                          href={`/a/iyzitrace-app/traces/${traceId}?spanId=${value}`}
+                          href={`/a/antreklabs-iyzitrace-app/traces/${traceId}?spanId=${value}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="u-text-link-blue"

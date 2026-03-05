@@ -34,7 +34,7 @@ import type { PluginJsonData } from '../../interfaces/utils/options';
 
 const { TextArea } = Input;
 
-const PLUGIN_ID = 'iyzitrace-app';
+const PLUGIN_ID = 'antreklabs-iyzitrace-app';
 
 const gradientAnimation = keyframes`
   0% { background-position: 0% 50%; }

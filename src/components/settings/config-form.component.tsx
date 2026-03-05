@@ -29,7 +29,7 @@ import {
 } from '../../utils/platform-setup.utils';
 import '../../assets/styles/components/settings/settings.css';
 
-const PLUGIN_ID = 'iyzitrace-app';
+const PLUGIN_ID = 'antreklabs-iyzitrace-app';
 
 const TAB_ITEMS = [
   { key: 'platform', label: 'Platform' },

@@ -1,6 +1,6 @@
 import { getBackendSrv } from '@grafana/runtime';
 
-const PLUGIN_ID = 'iyzitrace-app';
+const PLUGIN_ID = 'antreklabs-iyzitrace-app';
 
 export interface PluginSettings {
   pageViews?: Array<{

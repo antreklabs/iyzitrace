@@ -37,16 +37,16 @@ const NAV_ITEMS: Array<{
   route: string;
   description: string;
 }> = [
-    { key: 'overview', title: 'Overview', icon: BuildOutlined, route: '/a/iyzitrace-app/overview', description: 'High-level health & topology overview of your entire infrastructure and service ecosystem.' },
-    { key: 'serviceMap', title: 'Service Map', icon: DeploymentUnitOutlined, route: '/a/iyzitrace-app/service-map', description: 'Visualize service dependencies and data flow from infrastructure to applications and services.' },
-    { key: 'services', title: 'Services', icon: BarChartOutlined, route: '/a/iyzitrace-app/services', description: 'Monitor service performance metrics including P99 latency, error rates, and throughput.' },
-    { key: 'traces', title: 'Traces', icon: FileSearchOutlined, route: '/a/iyzitrace-app/traces', description: 'Explore distributed traces to find slow spans, bottlenecks, and analyze request flows.' },
-    { key: 'logs', title: 'Logs', icon: ProfileOutlined, route: '/a/iyzitrace-app/logs', description: 'Search and correlate application logs with traces for comprehensive debugging and analysis.' },
-    { key: 'exceptions', title: 'Exceptions', icon: RadarChartOutlined, route: '/a/iyzitrace-app/exceptions', description: 'Track and analyze error patterns, exception groups, and failure trends across your services.' },
-    { key: 'ai', title: 'AI Assistant', icon: RocketOutlined, route: '/a/iyzitrace-app/ai', description: 'Get intelligent insights and recommendations powered by AI to optimize your observability workflow.' },
-    { key: 'teams', title: 'Teams', icon: TeamOutlined, route: '/a/iyzitrace-app/teams', description: 'Manage team members, permissions, and access controls for collaborative observability.' },
-    { key: 'agentManager', title: 'Agents', icon: ControlOutlined, route: '/a/iyzitrace-app/agent-manager', description: 'Manage and monitor your OpenTelemetry collector agents, configurations, and groups.' },
-    { key: 'inventoryManager', title: 'Inventories', icon: AppstoreOutlined, route: '/a/iyzitrace-app/inventory-manager', description: 'View and manage your infrastructure inventory, entities, and their relationships.' },
+    { key: 'overview', title: 'Overview', icon: BuildOutlined, route: '/a/antreklabs-iyzitrace-app/overview', description: 'High-level health & topology overview of your entire infrastructure and service ecosystem.' },
+    { key: 'serviceMap', title: 'Service Map', icon: DeploymentUnitOutlined, route: '/a/antreklabs-iyzitrace-app/service-map', description: 'Visualize service dependencies and data flow from infrastructure to applications and services.' },
+    { key: 'services', title: 'Services', icon: BarChartOutlined, route: '/a/antreklabs-iyzitrace-app/services', description: 'Monitor service performance metrics including P99 latency, error rates, and throughput.' },
+    { key: 'traces', title: 'Traces', icon: FileSearchOutlined, route: '/a/antreklabs-iyzitrace-app/traces', description: 'Explore distributed traces to find slow spans, bottlenecks, and analyze request flows.' },
+    { key: 'logs', title: 'Logs', icon: ProfileOutlined, route: '/a/antreklabs-iyzitrace-app/logs', description: 'Search and correlate application logs with traces for comprehensive debugging and analysis.' },
+    { key: 'exceptions', title: 'Exceptions', icon: RadarChartOutlined, route: '/a/antreklabs-iyzitrace-app/exceptions', description: 'Track and analyze error patterns, exception groups, and failure trends across your services.' },
+    { key: 'ai', title: 'AI Assistant', icon: RocketOutlined, route: '/a/antreklabs-iyzitrace-app/ai', description: 'Get intelligent insights and recommendations powered by AI to optimize your observability workflow.' },
+    { key: 'teams', title: 'Teams', icon: TeamOutlined, route: '/a/antreklabs-iyzitrace-app/teams', description: 'Manage team members, permissions, and access controls for collaborative observability.' },
+    { key: 'agentManager', title: 'Agents', icon: ControlOutlined, route: '/a/antreklabs-iyzitrace-app/agent-manager', description: 'Manage and monitor your OpenTelemetry collector agents, configurations, and groups.' },
+    { key: 'inventoryManager', title: 'Inventories', icon: AppstoreOutlined, route: '/a/antreklabs-iyzitrace-app/inventory-manager', description: 'View and manage your infrastructure inventory, entities, and their relationships.' },
   ];
 
 interface MenuCardProps {

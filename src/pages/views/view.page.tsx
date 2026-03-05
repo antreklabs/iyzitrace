@@ -183,19 +183,19 @@ function ViewsPage() {
 
     switch (widget.page) {
       case 'logs':
-        return `/a/iyzitrace-app/logs${urlWithViewId}`;
+        return `/a/antreklabs-iyzitrace-app/logs${urlWithViewId}`;
       case 'traces':
-        return `/a/iyzitrace-app/traces${urlWithViewId}`;
+        return `/a/antreklabs-iyzitrace-app/traces${urlWithViewId}`;
       case 'services':
-        return `/a/iyzitrace-app/services${urlWithViewId}`;
+        return `/a/antreklabs-iyzitrace-app/services${urlWithViewId}`;
       case 'service-map':
-        return `/a/iyzitrace-app/service-map${urlWithViewId}`;
+        return `/a/antreklabs-iyzitrace-app/service-map${urlWithViewId}`;
       case 'alerts':
-        return `/a/iyzitrace-app/alerts${urlWithViewId}`;
+        return `/a/antreklabs-iyzitrace-app/alerts${urlWithViewId}`;
       case 'exceptions':
-        return `/a/iyzitrace-app/exceptions${urlWithViewId}`;
+        return `/a/antreklabs-iyzitrace-app/exceptions${urlWithViewId}`;
       default:
-        return `/a/iyzitrace-app/${widget.page || ''}${urlWithViewId}`;
+        return `/a/antreklabs-iyzitrace-app/${widget.page || ''}${urlWithViewId}`;
     }
   };
 

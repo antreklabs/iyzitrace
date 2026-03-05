@@ -44,7 +44,7 @@ const ExceptionsContainer: React.FC = () => {
         return (
           <span
             className="service-name-link"
-            onClick={() => navigate(`/a/iyzitrace-app/services/${value}`)}>
+            onClick={() => navigate(`/a/antreklabs-iyzitrace-app/services/${value}`)}>
             {value}
           </span>
         );
@@ -55,7 +55,7 @@ const ExceptionsContainer: React.FC = () => {
       exceptionTypeColumn.render = (value: string) => {
         return <span
           className="service-name-link"
-          onClick={() => navigate(`/a/iyzitrace-app/exceptions/${value}`)}>
+          onClick={() => navigate(`/a/antreklabs-iyzitrace-app/exceptions/${value}`)}>
           {value}
         </span>
       };

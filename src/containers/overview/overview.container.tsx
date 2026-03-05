@@ -95,7 +95,7 @@ const OverviewContainer: React.FC = () => {
     const serviceNameColumn = l1.find((col: ColumnItem) => col.key === 'name');
     if (serviceNameColumn) {
       serviceNameColumn.render = (value: string) => {
-        return <span className="overview-link-blue" onClick={() => navigate(`/a/iyzitrace-app/services/${value}`)}>{value}</span>;
+        return <span className="overview-link-blue" onClick={() => navigate(`/a/antreklabs-iyzitrace-app/services/${value}`)}>{value}</span>;
       };
     }
 

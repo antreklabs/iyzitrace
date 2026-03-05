@@ -3,7 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { LoadingPlaceholder } from '@grafana/ui';
 import { getBackendSrv } from '@grafana/runtime';
 
-const PLUGIN_ID = 'iyzitrace-app';
+const PLUGIN_ID = 'antreklabs-iyzitrace-app';
 
 interface WizardState {
     completed: boolean;
@@ -64,7 +64,7 @@ const WizardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
     // If wizard not completed and NOT on wizard page, redirect to wizard
     if (!wizardCompleted && !isWizardPath) {
-        return <Navigate to="/a/iyzitrace-app/wizard" replace />;
+        return <Navigate to="/a/antreklabs-iyzitrace-app/wizard" replace />;
     }
 
     // Provide wizard context to children

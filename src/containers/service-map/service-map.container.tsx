@@ -66,7 +66,7 @@ const ServiceMapContainer: React.FC = () => {
     const serviceNameColumn = l1.find((col: ColumnItem) => col.key === 'name');
     if (serviceNameColumn) {
       serviceNameColumn.render = (value: string) => {
-        return <span className="service-name-link" onClick={() => navigate(`/a/iyzitrace-app/services/${value}`)}>{value}</span>;
+        return <span className="service-name-link" onClick={() => navigate(`/a/antreklabs-iyzitrace-app/services/${value}`)}>{value}</span>;
       };
     }
 

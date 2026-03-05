@@ -13,9 +13,9 @@ type TabsState = {
 
 const initialState: TabsState = {
   tabs: [
-    { key: '/a/iyzitrace-app/', label: 'Dashboard', closable: false }
+    { key: '/a/antreklabs-iyzitrace-app/', label: 'Dashboard', closable: false }
   ],
-  activeKey: '/a/iyzitrace-app/',
+  activeKey: '/a/antreklabs-iyzitrace-app/',
 };
 
 const tabsSlice = createSlice({

@@ -43,7 +43,7 @@ const BaseContainer: React.FC<BaseConatinerProps> = ({ title, children, showHead
   })();
 
   const handleGoToSettings = () => {
-    navigate('/a/iyzitrace-app/settings?tab=security');
+    navigate('/a/antreklabs-iyzitrace-app/settings?tab=security');
   };
 
   return (

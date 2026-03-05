@@ -126,7 +126,7 @@ export function AppSidebar() {
               asChild
               tooltip="iyzitrace'e Git"
             >
-              <a href="/a/iyzitrace-app/landing" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+              <a href="/a/antreklabs-iyzitrace-app/landing" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
                 <ExternalLink className="h-4 w-4" />
                 {state === "expanded" && <span>iyzitrace'e Git</span>}
               </a>

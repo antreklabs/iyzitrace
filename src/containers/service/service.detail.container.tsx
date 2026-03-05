@@ -86,7 +86,7 @@ const ServiceDetailContainer: React.FC<ServiceDetailContainerProps> = ({ service
         return (
           <span
             className="service-name-link"
-            onClick={() => navigate(`/a/iyzitrace-app/services/${value}`)}>
+            onClick={() => navigate(`/a/antreklabs-iyzitrace-app/services/${value}`)}>
             {value}
           </span>
         );

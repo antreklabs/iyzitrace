@@ -5,7 +5,7 @@ import { Button, LoadingPlaceholder, Alert } from '@grafana/ui';
 import { RocketOutlined, CheckCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import ConfigForm from '../../components/settings/config-form.component';
 
-const PLUGIN_ID = 'iyzitrace-app';
+const PLUGIN_ID = 'antreklabs-iyzitrace-app';
 
 interface WizardState {
   completed: boolean;
@@ -74,7 +74,7 @@ const SettingsPage: React.FC<PluginConfigProps> = (props) => {
     return (
       <div style={styles.welcomeContainer}>
         <img
-          src="/public/plugins/iyzitrace-app/img/logo.png"
+          src="/public/plugins/antreklabs-iyzitrace-app/img/logo.png"
           alt="IyziTrace"
           style={styles.logo}
         />

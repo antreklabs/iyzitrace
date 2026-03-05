@@ -45,7 +45,7 @@ const TraceContainer: React.FC = () => {
       traceIdColumn.render = (value: string) => {
         return (
           <span className="service-name-link font-mono"
-            onClick={() => navigate(`/a/iyzitrace-app/traces/${value}`)}>
+            onClick={() => navigate(`/a/antreklabs-iyzitrace-app/traces/${value}`)}>
             {value}
           </span>);
       };
@@ -55,7 +55,7 @@ const TraceContainer: React.FC = () => {
     if (serviceNameColumn) {
       serviceNameColumn.render = (value: string) => {
         return (
-          <span className="service-name-link" onClick={() => navigate(`/a/iyzitrace-app/services/${value}`)}>
+          <span className="service-name-link" onClick={() => navigate(`/a/antreklabs-iyzitrace-app/services/${value}`)}>
             {value}
           </span>);
       };

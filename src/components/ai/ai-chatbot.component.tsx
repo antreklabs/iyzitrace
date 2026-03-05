@@ -21,7 +21,7 @@ import {
 import type { PluginJsonData } from '../../interfaces/utils/options';
 import '../../assets/styles/components/ai/ai-chatbot.css';
 
-const PLUGIN_ID = 'iyzitrace-app';
+const PLUGIN_ID = 'antreklabs-iyzitrace-app';
 
 interface Message {
   id: string;
