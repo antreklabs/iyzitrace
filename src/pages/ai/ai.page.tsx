@@ -626,7 +626,7 @@ const AIPage: React.FC = () => {
         const aiConfig = (settings?.jsonData as PluginJsonData)?.aiConfig;
 
         const config = {
-          apiKey: aiConfig?.apiKey || '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',
+          apiKey: aiConfig?.apiKey || '',
           model: aiConfig?.model || 'deepseek/deepseek-chat',
           baseUrl: 'https://openrouter.ai/api/v1',
           temperature: aiConfig?.temperature ?? 0.7,
