@@ -116,7 +116,7 @@ export const isAIConfigured = async (): Promise<boolean> => {
   try {
     // Use the same API key/base URL as ai.service.ts
     const settings = await getPluginSettings();
-    const apiKey = settings?.aiConfig?.apiKey || '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';
+    const apiKey = settings?.aiConfig?.apiKey || '';
     const baseUrl = 'https://openrouter.ai/api/v1';
 
     const controller = new AbortController();

@@ -6,7 +6,7 @@ import type { AIConfig, AIMessage, AIResponse, AIInsightRequest, AIError } from 
 export type { AIConfig, AIMessage, AIResponse, AIInsightRequest, AIError };
 
 let AI_CONFIG = {
-  apiKey: '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',
+  apiKey: '',
   model: 'deepseek/deepseek-chat',
   baseUrl: 'https://openrouter.ai/api/v1',
   temperature: 0.7,

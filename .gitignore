@@ -5,3 +5,7 @@ grafana-data
 tempo-data
 /loki-data
 /grafana/public/app/plugins
+.env
+.env.*
+*.pem
+*.key
