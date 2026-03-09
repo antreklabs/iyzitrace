@@ -33,7 +33,6 @@ export function validateYamlConfig(
       const errors = validator.validate(yamlContent, parsedData);
       allErrors.push(...errors);
     } catch (error) {
-      console.error(`Validator ${validator.name} failed:`, error);
     }
   }
 

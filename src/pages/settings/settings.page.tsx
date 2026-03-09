@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { PluginConfigPageProps, AppPluginMeta } from '@grafana/data';
-import { getBackendSrv } from '@grafana/runtime';
+import { getBackendSrv, locationService } from '@grafana/runtime';
 import { Button, LoadingPlaceholder, Alert } from '@grafana/ui';
 import { RocketOutlined, CheckCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import ConfigForm from '../../components/settings/config-form.component';
@@ -46,19 +46,18 @@ const SettingsPage: React.FC<PluginConfigProps> = (props) => {
       });
 
       // Redirect to wizard
-      window.location.href = `/a/${PLUGIN_ID}/wizard`;
+      locationService.push(`/a/${PLUGIN_ID}/wizard`);
     } catch (error) {
-      console.error('Failed to enable plugin:', error);
       setEnabling(false);
     }
   };
 
   const handleGoToWizard = () => {
-    window.location.href = `/a/${PLUGIN_ID}/wizard`;
+    locationService.push(`/a/${PLUGIN_ID}/wizard`);
   };
 
   const handleGoToApp = () => {
-    window.location.href = `/a/${PLUGIN_ID}/landing`;
+    locationService.push(`/a/${PLUGIN_ID}/landing`);
   };
 
   if (loading) {

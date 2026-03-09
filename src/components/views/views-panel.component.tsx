@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { locationService } from '@grafana/runtime';
 import { Typography, Form, Card, Button, Space, Empty, Modal, Input, message, Row, Col, Skeleton } from 'antd';
 import { getPluginSettings, savePluginSettings, PluginSettings } from '../../api/service/settings.service';
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlayCircleOutlined, PauseCircleOutlined, StopOutlined } from '@ant-design/icons';
-import '../../assets/styles/pages/views/views.css';
+import '../../assets/styles/pages/views/views.styles';
 import { getRegions } from '../../api/service/service-map.service';
 import { getServicesTableData } from '../../api/service/services.service';
 import { getTracesTableData } from '../../api/service/traces.service';
@@ -531,7 +532,7 @@ const ViewsPanel: React.FC = () => {
                             icon={<EyeOutlined />}
                             size="small"
                             onClick={() => {
-                                window.location.href = iframeUrl;
+                                locationService.push(iframeUrl);
                             }}
                         >
                             View

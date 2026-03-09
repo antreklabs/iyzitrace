@@ -151,8 +151,7 @@ export default function ConfigsPage({
       await mutateVersions();
       navigate("../configs");
     } catch (error) {
-      console.error("Save failed:", error);
-      alert("Failed to save configuration");
+
     } finally {
       setIsSaving(false);
     }

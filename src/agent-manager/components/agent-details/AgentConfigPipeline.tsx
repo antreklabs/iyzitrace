@@ -64,7 +64,6 @@ export function AgentConfigPipeline({
         const result = await fetchAgentComponentMetrics(agentId, minutes);
         return result;
       } catch (error) {
-        console.error("Failed to fetch component metrics:", error);
         return [];
       }
     },
@@ -92,7 +91,6 @@ export function AgentConfigPipeline({
         // TODO: Optionally refresh agent data to get updated effective config
       }
     } catch (error) {
-      console.error("Failed to send config to agent:", error);
     } finally {
       setIsSending(false);
     }

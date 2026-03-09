@@ -9,7 +9,7 @@ import {
 } from '@ant-design/icons';
 import { NavigationProvider } from './components/NavigationContext';
 import EntityDrawer from './components/EntityDrawer';
-import '../assets/styles/pages/inventory-manager/inventory-manager.css';
+import '../assets/styles/pages/inventory-manager/inventory-manager.styles';
 
 // Lazy load pages
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));

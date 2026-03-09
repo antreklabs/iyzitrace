@@ -4,7 +4,7 @@ import { IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { TableColumn } from '../api/service/table.services';
 import { getFilterParams, updateUrlParams } from '../api/service/query.service';
-import '../assets/styles/base/base.container.css';
+import '../assets/styles/base/base.container.styles';
 
 const { Title } = Typography;
 

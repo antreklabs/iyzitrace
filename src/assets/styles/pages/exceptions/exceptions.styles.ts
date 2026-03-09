@@ -1,0 +1,76 @@
+import { injectCSS } from '../../../../utils/inject-css';
+
+injectCSS('assets-styles-pages-exceptions-exceptions', `
+/* Exception Pages Styles */
+
+.exception-detail-container {
+    padding: 24px;
+}
+
+.exception-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.exception-detail-title {
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.exception-detail-type {
+    color: #ff4d4f;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.exception-detail-meta {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.exception-detail-meta-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.exception-detail-meta-label {
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.exception-detail-meta-value {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.exception-detail-stacktrace {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    padding: 20px;
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid var(--border-light);
+}
+
+.exception-detail-section {
+    margin-bottom: 24px;
+}
+
+.exception-detail-section-title {
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}`);

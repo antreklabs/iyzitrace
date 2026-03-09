@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, Col, Row, Spin } from 'antd';
 import MsCharts from './service.detail.chart.component';
 import { Service } from '../../api/service/interface.service';
-import '../../assets/styles/components/service/service.css';
+import '../../assets/styles/components/service/service.styles';
 
 interface CallMetricsProps {
   data?: Service[];

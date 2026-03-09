@@ -16,7 +16,36 @@
       "small": "img/logo.svg",
       "large": "img/logo.svg"
     },
-    "screenshots": [],
+    "screenshots": [
+      {
+        "name": "Overview Dashboard",
+        "path": "img/screenshots/overview.png"
+      },
+      {
+        "name": "Service Map",
+        "path": "img/screenshots/service-map.png"
+      },
+      {
+        "name": "Service Detail",
+        "path": "img/screenshots/service-detail.png"
+      },
+      {
+        "name": "Trace Detail",
+        "path": "img/screenshots/trace-detail.png"
+      },
+      {
+        "name": "Log Explorer",
+        "path": "img/screenshots/logs.png"
+      },
+      {
+        "name": "AI Agent",
+        "path": "img/screenshots/ai-agent.png"
+      },
+      {
+        "name": "Agent Manager",
+        "path": "img/screenshots/agent-topology.png"
+      }
+    ],
     "version": "%VERSION%",
     "updated": "%TODAY%"
   },

@@ -77,8 +77,7 @@ export default function AgentsPage() {
       mutateAgents();
       setAgentToDelete(null);
     } catch (error) {
-      alert("Failed to delete agent");
-      console.error(error);
+
     }
   };
 

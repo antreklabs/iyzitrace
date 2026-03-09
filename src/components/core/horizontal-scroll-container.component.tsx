@@ -1,7 +1,7 @@
 import React, { useRef, useState, useMemo, ReactElement } from 'react';
 import { Typography, Input } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import '../../assets/styles/components/core/core.css';
+import '../../assets/styles/components/core/core.styles';
 
 const { Title } = Typography;
 const { Search } = Input;

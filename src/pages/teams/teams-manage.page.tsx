@@ -21,7 +21,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api, type Team, type TeamMember, type TeamPage, type AvailablePage, type TeamSettings } from '../../api/service/team.service';
 import pluginJson from '../../plugin.json';
 import { getTeams } from '../../api/service/team.service';
-import '../../assets/styles/pages/teams/teams.css';
+import '../../assets/styles/pages/teams/teams.styles';
 
 const { Search } = Input;
 const { TabPane } = Tabs;

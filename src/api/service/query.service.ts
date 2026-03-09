@@ -1,4 +1,5 @@
 import { getPluginSettings } from './settings.service';
+import { locationService } from '@grafana/runtime';
 import { Definitions } from '../../interfaces/utils/options';
 import { DEFAULT_DEFINITIONS } from '../../components/settings/definitions-table.component';
 
@@ -64,50 +65,50 @@ export class FilterParamsModel {
     };
     readonly rangeText: string;
   };
-  
+
   duration: {
     scope: string;
     min: string;
     max: string;
   };
-  
+
   fields: Array<{
     name: string;
     value: string[];
   }>;
-  
+
   labels: Array<{
     name: string;
     value: string[];
   }>;
-  
+
   operation: {
     name: string;
     operator: string;
   };
-  
+
   service: {
     name: string;
     operator: string;
   };
-  
+
   tag: {
     scope: string;
     key: string;
     operator: string;
     value: string;
   };
-  
+
   type: {
     name: string;
     operator: string;
   };
-  
+
   status: {
     name: string;
     operator: string;
   };
-  
+
   options: {
     interval: string;
     limit: string;
@@ -126,7 +127,7 @@ export class FilterParamsModel {
   constructor(params: Record<string, string>) {
     const now = Date.now();
     const fifteenMinutesAgo = now - (15 * 60 * 1000);
-    
+
     this.timeRange = {
       from: params.from ? parseInt(params.from) : fifteenMinutesAgo,
       to: params.to ? parseInt(params.to) : now,
@@ -163,7 +164,7 @@ export class FilterParamsModel {
 
     this.labels = [];
     const labelMap: { [key: string]: { name?: string; value?: string[] } } = {};
-    
+
     Object.keys(params).forEach(key => {
       if (key.startsWith('label_')) {
         const match = key.match(/^label_(.+)_(name|value)$/);
@@ -180,7 +181,7 @@ export class FilterParamsModel {
         }
       }
     });
-    
+
     Object.values(labelMap).forEach((label) => {
       if (label.name && label.value && label.value.length > 0) {
         this.labels.push({ name: label.name, value: label.value });
@@ -240,7 +241,7 @@ export class FilterParamsModel {
         const exception_type_label_name = definitions.exception_type_label_name;
 
         const labelFilters: string[] = [];
-        
+
         if (this.service.name) {
           labelFilters.push(`${service_label_name}="${this.service.name}"`);
         }
@@ -254,7 +255,7 @@ export class FilterParamsModel {
           labelFilters.push(`${status_label_name}="${this.status.name}"`);
           labelFilters.push(`${exception_type_label_name}="${this.status.name}"`);
         }
-        
+
         this.labels.forEach((label: { name: string; value: string[] }) => {
           if (label.value.length === 1) {
             labelFilters.push(`${label.name}="${label.value[0]}"`);
@@ -262,7 +263,7 @@ export class FilterParamsModel {
             labelFilters.push(`${label.name}=~"${label.value.join('|')}"`);
           }
         });
-        
+
         if (this.duration.min) {
           labelFilters.push(`${definitions.duration_ms_label_name}>${this.duration.min}`);
         }
@@ -288,7 +289,7 @@ export class FilterParamsModel {
     if (this._labelFiltersValue === undefined && !this._labelFiltersPromise) {
       this.initializeLabelFilters();
     }
-    
+
     return this._labelFiltersValue || '';
   }
 
@@ -316,9 +317,9 @@ export class FilterParamsModel {
           terms.push(`name${op}"${this.operation.name}"`);
         }
 
-        if(this.duration?.min && this.duration?.max) {
+        if (this.duration?.min && this.duration?.max) {
           let durationLabel = 'duration';
-          if(this.duration.scope === 'trace') {
+          if (this.duration.scope === 'trace') {
             durationLabel = 'traceDuration';
           }
           if (this.duration?.min) {
@@ -374,15 +375,15 @@ export class FilterParamsModel {
   }
 }
 
-export const getFilterParams = (urlSearch: string = window.location.search): FilterParamsModel => {
+export const getFilterParams = (urlSearch: string = locationService.getLocation().search): FilterParamsModel => {
   const urlParams = new URLSearchParams(urlSearch);
   const params = Object.fromEntries(urlParams.entries());
   return new FilterParamsModel(params);
 };
 
-export const updateUrlParams = (updates: Record<string, string | null>, currentSearch: string = window.location.search): string => {
+export const updateUrlParams = (updates: Record<string, string | null>, currentSearch: string = locationService.getLocation().search): string => {
   const urlParams = new URLSearchParams(currentSearch);
-  
+
   Object.entries(updates).forEach(([key, value]) => {
     if (value === null || value === '') {
       urlParams.delete(key);
@@ -390,7 +391,7 @@ export const updateUrlParams = (updates: Record<string, string | null>, currentS
       urlParams.set(key, value);
     }
   });
-  
+
   return urlParams.toString();
 };
 
@@ -403,7 +404,7 @@ export const getDefaultSearchQuery = (): string => {
     option_interval: '5m',
     option_limit: '100',
     option_pageCount: '20',
-  };    
+  };
 
   const defaultSearchQuery = updateUrlParams(defaultParams);
 
@@ -470,37 +471,37 @@ export const getQueryByType = (
 
     case QueryType.CALLS_BY_SERVICE:
       return `sum by(${service_label_name}) (increase(${definitions.request_count_metric_name}${labelFilters}[${interval}]))`;
-    
+
     case QueryType.AVG_DURATION_BY_SERVICE:
       return `sum by(${service_label_name}) (rate(${definitions.sum_duration_ms_metric_name}${labelFilters}[${interval}])) / sum by(${service_label_name}) (rate(${definitions.count_duration_ms_metric_name}${labelFilters}[${interval}]))`;
-    
+
     case QueryType.SUM_DURATION_BY_SERVICE:
       return `sum by(${service_label_name}) (rate(${definitions.sum_duration_ms_metric_name}${labelFilters}[${interval}]))`;
-    
+
     case QueryType.MIN_DURATION_BY_SERVICE:
       return `histogram_quantile(0.0, sum by(${service_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
-    
+
     case QueryType.MAX_DURATION_BY_SERVICE:
       return `histogram_quantile(1.0, sum by(${service_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
-    
+
     case QueryType.P50_BY_SERVICE:
       return `histogram_quantile(0.50, sum by(${service_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
-  
+
     case QueryType.P75_BY_SERVICE:
       return `histogram_quantile(0.75, sum by(${service_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
-  
+
     case QueryType.P90_BY_SERVICE:
       return `histogram_quantile(0.90, sum by(${service_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
-  
+
     case QueryType.P95_BY_SERVICE:
       return `histogram_quantile(0.95, sum by(${service_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
 
     case QueryType.P99_BY_SERVICE:
       return `histogram_quantile(0.99, sum by(${service_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
-      
+
     case QueryType.P50_BY_SERVICE_INTIME:
       return `histogram_quantile(0.50, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, le))`;
-  
+
     case QueryType.P75_BY_SERVICE_INTIME:
       return `histogram_quantile(0.75, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, le))`;
 
@@ -515,37 +516,37 @@ export const getQueryByType = (
 
     case QueryType.APDEX_BY_SERVICE_INTIME:
       return `(sum by(${service_label_name}) (rate(${definitions.bucket_duration_ms_metric_name}${buildLeFilter(labelFilters, definitions.apdex_min_threshold_seconds)}[${interval}])) + sum by(${service_label_name}) (rate(${definitions.bucket_duration_ms_metric_name}${buildLeFilter(labelFilters, definitions.apdex_max_threshold_seconds)}[${interval}])) / 2) / sum by(${service_label_name}) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}]))`;
-    
+
     case QueryType.CALLS_BY_SERVICE_AND_SPAN:
       return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, ${http_method_label_name}, ${http_url_label_name}, ${net_host_port_label_name}) (increase(${definitions.request_count_metric_name}${labelFilters}[${interval}]))`;
-    
+
     case QueryType.P50_BY_SERVICE_AND_SPAN:
       return `histogram_quantile(0.5, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, ${http_method_label_name}, ${http_url_label_name}, ${net_host_port_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
-    
+
     case QueryType.P75_BY_SERVICE_AND_SPAN:
       return `histogram_quantile(0.75, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, ${http_method_label_name}, ${http_url_label_name}, ${net_host_port_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
-    
+
     case QueryType.P90_BY_SERVICE_AND_SPAN:
       return `histogram_quantile(0.9, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, ${http_method_label_name}, ${http_url_label_name}, ${net_host_port_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
-    
+
     case QueryType.P95_BY_SERVICE_AND_SPAN:
       return `histogram_quantile(0.95, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, ${http_method_label_name}, ${http_url_label_name}, ${net_host_port_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
-    
+
     case QueryType.P99_BY_SERVICE_AND_SPAN:
       return `histogram_quantile(0.99, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, ${http_method_label_name}, ${http_url_label_name}, ${net_host_port_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
-    
+
     case QueryType.AVG_DURATION_BY_SERVICE_AND_SPAN:
       return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, ${http_method_label_name}, ${http_url_label_name}, ${net_host_port_label_name}) (rate(${definitions.sum_duration_ms_metric_name}${labelFilters}[${interval}])) / sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, ${http_method_label_name}, ${http_url_label_name}, ${net_host_port_label_name}) (rate(${definitions.count_duration_ms_metric_name}${labelFilters}[${interval}]))`;
-      
+
     case QueryType.MIN_DURATION_BY_SERVICE_AND_SPAN:
       return `histogram_quantile(0.0, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, ${http_method_label_name}, ${http_url_label_name}, ${net_host_port_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
-    
+
     case QueryType.MAX_DURATION_BY_SERVICE_AND_SPAN:
       return `histogram_quantile(1.0, sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, ${http_method_label_name}, ${http_url_label_name}, ${net_host_port_label_name}, le) (rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])))`;
-    
+
     case QueryType.ERROR_PERCENTAGE_BY_SERVICE_AND_SPAN:
       return `sum by(${service_label_name}, ${span_label_name}, ${type_label_name}, ${http_method_label_name}, ${http_url_label_name}, ${net_host_port_label_name}) (rate(${definitions.request_count_metric_name}${buildStatusCodeFilter(labelFilters, definitions.error_status_code_value)}[${interval}]))`;
-  
+
     case QueryType.P50_BY_SERVICE_AND_SPAN_INTIME:
       return `histogram_quantile(0.50, sum(rate(${definitions.bucket_duration_ms_metric_name}${labelFilters}[${interval}])) by (${service_label_name}, ${span_label_name}, ${type_label_name}, ${http_method_label_name}, ${http_url_label_name}, ${net_host_port_label_name}, le))`;
 
@@ -573,8 +574,8 @@ export const getQueryByType = (
     case QueryType.SERVICE_SPAN_RELATION:
       return `sum by(${client_label_name}, ${client_operation_name_label_name}, ${server_label_name}, ${server_operation_name_label_name}) (${definitions.service_graph_metric_name})`;
 
-      case QueryType.SERVICE_RELATION:
-        return `sum by(${client_label_name}, ${server_label_name}) (${definitions.service_graph_metric_name})`;
+    case QueryType.SERVICE_RELATION:
+      return `sum by(${client_label_name}, ${server_label_name}) (${definitions.service_graph_metric_name})`;
 
     default:
       throw new Error(`Unknown query type: ${queryType}`);

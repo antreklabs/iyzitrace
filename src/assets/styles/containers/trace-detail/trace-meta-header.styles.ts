@@ -1,0 +1,67 @@
+import { injectCSS } from '../../../../utils/inject-css';
+
+injectCSS('assets-styles-containers-trace-detail-trace-meta-header', `
+/* Trace Meta Header Styles */
+
+.trace-meta-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background-color: var(--bg-primary);
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.trace-label {
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-right: 8px;
+}
+
+.trace-id-box {
+    background-color: var(--bg-secondary);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-family: monospace;
+    color: var(--text-secondary);
+}
+
+.center-section {
+    display: flex;
+    align-items: center;
+}
+
+.service-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.duration,
+.timestamp {
+    color: var(--text-secondary);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+}
+
+.duration-icon,
+.timestamp-icon {
+    margin-right: 4px;
+}
+
+.right-section {
+    text-align: right;
+}
+
+.meta-count {
+    font-weight: 500;
+    margin-right: 12px;
+    color: var(--text-muted);
+}
+
+.meta-error {
+    color: #f5222d;
+    font-weight: 500;
+}`);

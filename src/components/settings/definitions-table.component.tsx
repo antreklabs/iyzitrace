@@ -1,7 +1,7 @@
 import React from 'react';
 import { InlineField, Input } from '@grafana/ui';
 import { Definitions } from '../../interfaces/utils/options';
-import '../../assets/styles/components/settings/settings.css';
+import '../../assets/styles/components/settings/settings.styles';
 
 interface DefinitionsTableProps {
   value: Definitions;

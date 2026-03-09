@@ -1,0 +1,166 @@
+import { injectCSS } from '../../../../utils/inject-css';
+
+injectCSS('assets-styles-containers-trace-detail-service-legend', `
+/* Service Legend Panel Styles */
+
+.service-legend-panel {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 16px;
+    border-top: 1px solid #333;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 12px;
+    gap: 16px;
+}
+
+.operation-type-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.clear-all-button {
+    padding: 4px 8px;
+    border: 1px solid #666;
+    border-radius: 4px;
+    background-color: transparent;
+    color: var(--text-secondary);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clear-all-button:hover {
+    border-color: #888;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.operation-type-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.operation-type-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid #555;
+    border-radius: 6px;
+    background-color: transparent;
+    color: var(--text-primary);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.operation-type-button:hover {
+    border-color: #777;
+    background-color: var(--bg-tertiary);
+}
+
+.operation-type-button.selected {
+    font-weight: 600;
+}
+
+/* Dynamic colors for operation type buttons */
+.operation-type-button.selected-blue {
+    border-color: blue;
+    background-color: rgba(0, 0, 255, 0.125);
+}
+
+.operation-type-button.selected-orange {
+    border-color: orange;
+    background-color: rgba(255, 165, 0, 0.125);
+}
+
+.operation-type-button.selected-purple {
+    border-color: purple;
+    background-color: rgba(128, 0, 128, 0.125);
+}
+
+.operation-type-button.selected-green {
+    border-color: green;
+    background-color: rgba(0, 128, 0, 0.125);
+}
+
+.operation-type-button.selected-red {
+    border-color: red;
+    background-color: rgba(255, 0, 0, 0.125);
+}
+
+.operation-icon {
+    font-size: 14px;
+}
+
+.operation-type-name {
+    font-weight: 500;
+}
+
+.service-legend-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.service-legend-rows {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.service-legend-row {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-tertiary);
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+.service-legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.service-legend-label {
+    font-weight: bold;
+    margin-right: 8px;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.service-legend-duration {
+    opacity: 0.6;
+}
+
+.service-legend-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.service-legend-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}`);

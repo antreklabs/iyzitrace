@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import BaseContainerComponent, { FetchedModel } from '../base.container';
-import '../../assets/styles/pages/log/log.container.css';
+import '../../assets/styles/pages/log/log.container.styles';
 import { TableColumn } from '../../api/service/table.services';
 import { FilterParamsModel } from '../../api/service/query.service';
 import BaseFilter from '../base.filter';

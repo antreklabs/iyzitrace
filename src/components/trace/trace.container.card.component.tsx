@@ -2,7 +2,7 @@ import { Card, Flex, Tooltip } from 'antd';
 import React, { useMemo } from 'react';
 import { Typography } from 'antd';
 import pluginJson from '../../plugin.json';
-import '../../assets/styles/components/trace/trace.css';
+import '../../assets/styles/components/trace/trace.styles';
 
 const { Text } = Typography;
 export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;

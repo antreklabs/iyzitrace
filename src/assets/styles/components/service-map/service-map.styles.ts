@@ -1,0 +1,861 @@
+import { injectCSS } from '../../../../utils/inject-css';
+
+injectCSS('assets-styles-components-service-map-service-map', `
+/* Service Map Components Styles */
+
+/* Infrastructure Map */
+.infra-map-wrapper {
+    width: 100%;
+    min-height: 600px;
+    position: relative;
+    background: var(--bg-primary);
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.infra-map-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+.infra-map-loading-text {
+    margin-left: 8px;
+}
+
+.infra-map-empty {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    color: var(--text-muted);
+}
+
+/* Infrastructure Node */
+
+.infra-node-card {
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #3a3a3a;
+    min-width: 200px;
+    cursor: pointer;
+}
+
+.infra-node-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.infra-node-name {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.infra-node-type {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.infra-node-metrics {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.infra-node-metric {
+    display: flex;
+    flex-direction: column;
+}
+
+.infra-node-metric-label {
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+.infra-node-metric-value {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Region Group */
+.region-group {
+    margin-bottom: 24px;
+}
+
+.region-group-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.region-group-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.region-group-count {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.region-group-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+/* Search Tree */
+.search-tree-wrapper {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid var(--border-light);
+}
+
+.search-tree-input {
+    margin-bottom: 12px;
+}
+
+.search-tree-empty {
+    color: var(--text-muted);
+    text-align: center;
+    padding: 24px;
+}
+
+/* Infrastructure Detail Panel */
+.infra-detail-panel {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--border-light);
+}
+
+.infra-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.infra-detail-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.infra-detail-section {
+    margin-bottom: 24px;
+}
+
+.infra-detail-section-title {
+    color: var(--text-muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.infra-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.infra-detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.infra-detail-label {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.infra-detail-value {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Bottom Drawer */
+.bottom-drawer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-light);
+    border-radius: 16px 16px 0 0;
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
+
+.bottom-drawer-handle {
+    width: 48px;
+    height: 4px;
+    background: var(--border-strong);
+    border-radius: 2px;
+    margin: 12px auto;
+    cursor: pointer;
+}
+
+.bottom-drawer-content {
+    padding: 16px 24px 24px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* ================================
+   Infrastructure Map — Overlays
+   ================================ */
+.infra-map-container {
+    padding-bottom: 100px;
+    height: 90vh;
+    overflow: hidden;
+}
+
+.infra-map-card {
+    background: var(--bg-primary);
+    border-color: #1f2937;
+    height: 80vh;
+}
+
+.infra-map-canvas-wrapper {
+    position: relative;
+    height: 100%;
+}
+
+.infra-map-title-overlay {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 10;
+    width: 180px;
+}
+
+.infra-map-panel-card {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.infra-map-panel-title {
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.infra-map-panel-subtitle {
+    opacity: 0.7;
+    font-size: 11px;
+}
+
+.infra-map-legend-overlay {
+    position: absolute;
+    top: 12px;
+    right: 55px;
+    z-index: 10;
+}
+
+.infra-map-legend-card {
+    padding: 5px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.infra-map-legend-items {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
+.infra-map-legend-healthy {
+    color: #22c55e;
+}
+
+.infra-map-legend-warning {
+    color: #f59e0b;
+}
+
+.infra-map-legend-error {
+    color: #ef4444;
+}
+
+.infra-map-search-overlay {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+}
+
+.infra-map-search-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #1f2937;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    background: var(--bg-secondary);
+}
+
+.infra-map-detail-overlay {
+    position: absolute;
+    left: 12px;
+    top: 100px;
+    z-index: 1000;
+}
+
+.infra-map-reactflow {
+    background: var(--bg-primary);
+}
+
+.infra-map-controls {
+    background: var(--bg-secondary);
+    border: 1px solid #374151;
+}
+
+.infra-map-minimap {
+    background: var(--bg-secondary);
+    border: 1px solid #374151;
+}
+
+/* ================================
+   Infrastructure Node — Extended
+   ================================ */
+.infra-node-wrapper {
+    position: relative;
+}
+
+.infra-node-status-indicator {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--border-light);
+}
+
+.infra-node-icon {
+    font-size: 20px;
+    margin-bottom: 4px;
+}
+
+.infra-node-separator {
+    width: 100%;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin: 8px 0;
+}
+
+/* ================================
+   Search Tree — Extended
+   ================================ */
+.search-tree-container {
+    width: 280px;
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+    border-radius: 12px;
+    padding: 14px 12px 10px 12px;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.search-tree-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.search-tree-label {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.search-tree-clear-btn {
+    font-size: 11px;
+    color: #60a5fa;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.search-tree-clear-btn:hover {
+    text-decoration: underline;
+}
+
+/* ================================
+   Infrastructure Detail Panel — Extended
+   ================================ */
+.infra-detail-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.infra-detail-services-btn {
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    background: rgba(96, 165, 250, 0.1);
+    color: #60a5fa;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: background 0.2s;
+}
+
+.infra-detail-services-btn:hover {
+    background: rgba(96, 165, 250, 0.2);
+}
+
+/* ================================
+   Service Map Bottom Drawer — Extended
+   ================================ */
+.smap-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.smap-drawer-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.smap-drawer-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.smap-drawer-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.smap-drawer-service-card {
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #3a3a3a;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.smap-drawer-service-card:hover {
+    border-color: #4a4a4a;
+    transform: translateY(-2px);
+}
+
+.smap-drawer-service-name {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.smap-drawer-service-type {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.smap-drawer-service-metrics {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.smap-drawer-metric {
+    display: flex;
+    flex-direction: column;
+}
+
+.smap-drawer-metric-label {
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+.smap-drawer-metric-value {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 13px;
+}
+
+/* Icon size utilities */
+.sm-icon-14 {
+    font-size: 14px;
+}
+
+.sm-icon-16 {
+    font-size: 16px;
+}
+
+.sm-icon-16-bold {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.sm-icon-24 {
+    font-size: 24px;
+}
+
+/* ReactFlow Handle */
+.sm-handle {
+    width: 14px;
+    height: 14px;
+    border: 4px solid #0f172a;
+}
+
+/* Bottom Drawer — Main Container */
+.sm-drawer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-primary);
+    border-top: 2px solid var(--border-color);
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+}
+
+.sm-drawer--fullscreen {
+    top: 0;
+    height: 100vh;
+    border-top: none;
+    z-index: 9999;
+}
+
+.sm-drawer-resize-bar {
+    height: 8px;
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sm-drawer-resize-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--border-strong);
+    border-radius: 2px;
+}
+
+.sm-drawer-header {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-secondary);
+}
+
+.sm-drawer-title {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.sm-drawer-subtitle {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.sm-drawer-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.sm-drawer-action-btn {
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.sm-drawer-fullscreen-btn {
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid #3b82f6;
+    color: #3b82f6;
+}
+
+.sm-drawer-close-btn-red {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid #ef4444;
+    color: #ef4444;
+}
+
+.sm-drawer-content {
+    flex: 1;
+    position: relative;
+}
+
+.sm-drawer-reactflow-bg {
+    background: var(--bg-primary);
+}
+
+.sm-drawer-controls {
+    background: var(--bg-secondary);
+    border: 1px solid #374151;
+}
+
+.sm-drawer-mb-16 {
+    margin-bottom: 16px;
+}
+
+/* Infrastructure Node — Extended Styles */
+.sm-infra-node-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    white-space: nowrap;
+    transition: all 0.15s;
+}
+
+.sm-infra-node-icon {
+    font-size: 14px;
+}
+
+.sm-infra-node-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* Infrastructure Detail Panel — Extended */
+.sm-infra-detail-bg {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+/* Search Tree Inputs */
+.sm-search-input {
+    background: var(--bg-tertiary);
+    border: 1px solid #4b5563;
+    color: #e5e7eb;
+    flex: 1;
+}
+
+.sm-search-clear-btn {
+    background: #dc2626;
+    border: 1px solid #b91c1c;
+    color: var(--text-primary);
+    min-width: 32px;
+    height: 32px;
+}
+
+.sm-search-tree-container {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg-secondary);
+}
+
+.sm-search-tree {
+    background: transparent;
+    color: #e5e7eb;
+}
+
+.sm-search-result-text {
+    color: #f0f0f0;
+}
+
+/* Region Group */
+.sm-region-infra-count {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* Overview Badge Status */
+.overview-badge-status-text {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* Infrastructure Node */
+.infra-node-card-base {
+    width: 140px;
+    text-align: center;
+}
+
+.infra-node-status-badge {
+    color: var(--text-primary);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    display: inline-block;
+}
+
+.infra-node-icon-container {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+}
+
+/* ===== Default dark backgrounds for overlay cards (moved from inline styles) ===== */
+.infra-map-legend-card,
+.infra-map-panel-card {
+    background: linear-gradient(180deg, #1b2a44 0%, rgba(6, 10, 19, 0.9) 100%);
+}
+
+/* ===== Light Mode Overrides ===== */
+[data-theme="light"] .infra-map-legend-card,
+[data-theme="light"] .infra-map-panel-card {
+    background: #ffffff !important;
+    border-color: #d9d9d9 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    color: #1a1a1a !important;
+}
+
+[data-theme="light"] .infra-map-legend-healthy {
+    color: #16a34a;
+}
+
+[data-theme="light"] .infra-map-legend-warning {
+    color: #d97706;
+}
+
+[data-theme="light"] .infra-map-legend-error {
+    color: #dc2626;
+}
+
+[data-theme="light"] .infra-map-panel-title,
+[data-theme="light"] .infra-map-panel-subtitle {
+    color: #1a1a1a !important;
+}
+
+[data-theme="light"] .infra-map-search-btn {
+    background: #ffffff !important;
+    border-color: #d9d9d9 !important;
+    color: #1a1a1a !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .infra-map-card {
+    background: #ffffff !important;
+    border-color: #e8e8e8 !important;
+}
+
+[data-theme="light"] .infra-map-reactflow {
+    background: #f8f9fa !important;
+}
+
+[data-theme="light"] .infra-node-card {
+    background: #ffffff !important;
+    border-color: #e8e8e8 !important;
+}
+
+[data-theme="light"] .infra-node-separator {
+    border-top-color: #e8e8e8;
+}
+
+[data-theme="light"] .infra-map-controls,
+[data-theme="light"] .infra-map-minimap {
+    background: #ffffff !important;
+    border-color: #d9d9d9 !important;
+}
+
+[data-theme="light"] .sm-infra-node-container {
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .search-tree-container {
+    background: linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%) !important;
+    border-color: #d9d9d9 !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .sm-search-input {
+    background: #ffffff !important;
+    border-color: #d9d9d9 !important;
+    color: #1a1a1a !important;
+}
+
+[data-theme="light"] .sm-search-tree-container {
+    background: #ffffff !important;
+}
+
+[data-theme="light"] .sm-search-tree {
+    color: #1a1a1a !important;
+}
+
+[data-theme="light"] .sm-search-result-text {
+    color: #1a1a1a !important;
+}
+
+[data-theme="light"] .region-group-header {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .sm-handle {
+    border-color: #d9d9d9;
+}
+
+[data-theme="light"] .smap-drawer-service-card {
+    border-color: #e8e8e8 !important;
+}
+
+[data-theme="light"] .smap-drawer-service-card:hover {
+    border-color: #d9d9d9 !important;
+}
+
+[data-theme="light"] .sm-drawer-controls {
+    background: #ffffff !important;
+    border-color: #d9d9d9 !important;
+}
+
+[data-theme="light"] .sm-infra-detail-bg {
+    background: #ffffff !important;
+    border-color: #e8e8e8 !important;
+}`);

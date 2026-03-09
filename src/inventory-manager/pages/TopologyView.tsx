@@ -1,3 +1,4 @@
+import '../../assets/styles/vendor/xyflow.styles';
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import ReactFlow, {
     Node,
@@ -13,7 +14,6 @@ import ReactFlow, {
 } from 'reactflow';
 import { Input } from 'antd';
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
-import 'reactflow/dist/style.css';
 
 import { useTopology } from '../hooks/useInventory';
 import LoadingSpinner from '../components/LoadingSpinner';

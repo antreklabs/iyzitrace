@@ -19,7 +19,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getStoredTeamPages } from '../../../api/service/team.service';
 import pluginJson from '../../../plugin.json';
-import '../../../assets/styles/components/core/layout/sidebar.css';
+import '../../../assets/styles/components/core/layout/sidebar.styles';
 import { useTheme } from '../../../contexts/ThemeContext';
 
 export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;

@@ -64,7 +64,6 @@ export default function GroupsPage() {
       setCreateForm({ name: "", labels: {} });
       await mutateGroups();
     } catch (error) {
-      console.error("Failed to create group:", error);
     }
   };
 
@@ -77,7 +76,6 @@ export default function GroupsPage() {
       setSelectedGroup(null);
       await mutateGroups();
     } catch (error) {
-      console.error("Failed to update group:", error);
     }
   };
 
@@ -89,7 +87,6 @@ export default function GroupsPage() {
       setSelectedGroup(null);
       await mutateGroups();
     } catch (error) {
-      console.error("Failed to delete group:", error);
     }
   };
 

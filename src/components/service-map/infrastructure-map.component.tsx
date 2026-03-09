@@ -1,3 +1,4 @@
+import '../../assets/styles/vendor/xyflow.styles';
 import React, { useMemo, useCallback, useState, forwardRef, useImperativeHandle } from 'react';
 import {
   ReactFlowProvider,
@@ -12,7 +13,6 @@ import {
   useReactFlow,
   ControlButton
 } from 'reactflow';
-import 'reactflow/dist/style.css';
 import { Card, Dropdown } from 'antd';
 import { AppstoreOutlined, FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons';
 import { ServiceMapData } from '../../api/service/interface.service';

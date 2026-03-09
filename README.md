@@ -6,7 +6,6 @@ A comprehensive OpenTelemetry-native observability platform built as a Grafana p
 
 ## Table of Contents
 
-<!-- !toc (minlevel=2 omit="Table of Contents") -->
 
 * [Introduction](#introduction)
 * [Platform Features Gallery](#platform-features-gallery)
@@ -56,7 +55,6 @@ A comprehensive OpenTelemetry-native observability platform built as a Grafana p
 * [FAQ](#faq)
 * [Troubleshooting](#troubleshooting)
 
-<!-- toc! -->
 
 ---
 
@@ -95,27 +93,27 @@ No complex setups, no maintenance — all the context for your logs, metrics and
 
 - **Full-stack Infrastructure Overview**: See servers, runtimes, services and operations in a single layered view. From CPU usage to business operations, IyziTrace gives you an instant, end-to-end snapshot of your system health.
 
-  ![Full-stack Infrastructure Overview](docs/images/screenshots/overview/overview.png)
+  ![Full-stack Infrastructure Overview](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/overview/overview.png)
 
 - **Service Dependency Topology**: Visualize all services and their dependencies as interactive service maps. Click any node to see details including infrastructure info, resources, health status, and connected applications.
 
-  ![Service Dependency Topology](docs/images/screenshots/service-map/service-map.png)
+  ![Service Dependency Topology](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/service-map/service-map.png)
 
 - **Deep Service Performance**: Drill into individual services to analyze latency percentiles (P50, P75, P90, P95, P99), throughput, Apdex scores, and operation rates with real-time performance charts.
 
-  ![Deep Service Performance](docs/images/screenshots/services/service-detail.png)
+  ![Deep Service Performance](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/services/service-detail.png)
 
 - **Distributed Trace Analysis**: Follow the complete journey of requests across services with detailed Gantt chart timelines, span attributes, and operation type filtering.
 
-  ![Distributed Trace Analysis](docs/images/screenshots/traces/trace-detail.png)
+  ![Distributed Trace Analysis](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/traces/trace-detail.png)
 
 - **AI-Powered Insights**: Get instant system health analysis, anomaly detection, and optimization recommendations from the AI Assistant with context-aware data analysis.
 
-  ![AI-Powered Insights](docs/images/screenshots/ai-agent/ai2.png)
+  ![AI-Powered Insights](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/ai-agent/ai2.png)
 
 - **Agent Fleet Management**: Manage and monitor your OpenTelemetry collectors with real-time topology views, configuration management, metrics dashboards, and centralized log collection.
 
-  ![Agent Fleet Management](docs/images/screenshots/agent-manager/agent-topology.png)
+  ![Agent Fleet Management](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/agent-manager/agent-topology.png)
 
 ### Built for Modern Platforms
 
@@ -170,7 +168,7 @@ IyziTrace provides a comprehensive set of features designed to give you complete
 
 **1. Overview – Regions & Infrastructures**
 
-![Overview – Regions & Infrastructures](docs/images/screenshots/overview/overview.png)
+![Overview – Regions & Infrastructures](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/overview/overview.png)
 
 See your entire infrastructure at a glance. The overview page presents regions, infrastructure hosts with CPU/memory metrics, services grouped by infrastructure, and operations — all in a single scrollable view with advanced filtering.
 
@@ -182,7 +180,7 @@ See your entire infrastructure at a glance. The overview page presents regions, 
 
 **2. Overview – Operations & Data Table**
 
-![Overview – Operations & Data Table](docs/images/screenshots/overview/overview2.png)
+![Overview – Operations & Data Table](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/overview/overview2.png)
 
 Drill down into operation-level details and view all infrastructure data in a sortable, expandable table. Expand any infrastructure to see its services, and expand services to see operations with detailed metrics.
 
@@ -192,7 +190,7 @@ Drill down into operation-level details and view all infrastructure data in a so
 
 **3. Service Map – Infrastructure Topology**
 
-![Service Map – Infrastructure Topology](docs/images/screenshots/service-map/service-map.png)
+![Service Map – Infrastructure Topology](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/service-map/service-map.png)
 
 Visualize your entire infrastructure topology with interactive region-based grouping. Click any infrastructure node to see its details including IP address, OS version, type, resource usage, health status, and connected applications.
 
@@ -203,7 +201,7 @@ Visualize your entire infrastructure topology with interactive region-based grou
 
 **4. Service Map – Dependency Graph**
 
-![Service Map – Dependency Graph](docs/images/screenshots/service-map/service-map2.png)
+![Service Map – Dependency Graph](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/service-map/service-map2.png)
 
 View the complete service dependency graph for any infrastructure. See all services and their interconnections with metrics including average latency, min/max latency, calls count, and status badges.
 
@@ -214,7 +212,7 @@ View the complete service dependency graph for any infrastructure. See all servi
 
 **5. Service Map – Detailed View**
 
-![Service Map – Detailed View](docs/images/screenshots/service-map/service-map3.png)
+![Service Map – Detailed View](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/service-map/service-map3.png)
 
 Zoom into specific service connections with detailed metrics per node. Each service card shows average/min latency, calls count, operation types (HTTP, RPC, MESSAGING, etc.), and health status.
 
@@ -227,7 +225,7 @@ Zoom into specific service connections with detailed metrics per node. Each serv
 
 **6. Services Overview**
 
-![Services Overview](docs/images/screenshots/services/services.png)
+![Services Overview](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/services/services.png)
 
 Track all services with summary cards showing average, min, and max latency along with call counts. Below, interactive charts display request rates, error rates, and duration percentiles (P50) over time, with a sortable services table.
 
@@ -239,7 +237,7 @@ Track all services with summary cards showing average, min, and max latency alon
 
 **7. Service Detail – Call Metrics**
 
-![Service Detail – Call Metrics](docs/images/screenshots/services/service-detail.png)
+![Service Detail – Call Metrics](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/services/service-detail.png)
 
 Analyze detailed call metrics for any service. View operation count, total call count, max/min latency spans, and interactive charts for latency percentiles (P50, P75, P90, P95, P99), operation rate, Apdex score, and key operations.
 
@@ -251,7 +249,7 @@ Analyze detailed call metrics for any service. View operation count, total call 
 
 **8. Service Detail – Operations Tab**
 
-![Service Detail – Operations Tab](docs/images/screenshots/services/service-detail2.png)
+![Service Detail – Operations Tab](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/services/service-detail2.png)
 
 Switch to the Operations tab to see per-operation latency breakdown with P50 tooltips, operation rates, and Apdex scores — all with interactive time-series charts.
 
@@ -263,7 +261,7 @@ Switch to the Operations tab to see per-operation latency breakdown with P50 too
 
 **9. Traces Overview**
 
-![Traces Overview](docs/images/screenshots/traces/traces.png)
+![Traces Overview](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/traces/traces.png)
 
 View all traces across your system with summary cards showing max latency, min latency, average latency, and total span count. The trace list includes Trace ID, Service, Trace name, Duration, Start/End Time, and per-service span counts.
 
@@ -274,7 +272,7 @@ View all traces across your system with summary cards showing max latency, min l
 
 **10. Trace Detail**
 
-![Trace Detail](docs/images/screenshots/traces/trace-detail.png)
+![Trace Detail](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/traces/trace-detail.png)
 
 Inspect individual traces with a complete Gantt chart timeline view. Filter by operation type (HTTP, MESSAGING, CACHE, DATABASE, RPC), view parent-child span relationships, and inspect span details including attributes, resources, and events.
 
@@ -288,7 +286,7 @@ Inspect individual traces with a complete Gantt chart timeline view. Filter by o
 
 **11. Centralized Log Explorer**
 
-![Centralized Log Explorer](docs/images/screenshots/logs/logs.png)
+![Centralized Log Explorer](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/logs/logs.png)
 
 Search, filter, and inspect logs from any service. Expand any log entry to see the full message, telemetry information (SDK, version, language), basic information, runtime details, and additional attributes with clickable trace/span IDs.
 
@@ -304,7 +302,7 @@ Search, filter, and inspect logs from any service. Expand any log entry to see t
 
 **12. AI Assistant – Chat Interface**
 
-![AI Assistant – Chat Interface](docs/images/screenshots/ai-agent/ai.png)
+![AI Assistant – Chat Interface](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/ai-agent/ai.png)
 
 The AI Assistant provides a full-page intelligent analysis interface. Quick action cards (Quick Overview, Service Health, Find Anomalies, Recommendations) give instant insights. Context toggles let you include Regions, Infrastructures, Applications, Services, and Operations data.
 
@@ -317,7 +315,7 @@ The AI Assistant provides a full-page intelligent analysis interface. Quick acti
 
 **13. AI Assistant – Analysis Response**
 
-![AI Assistant – Analysis Response](docs/images/screenshots/ai-agent/ai2.png)
+![AI Assistant – Analysis Response](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/ai-agent/ai2.png)
 
 AI responses include structured summaries, key findings with severity indicators, and actionable recommendations. Results show token count and timestamp with copy functionality.
 
@@ -330,7 +328,7 @@ AI responses include structured summaries, key findings with severity indicators
 
 **14. Agent Manager – Agents List**
 
-![Agent Manager – Agents List](docs/images/screenshots/agent-manager/agent.png)
+![Agent Manager – Agents List](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/agent-manager/agent.png)
 
 Manage and monitor all registered OpenTelemetry agents. View agent status (Online/Offline), name, version, group assignment, last seen timestamp, and labels. Search, filter by active status, and perform actions on agents.
 
@@ -342,7 +340,7 @@ Manage and monitor all registered OpenTelemetry agents. View agent status (Onlin
 
 **15. Agent Topology**
 
-![Agent Topology](docs/images/screenshots/agent-manager/agent-topology.png)
+![Agent Topology](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/agent-manager/agent-topology.png)
 
 Visualize your agent infrastructure as interactive topology cards. View agents grouped by instance or group, with metrics (Metrics count, Logs count, Throughput), and a resource tree showing Agent Groups and individual agents with online/offline status.
 
@@ -353,7 +351,7 @@ Visualize your agent infrastructure as interactive topology cards. View agents g
 
 **16. Agent Groups**
 
-![Agent Groups](docs/images/screenshots/agent-manager/agent-group.png)
+![Agent Groups](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/agent-manager/agent-group.png)
 
 Organize agents into logical groups for easier management. View group name, agent count, configuration assignment, creation/update dates, labels, and perform edit/delete actions.
 
@@ -363,7 +361,7 @@ Organize agents into logical groups for easier management. View group name, agen
 
 **17. Agent Configuration**
 
-![Agent Configuration](docs/images/screenshots/agent-manager/agent-config.png)
+![Agent Configuration](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/agent-manager/agent-config.png)
 
 Create and edit OpenTelemetry Collector configurations with a built-in YAML editor and live pipeline visualization. The pipeline view shows Receivers, Processors, and Exporters for Traces, Metrics, and Logs with validation status.
 
@@ -375,7 +373,7 @@ Create and edit OpenTelemetry Collector configurations with a built-in YAML edit
 
 **18. Agent Detail – Metrics**
 
-![Agent Detail – Metrics](docs/images/screenshots/agent-manager/agent-detail-metrics.png)
+![Agent Detail – Metrics](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/agent-manager/agent-detail-metrics.png)
 
 Monitor individual agent performance with detailed telemetry metrics. View Spans Rate, Metric Points Rate, and Log Records Rate over time with interactive charts showing accepted data across receivers.
 
@@ -386,7 +384,7 @@ Monitor individual agent performance with detailed telemetry metrics. View Spans
 
 **19. Agent Detail – Logs**
 
-![Agent Detail – Logs](docs/images/screenshots/agent-manager/agent-detail-logs.png)
+![Agent Detail – Logs](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/agent-manager/agent-detail-logs.png)
 
 View agent-specific logs with severity filtering and search. Logs show timestamp, severity level (Info, Error), and message content for troubleshooting agent issues.
 
@@ -399,7 +397,7 @@ View agent-specific logs with severity filtering and search. Logs show timestamp
 
 **20. Inventory Dashboard**
 
-![Inventory Dashboard](docs/images/screenshots/inventory-manager/inventory-dashboard.png)
+![Inventory Dashboard](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/inventory-manager/inventory-dashboard.png)
 
 Get a complete overview of all discovered infrastructure entities and their relationships. Summary cards show Total Entities, Total Relations, Entity Types, and Relation Types. Resource breakdown cards display Hosts, Containers, Kubernetes Pods, Services, Databases & Cache, and Messaging Systems.
 
@@ -411,7 +409,7 @@ Get a complete overview of all discovered infrastructure entities and their rela
 
 **21. Inventory Tree View**
 
-![Inventory Tree View](docs/images/screenshots/inventory-manager/inventory-treeview.png)
+![Inventory Tree View](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/inventory-manager/inventory-treeview.png)
 
 Explore your infrastructure hierarchy in an interactive tree structure. Navigate from cloud regions → hosts → services → containers with expandable nodes. Switch between Tree View and Category View.
 
@@ -423,31 +421,31 @@ Explore your infrastructure hierarchy in an interactive tree structure. Navigate
 
 **22. Inventory Company View**
 
-![Inventory Company View](docs/images/screenshots/inventory-manager/inventory-company.png)
+![Inventory Company View](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/inventory-manager/inventory-company.png)
 
 **23. Inventory Service Detail**
 
-![Inventory Service Detail](docs/images/screenshots/inventory-manager/inventory-service-detail.png)
+![Inventory Service Detail](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/inventory-manager/inventory-service-detail.png)
 
 **24. Inventory Table – Entities**
 
-![Inventory Table – Entities](docs/images/screenshots/inventory-manager/inventory-table-entity.png)
+![Inventory Table – Entities](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/inventory-manager/inventory-table-entity.png)
 
 **25. Inventory Table – Relations**
 
-![Inventory Table – Relations](docs/images/screenshots/inventory-manager/inventory-table-relations.png)
+![Inventory Table – Relations](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/inventory-manager/inventory-table-relations.png)
 
 ### Customization
 
 **26. Exception Tracking**
 
-![Exception Tracking](docs/images/screenshots/exception/exceptions.png)
+![Exception Tracking](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/exception/exceptions.png)
 
 Track and analyze exceptions across services. View ExceptionType, Count, Service, Operation, Type (messaging, rpc, etc.), and ExceptionMessage with search and pagination.
 
 **27. Exception Detail**
 
-![Exception Detail](docs/images/screenshots/exception/exception-detail.png)
+![Exception Detail](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/exception/exception-detail.png)
 
 Inspect individual exceptions with full context. Quick action cards link to Service Details, Trace Graph, and Span Details. Key-Value Pairs table shows all span attributes including serviceName, host.name, traceID, spanID, messaging details, resource information, and more.
 
@@ -468,7 +466,7 @@ Inspect individual exceptions with full context. Quick action cards link to Serv
 3. Search for **"IyziTrace"**
 4. Click **Install**
 
-![Plugin Installation](docs/images/screenshots/plugin/plugin-install.png)
+![Plugin Installation](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/plugin/plugin-install.png)
 
 Alternatively, install via CLI:
 
@@ -482,7 +480,7 @@ grafana-cli plugins install iyzitrace-app
 2. Find **IyziTrace** in your installed plugins
 3. Click **Enable**
 
-![Plugin Configuration](docs/images/screenshots/plugin/plugin-configuration.png)
+![Plugin Configuration](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/plugin/plugin-configuration.png)
 
 ### Setup Wizard
 
@@ -492,7 +490,7 @@ IyziTrace includes a guided setup wizard to get you started quickly:
 
 #### Step 1: Platform Connection
 
-![Wizard – Platform Connection](docs/images/screenshots/wizard/wizard1.png)
+![Wizard – Platform Connection](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/wizard/wizard1.png)
 
 Connect to your IyziTrace Observability Platform:
 1. Enter your **Platform URL** (e.g., `http://localhost`)
@@ -503,7 +501,7 @@ Connect to your IyziTrace Observability Platform:
 
 #### Step 2: Configure Data Sources
 
-![Wizard – Data Sources](docs/images/screenshots/wizard/wizard2.png)
+![Wizard – Data Sources](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/wizard/wizard2.png)
 
 Automatically configure Prometheus, Loki, and Tempo data sources:
 1. Review the auto-detected data source endpoints
@@ -513,7 +511,7 @@ Automatically configure Prometheus, Loki, and Tempo data sources:
 
 #### Step 3: Verification
 
-![Wizard – Verification](docs/images/screenshots/wizard/wizard3.png)
+![Wizard – Verification](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/wizard/wizard3.png)
 
 The wizard verifies your setup:
 1. Check that all data sources are properly connected
@@ -524,7 +522,7 @@ The wizard verifies your setup:
 
 After completing the setup wizard, you can fine-tune your configuration in **Settings**:
 
-![Settings – Platform](docs/images/screenshots/setting/settings.png)
+![Settings – Platform](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/setting/settings.png)
 
 #### Settings Tabs:
 
@@ -534,13 +532,13 @@ After completing the setup wizard, you can fine-tune your configuration in **Set
 4. **Definitions**: Define metric and label patterns
 5. **Privacy**: Privacy and data handling settings
 
-![Settings – Data Sources](docs/images/screenshots/setting/settings2.png)
+![Settings – Data Sources](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/setting/settings2.png)
 
 ### Quick Start Guide
 
 Once configured, you'll see the **Home Page** with module status and views:
 
-![Home Page](docs/images/screenshots/home/home.png)
+![Home Page](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/home/home.png)
 
 **Module Status** shows active modules (e.g., 10/11 active), and **Section Cards** provide quick navigation:
 
@@ -587,7 +585,7 @@ IyziTrace automatically discovers relationships between services and infrastruct
 
 ### Time Picker
 
-![Time Range Filter](docs/images/screenshots/common/timerange-filter.png)
+![Time Range Filter](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/common/timerange-filter.png)
 
 All views support flexible time range selection:
 
@@ -599,7 +597,7 @@ Time ranges are preserved when navigating between views.
 
 ### Filtering
 
-![Filters Panel](docs/images/screenshots/common/filters.png)
+![Filters Panel](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/common/filters.png)
 
 IyziTrace provides powerful filtering capabilities:
 
@@ -623,7 +621,7 @@ IyziTrace provides powerful filtering capabilities:
 
 The **Home Page** provides an at-a-glance overview of your observability setup.
 
-![Home Page](docs/images/screenshots/home/home.png)
+![Home Page](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/home/home.png)
 
 **Key Features:**
 - **Module Status**: Shows active module count (e.g., 10/11 active)
@@ -640,7 +638,7 @@ The **Home Page** provides an at-a-glance overview of your observability setup.
 
 The **Overview** page provides a comprehensive view of your entire infrastructure and service topology.
 
-![Overview – Full View](docs/images/screenshots/overview/overview.png)
+![Overview – Full View](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/overview/overview.png)
 
 **Layout:**
 
@@ -651,7 +649,7 @@ The page is organized into horizontal scrollable sections:
 3. **Services**: Services grouped by infrastructure with type badges, avg duration, and calls/sec
 4. **Operations**: Operations grouped by service with expandable details
 
-![Overview – Table View](docs/images/screenshots/overview/overview2.png)
+![Overview – Table View](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/overview/overview2.png)
 
 **Data Table Features:**
 - Expandable rows: Infrastructure → Services → Operations
@@ -664,7 +662,7 @@ The page is organized into horizontal scrollable sections:
 
 The **Service Map** provides a visual representation of service dependencies and data flow.
 
-![Service Map – Infrastructure View](docs/images/screenshots/service-map/service-map.png)
+![Service Map – Infrastructure View](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/service-map/service-map.png)
 
 **Two Views Available:**
 
@@ -682,7 +680,7 @@ Shows infrastructure nodes grouped by region with health status:
 
 #### 2. Service Dependency Map
 
-![Service Map – Dependencies](docs/images/screenshots/service-map/service-map2.png)
+![Service Map – Dependencies](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/service-map/service-map2.png)
 
 Detailed service dependency graph showing all connections:
 - Service nodes with metrics (Avg Lat, Min Lat, Max Lat, Calls)
@@ -694,7 +692,7 @@ Detailed service dependency graph showing all connections:
   - Operations list with type badges and latency
   - Quick links: Logs, Metrics, Traces
 
-![Service Map – Zoomed Detail](docs/images/screenshots/service-map/service-map3.png)
+![Service Map – Zoomed Detail](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/service-map/service-map3.png)
 
 ### Services
 
@@ -702,7 +700,7 @@ Detailed service dependency graph showing all connections:
 
 The **Services** page provides comprehensive performance monitoring.
 
-![Services Page](docs/images/screenshots/services/services.png)
+![Services Page](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/services/services.png)
 
 **Service Summary Cards:**
 - Each service shows: Avg. Lat, Min. Lat, Max. Lat, Count
@@ -720,14 +718,14 @@ The **Services** page provides comprehensive performance monitoring.
 
 **Service Detail:**
 
-![Service Detail – Call Metrics](docs/images/screenshots/services/service-detail.png)
+![Service Detail – Call Metrics](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/services/service-detail.png)
 
 Click any service to see detailed analytics:
 - Summary cards: Operation Count, Total Call Count, Max/Min Latency Span
 - **Call Metrics tab**: Latency (P50–P99), Operation Rate, Apdex Score, Key Operations
 - **Operations tab**: Per-operation latency breakdown
 
-![Service Detail – Operations](docs/images/screenshots/services/service-detail2.png)
+![Service Detail – Operations](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/services/service-detail2.png)
 
 ### Traces
 
@@ -735,7 +733,7 @@ Click any service to see detailed analytics:
 
 The **Traces** page helps you analyze distributed traces across your microservices.
 
-![Traces Page](docs/images/screenshots/traces/traces.png)
+![Traces Page](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/traces/traces.png)
 
 **Summary Cards:**
 - Max Latency, Min Latency, Avg Latency, Total Span Count
@@ -748,7 +746,7 @@ The **Traces** page helps you analyze distributed traces across your microservic
 
 **Trace Detail:**
 
-![Trace Detail](docs/images/screenshots/traces/trace-detail.png)
+![Trace Detail](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/traces/trace-detail.png)
 
 Click any trace to see:
 - Trace header: Trace ID, root service, duration, timestamp, total spans
@@ -769,7 +767,7 @@ Click any trace to see:
 
 The **Logs** page provides powerful log aggregation and search capabilities.
 
-![Logs Page](docs/images/screenshots/logs/logs.png)
+![Logs Page](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/logs/logs.png)
 
 **Log Stream:**
 - Columns: Timestamp, Level (color-coded), Service, Message
@@ -787,7 +785,7 @@ The **Logs** page provides powerful log aggregation and search capabilities.
 
 The **Views** section (on the Home page) allows you to save and manage custom monitoring views.
 
-![Views on Home Page](docs/images/screenshots/home/home.png)
+![Views on Home Page](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/home/home.png)
 
 **Creating a View:**
 1. Navigate to any page (e.g., Overview, Services, Traces)
@@ -817,7 +815,7 @@ Each saved view shows:
 
 The **Exceptions** page helps you track and analyze errors across services.
 
-![Exceptions Page](docs/images/screenshots/exception/exceptions.png)
+![Exceptions Page](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/exception/exceptions.png)
 
 **Exception List:**
 - Columns: ExceptionType, Count, Service, Operation, Type, ExceptionMessage
@@ -827,7 +825,7 @@ The **Exceptions** page helps you track and analyze errors across services.
 
 **Exception Detail:**
 
-![Exception Detail](docs/images/screenshots/exception/exception-detail.png)
+![Exception Detail](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/exception/exception-detail.png)
 
 Click any exception to see:
 - Exception type and message header
@@ -848,7 +846,7 @@ Click any exception to see:
 
 The **AI Assistant** provides intelligent insights and recommendations powered by AI.
 
-![AI Assistant](docs/images/screenshots/ai-agent/ai.png)
+![AI Assistant](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/ai-agent/ai.png)
 
 **Features:**
 
@@ -869,7 +867,7 @@ Pre-built questions for quick start:
 
 #### 3. AI Analysis Response
 
-![AI Response](docs/images/screenshots/ai-agent/ai2.png)
+![AI Response](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/ai-agent/ai2.png)
 
 Structured responses with:
 - **Summary**: Overview of findings
@@ -884,7 +882,7 @@ Structured responses with:
 
 The **Agent Manager** provides comprehensive management of OpenTelemetry collectors.
 
-![Agent Manager – Agents](docs/images/screenshots/agent-manager/agent.png)
+![Agent Manager – Agents](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/agent-manager/agent.png)
 
 **Agents Tab:**
 - All registered agents with Status, Name, Version, Group, Last Seen, Labels
@@ -899,23 +897,23 @@ The drawer provides four tabs:
 1. **Overview**: Agent basic information and status
 
 2. **Config**: Current configuration details
-   ![Agent Detail – Config](docs/images/screenshots/agent-manager/agent-detail-config-light-mode.png)
+   ![Agent Detail – Config](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/agent-manager/agent-detail-config-light-mode.png)
 
 3. **Metrics**: Telemetry performance metrics
-   ![Agent Detail – Metrics](docs/images/screenshots/agent-manager/agent-detail-metrics.png)
+   ![Agent Detail – Metrics](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/agent-manager/agent-detail-metrics.png)
    - Spans Rate, Metric Points Rate, Log Records Rate
    - Receivers, Processors, Exporters tabs
    - Interactive charts with Min, Max, Mean statistics
 
 4. **Logs**: Agent-specific logs
-   ![Agent Detail – Logs](docs/images/screenshots/agent-manager/agent-detail-logs.png)
+   ![Agent Detail – Logs](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/agent-manager/agent-detail-logs.png)
    - Severity filtering (All Severities, Info, Error, etc.)
    - Search within logs
    - Time range selection (1h, 6h, 24h)
 
 **Topology Tab:**
 
-![Agent Topology](docs/images/screenshots/agent-manager/agent-topology.png)
+![Agent Topology](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/agent-manager/agent-topology.png)
 
 - Visualize agents as interactive topology cards
 - Instance and Group view modes
@@ -924,7 +922,7 @@ The drawer provides four tabs:
 
 **Groups Tab:**
 
-![Agent Groups](docs/images/screenshots/agent-manager/agent-group.png)
+![Agent Groups](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/agent-manager/agent-group.png)
 
 - Organize agents into logical groups
 - Group details: Name, Agent count, Config, Created, Updated, Labels
@@ -932,7 +930,7 @@ The drawer provides four tabs:
 
 **Configs Tab:**
 
-![Agent Configuration](docs/images/screenshots/agent-manager/agent-config.png)
+![Agent Configuration](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/agent-manager/agent-config.png)
 
 - YAML configuration editor with syntax highlighting
 - Live pipeline visualization (Receiver → Processor → Exporter)
@@ -945,7 +943,7 @@ The drawer provides four tabs:
 
 The **Inventory Manager** provides complete infrastructure discovery and relationship tracking.
 
-![Inventory Dashboard](docs/images/screenshots/inventory-manager/inventory-dashboard.png)
+![Inventory Dashboard](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/inventory-manager/inventory-dashboard.png)
 
 **Dashboard Tab:**
 - Summary cards: Total Entities, Total Relations, Entity Types, Relation Types
@@ -955,7 +953,7 @@ The **Inventory Manager** provides complete infrastructure discovery and relatio
 
 **Tree View Tab:**
 
-![Inventory Tree View](docs/images/screenshots/inventory-manager/inventory-treeview.png)
+![Inventory Tree View](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/inventory-manager/inventory-treeview.png)
 
 - Hierarchical entity tree (cloud.region → host → services → containers)
 - Expand/Collapse all functionality
@@ -964,12 +962,12 @@ The **Inventory Manager** provides complete infrastructure discovery and relatio
 
 **Table View Tab:**
 
-![Inventory Table – Entities](docs/images/screenshots/inventory-manager/inventory-table-entity.png)
+![Inventory Table – Entities](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/inventory-manager/inventory-table-entity.png)
 
 - Tabular view of all entities with sortable columns
 - Entity detail view with full attribute list
 
-![Inventory Table – Relations](docs/images/screenshots/inventory-manager/inventory-table-relations.png)
+![Inventory Table – Relations](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/inventory-manager/inventory-table-relations.png)
 
 - View all entity relationships
 - Source, Relation Type, and Target columns
@@ -982,7 +980,7 @@ The **Inventory Manager** provides complete infrastructure discovery and relatio
 
 Access settings via the **Settings** menu item.
 
-![Settings – Platform](docs/images/screenshots/setting/settings.png)
+![Settings – Platform](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/setting/settings.png)
 
 #### Tabs:
 
@@ -992,7 +990,7 @@ Access settings via the **Settings** menu item.
 4. **Definitions**: Define metric and label patterns
 5. **Privacy**: Privacy and data handling settings
 
-![Settings – Data Sources](docs/images/screenshots/setting/settings2.png)
+![Settings – Data Sources](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/setting/settings2.png)
 
 ### Datasources
 
@@ -1045,7 +1043,7 @@ Add custom metrics for:
 
 IyziTrace supports multi-tenancy through teams.
 
-![Teams Page](docs/images/screenshots/team/teams.png)
+![Teams Page](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/team/teams.png)
 
 **Creating a Team:**
 
@@ -1059,13 +1057,13 @@ IyziTrace supports multi-tenancy through teams.
 
 **Team Detail:**
 
-![Team Detail](docs/images/screenshots/team/team-detail.png)
+![Team Detail](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/team/team-detail.png)
 
 ### Page Permissions
 
 Control which pages team members can access:
 
-![Team Pages](docs/images/screenshots/team/team-pages.png)
+![Team Pages](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/team/team-pages.png)
 
 **Available Pages:**
 
@@ -1380,7 +1378,7 @@ This will log detailed information about:
 For additional support:
 
 1. Check this documentation
-2. Review [GitHub Issues](https://github.com/iyzitrace/iyzitrace)
+2. Review [GitHub Issues](https://github.com/antreklabs/iyzitrace)
 3. Contact support team
 4. Join community discussions
 
@@ -1388,7 +1386,7 @@ For additional support:
 
 ## Navigation
 
-![Sidebar Menu](docs/images/screenshots/common/menu.png)
+![Sidebar Menu](https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/common/menu.png)
 
 IyziTrace provides a clean sidebar navigation with access to all modules:
 

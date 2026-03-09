@@ -1,6 +1,6 @@
 import React from 'react';
-import '../../../assets/styles/containers/trace-detail/selected-span-details.css';
-import '../../../assets/styles/containers/trace-detail/trace-detail.css';
+import '../../../assets/styles/containers/trace-detail/selected-span-details.styles';
+import '../../../assets/styles/containers/trace-detail/trace-detail.styles';
 import { Collapse, Typography, Tag, Divider, Tooltip, Tabs, Button, Badge } from 'antd';
 import { CopyOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import GroupedAttributeList from './GroupedAttributeList';

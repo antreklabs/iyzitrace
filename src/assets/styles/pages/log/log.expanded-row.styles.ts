@@ -1,0 +1,151 @@
+import { injectCSS } from '../../../../utils/inject-css';
+
+injectCSS('assets-styles-pages-log-log.expanded-row', `
+.log-expanded-row-container {
+  padding: 16px;
+  background-color: var(--bg-secondary);
+  margin: 8px 0;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+.log-expanded-row-message-section {}
+
+.log-expanded-row-message-title {
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.log-expanded-row-message-content {
+  background-color: var(--bg-tertiary);
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 14px;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.log-expanded-row-telemetry-section {
+  margin-top: 16px;
+}
+
+.log-expanded-row-telemetry-title {
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.log-expanded-row-telemetry-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.log-expanded-row-telemetry-badge {
+  background-color: var(--bg-tertiary);
+  border: 1px solid #1890ff;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.log-expanded-row-telemetry-badge-label {
+  color: #1890ff;
+}
+
+.log-expanded-row-grid {
+  display: grid;
+  grid-template-columns: 400px minmax(500px, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.log-expanded-row-left-column {
+  min-width: 400px;
+}
+
+.log-expanded-row-right-column {
+  min-width: 400px;
+  max-width: 600px;
+}
+
+.log-expanded-row-section-title {
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.log-expanded-row-field {
+  color: var(--text-secondary);
+  margin: 4px 0;
+}
+
+.log-expanded-row-field-label {
+  color: var(--text-primary);
+}
+
+.log-expanded-row-field-value {
+  margin-left: 8px;
+}
+
+.log-expanded-row-level-error {
+  color: #ff4d4f;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+.log-expanded-row-level-warn {
+  color: #faad14;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+.log-expanded-row-level-info {
+  color: #52c41a;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+.log-expanded-row-level-debug {
+  color: #1890ff;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+.log-expanded-row-runtime-section {
+  margin-top: 16px;
+}
+
+.log-expanded-row-attributes-container {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.log-expanded-row-attribute-item {
+  padding: 8px 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.log-expanded-row-attribute-item:not(:last-child) {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.log-expanded-row-attribute-key {
+  color: #1890ff;
+  margin-bottom: 4px;
+}
+
+.log-expanded-row-attribute-value {
+  word-break: break-all;
+  font-family: monospace;
+}`);

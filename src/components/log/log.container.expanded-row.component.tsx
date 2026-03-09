@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../assets/styles/pages/log/log.expanded-row.css';
+import '../../assets/styles/pages/log/log.expanded-row.styles';
 
 interface LogExpandedRowProps {
   record: any;

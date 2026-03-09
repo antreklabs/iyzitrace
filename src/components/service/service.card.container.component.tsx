@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { Service } from '../../api/service/interface.service';
 import ServiceMetricsCard from './service.container.card.component';
-import '../../assets/styles/components/service/service.css';
+import '../../assets/styles/components/service/service.styles';
 
 interface ServiceCardContainerProps {
   services: Service[] | undefined;

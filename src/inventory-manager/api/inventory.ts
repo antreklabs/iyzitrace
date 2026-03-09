@@ -8,14 +8,29 @@ import type {
     EntityType,
     RelationType,
 } from '../types/inventory';
+import { getPluginSettings } from '../../api/service/settings.service';
 
-// API base - proxied through observability-platform nginx (port 80)
-// In development, access via localhost:80/inventory/api/v1
-const API_BASE = 'http://localhost:80/inventory/api/v1';
+// API base - dynamically read from plugin settings (platformUrl)
+let cachedApiBase: string | null = null;
+
+async function getApiBase(): Promise<string> {
+    if (cachedApiBase) {
+        return cachedApiBase;
+    }
+    try {
+        const settings = await getPluginSettings();
+        if (settings?.platformUrl) {
+            cachedApiBase = `${settings.platformUrl.replace(/\/$/, '')}/inventory/api/v1`;
+            return cachedApiBase;
+        }
+    } catch { }
+    return 'http://localhost:80/inventory/api/v1';
+}
 
 // Generic fetch wrapper with error handling
 async function fetchAPI<T>(endpoint: string): Promise<T> {
-    const response = await fetch(`${API_BASE}${endpoint}`);
+    const apiBase = await getApiBase();
+    const response = await fetch(`${apiBase}${endpoint}`);
     if (!response.ok) {
         throw new Error(`API error: ${response.status} ${response.statusText}`);
     }

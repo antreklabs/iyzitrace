@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tag, Typography, Space } from 'antd';
 import { FiClock, FiCalendar } from 'react-icons/fi';
-import '../../../assets/styles/containers/trace-detail/trace-meta-header.css';
+import '../../../assets/styles/containers/trace-detail/trace-meta-header.styles';
 
 const { Text } = Typography;
 

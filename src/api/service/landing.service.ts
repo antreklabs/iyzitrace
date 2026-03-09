@@ -10,6 +10,11 @@ import { FilterParamsModel } from './query.service';
 
 export const isApiKeySet = async (): Promise<boolean> => {
   try {
+    // If authType is 'open', no API key is needed
+    const pluginSettings = await getPluginSettings();
+    if (pluginSettings?.authType === 'open') {
+      return true;
+    }
     const settings = await getSecurePluginSettings();
     return !!(settings?.apiKey);
   } catch (error) {

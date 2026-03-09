@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layout } from 'antd';
-import '../../../assets/styles/components/core/layout/index.css';
+import '../../../assets/styles/components/core/layout/index.styles';
 import Sidebar from './sidebar.component';
 
 const { Content } = Layout;

@@ -1,0 +1,90 @@
+import { injectCSS } from '../../../../utils/inject-css';
+
+injectCSS('assets-styles-containers-trace-detail-selected-span-details', `
+/* Selected Span Details Styles */
+
+.selected-span-details {
+    padding: 16px;
+    color: var(--text-primary);
+    font-size: 13px;
+    background-color: var(--bg-primary);
+    height: 100%;
+    overflow-y: auto;
+}
+
+.selected-span-details-empty {
+    padding: 16px;
+    color: #888;
+    font-style: italic;
+}
+
+.span-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.meta-grid {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    row-gap: 8px;
+    column-gap: 16px;
+    margin-bottom: 16px;
+}
+
+.meta-label {
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+.attributes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.attribute-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.attribute-key {
+    font-weight: 500;
+}
+
+.attribute-value {
+    max-width: 200px;
+    text-align: right;
+    word-break: break-all;
+}
+
+/* Divider margin override */
+.span-details-divider {
+    margin: 8px 0;
+}
+
+/* Empty attributes message */
+.no-attributes-message {
+    color: var(--text-muted);
+}
+
+/* Grouped Attribute List */
+.tag-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 2px 12px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.tag-key {
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.tag-value {
+    color: var(--text-muted);
+    word-break: break-all;
+}`);
