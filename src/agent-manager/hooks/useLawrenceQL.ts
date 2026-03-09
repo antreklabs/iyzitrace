@@ -99,7 +99,6 @@ export function useLawrenceQL() {
         const response = await getQuerySuggestions(q, cursorPos);
         return response.suggestions;
       } catch (err) {
-        console.error("Failed to get suggestions:", err);
         return [];
       }
     },

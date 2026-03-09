@@ -71,9 +71,7 @@ export const configureDatasourceAuth = async (
             },
         });
 
-        console.log(`[ObservabilityAuth] Configured auth for datasource: ${ds.name}`);
     } catch (error) {
-        console.error(`[ObservabilityAuth] Failed to configure datasource ${datasourceUid}:`, error);
         throw error;
     }
 };
@@ -85,7 +83,6 @@ export const configureAllDatasourcesAuth = async (apiKey: string): Promise<void>
     const datasources = await getObservabilityDatasources();
 
     if (datasources.length === 0) {
-        console.warn('[ObservabilityAuth] No observability platform datasources found');
         return;
     }
 
@@ -93,7 +90,6 @@ export const configureAllDatasourcesAuth = async (apiKey: string): Promise<void>
         await configureDatasourceAuth(ds.uid, apiKey);
     }
 
-    console.log(`[ObservabilityAuth] Configured ${datasources.length} datasources with auth`);
 };
 
 /**
@@ -117,9 +113,7 @@ export const removeAllDatasourcesAuth = async (): Promise<void> => {
                 },
             });
 
-            console.log(`[ObservabilityAuth] Removed auth from datasource: ${currentDs.name}`);
         } catch (error) {
-            console.error(`[ObservabilityAuth] Failed to remove auth from ${ds.uid}:`, error);
         }
     }
 };

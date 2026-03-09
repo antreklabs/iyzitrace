@@ -1,0 +1,64 @@
+import { injectCSS } from '../../../utils/inject-css';
+
+injectCSS('assets-styles-base-basecontainer.component', `
+.filter-bar-wrapper {
+  overflow: hidden;
+  white-space: nowrap;
+  transition: width 0.4s ease-in-out;
+  width: 160px;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+.filter-bar-wrapper.expanded {
+  width: 100%;
+}
+
+.filter-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.form-divider {
+  height: 32px;
+  width: 1px;
+  background-color: rgb(90, 90, 90);
+  margin-top: 20px;
+}
+
+.filter-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-header h3 {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* Header Row */
+.base-container-header-row {
+  width: 100%;
+  height: 50px;
+}
+
+.base-container-header-title-col {
+  display: flex;
+  justify-content: center;
+}
+
+.base-container-header-title {
+  margin: 0;
+  font-size: 20px;
+  text-align: center;
+}
+
+.base-container-header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}`);

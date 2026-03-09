@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../../../assets/styles/containers/trace-detail/flame-graph.css';
+import '../../../assets/styles/containers/trace-detail/flame-graph.styles';
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import { Tooltip } from 'antd';
 

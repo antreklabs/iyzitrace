@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import '../../../assets/styles/containers/trace-detail/timeline-header.css';
+import '../../../assets/styles/containers/trace-detail/timeline-header.styles';
 
 interface TimelineHeaderProps {
   startTime: number;

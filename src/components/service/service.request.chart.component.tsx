@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import ApexCharts from 'react-apexcharts';
 import { Service } from '../../api/service/interface.service';
-import '../../assets/styles/components/service/service.css';
+import '../../assets/styles/components/service/service.styles';
 
 const ServiceRequestChart: React.FC<{ services: Service[] }> = ({ services }) => {
   const chartData = useMemo(() => {

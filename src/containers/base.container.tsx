@@ -3,7 +3,7 @@ import { Layout, Spin, Empty } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
 import BaseContainer from '../components/core/basecontainer/basecontainer.component';
 import FiltersSider from '../components/core/layout/filters-sider.component';
-import '../assets/styles/base/base.container.css';
+import '../assets/styles/base/base.container.styles';
 import { TableColumn } from '../api/service/table.services';
 import { getFilterParams, FilterParamsModel, getDefaultSearchQuery } from '../api/service/query.service';
 import AIChatbot from '../components/ai/ai-chatbot.component';

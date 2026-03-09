@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layout, Button, Typography } from 'antd';
-import '../../../assets/styles/containers/trace-detail/trace-detail.css';
+import '../../../assets/styles/containers/trace-detail/trace-detail.styles';
 
 const { Sider } = Layout;
 const { Title } = Typography;

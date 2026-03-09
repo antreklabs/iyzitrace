@@ -11,7 +11,7 @@ import { Tag } from 'antd';
 import { Service } from '../../api/service/interface.service';
 import ServiceCardContainer from '../../components/service/service.card.container.component';
 import ServiceChartContainer from '../../components/service/service.chart.container.component';
-import '../../assets/styles/global.css';
+import '../../assets/styles/global.styles';
 
 const ServiceContainer: React.FC = () => {
   const navigate = useNavigate();

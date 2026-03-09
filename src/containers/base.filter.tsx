@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Select, Input, Button, Divider, Form, Row, Col, Space } from 'antd';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
-import '../assets/styles/base/base.filter.css';
+import '../assets/styles/base/base.filter.styles';
 import { DropdownOption, getPrometheusLabels, getPrometheusLabelValues, getPrometheusOperations, getPrometheusOperationTypes, getPrometheusServices, getPrometheusTraceStatuses, getPrometheusExceptionTypes } from '../api/service/list.service';
 import { TempoApi as TempoApiProvider } from '../api/provider/tempo.provider';
 
@@ -76,7 +76,7 @@ const BaseFilter: React.FC<BaseFilterProps> = ({
       setLabels(labels);
     }
     if (hasOperationsFilter) {
-      const urlServiceName = new URLSearchParams(window.location.search).get('serviceName');
+      const urlServiceName = new URLSearchParams(location.search).get('serviceName');
       const operations = await getPrometheusOperations(urlServiceName || undefined);
       setOperations(operations);
     }

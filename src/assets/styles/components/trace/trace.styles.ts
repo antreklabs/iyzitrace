@@ -1,0 +1,117 @@
+import { injectCSS } from '../../../../utils/inject-css';
+
+injectCSS('assets-styles-components-trace-trace', `
+/* Trace Components Styles */
+
+/* Trace Container Card */
+.trace-card {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--border-light);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.trace-card:hover {
+    border-color: #3a3a3a;
+    transform: translateY(-2px);
+}
+
+.trace-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.trace-card-id {
+    color: var(--text-primary);
+    font-family: monospace;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.trace-card-service {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.trace-card-metrics {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.trace-card-metric {
+    display: flex;
+    flex-direction: column;
+}
+
+.trace-card-metric-label {
+    color: var(--text-muted);
+    font-size: 10px;
+    text-transform: uppercase;
+}
+
+.trace-card-metric-value {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.trace-card-metric-value.error {
+    color: #ff4d4f;
+}
+
+.trace-card-metric-value.success {
+    color: #52c41a;
+}
+
+.trace-card-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+/* Trace Metrics Card */
+.trace-metrics-card {
+    border-radius: 12px;
+    margin-bottom: 12px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    width: 250px;
+    min-height: 180px;
+}
+
+.trace-metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 16px;
+    row-gap: 8px;
+}
+
+.trace-metrics-value {
+    color: #52c41a;
+    font-size: 28px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.trace-chart-bars {
+    display: flex;
+    align-items: end;
+    height: 100px;
+    gap: 1px;
+    margin-top: 8px;
+    padding: 4px 0;
+}
+
+.trace-bar-segment {
+    flex: 1;
+    opacity: 0.7;
+    border-radius: 1px;
+    min-height: 3px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+}`);

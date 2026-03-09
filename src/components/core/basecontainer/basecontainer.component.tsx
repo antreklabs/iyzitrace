@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Card, Alert, Button } from 'antd';
 import { WarningOutlined, SettingOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { locationService } from '@grafana/runtime';
 
-import '../../../assets/styles/base/basecontainer.component.css';
+import '../../../assets/styles/base/basecontainer.component.styles';
 import BaseContainerHeader from './basecontainerheader.component';
 import { isApiKeySet } from '../../../api/service/landing.service';
 
@@ -34,7 +35,7 @@ const BaseContainer: React.FC<BaseConatinerProps> = ({ title, children, showHead
 
   const resolvedPageName = (() => {
     try {
-      const path = (window.location.pathname || '').replace(/\/+$/, '');
+      const path = (locationService.getLocation().pathname || '').replace(/\/+$/, '');
       const last = path.split('/').filter(Boolean).pop() || '';
       return last;
     } catch {

@@ -27,7 +27,7 @@ import {
   type DatasourceStatus,
   type DatasourceType,
 } from '../../utils/platform-setup.utils';
-import '../../assets/styles/components/settings/settings.css';
+import '../../assets/styles/components/settings/settings.styles';
 
 const PLUGIN_ID = 'antreklabs-iyzitrace-app';
 
@@ -186,7 +186,6 @@ const ConfigForm: React.FC = () => {
         enabled: true,
       });
     } catch (err) {
-      console.error('Failed to save platform settings:', err);
     } finally {
       setIsSaving(false);
     }
@@ -387,7 +386,7 @@ const ConfigForm: React.FC = () => {
                 setPlatformUrl(e.target.value);
                 setPlatformStatus({ checking: false, success: null, error: null });
               }}
-              placeholder="http://localhost"
+              placeholder="http://217.154.215.186"
               className="settings-platform-input"
             />
             <span className="settings-description-mt">

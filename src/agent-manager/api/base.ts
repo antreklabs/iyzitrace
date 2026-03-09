@@ -1,4 +1,4 @@
-import { apiBaseUrl } from "../config";
+import { getApiBaseUrl } from "../config";
 
 // Common types for API responses
 export interface ApiResponse<T = unknown> {
@@ -9,7 +9,6 @@ export interface ApiResponse<T = unknown> {
 
 // Base API configuration
 export const apiConfig = {
-  baseUrl: apiBaseUrl,
   defaultHeaders: {
     "Content-Type": "application/json",
   },
@@ -20,7 +19,8 @@ export const simpleRequest = async <T = unknown>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> => {
-  const url = `${apiConfig.baseUrl}${endpoint}`;
+  const baseUrl = await getApiBaseUrl();
+  const url = `${baseUrl}${endpoint}`;
 
   const defaultOptions: RequestInit = {
     headers: {
@@ -66,7 +66,6 @@ export const apiGet = <T = unknown>(
   params?: Record<string, string>,
 ): Promise<T> => {
   const url = params ? `${endpoint}?${new URLSearchParams(params)}` : endpoint;
-  console.log("API GET URL:", url);
   return simpleRequest<T>(url, { method: "GET" });
 };
 

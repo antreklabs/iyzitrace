@@ -19,7 +19,7 @@ import {
   type AIResponse,
 } from '../../api/service/ai.service';
 import type { PluginJsonData } from '../../interfaces/utils/options';
-import '../../assets/styles/components/ai/ai-chatbot.css';
+import '../../assets/styles/components/ai/ai-chatbot.styles';
 
 const PLUGIN_ID = 'antreklabs-iyzitrace-app';
 

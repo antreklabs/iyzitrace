@@ -9,8 +9,8 @@ import { Trace } from '../../api/service/interface.service';
 import { useNavigate } from 'react-router-dom';
 import TraceMetricsCard from '../../components/trace/trace.container.card.component';
 import { columns as columnUtils } from '../../api/service/table.services';
-import '../../assets/styles/components/core/core.css';
-import '../../assets/styles/global.css';
+import '../../assets/styles/components/core/core.styles';
+import '../../assets/styles/global.styles';
 
 const TraceContainer: React.FC = () => {
   const navigate = useNavigate();

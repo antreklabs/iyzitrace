@@ -24,7 +24,7 @@ import {
   RightOutlined,
   EyeInvisibleOutlined,
 } from '@ant-design/icons';
-import '../../assets/styles/pages/landing/landing.css';
+import '../../assets/styles/pages/landing/landing.styles';
 
 const LANDING_DISMISSED_KEY = 'iyzitrace-landing-dismissed';
 

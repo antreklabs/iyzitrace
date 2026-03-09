@@ -1,0 +1,120 @@
+import { injectCSS } from '../../../../utils/inject-css';
+
+injectCSS('assets-styles-containers-trace-detail-flame-graph', `
+/* FlameGraph Styles */
+
+.flamegraph-container {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 12px;
+    width: 100%;
+}
+
+.flamegraph-row {
+    display: flex;
+    align-items: center;
+    height: 42px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.flamegraph-label {
+    flex: 0 0 40%;
+    min-width: 0;
+    padding-left: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.flamegraph-label-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: default;
+    font-size: 12px;
+}
+
+.collapse-toggle {
+    display: inline-flex;
+    align-items: center;
+    width: 16px;
+    text-align: center;
+    cursor: pointer;
+    margin-right: 2px;
+    flex-shrink: 0;
+}
+
+.flamegraph-bar-container {
+    flex: 1;
+    position: relative;
+}
+
+.flamegraph-bar {
+    position: absolute;
+    height: 20px;
+    background-color: #1890ff;
+    border-radius: 4px;
+    min-width: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6px;
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.flamegraph-bar.selected {
+    border: 2px solid #ff4d4f;
+}
+
+.flamegraph-bar-start {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.duration-label {
+    white-space: nowrap;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
+}
+
+/* Event markers on bars */
+.event-marker {
+    position: absolute;
+    top: -6px;
+    width: 8px;
+    height: 8px;
+    transform: translateX(-50%) rotate(45deg);
+    background-color: #faad14;
+    border: 1px solid #d48806;
+    cursor: pointer;
+    z-index: 2;
+    transition: transform 0.15s;
+}
+
+.event-marker:hover {
+    transform: translateX(-50%) rotate(45deg) scale(1.3);
+    background-color: #ffc53d;
+}
+
+/* FlameGraph Loading State */
+.flamegraph-loading {
+    text-align: center;
+    padding: 20px;
+}
+
+.flamegraph-loading-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.flamegraph-loading-text {
+    margin-left: 8px;
+}`);

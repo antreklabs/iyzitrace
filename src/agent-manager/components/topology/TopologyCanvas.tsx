@@ -1,3 +1,4 @@
+import '../../../assets/styles/vendor/xyflow.styles';
 import React from "react";
 import {
   ReactFlow,
@@ -7,7 +8,6 @@ import {
   type Node,
 } from "@xyflow/react";
 
-import "@xyflow/react/dist/style.css";
 import { AgentNode } from "./AgentNode";
 import { GroupNode } from "./GroupNode";
 

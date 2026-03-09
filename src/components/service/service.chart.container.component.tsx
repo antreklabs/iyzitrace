@@ -4,7 +4,7 @@ import { Service } from '../../api/service/interface.service';
 import ServiceRequestChart from './service.request.chart.component';
 import ServiceErrorChart from './service.error.chart.component';
 import ServiceDurationChart from './service.duration.chart.component';
-import '../../assets/styles/components/service/service.css';
+import '../../assets/styles/components/service/service.styles';
 
 interface ServiceChartContainerProps {
   services: Service[] | undefined;

@@ -1,0 +1,87 @@
+import { injectCSS } from '../../../utils/inject-css';
+
+injectCSS('assets-styles-base-base.filter', `
+.base-filter-form {
+}
+.base-filter-service-select {
+  width: 100%;
+}
+.filter-operator-select {
+  width: 25% !important;
+}
+.filter-value-select {
+  width: 75%;
+  max-height: 32px;
+}
+.filter-compact-space {
+  max-height: 32px;
+  width: 100%;
+}
+.base-filter-label-filter-row {
+  margin-bottom: 16px;
+}
+.base-filter-field-filter-row {
+  margin-bottom: 16px;
+}
+.base-filter-add-remove-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.base-filter-options-row {
+  margin-bottom: 16px;
+}
+.base-filter-options-col {
+  padding: 0 8px;
+}
+.base-filter-apply-button {
+  width: 100%;
+  margin-top: 16px;
+}
+.base-filter-label-select {
+  width: 100%;
+  max-height: 16px;
+}
+.base-filter-field-select {
+  width: 100%;
+  max-height: 16px;
+}
+.base-filter-add-button {
+  width: 100%;
+}
+.base-filter-remove-button {
+  width: 100%;
+}
+.base-filter-remove-button-row {
+  margin-top: 8px;
+}
+.base-filter-input-number {
+  width: 100%;
+}
+.base-filter-order-select {
+  width: 100%;
+}
+.base-filter-direction-select {
+  width: 100%;
+}
+.base-filter-apply-form-item {
+  margin-top: 16px;
+  position: sticky;
+  bottom: 0;
+  background: var(--bg-secondary);
+  padding: 16px 0;
+  z-index: 10;
+}
+.base-filter-reset-button {
+  margin-top: 8px;
+  position: sticky;
+  bottom: 0;
+  background: var(--bg-secondary);
+  padding: 8px 0;
+  z-index: 10;
+}
+.base-filter-scrollable {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  padding-bottom: 80px;
+}`);

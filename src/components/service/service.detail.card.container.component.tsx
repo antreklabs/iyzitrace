@@ -3,7 +3,7 @@ import { Card, Col, Flex, Row, Spin, Typography } from 'antd';
 import { Operation, Service } from '@/api/service/interface.service';
 import { FilterParamsModel } from '@/api/service/query.service';
 import { FundOutlined, ThunderboltOutlined, RiseOutlined, FallOutlined } from '@ant-design/icons';
-import '../../assets/styles/components/service/service.css';
+import '../../assets/styles/components/service/service.styles';
 
 const formatDuration = (ms: number): string => {
   if (ms >= 1000) {

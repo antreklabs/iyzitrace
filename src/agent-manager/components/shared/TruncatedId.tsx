@@ -36,7 +36,6 @@ export function TruncatedId({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error("Failed to copy:", err);
     }
   };
 

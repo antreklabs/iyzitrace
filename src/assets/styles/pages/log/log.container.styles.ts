@@ -1,0 +1,42 @@
+import { injectCSS } from '../../../../utils/inject-css';
+
+injectCSS('assets-styles-pages-log-log.container', `
+.log-container-timestamp {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.log-container-level-error {
+  color: #ff4d4f;
+  font-weight: bold;
+}
+
+.log-container-level-warn {
+  color: #faad14;
+  font-weight: bold;
+}
+
+.log-container-level-info {
+  color: #52c41a;
+  font-weight: bold;
+}
+
+.log-container-level-debug {
+  color: #1890ff;
+  font-weight: bold;
+}
+
+.log-container-service {
+  color: var(--text-secondary);
+}
+
+.log-container-message {
+  color: var(--text-secondary);
+  font-family: monospace;
+  font-size: 12px;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}`);

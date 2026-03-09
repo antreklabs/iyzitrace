@@ -1,7 +1,7 @@
 import React, { JSX } from 'react';
 import { Spin } from 'antd';
 import FlameGraphRow from './FlameGraphRow';
-import '../../../assets/styles/containers/trace-detail/flame-graph.css';
+import '../../../assets/styles/containers/trace-detail/flame-graph.styles';
 
 interface SpanEvent {
   name: string;

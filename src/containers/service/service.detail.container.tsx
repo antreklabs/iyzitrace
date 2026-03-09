@@ -11,7 +11,7 @@ import { getOperationTypeColor } from '../../api/service/services.service';
 import CallMetrics from '../../components/service/service.detail.chart.container.component';
 import BasicSummary from '../../components/service/service.detail.card.container.component';
 import BaseTable from '../base.table';
-import '../../assets/styles/global.css';
+import '../../assets/styles/global.styles';
 
 interface ServiceDetailContainerProps {
   serviceName: string;

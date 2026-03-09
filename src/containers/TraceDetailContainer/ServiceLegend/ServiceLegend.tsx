@@ -1,5 +1,5 @@
 import React, { JSX, useState } from 'react';
-import '../../../assets/styles/containers/trace-detail/service-legend.css';
+import '../../../assets/styles/containers/trace-detail/service-legend.styles';
 
 interface ServiceMeta {
   color: string;

@@ -1,3 +1,4 @@
+import '../../assets/styles/vendor/xyflow.styles';
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   ReactFlowProvider,
@@ -13,14 +14,13 @@ import {
   useReactFlow,
   Handle
 } from 'reactflow';
-import 'reactflow/dist/style.css';
 import { CloseOutlined, CloudServerOutlined, DatabaseOutlined, ApiOutlined, ContainerOutlined, BarChartOutlined, LineChartOutlined, ApartmentOutlined, FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons';
 import { Infrastructure, Service, Operation } from '../../api/service/interface.service';
 import { getOperationTypeColor } from '../../api/service/services.service';
 import { useNavigate } from 'react-router-dom';
 import dagre from 'dagre';
 import { css } from '@emotion/css';
-import '../../assets/styles/components/service-map/service-map.css';
+import '../../assets/styles/components/service-map/service-map.styles';
 
 interface ServiceMapBottomDrawerProps {
   infrastructure: Infrastructure | null;

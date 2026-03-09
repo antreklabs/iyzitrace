@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import '../../assets/styles/components/core/view.css';
+import '../../assets/styles/components/core/view.styles';
 import { Button, Dropdown, Modal, Form, Input, message } from 'antd';
 import { SaveOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';

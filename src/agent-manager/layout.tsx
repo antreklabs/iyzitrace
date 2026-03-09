@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { Server, Network, Users, FileCode } from "lucide-react";
-import '../assets/styles/containers/trace-detail/trace-detail.css';
+import '../assets/styles/containers/trace-detail/trace-detail.styles';
 
 const navItems = [
   { name: "Agents", path: "agents", icon: Server },

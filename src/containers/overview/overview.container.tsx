@@ -22,9 +22,9 @@ import BaseFilter from '../base.filter';
 import BaseTable from '../base.table';
 import HorizontalScrollContainer from '../../components/core/horizontal-scroll-container.component';
 import { getOperationTypeColor } from '../../api/service/services.service';
-import '../../assets/styles/containers/containers.css';
-import '../../assets/styles/global.css';
-import '../../assets/styles/components/overview/overview.css';
+import '../../assets/styles/containers/containers.styles';
+import '../../assets/styles/global.styles';
+import '../../assets/styles/components/overview/overview.styles';
 
 const OverviewContainer: React.FC = () => {
   const navigate = useNavigate();

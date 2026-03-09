@@ -1,5 +1,5 @@
 import React, { JSX, useEffect, useMemo, useState } from 'react';
-import '../../assets/styles/containers/trace-detail/index.css';
+import '../../assets/styles/containers/trace-detail/index.styles';
 import TraceMetaHeader from './TraceMetaHeader/TraceMetaHeader';
 import TimelineHeader from './TimelineHeader/TimelineHeader';
 import FlameGraph from './FlameGraph/FlameGraph';

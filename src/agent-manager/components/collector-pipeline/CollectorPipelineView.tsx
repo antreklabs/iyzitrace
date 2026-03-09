@@ -1,3 +1,4 @@
+import '../../../assets/styles/vendor/xyflow.styles';
 import React from "react";
 import {
   ReactFlow,
@@ -11,7 +12,6 @@ import { RefreshCw, AlertCircle } from "lucide-react";
 import { useEffect } from 'react';
 import useSWR from "swr";
 
-import "@xyflow/react/dist/style.css";
 
 import {
   ReceiverNode,
@@ -57,7 +57,6 @@ export function CollectorPipelineView({
       try {
         return await fetchAgentComponentMetrics(agentId!, 5); // 5 minutes
       } catch (error) {
-        console.error("Failed to fetch component metrics:", error);
         return [];
       }
     },

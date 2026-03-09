@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Alert, Spinner } from '@grafana/ui';
-import { getBackendSrv } from '@grafana/runtime';
+import { getBackendSrv, locationService } from '@grafana/runtime';
 import {
     CheckCircleOutlined,
     CloseCircleOutlined,
@@ -18,7 +18,7 @@ import {
     LockOutlined,
 } from '@ant-design/icons';
 import { useWizardContext } from './wizard-layout.component';
-import '../../assets/styles/pages/wizard/wizard.css';
+import '../../assets/styles/pages/wizard/wizard.styles';
 import {
     DATASOURCE_PATHS,
     toDatasourceUrl,
@@ -183,8 +183,6 @@ const SetupWizardPage: React.FC = () => {
     // Create datasource
     const createDatasource = async (type: 'prometheus' | 'loki' | 'tempo'): Promise<void> => {
         const configs = getDatasourceConfigs(platformUrl, authType, platformApiKey);
-        console.log(`[Wizard] Creating ${type} datasource:`, JSON.stringify(configs[type], null, 2));
-        console.log(`[Wizard] authType=${authType}, hasApiKey=${!!platformApiKey.trim()}`);
         await getBackendSrv().post('/api/datasources', configs[type]);
         // Small delay to ensure Grafana processes the datasource
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -251,7 +249,6 @@ const SetupWizardPage: React.FC = () => {
                 enabled: true,
             });
         } catch (err) {
-            console.error('Failed to save platform settings:', err);
         }
         setCurrentStep('datasources');
     };
@@ -325,10 +322,9 @@ const SetupWizardPage: React.FC = () => {
             });
 
             setWizardCompleted(true);
-            window.location.href = '/a/antreklabs-iyzitrace-app/landing';
+            locationService.push('/a/antreklabs-iyzitrace-app/landing');
         } catch (err) {
-            console.error('Failed to save wizard state:', err);
-            window.location.href = '/a/antreklabs-iyzitrace-app/landing';
+            locationService.push('/a/antreklabs-iyzitrace-app/landing');
         } finally {
             setSaving(false);
         }
@@ -353,10 +349,9 @@ const SetupWizardPage: React.FC = () => {
             });
 
             setWizardCompleted(true);
-            window.location.href = '/a/antreklabs-iyzitrace-app/landing';
+            locationService.push('/a/antreklabs-iyzitrace-app/landing');
         } catch (err) {
-            console.error('Failed to save wizard state:', err);
-            window.location.href = '/a/antreklabs-iyzitrace-app/landing';
+            locationService.push('/a/antreklabs-iyzitrace-app/landing');
         } finally {
             setSkipping(false);
         }
@@ -713,7 +708,7 @@ const SetupWizardPage: React.FC = () => {
                                     setPlatformUrl(e.target.value);
                                     setPlatformStatus({ checking: false, success: null, error: null });
                                 }}
-                                placeholder="http://localhost"
+                                placeholder="http://217.154.215.186"
                                 className="wizard-input"
                             />
                             <span className="wizard-form-hint">

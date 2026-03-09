@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import '../../../assets/styles/containers/trace-detail/selected-span-details.css';
+import '../../../assets/styles/containers/trace-detail/selected-span-details.styles';
 import { Collapse, Tag, Tooltip, TooltipProps } from 'antd';
 
 interface GroupedAttributeListProps {

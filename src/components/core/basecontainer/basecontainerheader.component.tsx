@@ -4,7 +4,7 @@ import { Col, Row } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
 import GrafanaLikeRangePicker from '../graphanadatepicker';
 import ViewComponent from '../view.component';
-import '../../../assets/styles/base/basecontainer.component.css';
+import '../../../assets/styles/base/basecontainer.component.styles';
 
 interface BaseContainerHeaderProps {
   title: string;
