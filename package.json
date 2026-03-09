@@ -1,6 +1,6 @@
 {
   "name": "antreklabs-iyzitrace-app",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "scripts": {
     "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
     "dev": "webpack -w -c ./.config/webpack/webpack.config.ts --env development",
@@ -129,10 +129,10 @@
   },
   "pnpm": {
     "overrides": {
-      "serialize-javascript": ">=6.0.2",
+      "serialize-javascript": ">=7.0.4",
       "minimatch": ">=9.0.6",
-      "immutable": ">=5.1.2",
-      "@remix-run/router": ">=1.22.0",
+      "immutable": ">=5.1.5",
+      "@remix-run/router": ">=1.23.2",
       "glob": ">=10.0.0"
     }
   },

@@ -19,31 +19,31 @@
     "screenshots": [
       {
         "name": "Overview Dashboard",
-        "path": "https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/overview/overview.png"
+        "path": "img/screenshots/overview.png"
       },
       {
         "name": "Service Map",
-        "path": "https://raw.githubusercontent.com/antreklabs/iyzitrace/main/docs/images/screenshots/service-map/service-map.png"
+        "path": "img/screenshots/service-map.png"
       },
       {
         "name": "Service Detail",
-        "path": "https://raw.githubusercontent.com/antreklabs/iyzitrace/main/iyzitrace/docs/images/screenshots/services/service-detail.png"
+        "path": "img/screenshots/service-detail.png"
       },
       {
         "name": "Trace Detail",
-        "path": "https://raw.githubusercontent.com/antreklabs/iyzitrace/main/iyzitrace/docs/images/screenshots/traces/trace-detail.png"
+        "path": "img/screenshots/trace-detail.png"
       },
       {
         "name": "Log Explorer",
-        "path": "https://raw.githubusercontent.com/antreklabs/iyzitrace/main/iyzitrace/docs/images/screenshots/logs/logs.png"
+        "path": "img/screenshots/logs.png"
       },
       {
         "name": "AI Agent",
-        "path": "https://raw.githubusercontent.com/antreklabs/iyzitrace/main/iyzitrace/docs/images/screenshots/ai-agent/ai2.png"
+        "path": "img/screenshots/ai-agent.png"
       },
       {
         "name": "Agent Manager",
-        "path": "https://raw.githubusercontent.com/antreklabs/iyzitrace/main/iyzitrace/docs/images/screenshots/agent-manager/agent-topology.png"
+        "path": "img/screenshots/agent-topology.png"
       }
     ],
     "version": "%VERSION%",
